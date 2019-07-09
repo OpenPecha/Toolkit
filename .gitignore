@@ -1,0 +1,4 @@
+**/data/*
+**/__pycache__/
+usage/input/
+usage/layer_output/
