@@ -1,5 +1,5 @@
 from pathlib import Path
-from openpecha.formatted_dmp import FormattedDMP
+from .formatted_dmp import FormattedDMP
 import re
 import copy
 
@@ -148,10 +148,7 @@ class OpenPecha:
                 'layers': Path(dir_paths['layers']),
                 'input': Path(dir_paths['input']),
                 'output': Path(dir_paths['output'])}
-        dirs['bases'].mkdir(parents=True, exist_ok=True)
         dirs['layers'].mkdir(parents=True, exist_ok=True)
-        dirs['input'].mkdir(parents=True, exist_ok=True)
-        dirs['output'].mkdir(parents=True, exist_ok=True)
         return dirs
 
     def reset_current(self):
@@ -189,10 +186,7 @@ class OpenPecha:
         base = [chunks[i] for i in range(0, len(chunks), 2)]
         base = ''.join(base)
 
-        lyrs = {'front_title': [],
-                'book_number': [],
-                'text_author': [],
-                'book_title': [],
+        lyrs = {'book_title': [],
                 'book_sub_title': [],
                 'chapter_title': [],
                 'sapche': [],
@@ -219,12 +213,6 @@ class OpenPecha:
                         lyrs['book_sub_title'].append(c)
                     elif c == '#':
                         lyrs['book_title'].append(c)
-                    elif c == 'ft':
-                        lyrs['front_title'].append(c)
-                    elif c == 'bn':
-                        lyrs['book_number'].append(c)
-                    elif c == 'ta':
-                        lyrs['text_author'].append(c)
                     elif c.startswith('='):  # test for titles (to be improved)
                         lyrs['book_title'].append(c)
                 else:
@@ -249,15 +237,18 @@ class OpenPecha:
         base, md_lyrs = self.build_md_layers(dump)
 
         # write base
-        Path(self.dirs['bases'] / f'{basename.stem}.txt').write_text(base, encoding='utf-8-sig')
+        Path(self.dirs['bases'] / f'base.txt').write_text(base, encoding='utf-8-sig')
 
         # write layers
-        lyr_dir = Path(self.dirs['layers'] / basename.stem)
-        lyr_dir.mkdir(exist_ok=True)
+        # lyr_dir = Path(self.dirs['layers'] / basename.stem)
+        # lyr_dir.mkdir(exist_ok=True)
 
-        self.load_pecha(basename.stem)
+        #self.load_pecha(basename.stem)
         for name, lyr in md_lyrs:
             self.create_layer(base, lyr, name, clean_patch=False)
+
+        #layers info
+        ((self.dirs['layers'].parent)/'layers.yml').write_text('layers:\n  - book_sub_title:\n  - book_title:\n  - chapter_title:\n  - quotes:\n  - sapche:\n  - tsawa:')
 
     def create_layer(self, orig, mod, name, deps='', clean_patch=True):
         """
