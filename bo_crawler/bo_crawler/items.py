@@ -7,22 +7,29 @@
 #
 # Extracted data -> EbookItem -> Pipeline -> open-pecha
 
-import datetime
-
 import scrapy
 
 
 class TsadraEbookItem(scrapy.Item):
-    #Digital Publication Source
-    org = {'bo': 'མཐའ་ཡས་དཔེ་མཛོད།', 'en': 'Timeless Treasuries'}
-    website = 'http://dharmacloud.tsadra.org'
-    aquisition_data = str(datetime.date.today())
+    # Digital Publication Source
+    org_bo = scrapy.Field()
+    org_en = scrapy.Field()
+    website = scrapy.Field()
+    aquisition_data = scrapy.Field()
 
     # Crawled Metadata
-    title = {'bo': scrapy.Field(), 'en': scrapy.Field()}
-    category = {'bo': scrapy.Field(), 'en': scrapy.Field()}
-    collection = {'bo': scrapy.Field(), 'en': scrapy.Field()}
-    publisher = {'bo': scrapy.Field(), 'en': scrapy.Field()}
-    author = {'bo': scrapy.Field(), 'en': scrapy.Field()}
+    title_bo = scrapy.Field()
+    title_en = scrapy.Field()
+    collection_bo = scrapy.Field()
+    collection_en = scrapy.Field()
+    publisher_bo = scrapy.Field()
+    publisher_en = scrapy.Field()
+    author_bo = scrapy.Field()
+    author_en = scrapy.Field()
+
     sku = scrapy.Field()
-    description: scrapy.Field()
+    category_bo = scrapy.Field()
+    category_en = scrapy.Field()
+
+    description_bo = scrapy.Field()
+    description_en = scrapy.Field()
