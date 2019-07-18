@@ -33,3 +33,5 @@ class TsadraEbookItem(scrapy.Item):
 
     description_bo = scrapy.Field()
     description_en = scrapy.Field()
+
+    filename = scrapy.Field()
