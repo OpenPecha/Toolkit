@@ -6,6 +6,8 @@ class Serialize(object, metaclass=serialize.SerializeMeta):
 
     Note that currently we suppose that we're only adding characters, never removing any. This can
     change in the future but let's start simple.
+
+    To use it, instantiate a concrete class with the path of the opf file, and call applylayers() then getresult()
     """
     def __init__(self, opfpath, layers = None):
         self.opfpath = opfpath
@@ -53,6 +55,12 @@ class Serialize(object, metaclass=serialize.SerializeMeta):
         """
         pass
 
+    def applylayers(self):
+        """
+        This applies all the layers recorded in self.layers. If self.layers is none, it reads all the layers from the layer directory.
+        """
+        pass
+
     def addchars(self, cc, frombefore, charstoadd):
         """
         This records some characters to add at a character coordinate (cc), either frombefore (from the left) or after. before is a boolean.
@@ -71,7 +79,7 @@ class Serialize(object, metaclass=serialize.SerializeMeta):
         """
         raise NotImplementedError("The Serialize class doesn't provide any serialization, please use a subclass such ass SerializeMd")
 
-    def __string___(self):
+    def getresult(self):
         """
         returns a string which is the base layer where the changes recorded in self.charstoapply have been applied. 
 
