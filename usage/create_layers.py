@@ -1,15 +1,15 @@
 import sys
 sys.path.append('../')
-# TODO: Above to be remove once the openpecha is uploaded to pypi
+# TODO: Above to be remove once the openpoti is uploaded to pypi
 
 import argparse
 from pathlib import Path
 import shutil
 
-from openpecha.openpecha import OpenPecha
+from openpoti.openpoti import OpenPoti
 
 
-def to_openpecha_format(ebook):
+def to_openpoti_format(ebook):
     ebook_name = ebook.name
     ebook_stem = ebook.stem
 
@@ -21,8 +21,8 @@ def to_openpecha_format(ebook):
         }
 
     print(ebook)
-    existing = OpenPecha(conf)
-    existing.new_pecha(ebook_name)
+    existing = OpenPoti(conf)
+    existing.new_poti(ebook_name)
 
 
 if __name__ == "__main__":
@@ -32,7 +32,7 @@ if __name__ == "__main__":
     args = ap.parse_args()
 
     for ebook in sorted([o for o in list(Path(args.path).iterdir()) if str(o).endswith('.txt')]):
-        to_openpecha_format(ebook)
+        to_openpoti_format(ebook)
 
         #move all the ebook to output_layer/source
         source_ebook = f'{args.path}/{ebook.stem}.epub'

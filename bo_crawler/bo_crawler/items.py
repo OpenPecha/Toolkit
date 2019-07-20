@@ -5,7 +5,7 @@
 # See documentation in:
 # https://doc.scrapy.org/en/latest/topics/items.html
 #
-# Extracted data -> EbookItem -> Pipeline -> open-pecha
+# Extracted data -> EbookItem -> Pipeline -> open-poti
 
 import scrapy
 
