@@ -1,6 +1,14 @@
 import copy
 
 class Blupdate:
+    """
+    This class represents an update in the base layer. It is used to recompute the existing layers into the new base layer.
+
+    When you want to update the base layer to a new text, initialize the class with the content of the old base layer and the new one.
+    Then for each annotation in the layers, you can call getupdatedcoord() with the coordinate of the annotation, it will return the
+    updated coordinate that you can use to update the annotation.
+    """
+
     def __init__(self, srcbl, dstbl):
         self.srcbl = srcbl
         self.dstbl = dstbl
