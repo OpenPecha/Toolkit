@@ -1,4 +1,7 @@
-class Serialize(object, metaclass=serialize.SerializeMeta):
+from pathlib import Path
+
+
+class Serialize(object):
     """
     This class is used when serializing the .opf into anything else (Markdown, TEI, etc.).
 
@@ -10,7 +13,7 @@ class Serialize(object, metaclass=serialize.SerializeMeta):
     To use it, instantiate a concrete class with the path of the opf file, and call applylayers() then getresult()
     """
     def __init__(self, opfpath, layers = None):
-        self.opfpath = opfpath
+        self.opfpath = Path(opfpath)
         self.baselayer = self.__readbaselayer()
         """
         The charstoapply is an important piece of the puzzle here. Basically applying the changes to the string directly is a
@@ -46,7 +49,7 @@ class Serialize(object, metaclass=serialize.SerializeMeta):
         """
         reads opfpath/base.txt and returns its content
         """
-        pass
+        return (self.opfpath/'base.txt').read_text()
 
     def applylayer(self, layerid):
         """
@@ -72,8 +75,8 @@ class Serialize(object, metaclass=serialize.SerializeMeta):
         else:
             self.charstoapply[cc][1].append(charstoadd)
 
+    #@serialize.abstractmethod
     def applyannotation(self, annotation):
-        @serialize.abstractmethod
         """
         This applies the annotation given as argument. The annotation must contain at least a type
         """
