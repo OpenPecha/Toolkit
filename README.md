@@ -1,1 +1,1 @@
-# openpecha
+# openpoti

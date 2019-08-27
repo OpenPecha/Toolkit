@@ -130,7 +130,7 @@ class Patches:
         return patches
 
 
-class OpenPecha:
+class OpenPoti:
     def __init__(self, dirs_conf):
         self.dmp = FormattedDMP()
         self.cp = Patches()
@@ -154,7 +154,7 @@ class OpenPecha:
     def reset_current(self):
         self.current = {'base': None, 'layers': {}}
 
-    def load_pecha(self, pch_path):
+    def load_poti(self, pch_path):
         """
         loads in self.current all the files pertaining to the current layered text
         :param pch_path: the base-name of the layered text to load
@@ -216,14 +216,14 @@ class OpenPecha:
                     elif c.startswith('='):  # test for titles (to be improved)
                         lyrs['book_title'].append(c)
                 else:
-                    raise ValueError('This should not happen: the file used to create an openpecha is')
+                    raise ValueError('This should not happen: the file used to create an openpoti is')
             else:
                 for k in lyrs.keys():
                     lyrs[k].append(c)
 
         return base, [(k, ''.join(v)) for k, v in lyrs.items()]
 
-    def new_pecha(self, basename):
+    def new_poti(self, basename):
         """
         Create the scafolding for a new layered text:
             - <basename>.txt        the base layer
@@ -243,7 +243,7 @@ class OpenPecha:
         # lyr_dir = Path(self.dirs['layers'] / basename.stem)
         # lyr_dir.mkdir(exist_ok=True)
 
-        #self.load_pecha(basename.stem)
+        #self.load_poti(basename.stem)
         for name, lyr in md_lyrs:
             self.create_layer(base, lyr, name, clean_patch=False)
 
@@ -324,7 +324,7 @@ class OpenPecha:
         return view + footnotes, fails
 
     def write_views(self, layers, view_type):
-        self.load_pecha(self.current["name"])
+        self.load_poti(self.current["name"])
         if view_type == 'export':
             view, fails = self.create_view(layers)
         elif view_type == 'edit':
@@ -348,8 +348,8 @@ if __name__ == '__main__':
         'output': 'user/output'
     }
 
-    existing = OpenPecha(conf)
-    existing.new_pecha('test_base+md.txt') 
+    existing = OpenPoti(conf)
+    existing.new_poti('test_base+md.txt') 
 
     existing.create_layer(existing.current['base'],
                           Path(existing.dirs['input'] / 'text_base+md_correction.txt').read_text(encoding='utf-8-sig'),
