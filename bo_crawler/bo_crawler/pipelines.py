@@ -23,9 +23,8 @@ class BoCrawlerPipeline(object):
                 'org': {'bo': item['org_en'], 'en': item['org_bo']},
                 'website': item['website'],
                 'aquisition_data': item['aquisition_data'],
-                'filename': item['filename']
+                'filename': item['filename'],
+                'description': {'en': item['description_en'], 'bo': item['description_bo']}
             }
-            if 'description_en' in item:
-                metadata.update({'description': {'en': item['description_en'], 'bo': item['description_bo']}})
 
         return metadata

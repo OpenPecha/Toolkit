@@ -39,7 +39,3 @@ if __name__ == "__main__":
         ebook_export_path = Path(f'layer_output/{ebook.stem}/src')
         ebook_export_path.mkdir(parents=True, exist_ok=True)
         shutil.copy(source_ebook, str(ebook_export_path))
-        # if not ebook_export_path.is_dir():
-        #     ebook_export_path.mkdir(parents=True, exist_ok=True)
-        #     if not (ebook_export_path/f'{ebook.stem}.epub').is_file():
-        #         shutil.copy(source_ebook, str(ebook_export_path))
