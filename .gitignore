@@ -1,4 +1,10 @@
+.env/
+.vscode/
+openpoti.egg-info/
+
 **/data/*
 **/__pycache__/
 usage/input/
 usage/layer_output/
+
+usage/
