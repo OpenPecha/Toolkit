@@ -8,14 +8,14 @@ class SerializeMd(Serialize):
     This class is serializes an opf file into MarkDown.
     """
 
-    def applyannotation(self, ann):
+    def apply_annotation(self, ann):
         """
         This applies an annotation. 
 
         This is currently a dummy example.
         """
         if ann.type == "title":
-            self.addchars(ann.startcc, False, "*")
-            self.addchars(ann.endcc, True, "*")
+            self.add_chars(ann.startcc, False, "*")
+            self.add_chars(ann.endcc, True, "*")
         else:
             pass # to be implemented

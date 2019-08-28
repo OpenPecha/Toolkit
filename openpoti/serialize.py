@@ -10,11 +10,11 @@ class Serialize(object):
     Note that currently we suppose that we're only adding characters, never removing any. This can
     change in the future but let's start simple.
 
-    To use it, instantiate a concrete class with the path of the opf file, and call applylayers() then getresult()
+    To use it, instantiate a concrete class with the path of the opf file, and call apply_layers() then get_result()
     """
     def __init__(self, opfpath, layers = None):
         self.opfpath = Path(opfpath)
-        self.baselayer = self.__readbaselayer()
+        self.baselayer = self.__read_base_layer()
         """
         The charstoapply is an important piece of the puzzle here. Basically applying the changes to the string directly is a
         bad idea for several reasons:
@@ -45,26 +45,26 @@ class Serialize(object):
         # by convention, when it is None, all layers are applied in alphabetical order (?)
         self.layers = layers
 
-    def __readbaselayer(self):
+    def __read_base_layer(self):
         """
         reads opfpath/base.txt and returns its content
         """
         return (self.opfpath/'base.txt').read_text()
 
-    def applylayer(self, layerid):
+    def apply_layer(self, layerid):
         """
         This reads the file opfpath/layers/layerid.yml and applies all the annotations it contains, in the order in which they appear.
-        I think it can be implemented in this class by just calling self.applyannotation on each annotation of the file.
+        I think it can be implemented in this class by just calling self.apply_annotation on each annotation of the file.
         """
         pass
 
-    def applylayers(self):
+    def apply_layers(self):
         """
         This applies all the layers recorded in self.layers. If self.layers is none, it reads all the layers from the layer directory.
         """
         pass
 
-    def addchars(self, cc, frombefore, charstoadd):
+    def add_chars(self, cc, frombefore, charstoadd):
         """
         This records some characters to add at a character coordinate (cc), either frombefore (from the left) or after. before is a boolean.
         """
@@ -76,13 +76,13 @@ class Serialize(object):
             self.charstoapply[cc][1].append(charstoadd)
 
     #@serialize.abstractmethod
-    def applyannotation(self, annotation):
+    def apply_annotation(self, annotation):
         """
         This applies the annotation given as argument. The annotation must contain at least a type
         """
         raise NotImplementedError("The Serialize class doesn't provide any serialization, please use a subclass such ass SerializeMd")
 
-    def getresult(self):
+    def get_result(self):
         """
         returns a string which is the base layer where the changes recorded in self.charstoapply have been applied. 
 
