@@ -1,4 +1,7 @@
+from pathlib import Path
+
 import pytest
+
 from openpoti.serialize import Serialize
 from openpoti.serializemd import SerializeMd
 
@@ -51,8 +54,8 @@ def test_apply_layer(opf_path):
     }
 
     expected_result_yigchung = {
-        109468: (['*'], []), 109490: ([], ['*']), 
-        109820: (['*'], []), 109959: ([], ['*'])
+        109468: (['*'], []), 109489: ([], ['*']), 
+        109820: (['*'], []), 109958: ([], ['*'])
     }
     assert result_title == expected_result_title
     assert result_yigchung == expected_result_yigchung
@@ -76,6 +79,28 @@ def test_apply_layers(opf_path):
         0: (['# '], []), 73: (['# '], []), 5122: (['# '], []), 13316: (['# '], []), 
         17384: (['# '], []), 23478: (['# '], []), 36047: (['# '], []), 51718: (['# '], []), 
         60869: (['# '], []), 82453: (['# '], []), 101537: (['# '], []),
-        109468: (['*'], []), 109490: ([], ['*']), 109820: (['*'], []), 109959: ([], ['*'])
+        109468: (['*'], []), 109489: ([], ['*']), 109820: (['*'], []), 109958: ([], ['*'])
     }
+    assert result == expected_result
+
+
+def test_get_result(opf_path):
+    serializer_title = SerializeMd(opf_path)
+    serializer_yigchung = SerializeMd(opf_path)
+    Serializer = SerializeMd(opf_path)
+
+    serializer_title.apply_layer('title')
+    serializer_yigchung.apply_layer('yigchung')
+    Serializer.apply_layers()
+
+    result_title = serializer_title.get_result()
+    result_yigchung = serializer_yigchung.get_result()
+    result = Serializer.get_result()
+
+    expected_result_title = Path('data/export/title_expected.txt').read_text()
+    expected_result_yigchung = Path('data/export/yigchung_expected.txt').read_text()
+    expected_result = Path('data/export/all_expected.txt').read_text()
+
+    assert result_title == expected_result_title
+    assert result_yigchung == expected_result_yigchung
     assert result == expected_result
