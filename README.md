@@ -1,4 +1,4 @@
-# openpoti
+# OpenPoti Toolkit
 
 ## Installtion
 ```
