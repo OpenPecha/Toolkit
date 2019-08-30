@@ -71,11 +71,22 @@ class Serialize(object):
                 self.apply_annotation(ann)
         return layer
 
+    def get_all_layer(self):
+        """
+        Returns all the layerid of layer from the layer directory
+        """
+        return [layer.stem for layer in (self.opfpath/'layers').iterdir() if layer.suffix == '.yml']
+
     def apply_layers(self):
         """
         This applies all the layers recorded in self.layers. If self.layers is none, it reads all the layers from the layer directory.
         """
-        pass
+        if self.layers:
+            for layer_id in self.layers:
+                self.apply_layer(layer_id)
+        else:
+            for layer_id in self.get_all_layer():
+                self.apply_layer(layer_id)
 
     def add_chars(self, cc, frombefore, charstoadd):
         """

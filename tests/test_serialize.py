@@ -5,7 +5,7 @@ from openpoti.serializemd import SerializeMd
 
 @pytest.fixture(scope='module')
 def opf_path():
-    op_path = 'usage/new_layer_output'
+    op_path = './data'
     test_op = 'W1OP000001'
     opf_path = f'{op_path}/{test_op}/{test_op}.opf'
     return opf_path
@@ -42,6 +42,23 @@ def test_apply_layer(opf_path):
     serializer.apply_layer('yigchung')
     print()
     print(serializer.chars_toapply)
+    result = len(serializer.chars_toapply)
+
+    assert result > 0
+
+
+def test_get_all_layer(opf_path):
+    serializer = Serialize(opf_path)
+
+    result = serializer.get_all_layer()
+    
+    assert result == ['title', 'yigchung']
+
+
+def test_apply_layers(opf_path):
+    serializer = SerializeMd(opf_path)
+
+    serializer.apply_layers()
     result = len(serializer.chars_toapply)
 
     assert result > 0
