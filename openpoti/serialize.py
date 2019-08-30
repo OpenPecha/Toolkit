@@ -1,4 +1,6 @@
+from collections import namedtuple
 from pathlib import Path
+import yaml
 
 
 class Serialize(object):
@@ -15,8 +17,9 @@ class Serialize(object):
     def __init__(self, opfpath, layers = None):
         self.opfpath = Path(opfpath)
         self.baselayer = self.__read_base_layer()
+        self.Annotation = namedtuple('Annotation', 'type start_cc end_cc')  #annotation object
         """
-        The charstoapply is an important piece of the puzzle here. Basically applying the changes to the string directly is a
+        The chars_toapply is an important piece of the puzzle here. Basically applying the changes to the string directly is a
         bad idea for several reasons:
           - changing a big string with each annotation is costly
           - the application can be complex as character coordinate keep changing all the time
@@ -31,16 +34,17 @@ class Serialize(object):
         }
 
         So for example:
+          Annotated text = XXXXXXXXX<title>TTTTTT</title>XXXXXXX
           - there is an annotation that goes from character 10 to character 15
           - the serialization you want to make is to add "<title>" before and "</title>" after the title
-          - the charstoapply object will be:
+          - the chars_toapply object will be:
 
         {
             10: ([], ["<title>"]),
             15: (["</title>"], [])
         }
         """
-        self.charstoapply = {}
+        self.chars_toapply = {}
         # layer lists the layers to be applied, in the order of which they should be applied
         # by convention, when it is None, all layers are applied in alphabetical order (?)
         self.layers = layers
@@ -51,12 +55,21 @@ class Serialize(object):
         """
         return (self.opfpath/'base.txt').read_text()
 
-    def apply_layer(self, layerid):
+    def apply_layer(self, layer_id):
         """
-        This reads the file opfpath/layers/layerid.yml and applies all the annotations it contains, in the order in which they appear.
+        This reads the file opfpath/layers/layer_id.yml and applies all the annotations it contains, in the order in which they appear.
         I think it can be implemented in this class by just calling self.apply_annotation on each annotation of the file.
         """
-        pass
+        layer = yaml.safe_load((self.opfpath/'layers'/f'{layer_id}.yml').open())
+        if layer_id == 'title':
+            for _, char_coor in layer.items():
+                ann = self.Annotation(layer_id, char_coor, char_coor)
+                self.apply_annotation(ann)
+        else:
+            for _, char_coor in layer.items():
+                ann = self.Annotation(layer_id, char_coor[0], char_coor[1])
+                self.apply_annotation(ann)
+        return layer
 
     def apply_layers(self):
         """
@@ -68,12 +81,12 @@ class Serialize(object):
         """
         This records some characters to add at a character coordinate (cc), either frombefore (from the left) or after. before is a boolean.
         """
-        if cc not in self.charstoapply:
-            self.charstoapply[cc] = ([],[])
+        if cc not in self.chars_toapply:
+            self.chars_toapply[cc] = ([],[])
         if frombefore: # if from the left, layers should be applied in reverse order
-            self.charstoapply[cc][0].insert(0, charstoadd)
+            self.chars_toapply[cc][0].insert(0, charstoadd)
         else:
-            self.charstoapply[cc][1].append(charstoadd)
+            self.chars_toapply[cc][1].append(charstoadd)
 
     #@serialize.abstractmethod
     def apply_annotation(self, annotation):
@@ -84,7 +97,7 @@ class Serialize(object):
 
     def get_result(self):
         """
-        returns a string which is the base layer where the changes recorded in self.charstoapply have been applied. 
+        returns a string which is the base layer where the changes recorded in self.chars_toapply have been applied. 
 
         The algorithm should be something like:
         """
@@ -93,14 +106,14 @@ class Serialize(object):
         # see https://waymoot.org/home/python_string/ where method 5 is good
         i = 0
         for c in self.baselayer:
-            if i in self.charstoapply:
-                apply = self.charstoapply[i]
+            if i in self.chars_toapply:
+                apply = self.chars_toapply[i]
                 for s in apply[0]:
                     res += s
                 res += c
                 for s in apply[1]:
                     res += s
             else:
-                res += c 
+                res += c
             i += 1
         return res

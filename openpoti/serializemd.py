@@ -15,7 +15,9 @@ class SerializeMd(Serialize):
         This is currently a dummy example.
         """
         if ann.type == "title":
-            self.add_chars(ann.startcc, False, "*")
-            self.add_chars(ann.endcc, True, "*")
+            self.add_chars(ann.start_cc, True, "# ")
+        elif ann.type == 'yigchung':
+            self.add_chars(ann.start_cc, True, "*")
+            self.add_chars(ann.end_cc, False, '*')
         else:
             pass # to be implemented
