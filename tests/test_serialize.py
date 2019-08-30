@@ -36,15 +36,26 @@ def test_add_chars(opf_path):
 
 
 def test_apply_layer(opf_path):
-    serializer = SerializeMd(opf_path)
+    serializer_title = SerializeMd(opf_path)
+    serializer_yigchung = SerializeMd(opf_path)
 
-    serializer.apply_layer('title')
-    serializer.apply_layer('yigchung')
-    print()
-    print(serializer.chars_toapply)
-    result = len(serializer.chars_toapply)
+    serializer_title.apply_layer('title')
+    serializer_yigchung.apply_layer('yigchung')
+    result_title = serializer_title.chars_toapply
+    result_yigchung = serializer_yigchung.chars_toapply
 
-    assert result > 0
+    expected_result_title = {
+        0: (['# '], []), 73: (['# '], []), 5122: (['# '], []), 13316: (['# '], []), 
+        17384: (['# '], []), 23478: (['# '], []), 36047: (['# '], []), 51718: (['# '], []), 
+        60869: (['# '], []), 82453: (['# '], []), 101537: (['# '], [])
+    }
+
+    expected_result_yigchung = {
+        109468: (['*'], []), 109490: ([], ['*']), 
+        109820: (['*'], []), 109959: ([], ['*'])
+    }
+    assert result_title == expected_result_title
+    assert result_yigchung == expected_result_yigchung
 
 
 def test_get_all_layer(opf_path):
@@ -59,6 +70,12 @@ def test_apply_layers(opf_path):
     serializer = SerializeMd(opf_path)
 
     serializer.apply_layers()
-    result = len(serializer.chars_toapply)
+    result = serializer.chars_toapply
 
-    assert result > 0
+    expected_result = {
+        0: (['# '], []), 73: (['# '], []), 5122: (['# '], []), 13316: (['# '], []), 
+        17384: (['# '], []), 23478: (['# '], []), 36047: (['# '], []), 51718: (['# '], []), 
+        60869: (['# '], []), 82453: (['# '], []), 101537: (['# '], []),
+        109468: (['*'], []), 109490: ([], ['*']), 109820: (['*'], []), 109959: ([], ['*'])
+    }
+    assert result == expected_result
