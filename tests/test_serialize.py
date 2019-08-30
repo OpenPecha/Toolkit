@@ -97,6 +97,11 @@ def test_get_result(opf_path):
     result_yigchung = serializer_yigchung.get_result()
     result = Serializer.get_result()
 
+    # save the result
+    Path('data/export/title_result.txt').write_text(result_title)
+    Path('data/export/yigchung_result.txt').write_text(result_yigchung)
+    Path('data/export/all_result.txt').write_text(result)
+
     expected_result_title = Path('data/export/title_expected.txt').read_text()
     expected_result_yigchung = Path('data/export/yigchung_expected.txt').read_text()
     expected_result = Path('data/export/all_expected.txt').read_text()
