@@ -117,6 +117,7 @@ class Serialize(object):
         # see https://waymoot.org/home/python_string/ where method 5 is good
         i = 0
         for c in self.baselayer:
+            # UTF bom \ufeff takes the 0th index
             if c == '\ufeff': continue
             if i in self.chars_toapply:
                 apply = self.chars_toapply[i]
