@@ -12,10 +12,9 @@ class Blupdate:
     def __init__(self, srcbl, dstbl):
         self.srcbl = srcbl
         self.dstbl = dstbl
-        self.cctv = self.compute_cctv
+        self.cctv = self.compute_cctv()
         self.contextlen = 16
 
-    @staticmethod
     def compute_cctv(self):
         """
         Computes a cctv from self.srcbl to self.dstbl. This will take some effort but should be reasonable with DMP.
@@ -47,7 +46,28 @@ class Blupdate:
 			- from character 8 to 10 in srcbl (meaning "kl"), character coordinates in srcbl need to be added -1 in order to get their equivalent in dstbl
 
         """
-        pass
+        cctv = []
+        i = 0
+        while i < len(self.srcbl):
+            j = i+1
+            while j <= len(self.srcbl) + 1:
+                chunk = self.srcbl[i:j]
+                if j == len(self.srcbl) + 1:
+                    chunk += '$'
+                if chunk in self.dstbl:
+                    j += 1
+                else:
+                    matched_chunk = self.srcbl[i:j-1]
+                    if matched_chunk:
+                        idx = self.dstbl.find(matched_chunk)
+                        cctv.append((i, i+len(matched_chunk), idx-i))
+                    break
+            if i == j - 1:
+                i += 1
+            else:
+                i = j - 1
+        
+        return cctv
 
     def get_cctv_for_coord(self, srcblcoord):
     	"""
