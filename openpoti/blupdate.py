@@ -12,7 +12,7 @@ class Blupdate:
     def __init__(self, srcbl, dstbl):
         self.srcbl = srcbl
         self.dstbl = dstbl
-        self.cctv = self.compute_cctv()
+        self.cctv = self.compute_cctv
         self.contextlen = 16
 
     @staticmethod
