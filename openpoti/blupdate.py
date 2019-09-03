@@ -5,18 +5,18 @@ class Blupdate:
     This class represents an update in the base layer. It is used to recompute the existing layers into the new base layer.
 
     When you want to update the base layer to a new text, initialize the class with the content of the old base layer and the new one.
-    Then for each annotation in the layers, you can call getupdatedcoord() with the coordinate of the annotation, it will return the
+    Then for each annotation in the layers, you can call get_updated_coord() with the coordinate of the annotation, it will return the
     updated coordinate that you can use to update the annotation.
     """
 
     def __init__(self, srcbl, dstbl):
         self.srcbl = srcbl
         self.dstbl = dstbl
-        self.cctv = self.computecctv()
+        self.cctv = self.compute_cctv()
         self.contextlen = 16
 
     @staticmethod
-    def computecctv(self):
+    def compute_cctv(self):
         """
         Computes a cctv from self.srcbl to self.dstbl. This will take some effort but should be reasonable with DMP.
 		
@@ -49,7 +49,7 @@ class Blupdate:
         """
         pass
 
-    def getcctvforcoord(self, srcblcoord):
+    def get_cctv_for_coord(self, srcblcoord):
     	"""
     	Returns the character coordinate in dstbl for a character coordinate in srcbl according to the cctv. It returns two arguments:
     	  - the character coordinate translation, or an estimate if undefined
@@ -60,22 +60,22 @@ class Blupdate:
 		the estimate will be 2+(-1) / 2 = 0.5, for which we take an int value: 1.
 
 		So for a more complete example we would have:
-		  getcctvforcoord(3) == (2, true)
-		  getcctvforcoord(7) == (1, false)
+		  get_cctv_for_coord(3) == (2, true)
+		  get_cctv_for_coord(7) == (1, false)
     	"""
     	pass
 
-    def getcontext(self, srcblcoord):
+    def get_context(self, srcblcoord):
     	"""
 		This returns the left and right context of a character coordinate in srcbl, in the form of a tuple with two strings.
 		The length of the context is set by self.contextlen.
 
 		For instance:
-		   getcontext(3) == ("abe", "fgh")
+		   get_context(3) == ("abe", "fgh")
     	"""
     	pass
 
-    def dmpfind(self, context, dstcoordestimate):
+    def dmp_find(self, context, dstcoordestimate):
     	"""
 		This function uses the dmp lib wizardry to get the a coordinate in dstbl that is:
 		  - around dstcoordestimate
@@ -86,24 +86,24 @@ class Blupdate:
     	"""
     	pass
 
-    def getupdatedwithdmp(self, srcblcoord, cct):
+    def get_updated_with_dmp(self, srcblcoord, cct):
     	"""
     	This returns the coordinate in dstbl corresponding to srcblcoord using the dmp methods, and an indication from the cctv.
 
     	By convention, the function returns -1 when it is unable to compute the new coordinate.
     	"""
-    	context = self.getcontext(srcblcoord)
+    	context = self.get_context(srcblcoord)
     	dstcoordestimate = srcblcoord+cct
-    	return self.dmpfind(context, dstcoordestimate)
+    	return self.dmp_find(context, dstcoordestimate)
 
-    def getupdatedcoord(self, srcblcoord):
+    def get_updated_coord(self, srcblcoord):
     	"""
     	This is the main function used to update annotations. Annotations have references to character coordinates in a specific base layer. This function
     	allows them to get the corresponding coordinate in the new base layer.
 
     	By convention, the return value -1 means that the function is unable to compute the new coordinate.
     	"""
-    	cctvforcoord = self.getcctvforcoord(srcblcoord)
+    	cctvforcoord = self.get_cctv_for_coord(srcblcoord)
     	if cctvforcoord[1]:
     		return srcblcoord+cctvforcoord[0]
     	else:
