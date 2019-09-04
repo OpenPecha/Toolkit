@@ -52,27 +52,34 @@ class Blupdate:
         diffs = self.dmp.diff_main(self.srcbl, self.dstbl)
 
         cctv = []
+
+        # src_chunk is the chunk from source text, represented by mode 0 and -1.
         src_chunk_frist_idx = 0
         src_chunk_last_idx = 0
+        
+        # dst_chunk is the chunk from destination text, represented by mode 0 and 1.
         dst_chunk_frist_idx = 0
         dst_chunk_last_idx = 0
 
         for mode, chunk in diffs:
-            if mode == 0:
+            if mode == 0: # says the chunk is common, update the src_chunk and dst_chunk first and last indices.
                 src_chunk_frist_idx = src_chunk_last_idx
                 dst_chunk_frist_idx = dst_chunk_last_idx
                 src_chunk_last_idx += len(chunk)
                 dst_chunk_last_idx += len(chunk)
-            elif mode == -1:
+            elif mode == -1: # says the chunk is from source text, update src_chunk first and last indices.
                 src_chunk_frist_idx = src_chunk_last_idx
                 src_chunk_last_idx += len(chunk)
-            else:
+            else: # mode == 1, says the chunks is from destination text, update dst_chunk first and last indices.
                 dst_chunk_frist_idx = dst_chunk_last_idx
                 dst_chunk_last_idx += len(chunk)
-                
+
+            # get char coordinatte (cc) of the common chunk based on source and destination text.    
             if mode == 0:
                 src_cc = (src_chunk_frist_idx, src_chunk_last_idx)
                 dst_cc = (dst_chunk_frist_idx, dst_chunk_last_idx)
+
+                # contruct CCTV
                 cctv.append((*src_cc, dst_cc[0] - src_cc[0]))
 
         return cctv
