@@ -3,19 +3,14 @@ import pytest
 from openpoti.blupdate import Blupdate
 
 
-@pytest.fixture(scope='module')
-def preconfigured_blupdate():
-    srcbl = 'abefghijkl'
-    dstbl = 'abcdefgkl'
-    
+
+@pytest.mark.parametrize('srcbl, dstbl, expected_result',
+                         [
+                             ('abefghijkl', 'abcdefgkl', [(0,2,0), (2,5,2), (8,10,-1)])
+                         ])
+def test_compute_cctv(srcbl, dstbl, expected_result):
     updater = Blupdate(srcbl, dstbl)
 
-    return updater
-
-
-def test_compute_cctv(preconfigured_blupdate):
-    result = preconfigured_blupdate.cctv
-
-    expected_result = [(0,2,0), (2,5,2), (8,10,-1)]
+    result = updater.cctv
 
     assert result == expected_result
