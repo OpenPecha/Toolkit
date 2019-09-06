@@ -1,4 +1,5 @@
 import copy
+import math
 
 import diff_match_patch as dmp_module
 
@@ -97,8 +98,18 @@ class Blupdate:
         So for a more complete example we would have:
           get_cctv_for_coord(3) == (2, true)
           get_cctv_for_coord(7) == (1, false)
+          get_cctv_for_coord(9) == (-1, true)
         """
-        pass
+        prev_cct = 0
+        for cct in self.cctv:
+            if srcblcoord >= cct[0]:
+                if srcblcoord <= cct[1]:
+                    return (cct[2], True)
+            else:
+                return (math.ceil((prev_cct + cct[2]) / 2), False)
+            
+            prev_cct = cct[2]
+
 
     def get_context(self, srcblcoord):
         """
