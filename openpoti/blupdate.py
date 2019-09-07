@@ -12,12 +12,12 @@ class Blupdate:
     updated coordinate that you can use to update the annotation.
     """
 
-    def __init__(self, srcbl, dstbl):
+    def __init__(self, srcbl, dstbl, context_len=16):
         self.srcbl = srcbl
         self.dstbl = dstbl
         self.dmp = dmp_module.diff_match_patch()
         self.cctv = self.compute_cctv()
-        self.contextlen = 16
+        self.context_len = context_len
 
     def compute_cctv(self):
         """
@@ -103,7 +103,7 @@ class Blupdate:
         prev_cct = 0
         for cct in self.cctv:
             if srcblcoord >= cct[0]:
-                if srcblcoord <= cct[1]:
+                if srcblcoord < cct[1]:
                     return (cct[2], True)
             else:
                 return (math.ceil((prev_cct + cct[2]) / 2), False)
@@ -114,12 +114,20 @@ class Blupdate:
     def get_context(self, srcblcoord):
         """
         This returns the left and right context of a character coordinate in srcbl, in the form of a tuple with two strings.
-        The length of the context is set by self.contextlen.
+        The length of the context is set by self.context_len.
 
         For instance:
-           get_context(3) == ("abe", "fgh")
+           get_context(3) == ("abe", "ghi")
         """
-        pass
+
+        # check for left context size less than context_len
+        if srcblcoord >= self.context_len:
+            left_context = self.srcbl[srcblcoord-self.context_len:srcblcoord]
+        else:
+            left_context = self.srcbl[:srcblcoord]
+
+        right_context = self.srcbl[srcblcoord+1:srcblcoord+1+self.context_len]
+        return left_context, right_context
 
     def dmp_find(self, context, dstcoordestimate):
         """
