@@ -116,8 +116,10 @@ class Blupdate:
         This returns the left and right context of a character coordinate in srcbl, in the form of a tuple with two strings.
         The length of the context is set by self.context_len.
 
-        For instance:
-           get_context(3) == ("abe", "ghi")
+        format: 0a1b2e3f4g5h6i7
+
+        For instance for contex_len = 4
+           get_context(3) == ("abe", "fghi")
         """
 
         # check for left context size less than context_len
@@ -126,7 +128,7 @@ class Blupdate:
         else:
             left_context = self.srcbl[:srcblcoord]
 
-        right_context = self.srcbl[srcblcoord+1:srcblcoord+1+self.context_len]
+        right_context = self.srcbl[srcblcoord:srcblcoord+self.context_len]
         return left_context, right_context
 
     def dmp_find(self, context, dstcoordestimate):

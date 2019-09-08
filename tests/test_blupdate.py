@@ -40,14 +40,14 @@ def test_get_cctv_for_coord(inputs, cctv_for_coord_test_cases):
 
 
 @pytest.fixture(params=[{'srcblcoord': 3, 
-                         'expected_result': ('abe', 'ghi')},
+                         'expected_result': ('abe', 'fghi')},
                          {'srcblcoord': 7, 
-                         'expected_result': ('ghi', 'kl')}])
+                         'expected_result': ('fghi', 'jkl')}])
 def get_context_test_cases(request):
     return request.param
 
 def test_get_context(inputs, get_context_test_cases):
-    updater = Blupdate(inputs['srcbl'], inputs['dstbl'], context_len=3)
+    updater = Blupdate(inputs['srcbl'], inputs['dstbl'], context_len=4)
 
     result = updater.get_context(get_context_test_cases['srcblcoord'])
 
