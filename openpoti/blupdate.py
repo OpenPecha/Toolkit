@@ -140,7 +140,8 @@ class Blupdate:
         This is conceptually simple but might require the most time as it might require understanding the dmp code to
         hook into private functions.
         """
-        pass
+        match = self.dmp.match_main(self.dstbl, context[1], dstcoordestimate)
+        return match
 
     def get_updated_with_dmp(self, srcblcoord, cct):
         """

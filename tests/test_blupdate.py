@@ -52,3 +52,18 @@ def test_get_context(inputs, get_context_test_cases):
     result = updater.get_context(get_context_test_cases['srcblcoord'])
 
     assert result == get_context_test_cases['expected_result']
+
+
+@pytest.fixture(params=[{'context': ('fghi', 'jkl'),
+                          'dstcoordestimate': 8,
+                          'expected_result': 7}])
+def dmp_find_test_cases(request):
+    return request.param
+
+def test_dmp_find(inputs, dmp_find_test_cases):
+    updater = Blupdate(inputs['srcbl'], inputs['dstbl'], context_len=4)
+
+    result = updater.dmp_find(dmp_find_test_cases['context'],
+                              dmp_find_test_cases['dstcoordestimate'])
+
+    assert result == dmp_find_test_cases['expected_result']
