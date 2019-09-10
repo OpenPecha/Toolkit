@@ -11,9 +11,9 @@ class OPFormatter:
     ==========================
 
         W1OP000001.opf
-            ├── base.txt
-            ├── layers
-            │   ├── title.yml
+            ├── base.txt          # plain text, without markups (annotations)
+            ├── layers            # layers with annotation's char coordinate
+            │   ├── title.yml     
             │   ├── yigchung.yml
             |   ├── citation.yml
     '''
