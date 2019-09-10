@@ -19,7 +19,7 @@ class OPFormatter:
     '''
 
     def __init__(self, output_path='./output'):
-        self.output_path = Path(output_path)S
+        self.output_path = Path(output_path)
         
 
     def _build_dirs(self):
@@ -46,13 +46,38 @@ class OPFormatter:
         text = text.replace('##', '#')
         return text
 
+    
+    def normalizeUni(self, strNFC):
+        strNFC = strNFC.replace("\u0F00", "\u0F68\u0F7C\u0F7E") # ༀ
+        strNFC = strNFC.replace("\u0F43", "\u0F42\u0FB7") # གྷ
+        strNFC = strNFC.replace("\u0F48", "\u0F47\u0FB7") # ཈
+        strNFC = strNFC.replace("\u0F4D", "\u0F4C\u0FB7") # ཌྷ
+        strNFC = strNFC.replace("\u0F52", "\u0F51\u0FB7") # དྷ
+        strNFC = strNFC.replace("\u0F57", "\u0F56\u0FB7") # བྷ
+        strNFC = strNFC.replace("\u0F5C", "\u0F5B\u0FB7") # ཛྷ
+        strNFC = strNFC.replace("\u0F69", "\u0F40\u0FB5") # ཀྵ
+        strNFC = strNFC.replace("\u0F73", "\u0F71\u0F72") # ཱི
+        strNFC = strNFC.replace("\u0F75", "\u0F71\u0F74") #  ཱུ
+        strNFC = strNFC.replace("\u0F76", "\u0FB2\u0F80") # ྲྀ
+        strNFC = strNFC.replace("\u0F77", "\u0FB2\u0F71\u0F80") # ཷ
+        strNFC = strNFC.replace("\u0F78", "\u0FB3\u0F80") # ླྀ
+        strNFC = strNFC.replace("\u0F79", "\u0FB3\u0F71\u0F80") # ཹ
+        strNFC = strNFC.replace("\u0F81", "\u0F71\u0F80") #  ཱྀ
+        strNFC = strNFC.replace("\u0F93", "\u0F92\u0FB7") # ྒྷ
+        strNFC = strNFC.replace("\u0F9D", "\u0F9C\u0FB7") # ྜྷ
+        strNFC = strNFC.replace("\u0FA2", "\u0FA1\u0FB7") # ྡྷ
+        strNFC = strNFC.replace("\u0FA7", "\u0FA6\u0FB7") # ྦྷ
+        strNFC = strNFC.replace("\u0FAC", "\u0FAB\u0FB7") # ྫྷ
+        strNFC = strNFC.replace("\u0FB9", "\u0F90\u0FB5") # ྐྵ
+        return strNFC
+
 
     def get_input_text(self):
         '''
         Return a preprocess text from given input_file path
         '''
         m_text = self.text_preprocess(self.input_file.read_text())
-        return m_text
+        return self.normalizeUni(m_text)
 
 
     def layers_postprocess(self, layers):
@@ -127,5 +152,5 @@ class OPFormatter:
 
 
 if __name__ == "__main__":
-    formatter = OPFormatter('usage/new_layer_output')
-    formatter.new_poti('usage/input/W1OP000001.txt')
+    formatter = OPFormatter('../usage/new_layer_output')
+    formatter.new_poti('../usage/input/W1OP000001.txt')
