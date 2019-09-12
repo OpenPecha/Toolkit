@@ -40,10 +40,16 @@ class OPFormatter:
         This is temporary method to remove all the critic markups and make existing
         markup consistent.
         '''
+        # remove critic markup
         text = text.replace('{++', '')
         text = text.replace('++}', '')
-        text = text.replace('###', '#')
-        text = text.replace('##', '#')
+
+        # edit the existing markup
+        text = text.replace('###', '#') # book_title to title
+        text = text.replace('##', '#')  # chapter_title to title
+        text = text.replace("**", "`")  # change tsawa markup
+        text = text.replace("~~", '~')  # change quote markup
+
         return text
 
     
@@ -109,9 +115,9 @@ class OPFormatter:
                 layers['title'].append(i)
             elif c == '*':
                 layers['yigchung'].append(i)
-            elif c == '**':
+            elif c == '`':
                 layers['tsawa'].append(i)
-            elif c == '~~':
+            elif c == '~':
                 layers['quotes'].append(i)
             elif c == '[' or c == ']':
                 layers['sapche'].append(i)
@@ -124,19 +130,7 @@ class OPFormatter:
     def dump(self, data, output_fn):
         with output_fn.open('w') as fn:
             yaml.dump(data, fn, default_flow_style=False)
-
-
-    def formatter(work):
-        m_text = get_text(work)
-        layers = build_layers(m_text)
-        
-        output_dir = Path('new_layer_output')
-        work_dir = output_dir/work
-        layer_dir = work_dir/f'{work}.opf'/'layers'
-
-        for layer, ann in layers.items():
-            layer_fn = layer_dir/f'{layer}.yml'
-            dump(ann, layer_fn)
+            
         
     def new_poti(self, input_file):
         self.input_file = Path(input_file)
@@ -152,5 +146,5 @@ class OPFormatter:
 
 
 if __name__ == "__main__":
-    formatter = OPFormatter('../usage/new_layer_output')
-    formatter.new_poti('../usage/input/W1OP000001.txt')
+    formatter = OPFormatter('usage/new_layer_output')
+    formatter.new_poti('usage/input/W1OP000002.txt')
