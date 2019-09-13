@@ -6,13 +6,27 @@ from openpoti.serialize import Serialize
 from openpoti.serializemd import SerializeMd
 
 
+# For testing read_base_layer, add_chars and apply_layer
 @pytest.fixture(scope='module')
 def opf_path():
-    op_path = './data'
-    test_op = 'W1OP000001'
-    opf_path = f'{op_path}/{test_op}/{test_op}.opf'
+    opf_path = './data/W1OP000001/W1OP000001.opf'
     return opf_path
 
+# # Test case for get_result on muttiple OpenPoi
+# def get_opf_paths():
+#     DATA_PATH = './data'
+#     opf_paths = []
+#     for op_name in ['W1OP000001', 'W1OP000198']:
+#         opf_paths.append({
+#             'op': op_name,
+#             'opf_path': f'{DATA_PATH}/{op_name}/{op_name}.opf'
+#         })
+#     return opf_paths
+    
+# @pytest.fixture(params=get_opf_paths())
+# def opf_path_test_cases(request):
+#     request.param
+    
 
 def test_read_base_layer(opf_path):
     serializer = Serialize(opf_path)
@@ -20,7 +34,6 @@ def test_read_base_layer(opf_path):
     result = serializer.baselayer
 
     assert isinstance(result, str)
-
 
 def test_add_chars(opf_path):
     serializer = Serialize(opf_path)
@@ -84,28 +97,38 @@ def test_apply_layers(opf_path):
     assert result == expected_result
 
 
-def test_get_result(opf_path):
-    serializer_title = SerializeMd(opf_path)
-    serializer_yigchung = SerializeMd(opf_path)
-    Serializer = SerializeMd(opf_path)
+@pytest.fixture(scope='module')
+def get_result_opf_path():
+    opf_path = './data/W1OP000198/W1OP000198.opf'
+    return opf_path
+
+def test_get_result(get_result_opf_path):
+    serializer_title = SerializeMd(get_result_opf_path)
+    serializer_yigchung = SerializeMd(get_result_opf_path)
+    serializer_quotes = SerializeMd(get_result_opf_path)
+    serializer_sapche = SerializeMd(get_result_opf_path)
+    Serializer = SerializeMd(get_result_opf_path)
 
     serializer_title.apply_layer('title')
     serializer_yigchung.apply_layer('yigchung')
+    serializer_quotes.apply_layer('quotes')
+    serializer_sapche.apply_layer('sapche')
     Serializer.apply_layers()
 
     result_title = serializer_title.get_result()
     result_yigchung = serializer_yigchung.get_result()
+    result_quotes = serializer_quotes.get_result()
+    result_sapche = serializer_sapche.get_result()
     result = Serializer.get_result()
 
-    # save the result
-    Path('data/export/title_result.txt').write_text(result_title)
-    Path('data/export/yigchung_result.txt').write_text(result_yigchung)
-    Path('data/export/all_result.txt').write_text(result)
-
-    expected_result_title = Path('data/export/title_expected.txt').read_text()
-    expected_result_yigchung = Path('data/export/yigchung_expected.txt').read_text()
-    expected_result = Path('data/export/all_expected.txt').read_text()
+    expected_result_title = Path('data/serialize_test/W1OP000198/title_expected.txt').read_text()
+    expected_result_yigchung = Path('data/serialize_test/W1OP000198/yigchung_expected.txt').read_text()
+    expected_result_quotes = Path('data/serialize_test/W1OP000198/quotes_expected.txt').read_text()
+    expected_result_sapche = Path('data/serialize_test/W1OP000198/sapche_expected.txt').read_text()
+    expected_result = Path('data/serialize_test/W1OP000198/all_expected.txt').read_text()
 
     assert result_title == expected_result_title
     assert result_yigchung == expected_result_yigchung
+    assert result_quotes == expected_result_quotes
+    assert result_sapche == expected_result_sapche
     assert result == expected_result

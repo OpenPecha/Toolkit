@@ -6,6 +6,13 @@ from .serialize import Serialize
 class SerializeMd(Serialize):
     """
     This class is serializes an opf file into MarkDown.
+
+    Markdown markup for layers:
+        title    --> # (Heading)
+        yigchung --> *(italic)*
+        tsawa    --> **(blod)**
+        quotes   --> `(span)`
+        sapche   --> [<sapche>](#) link 
     """
 
     def apply_annotation(self, ann):
@@ -19,5 +26,12 @@ class SerializeMd(Serialize):
         elif ann.type == 'yigchung':
             self.add_chars(ann.start_cc, True, "*")
             self.add_chars(ann.end_cc, False, '*')
-        else:
-            pass # to be implemented
+        elif ann.type == 'tsawa':
+            self.add_chars(ann.start_cc, True, "**") # TODO: remove new line after ** from parser
+            self.add_chars(ann.end_cc, False, '**')
+        elif ann.type == 'quotes':
+            self.add_chars(ann.start_cc, True, "`")
+            self.add_chars(ann.end_cc, False, '`')
+        elif ann.type == 'sapche':
+            self.add_chars(ann.start_cc, True, "[")
+            self.add_chars(ann.end_cc, False, '](#)')
