@@ -1,6 +1,6 @@
 # OpenPoti Toolkit
 
-## Installtion
+## Installation
 ```
 $ git clone https://github.com/OpenPoti/openpoti-toolkit.git
 $ cd openpoti-toolkit
