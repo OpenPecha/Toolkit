@@ -126,6 +126,14 @@ class OPFormatter:
 
         return self.layers_postprocess(layers)
 
+    def get_base_text(self, m_text):
+        m_text = m_text.replace('#', '')
+        m_text = m_text.replace('*', '')
+        m_text = m_text.replace('`', '')
+        m_text = m_text.replace('~', '')
+        m_text = m_text.replace('[', '')
+        text = m_text.replace(']', '')
+        return text
 
     def dump(self, data, output_fn):
         with output_fn.open('w') as fn:
@@ -138,11 +146,15 @@ class OPFormatter:
 
         m_text = self.get_input_text()
         layers = self.build_layers(m_text)
+        base_text = self.get_base_text(m_text)
 
+        # save layers
         for layer, ann in layers.items():
             layer_fn = self.dirs['layers_path']/f'{layer}.yml'
-            self.dump(ann, layer_fn)        
+            self.dump(ann, layer_fn)
 
+        # save base_text
+        (self.dirs['opf_path']/'base.txt').write_text(base_text)
 
 
 if __name__ == "__main__":
