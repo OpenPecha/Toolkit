@@ -150,7 +150,7 @@ class Blupdate:
         By convention, the function returns -1 when it is unable to compute the new coordinate.
         """
         context = self.get_context(srcblcoord)
-        dstcoordestimate = srcblcoord+cct
+        dstcoordestimate = srcblcoord + cct
         return self.dmp_find(context, dstcoordestimate)
 
     def get_updated_coord(self, srcblcoord):
@@ -162,6 +162,6 @@ class Blupdate:
         """
         cctvforcoord = self.get_cctv_for_coord(srcblcoord)
         if cctvforcoord[1]:
-            return srcblcoord+cctvforcoord[0]
+            return srcblcoord + cctvforcoord[0]
         else:
-            return self.getupdatedwithdmp(srcblcoord, cctvforcoord[0])
+            return self.get_updated_with_dmp(srcblcoord, cctvforcoord[0])

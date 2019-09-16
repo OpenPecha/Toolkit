@@ -67,3 +67,20 @@ def test_dmp_find(inputs, dmp_find_test_cases):
                               dmp_find_test_cases['dstcoordestimate'])
 
     assert result == dmp_find_test_cases['expected_result']
+
+
+@pytest.fixture(params=[{'srcblcoord': 0,
+                          'expected_result': 0},
+                        {'srcblcoord': 2,
+                          'expected_result': 4},
+                        {'srcblcoord': 7,
+                          'expected_result': 7}])
+def get_updated_coord_test_cases(request):
+    return request.param
+
+def test_updated_coord(inputs, get_updated_coord_test_cases):
+    updater = Blupdate(inputs['srcbl'], inputs['dstbl'], context_len=4)
+
+    result = updater.get_updated_coord(get_updated_coord_test_cases['srcblcoord'])
+
+    assert result == get_updated_coord_test_cases['expected_result']
