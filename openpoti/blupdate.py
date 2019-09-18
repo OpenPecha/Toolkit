@@ -102,10 +102,11 @@ class Blupdate:
         """
         prev_cct = 0
         for cct in self.cctv:
-            if srcblcoord >= cct[0]:
-                if srcblcoord < cct[1]:
-                    return (cct[2], True)
-            else:
+            if srcblcoord > cct[0] and srcblcoord < cct[1]: # at inner of the range
+                return (cct[2], True)
+            elif srcblcoord == cct[0] or srcblcoord == cct[1] - 1: # at side of the range
+                return (cct[2], False)
+            elif srcblcoord < cct[0]: # falls between ccts (two range)
                 return (math.ceil((prev_cct + cct[2]) / 2), False)
             
             prev_cct = cct[2]
