@@ -95,7 +95,7 @@ def test_updated_coord(inputs, get_updated_coord_test_cases):
 
 
 # Test on real text
-data_path = Path('tests/data/blupdate')
+data_path = Path('data/blupdate')
 
 @pytest.fixture(scope='module')
 def updater():
@@ -120,11 +120,9 @@ def layers_test_cases(request):
 
 def test_get_updated_coord_all(updater, layers_test_cases):
     src_ann_cc, dst_ann_cc = get_layer(layers_test_cases['layer'])
-    if layers_test_cases['layer'] == 'title':
-        result = updater.get_updated_coord(src_ann_cc[0])
-        assert result == dst_ann_cc[0]
-    else:
-        start_result = updater.get_updated_coord(src_ann_cc[0][0])
-        end_result = updater.get_updated_coord(src_ann_cc[0][1])
-        assert start_result == dst_ann_cc[0][0]
-        assert end_result == dst_ann_cc[0][1] 
+    
+    start_result = updater.get_updated_coord(src_ann_cc[0][0])
+    end_result = updater.get_updated_coord(src_ann_cc[0][1])
+    
+    assert start_result == dst_ann_cc[0][0]
+    assert end_result == dst_ann_cc[0][1]
