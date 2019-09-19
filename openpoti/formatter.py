@@ -93,13 +93,9 @@ class OPFormatter:
         '''
         for layer, anns in layers.items():
             out = {}
-            if layer == 'title':
-                for i, ann in enumerate(anns):
-                    out[i] = ann
-            else:
-                anns = [e-1 if i%2 == 0 else e for i, e in enumerate(anns, start=1)]
-                for i, e in enumerate(range(0, len(anns), 2)):
-                    out[i] = anns[e:e+2]
+            anns = [e-1 if i%2 == 0 else e for i, e in enumerate(anns, start=1)]
+            for i, e in enumerate(range(0, len(anns), 2)):
+                out[i] = anns[e:e+2]
             layers[layer] = out            
         return layers
 
@@ -110,9 +106,15 @@ class OPFormatter:
         '''
         layers = defaultdict(list)
         i =  0
+        is_title = False
         for c in text:
             if c == '#':
                 layers['title'].append(i)
+                is_title = True
+            elif is_title and c == '\n':
+                layers['title'].append(i)
+                is_title = False
+                i += 1
             elif c == '*':
                 layers['yigchung'].append(i)
             elif c == '`':

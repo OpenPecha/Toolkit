@@ -11,16 +11,12 @@ def test_build_layers():
     result = formatter.build_layers(text)
 
     expected_result = {
-        'title': [0],
+        'title': [0, 17],
         'yigchung': [193, 830],
         'tsawa': [919, 1073],
         'quotes': [1733, 1777],
         'sapche': [1318, 1393]
     }
 
-    print(result)
     for layer, ann in expected_result.items():
-        if layer == 'title':
-            assert result[layer][0] == expected_result[layer][0]
-        else:
-            assert result[layer][0] == expected_result[layer]  
+        assert result[layer][0] == expected_result[layer]
