@@ -2,8 +2,7 @@
 TODO:
 1. Download catalog.csv
 2. Download all the OpenPotis
-3. poti layer <layer-name> -o <path to opf file>
-3. poti layers -o <path to opf file>
+3. poti layer -n <layer-name> -l <layer_01, layer_02, ...> -a -o <path to opf file>
 '''
 import csv
 import requests
@@ -76,3 +75,15 @@ def download(save_dir):
     config_path = Path(config['CONFIG_PATH'])
     config_path.parent.mkdir(parents=True, exist_ok=True)
     config_path.write_text(str(config['data'].resolve()))
+
+
+# Apply layer
+@cli.command()
+@click.argument("opf_path", type=click.Path(exists=True))
+@click.option('--name', '-n', help='name of a layer to be applied')
+@click.option('--list', '-l', help='list of name of layers to applied, \
+                          name of layers should be comma separated')
+def layer(**kwargs):
+    print(kwargs['opf_path'])
+    print(kwargs['name'])
+    print(kwargs['list'])
