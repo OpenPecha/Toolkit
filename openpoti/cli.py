@@ -63,7 +63,8 @@ def download_poti(poti):
 
 # Download openPoti
 @cli.command()
-@click.option('--save_dir', default='./.openpoti/data')
+@click.option('--save_dir', default='./.openpoti/data',
+                            help='directory to store all the poti')
 def download(save_dir):
     # configure the data_path
     config['data'] = Path(save_dir)
@@ -80,12 +81,31 @@ def download(save_dir):
 
 
 # Apply layer
+layers_name = ['title', 'tsawa', 'yigchung', 'quotes', 'sapche']
+
 @cli.command()
-@click.argument("opf_path", type=click.Path(exists=True))
-@click.option('--name', '-n', help='name of a layer to be applied')
+@click.option('--name', '-n', type=click.Choice(layers_name), \
+                              help='name of a layer to be applied')
 @click.option('--list', '-l', help='list of name of layers to applied, \
                           name of layers should be comma separated')
+@click.argument('opf_path', type=click.Path(exists=True))
+@click.argument('out', type=click.File('w'))
 def layer(**kwargs):
-    print(kwargs['opf_path'])
-    print(kwargs['name'])
-    print(kwargs['list'])
+    """
+    Command to apply a single layer, multiple layers or all available layers, which is the default.\n
+    Args:\n
+        - OPF_PATH is the path to opf directory of poti\n
+        - OUT is the filename to the write the result. Currently support only Markdown file.
+    """
+    serializer = SerializeMd(kwargs['opf_path'])
+    if kwargs['name']:
+        serializer.apply_layer(kwargs['name'])
+    elif kwargs['list']:
+        layers = kwargs['list'].split(',')
+        serializer.layers = layers
+        serializer.apply_layers()
+    else:
+        serializer.apply_layers()
+
+    result = serializer.get_result()
+    click.echo(result, file=kwargs['out'])
