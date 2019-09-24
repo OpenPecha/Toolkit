@@ -19,7 +19,7 @@ from openpoti.serializemd import SerializeMd
 config = {
     'CATALOG_URL': 'https://raw.githubusercontent.com/OpenPoti/openpoti-catalog/master/data/catalog.csv',
     'OpenPotiRepo': 'https://github.com/OpenPoti/',
-    'CONFIG_PATH': '.openpoti/config/data_config'
+    'CONFIG_PATH': './.openpoti/config/data_config'
 }
 
 
@@ -53,22 +53,24 @@ def download_poti(poti):
     z.extractall(config['data'])
 
     # rename the poti
-    source = config['data']/f'{poti}-master'
     target = config['data']/poti
-    source.replace(target)
+    if not target.is_dir():
+        source = config['data']/f'{poti}-master'
+        source.replace(target)
+
+    #TODO: updating the poti
 
 
 # Download openPoti
 @cli.command()
-@click.option('--save_dir', default='./openpoti')
+@click.option('--save_dir', default='./.openpoti/data')
 def download(save_dir):
     # configure the data_path
     config['data'] = Path(save_dir)
 
     # download the repo
     poti_list = get_poti_list()
-    for poti in poti_list[0:1]:
-        print(poti)
+    for poti in tqdm(poti_list[0:1]):
         download_poti(poti)
 
     # save data_path in data_config
