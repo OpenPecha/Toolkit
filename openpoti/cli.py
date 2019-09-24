@@ -71,7 +71,7 @@ def download(save_dir):
 
     # download the repo
     poti_list = get_poti_list()
-    for poti in tqdm(poti_list[0:1]):
+    for poti in tqdm(poti_list):
         download_poti(poti)
 
     # save data_path in data_config
