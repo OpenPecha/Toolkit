@@ -61,14 +61,9 @@ class Serialize(object):
         I think it can be implemented in this class by just calling self.apply_annotation on each annotation of the file.
         """
         layer = yaml.safe_load((self.opfpath/'layers'/f'{layer_id}.yml').open())
-        if layer_id == 'title':
-            for _, char_coor in layer.items():
-                ann = self.Annotation(layer_id, char_coor, char_coor)
-                self.apply_annotation(ann)
-        else:
-            for _, char_coor in layer.items():
-                ann = self.Annotation(layer_id, char_coor[0], char_coor[1])
-                self.apply_annotation(ann)
+        for _, char_coor in layer.items():
+            ann = self.Annotation(layer_id, char_coor[0], char_coor[1])
+            self.apply_annotation(ann)
         return layer
 
     def get_all_layer(self):

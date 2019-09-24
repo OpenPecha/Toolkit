@@ -2,7 +2,7 @@ from pathlib import Path
 
 from openpoti.formatter import OPFormatter
 
-m_text = Path('data/formatter/v2.txt').read_text()
+m_text = Path('tests/data/formatter/v2.txt').read_text()
 
 def test_build_layers():
     formatter = OPFormatter()
