@@ -1,7 +1,9 @@
 import copy
 import math
+from pathlib import Path
 
 import diff_match_patch as dmp_module
+import yaml
 
 class Blupdate:
     """
@@ -13,8 +15,14 @@ class Blupdate:
     """
 
     def __init__(self, srcbl, dstbl, context_len=16):
-        self.srcbl = srcbl
-        self.dstbl = dstbl
+        if isinstance(srcbl, Path):
+            self.srcbl = srcbl.read_text()
+            self.dstbl = dstbl.read_text()
+            self.opfpath = srcbl.parent
+        else:
+            self.srcbl = srcbl
+            self.dstbl = dstbl
+
         self.dmp = dmp_module.diff_match_patch()
         self.cctv = self.compute_cctv()
         self.context_len = context_len
@@ -166,3 +174,21 @@ class Blupdate:
             return srcblcoord + cctvforcoord[0]
         else:
             return self.get_updated_with_dmp(srcblcoord, cctvforcoord[0])
+
+    def update_layer(self, layer_fn):
+        """
+        Update individual layer, in format {0: [0, 17], 1: [20, 40], ...}
+        """
+        anns = yaml.safe_load(layer_fn.open())
+        for i, ann in anns.items():
+            start_cc = ann[0]
+            end_cc = ann[1]
+            anns[i] = [self.get_updated_coord(start_cc), self.get_updated_coord(end_cc)]
+        yaml.dump(anns, layer_fn.open('w'), default_flow_style=False)
+    
+    def update(self):
+        """
+        Update all the layer annotations
+        """
+        for layer_fn in (self.opfpath/'layers').iterdir():
+            self.update_layer(layer_fn)
