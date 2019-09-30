@@ -36,7 +36,27 @@ def create_config_dirs():
     Path(config['CONFIG_PATH']).mkdir(parents=True, exist_ok=True)
 
 
-def get_poti_list():
+def get_poti(id, batch_path, layers):
+
+    def _check_poti(id=None, potis=None, layer=None, poti_list=None):
+        if id not in poti_list:
+            if id in potis:
+                if layer:
+                    if layer in potis[id][-1].split('_'):
+                        poti_list.append(id)
+                    else:
+                        click.echo(f'{layer} layer is not found in {id}')
+                else:
+                    poti_list.append(id)
+            else:
+                click.echo(f'{id} not found in OpenPoti catalog')
+
+    def _get_batch(batch_path):
+        with Path(batch_path).open() as f:
+            batch_ids = [line.strip() for line in f.readlines()]
+        return batch_ids
+
+
     poti_list = []
 
     catalog_path = Path(config['OP_CATALOG_PATH'])
@@ -45,12 +65,35 @@ def get_poti_list():
         r = requests.get(config['OP_CATALOG_URL'])
         catalog_path.write_text(r.content.decode('utf-8'))
     
-    # parse the poti workid
+    # Create hash map of poti
     with catalog_path.open('r') as f:
         reader = csv.reader(f, delimiter=',')
-        for row in reader:
-            if not row[0].startswith('W'): continue
-            poti_list.append(row[0])
+        potis = {poti[0]: poti[1:] for poti in reader if poti[0].startswith('W')}
+
+    # If filter by layers
+    if layers:
+        layers_name = [l.strip() for l in layers.split(',')]
+        for layer in layers_name:
+            batch_ids = None
+            if id:
+                _check_poti(id=id, potis=potis, layer=layer, poti_list=poti_list)
+            elif batch_path:
+                if not batch_ids: batch_ids = _get_batch(batch_path)
+                for b_id in batch_ids:
+                    _check_poti(id=b_id, potis=potis, layer=layer, poti_list=poti_list)
+            else:
+                for p_id in potis:
+                    _check_poti(id=p_id, potis=potis, layer=layer, poti_list=poti_list)
+    else:
+        if id:
+            _check_poti(id=id, potis=potis, poti_list=poti_list)
+        elif batch_path:
+            batch_ids = _get_batch(batch_path)
+            for b_id in batch_ids:
+                _check_poti(id=b_id, potis=potis, poti_list=poti_list)
+        else:
+            for p_id in potis:
+                _check_poti(id=p_id, potis=potis, poti_list=poti_list)
 
     return poti_list
 
@@ -75,18 +118,30 @@ def download_poti(poti, out):
 
 # Download openPoti
 @cli.command()
+@click.option('--id', '-i', help='Work ID of poti, for single poti download')
+@click.option('--batch', '-b', help="path to text file containg list of names of \
+                                     poti in separate line. Poti batch download")
+@click.option('--filter', '-f', help='filter poti by layer availability, specify \
+                                     layer names in comma separated, eg: title,yigchung,..')
 @click.option('--out', '-o', default='./poti',
                             help='directory to store all the poti')
 def download(**kwargs):
+    '''
+    Command to download poti.
+    If id and batch options are not provided then it will download all the poti.
+    '''
+
     # create config dirs
     create_config_dirs()
 
     # configure the data_path
     config['data'] = Path(kwargs['out'])
 
+    # get poti
+    potis = get_poti(kwargs['id'], kwargs['batch'], kwargs['filter'])
+
     # download the repo
-    poti_list = get_poti_list()
-    for poti in tqdm(poti_list[:2]):
+    for poti in tqdm(potis):
         download_poti(poti, kwargs['out'])
 
     # save data_path in data_config
