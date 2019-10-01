@@ -14,12 +14,32 @@ $ pip install openpoti
 ## Usage
 Frist we need to download all the poti which are in openpoti format.
 ```
-$ openpoti download <save_path>
+$ openpoti download --help
+Usage: openpoti download [OPTIONS]
+
+  Command to download poti. If id and batch options are not provided then it
+  will download all the poti.
+
+Options:
+  -i, --id TEXT      Work ID of poti, for single poti download
+  -b, --batch TEXT   path to text file containg list of names of
+                     poti in separate line. Poti batch download
+  -f, --filter TEXT  filter poti by layer availability, specify
+                     layer names in comma separated, eg: title,yigchung,..
+  -o, --out TEXT     directory to store all the poti
+  --help             Show this message and exit.
 ```
 
 Automatic updating annotations from source base-text (original) and destination base-text (edited)
 ```
-$ openpoti update <source_base-text_path> <destination_base-text_path>
+$ openpoti update --help
+Usage: openpoti update [OPTIONS]
+
+  Command to update the annotations, must be run making edits to base-text.
+
+Options:
+  -i, --id TEXT  Work ID of poti to be updated
+  --help         Show this message and exit.
 ```
 
 Exporting and Extracting layer
@@ -54,6 +74,5 @@ $ pip install -e .
 
 ## Testing
 ```
-$ cd tests
-$ pytest
+$ pytest tests
 ```
