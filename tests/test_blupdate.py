@@ -141,7 +141,7 @@ def test_update():
     
     updater = Blupdate(srcbl, dstbl)
 
-    updater.update(update_path/'v1.opf')
+    updater.update_annotations(update_path/'v1.opf')
 
     for layer in ['title', 'yigchung', 'quotes', 'tsawa', 'sapche']:
         update_result, v2_result = get_layer(layer, 'update', 'v2')

@@ -1,7 +1,5 @@
 import csv
 import requests
-import zipfile
-from io import BytesIO, StringIO
 from pathlib import Path
 import shutil
 
@@ -11,6 +9,8 @@ from git import Repo
 from tqdm import tqdm
 
 from openpoti.serializemd import SerializeMd
+from openpoti.blupdate import Blupdate
+
 
 OP_PATH = './.openpoti'
 config = {
@@ -24,6 +24,9 @@ config = {
     'CONFIG_PATH': f'{OP_PATH}/config',
     'DATA_CONFIG_PATH': f'{OP_PATH}/config/data_config',
 }
+
+ERROR = '[ERROR] {}'
+INFO = '[INFO] {}'
 
 
 @click.group()
@@ -45,11 +48,13 @@ def get_poti(id, batch_path, layers):
                     if layer in potis[id][-1].split('_'):
                         poti_list.append(id)
                     else:
-                        click.echo(f'{layer} layer is not found in {id}')
+                        msg = f'{layer} layer is not found in {id}'
+                        click.echo(ERROR.format(msg))
                 else:
                     poti_list.append(id)
             else:
-                click.echo(f'{id} not found in OpenPoti catalog')
+                msg = f'{id} not found in OpenPoti catalog'
+                click.echo(ERROR.format(msg))
 
     def _get_batch(batch_path):
         with Path(batch_path).open() as f:
@@ -116,7 +121,7 @@ def download_poti(poti, out):
     shutil.copy(str(base_text), str(dup_base_text))
 
 
-# Download openPoti
+# Poti Download command
 @cli.command()
 @click.option('--id', '-i', help='Work ID of poti, for single poti download')
 @click.option('--batch', '-b', help="path to text file containg list of names of \
@@ -150,10 +155,11 @@ def download(**kwargs):
         config_path.write_text(str(config['data'].resolve()))
 
     # print location of data
-    print('Poti saved at:', Path(kwargs['out']).resolve())
+    msg = f'Poti saved at: {Path(kwargs["out"])}'
+    click.echo(INFO.format(msg))
 
 
-# Apply layer
+# Apply layer command
 layers_name = ['title', 'tsawa', 'yigchung', 'quotes', 'sapche']
 
 @cli.command()
@@ -182,3 +188,53 @@ def layer(**kwargs):
 
     result = serializer.get_result()
     click.echo(result, file=kwargs['out'])
+
+    # logging
+    msg = f'Output is save at: {kwargs["out"]}'
+    click.echo(INFO.format(msg))
+
+
+def poti_list():
+    return [poti.name for poti in Path(config['OP_DATA_PATH']).iterdir()]
+
+def get_data_path():
+    return Path(Path(config['DATA_CONFIG_PATH']).read_text().strip())
+
+def check_edits(w_id):
+    edit_path = get_data_path()
+    data_path = Path(config['OP_DATA_PATH'])
+
+    srcbl = (data_path/f'{w_id}'/f'{w_id}.opf'/'base.txt').read_text()
+    dstbl = (edit_path/f'{w_id}.txt').read_text()
+
+    return srcbl != dstbl, srcbl, dstbl
+
+# Update annotations command
+@cli.command()
+@click.option('--id', '-i', help='Work ID of poti to be updated')
+def update(**kwargs):
+    """
+    Command to update the annotations, must be run making edits to base-text.
+    """
+    if kwargs['id']:
+        if kwargs['id'] in poti_list():
+            is_changed, srcbl, dstbl = check_edits(kwargs['id'])
+            if is_changed:
+                msg = f'Updating annotations of Poti {kwargs["id"]}'
+                click.echo(INFO.format(msg))
+
+                # Update layer annotations
+                updater =  Blupdate(srcbl, dstbl)
+                opfpath = Path(f'{config["OP_DATA_PATH"]}')/f'{kwargs["id"]}'/f'{kwargs["id"]}.opf'
+                updater.update_annotations(opfpath)
+
+                # Update base-text
+                src = get_data_path()/f'{kwargs["id"]}.txt'
+                dst = opfpath/'base.txt'
+                shutil.copy(str(src), str(dst))
+
+                msg = f'Poti {kwargs["id"]} is uploaded for futher validation'
+                click.echo(INFO.format(msg))
+        else:
+            msg = f'{kwargs["id"]} does not exits, check the work id'
+            click.echo(ERROR.format(msg))

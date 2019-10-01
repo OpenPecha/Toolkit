@@ -179,7 +179,7 @@ class Blupdate:
             anns[i] = [self.get_updated_coord(start_cc), self.get_updated_coord(end_cc)]
         yaml.dump(anns, layer_fn.open('w'), default_flow_style=False)
     
-    def update(self, opfpath):
+    def update_annotations(self, opfpath):
         """
         Update all the layer annotations
         """
