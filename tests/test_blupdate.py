@@ -136,14 +136,13 @@ def test_update():
     if update_path.is_dir(): shutil.rmtree(str(update_path))
     shutil.copytree(str(data_path/'v1'), str(update_path))
 
-    srcbl_path = update_path/'v1.opf'/'base.txt'
-    dstbl_path = data_path/'v2'/'v2.opf'/'base.txt'
+    srcbl = (update_path/'v1.opf'/'base.txt').read_text()
+    dstbl = (data_path/'v2'/'v2.opf'/'base.txt').read_text()
     
-    updater = Blupdate(srcbl_path, dstbl_path)
+    updater = Blupdate(srcbl, dstbl)
 
-    updater.update()
+    updater.update(update_path/'v1.opf')
 
     for layer in ['title', 'yigchung', 'quotes', 'tsawa', 'sapche']:
         update_result, v2_result = get_layer(layer, 'update', 'v2')
         assert update_result == v2_result
-
