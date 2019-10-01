@@ -109,6 +109,7 @@ def download_poti(poti, out):
     poti_path = Path(config['OP_DATA_PATH'])/poti
     if poti_path.is_dir(): # if repo is already exits at local then try to pull
         repo = Repo(str(poti_path))
+        repo.heads['master'].checkout()
         repo.remotes.origin.pull()
     else:
         Repo.clone_from(poti_url, str(poti_path))
@@ -211,9 +212,15 @@ def check_edits(w_id):
     return srcbl != dstbl, srcbl, dstbl
 
 
-def github_push(repo_path, msg='made edits'):
-    repo = Repo(str(data_path/'W1OP000001'))
-    branch_name = 'edited'
+def github_push(repo, branch_name, msg='made edits'):
+    # setup authentication
+    username = click.prompt('Github Username: ')
+    password = click.prompt('Github Password: ')
+
+    old_url = repo.remotes.origin.url.split('//')
+    repo.remotes.origin.set_url(
+        f'{old_url[0]}//{username}:{password}@{old_url[1]}'
+    )
 
     # checkout to edited branch
     if branch_name in repo.heads:
@@ -226,7 +233,17 @@ def github_push(repo_path, msg='made edits'):
     if repo.is_dirty():
         repo.git.add(A=True)
         repo.git.commit(m=msg)
-        repo.git.push('--set-upstream', 'origin', current)
+        try: 
+            repo.git.push('--set-upstream', 'origin', current)
+        except:
+            msg = f'Authentication failed: Incorrect Username or Password'
+            click.echo(ERROR.format(msg))
+            return False
+
+    # finally checkout to master for apply layer on validated text
+    repo.heads['master'].checkout()
+    
+    return True
 
 
 # Update annotations command
@@ -238,6 +255,15 @@ def update(**kwargs):
     """
     if kwargs['id']:
         if kwargs['id'] in poti_list():
+            repo_path = Path(f'{config["OP_DATA_PATH"]}')/f'{kwargs["id"]}'
+            repo = Repo(str(repo_path))
+
+            # if edited branch exists, then to check for changes in edited branch
+            branch_name = 'edited'
+            if branch_name in repo.heads:
+                current = repo.heads[branch_name]
+                current.checkout()
+
             is_changed, srcbl, dstbl = check_edits(kwargs['id'])
             if is_changed:
                 msg = f'Updating annotations of Poti {kwargs["id"]}'
@@ -245,7 +271,7 @@ def update(**kwargs):
 
                 # Update layer annotations
                 updater =  Blupdate(srcbl, dstbl)
-                opfpath = Path(f'{config["OP_DATA_PATH"]}')/f'{kwargs["id"]}'/f'{kwargs["id"]}.opf'
+                opfpath = repo_path/f'{kwargs["id"]}.opf'
                 updater.update_annotations(opfpath)
 
                 # Update base-text
@@ -253,8 +279,16 @@ def update(**kwargs):
                 dst = opfpath/'base.txt'
                 shutil.copy(str(src), str(dst))
 
-                msg = f'Poti {kwargs["id"]} is uploaded for futher validation'
-                click.echo(INFO.format(msg))
+                # Create edited branch and push to Github
+                status = github_push(repo, branch_name)
+
+                # logging
+                if status:
+                    msg = f'Poti {kwargs["id"]} is uploaded for futher validation'
+                    click.echo(INFO.format(msg))
+            else:
+                msg = f'There is not changes in Poti {kwargs["id"]}'
+                click.echo(ERROR.format(msg))
         else:
             msg = f'{kwargs["id"]} does not exits, check the work id'
             click.echo(ERROR.format(msg))
