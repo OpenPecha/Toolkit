@@ -200,6 +200,7 @@ def poti_list():
 def get_data_path():
     return Path(Path(config['DATA_CONFIG_PATH']).read_text().strip())
 
+
 def check_edits(w_id):
     edit_path = get_data_path()
     data_path = Path(config['OP_DATA_PATH'])
@@ -208,6 +209,25 @@ def check_edits(w_id):
     dstbl = (edit_path/f'{w_id}.txt').read_text()
 
     return srcbl != dstbl, srcbl, dstbl
+
+
+def github_push(repo_path, msg='made edits'):
+    repo = Repo(str(data_path/'W1OP000001'))
+    branch_name = 'edited'
+
+    # checkout to edited branch
+    if branch_name in repo.heads:
+        current = repo.heads[branch_name]
+    else:
+        current = repo.create_head(branch_name)
+    current.checkout()
+
+    # Add, commit and push the edited branch
+    if repo.is_dirty():
+        repo.git.add(A=True)
+        repo.git.commit(m=msg)
+        repo.git.push('--set-upstream', 'origin', current)
+
 
 # Update annotations command
 @cli.command()
