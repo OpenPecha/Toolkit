@@ -1,5 +1,7 @@
-import pytest
 from pathlib import Path
+import shutil
+
+import pytest
 import yaml
 
 from openpoti.blupdate import Blupdate
@@ -95,7 +97,7 @@ def test_updated_coord(inputs, get_updated_coord_test_cases):
 
 
 # Test on real text
-data_path = Path('data/blupdate')
+data_path = Path('tests/data/blupdate')
 
 @pytest.fixture(scope='module')
 def updater():
@@ -104,9 +106,9 @@ def updater():
     updater = Blupdate(srcbl, dstbl)
     return updater
 
-def get_layer(layer):
-    src_layer = data_path/'v1'/'v1.opf'/'layers'/f'{layer}.yml'
-    dst_layer = data_path/'v2'/'v2.opf'/'layers'/f'{layer}.yml'
+def get_layer(layer, v1, v2):
+    src_layer = data_path/f'{v1}'/'v1.opf'/'layers'/f'{layer}.yml'
+    dst_layer = data_path/f'{v2}'/f'{v2}.opf'/'layers'/f'{layer}.yml'
     return yaml.safe_load(src_layer.open()), yaml.safe_load(dst_layer.open())
 
 
@@ -119,10 +121,28 @@ def layers_test_cases(request):
     return request.param
 
 def test_get_updated_coord_all(updater, layers_test_cases):
-    src_ann_cc, dst_ann_cc = get_layer(layers_test_cases['layer'])
+    src_ann_cc, dst_ann_cc = get_layer(layers_test_cases['layer'], 'v1', 'v2')
     
     start_result = updater.get_updated_coord(src_ann_cc[0][0])
     end_result = updater.get_updated_coord(src_ann_cc[0][1])
     
     assert start_result == dst_ann_cc[0][0]
     assert end_result == dst_ann_cc[0][1]
+
+
+def test_update():
+    # prepare work to be updated
+    update_path = data_path/'update'
+    if update_path.is_dir(): shutil.rmtree(str(update_path))
+    shutil.copytree(str(data_path/'v1'), str(update_path))
+
+    srcbl = (update_path/'v1.opf'/'base.txt').read_text()
+    dstbl = (data_path/'v2'/'v2.opf'/'base.txt').read_text()
+    
+    updater = Blupdate(srcbl, dstbl)
+
+    updater.update_annotations(update_path/'v1.opf')
+
+    for layer in ['title', 'yigchung', 'quotes', 'tsawa', 'sapche']:
+        update_result, v2_result = get_layer(layer, 'update', 'v2')
+        assert update_result == v2_result

@@ -2,6 +2,7 @@ import copy
 import math
 
 import diff_match_patch as dmp_module
+import yaml
 
 class Blupdate:
     """
@@ -166,3 +167,21 @@ class Blupdate:
             return srcblcoord + cctvforcoord[0]
         else:
             return self.get_updated_with_dmp(srcblcoord, cctvforcoord[0])
+
+    def update_layer(self, layer_fn):
+        """
+        Update individual layer, in format {0: [0, 17], 1: [20, 40], ...}
+        """
+        anns = yaml.safe_load(layer_fn.open())
+        for i, ann in anns.items():
+            start_cc = ann[0]
+            end_cc = ann[1]
+            anns[i] = [self.get_updated_coord(start_cc), self.get_updated_coord(end_cc)]
+        yaml.dump(anns, layer_fn.open('w'), default_flow_style=False)
+    
+    def update_annotations(self, opfpath):
+        """
+        Update all the layer annotations
+        """
+        for layer_fn in (opfpath/'layers').iterdir():
+            self.update_layer(layer_fn)
