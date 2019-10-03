@@ -69,6 +69,7 @@ Options:
 ```
 $ git clone https://github.com/OpenPoti/openpoti-toolkit.git
 $ cd openpoti-toolkit
+$ pip install -r requirements.txt
 $ pip install -e .
 ```
 
