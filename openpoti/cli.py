@@ -213,14 +213,16 @@ def check_edits(w_id):
 
 
 def github_push(repo, branch_name, msg='made edits'):
-    # setup authentication
-    username = click.prompt('Github Username: ')
-    password = click.prompt('Github Password: ')
+    # setup authentication, if not done
+    if not '@' in repo.remotes.origin.url:
+        
+        username = click.prompt('Github Username')
+        password = click.prompt('Github Password', hide_input=True)
 
-    old_url = repo.remotes.origin.url.split('//')
-    repo.remotes.origin.set_url(
-        f'{old_url[0]}//{username}:{password}@{old_url[1]}'
-    )
+        old_url = repo.remotes.origin.url.split('//')
+        repo.remotes.origin.set_url(
+            f'{old_url[0]}//{username}:{password}@{old_url[1]}'
+        )
 
     # checkout to edited branch
     if branch_name in repo.heads:
@@ -244,6 +246,19 @@ def github_push(repo, branch_name, msg='made edits'):
     repo.heads['master'].checkout()
     
     return True
+
+
+def repo_reset(repo, branch_name):
+    # remove edited branch
+    repo.heads['master'].checkout()
+    repo.delete_head(repo.heads[branch_name], force=True)
+
+    # reset to the origin url
+    url = repo.remotes.origin.url.split('@')
+    protocol = url[0].split('//')[0]
+    repo.remotes.origin.set_url(
+            f'{protocol}//{url[1]}'
+    )
 
 
 # Update annotations command
@@ -286,6 +301,8 @@ def update(**kwargs):
                 if status:
                     msg = f'Poti {kwargs["id"]} is uploaded for futher validation'
                     click.echo(INFO.format(msg))
+                else:
+                    repo_reset(repo, branch_name)
             else:
                 msg = f'There is not changes in Poti {kwargs["id"]}'
                 click.echo(ERROR.format(msg))
