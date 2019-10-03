@@ -12,17 +12,17 @@ from openpoti.serializemd import SerializeMd
 from openpoti.blupdate import Blupdate
 
 
-OP_PATH = './.openpoti'
+OP_PATH = Path('./.openpoti')
 config = {
     # Github
     'OP_CATALOG_URL': 'https://raw.githubusercontent.com/OpenPoti/openpoti-catalog/master/data/catalog.csv',
     'OP_ORG': 'https://github.com/OpenPoti',
 
     # Local
-    'OP_DATA_PATH': f'{OP_PATH}/data',
-    'OP_CATALOG_PATH': f'{OP_PATH}/data/catalog.csv',
-    'CONFIG_PATH': f'{OP_PATH}/config',
-    'DATA_CONFIG_PATH': f'{OP_PATH}/config/data_config',
+    'OP_DATA_PATH': (OP_PATH/'data').resolve(),
+    'OP_CATALOG_PATH': (OP_PATH/'data'/'catalog.csv').resolve(),
+    'CONFIG_PATH': (OP_PATH/'config').resolve(),
+    'DATA_CONFIG_PATH': (OP_PATH/'config'/'data_config').resolve(),
 }
 
 ERROR = '[ERROR] {}'
@@ -35,8 +35,8 @@ def cli():
 
 
 def create_config_dirs():
-    Path(config['OP_DATA_PATH']).mkdir(parents=True, exist_ok=True)
-    Path(config['CONFIG_PATH']).mkdir(parents=True, exist_ok=True)
+    config['OP_DATA_PATH'].mkdir(parents=True, exist_ok=True)
+    config['CONFIG_PATH'].mkdir(parents=True, exist_ok=True)
 
 
 def get_poti(id, batch_path, layers):
@@ -64,7 +64,7 @@ def get_poti(id, batch_path, layers):
 
     poti_list = []
 
-    catalog_path = Path(config['OP_CATALOG_PATH'])
+    catalog_path = config['OP_CATALOG_PATH']
     if not catalog_path.is_file():
         # download the catalog
         r = requests.get(config['OP_CATALOG_URL'])
@@ -106,7 +106,7 @@ def get_poti(id, batch_path, layers):
 def download_poti(poti, out):
     # clone the repo
     poti_url = f"{config['OP_ORG']}/{poti}.git"
-    poti_path = Path(config['OP_DATA_PATH'])/poti
+    poti_path = config['OP_DATA_PATH']/poti
     if poti_path.is_dir(): # if repo is already exits at local then try to pull
         repo = Repo(str(poti_path))
         repo.heads['master'].checkout()
@@ -141,7 +141,7 @@ def download(**kwargs):
     create_config_dirs()
 
     # configure the data_path
-    config['data'] = Path(kwargs['out'])
+    config['data'] = Path(kwargs['out']).resolve()
 
     # get poti
     potis = get_poti(kwargs['id'], kwargs['batch'], kwargs['filter'])
@@ -151,7 +151,7 @@ def download(**kwargs):
         download_poti(poti, kwargs['out'])
 
     # save data_path in data_config
-    config_path = Path(config['DATA_CONFIG_PATH'])
+    config_path = config['DATA_CONFIG_PATH']
     if not config_path.is_file():
         config_path.write_text(str(config['data'].resolve()))
 
@@ -168,16 +168,17 @@ layers_name = ['title', 'tsawa', 'yigchung', 'quotes', 'sapche']
                               help='name of a layer to be applied')
 @click.option('--list', '-l', help='list of name of layers to applied, \
                           name of layers should be comma separated')
-@click.argument('opf_path', type=click.Path(exists=True))
+@click.argument('id')
 @click.argument('out', type=click.File('w'))
 def layer(**kwargs):
     """
     Command to apply a single layer, multiple layers or all available layers (by default) and then export to markdown.\n
     Args:\n
-        - OPF_PATH is the path to opf directory of poti\n
+        - ID is the work-id of the poti, from which given layer will be applied\n
         - OUT is the filename to the write the result. Currently support only Markdown file.
     """
-    serializer = SerializeMd(kwargs['opf_path'])
+    opfpath = config["OP_DATA_PATH"]/kwargs["id"]/f'{kwargs["id"]}.opf'
+    serializer = SerializeMd(opfpath)
     if kwargs['name']:
         serializer.apply_layer(kwargs['name'])
     elif kwargs['list']:
@@ -191,20 +192,20 @@ def layer(**kwargs):
     click.echo(result, file=kwargs['out'])
 
     # logging
-    msg = f'Output is save at: {kwargs["out"]}'
+    msg = f'Output is save at: {kwargs["out"].name}'
     click.echo(INFO.format(msg))
 
 
 def poti_list():
-    return [poti.name for poti in Path(config['OP_DATA_PATH']).iterdir()]
+    return [poti.name for poti in config['OP_DATA_PATH'].iterdir()]
 
 def get_data_path():
-    return Path(Path(config['DATA_CONFIG_PATH']).read_text().strip())
+    return Path(config['DATA_CONFIG_PATH'].read_text().strip())
 
 
 def check_edits(w_id):
     edit_path = get_data_path()
-    data_path = Path(config['OP_DATA_PATH'])
+    data_path = config['OP_DATA_PATH']
 
     srcbl = (data_path/f'{w_id}'/f'{w_id}.opf'/'base.txt').read_text()
     dstbl = (edit_path/f'{w_id}.txt').read_text()
@@ -270,7 +271,7 @@ def update(**kwargs):
     """
     if kwargs['id']:
         if kwargs['id'] in poti_list():
-            repo_path = Path(f'{config["OP_DATA_PATH"]}')/f'{kwargs["id"]}'
+            repo_path = config["OP_DATA_PATH"]/kwargs["id"]
             repo = Repo(str(repo_path))
 
             # if edited branch exists, then to check for changes in edited branch

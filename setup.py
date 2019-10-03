@@ -9,7 +9,7 @@ def read(fname):
 
 setup(
     name="openpoti",
-    version="0.2.1",
+    version="0.2.2",
     author="Esukhia developers",
     author_email="esukhiadev@gmail.com",
     description="OpenPoti Toolkit allows state of the art for distributed standoff annotations on moving texts",
