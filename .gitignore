@@ -1,11 +1,18 @@
+# Environment
 .env/
 .vscode/
 openpoti.egg-info/
 .pytest_cache/
 
+# data
 **/data/*
 **/__pycache__/
 usage/input/
 usage/layer_output/
 
+# scripts
 usage/
+
+# Deployment
+build/
+dist/
