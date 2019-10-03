@@ -305,8 +305,8 @@ def update(**kwargs):
                 else:
                     repo_reset(repo, branch_name)
             else:
-                msg = f'There is not changes in Poti {kwargs["id"]}'
+                msg = f'There is no changes in Poti {kwargs["id"]}'
                 click.echo(ERROR.format(msg))
         else:
-            msg = f'{kwargs["id"]} does not exits, check the work id'
+            msg = f'{kwargs["id"]} does not exits, check the work-id'
             click.echo(ERROR.format(msg))
