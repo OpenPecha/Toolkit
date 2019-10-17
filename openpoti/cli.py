@@ -267,7 +267,7 @@ def repo_reset(repo, branch_name):
 @click.option('--id', '-i', help='Work ID of poti to be updated')
 def update(**kwargs):
     """
-    Command to update the annotations, must be run making edits to base-text.
+    Command to update the base text with your edits.
     """
     if kwargs['id']:
         if kwargs['id'] in poti_list():
@@ -282,7 +282,7 @@ def update(**kwargs):
 
             is_changed, srcbl, dstbl = check_edits(kwargs['id'])
             if is_changed:
-                msg = f'Updating annotations of Poti {kwargs["id"]}'
+                msg = f'Updating {kwargs["id"]} base text.'
                 click.echo(INFO.format(msg))
 
                 # Update layer annotations
