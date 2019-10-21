@@ -28,6 +28,8 @@ config = {
 ERROR = '[ERROR] {}'
 INFO = '[INFO] {}'
 
+def get_work_id(n):
+    return f'W1OP{int(n):06}'
 
 @click.group()
 def cli():
@@ -124,7 +126,7 @@ def download_poti(poti, out):
 
 # Poti Download command
 @cli.command()
-@click.option('--id', '-i', help='Work ID of poti, for single poti download')
+@click.option('--number', '-n', help='Work number of poti, for single poti download')
 @click.option('--batch', '-b', help="path to text file containg list of names of \
                                      poti in separate line. Poti batch download")
 @click.option('--filter', '-f', help='filter poti by layer availability, specify \
@@ -136,6 +138,7 @@ def download(**kwargs):
     Command to download poti.
     If id and batch options are not provided then it will download all the poti.
     '''
+    work_id = get_work_id(kwargs['number'])
 
     # create config dirs
     create_config_dirs()
@@ -144,7 +147,7 @@ def download(**kwargs):
     config['data'] = Path(kwargs['out']).resolve()
 
     # get poti
-    potis = get_poti(kwargs['id'], kwargs['batch'], kwargs['filter'])
+    potis = get_poti(work_id, kwargs['batch'], kwargs['filter'])
 
     # download the repo
     for poti in tqdm(potis):
@@ -168,7 +171,7 @@ layers_name = ['title', 'tsawa', 'yigchung', 'quotes', 'sapche']
                               help='name of a layer to be applied')
 @click.option('--list', '-l', help='list of name of layers to applied, \
                           name of layers should be comma separated')
-@click.argument('id')
+@click.argument('work_number')
 @click.argument('out', type=click.File('w'))
 def layer(**kwargs):
     """
@@ -177,7 +180,8 @@ def layer(**kwargs):
         - ID is the work-id of the poti, from which given layer will be applied\n
         - OUT is the filename to the write the result. Currently support only Markdown file.
     """
-    opfpath = config["OP_DATA_PATH"]/kwargs["id"]/f'{kwargs["id"]}.opf'
+    work_id = get_work_id(kwargs['work_number'])
+    opfpath = config["OP_DATA_PATH"]/work_id/f'{work_id}.opf'
     serializer = SerializeMd(opfpath)
     if kwargs['name']:
         serializer.apply_layer(kwargs['name'])
@@ -239,7 +243,7 @@ def github_push(repo, branch_name, msg='made edits'):
         try: 
             repo.git.push('--set-upstream', 'origin', current)
         except:
-            msg = f'Authentication failed: Incorrect Username or Password'
+            msg = f'Authentication failed: Try again later'
             click.echo(ERROR.format(msg))
             return False
 
@@ -264,14 +268,15 @@ def repo_reset(repo, branch_name):
 
 # Update annotations command
 @cli.command()
-@click.option('--id', '-i', help='Work ID of poti to be updated')
+@click.option('--number', '-n', help='Work number of poti to be updated')
 def update(**kwargs):
     """
     Command to update the base text with your edits.
     """
-    if kwargs['id']:
-        if kwargs['id'] in poti_list():
-            repo_path = config["OP_DATA_PATH"]/kwargs["id"]
+    work_id = get_work_id(kwargs['number'])
+    if work_id:
+        if work_id in poti_list():
+            repo_path = config["OP_DATA_PATH"]/work_id
             repo = Repo(str(repo_path))
 
             # if edited branch exists, then to check for changes in edited branch
@@ -280,18 +285,18 @@ def update(**kwargs):
                 current = repo.heads[branch_name]
                 current.checkout()
 
-            is_changed, srcbl, dstbl = check_edits(kwargs['id'])
+            is_changed, srcbl, dstbl = check_edits(work_id)
             if is_changed:
-                msg = f'Updating {kwargs["id"]} base text.'
+                msg = f'Updating {work_id} base text.'
                 click.echo(INFO.format(msg))
 
                 # Update layer annotations
                 updater =  Blupdate(srcbl, dstbl)
-                opfpath = repo_path/f'{kwargs["id"]}.opf'
+                opfpath = repo_path/f'{work_id}.opf'
                 updater.update_annotations(opfpath)
 
                 # Update base-text
-                src = get_data_path()/f'{kwargs["id"]}.txt'
+                src = get_data_path()/f'{work_id}.txt'
                 dst = opfpath/'base.txt'
                 shutil.copy(str(src), str(dst))
 
@@ -300,13 +305,13 @@ def update(**kwargs):
 
                 # logging
                 if status:
-                    msg = f'Poti {kwargs["id"]} is uploaded for futher validation'
+                    msg = f'Poti {work_id} is uploaded for futher validation'
                     click.echo(INFO.format(msg))
                 else:
                     repo_reset(repo, branch_name)
             else:
-                msg = f'There is no changes in Poti {kwargs["id"]}'
+                msg = f'There is no changes in Poti {work_id}'
                 click.echo(ERROR.format(msg))
         else:
-            msg = f'{kwargs["id"]} does not exits, check the work-id'
+            msg = f'{work_id} does not exits, check the work-id'
             click.echo(ERROR.format(msg))
