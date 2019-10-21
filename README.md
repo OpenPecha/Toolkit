@@ -21,7 +21,7 @@ Usage: openpoti download [OPTIONS]
   will download all the poti.
 
 Options:
-  -i, --id TEXT      Work ID of poti, for single poti download
+  -n, --number TEXT  Work number of poti, for single poti download
   -b, --batch TEXT   path to text file containg list of names of
                      poti in separate line. Poti batch download
   -f, --filter TEXT  filter poti by layer availability, specify
@@ -33,24 +33,27 @@ Options:
 Automatic updating annotations from source base-text (original) and destination base-text (edited)
 ```
 $ openpoti update --help
-Usage: openpoti update [OPTIONS]
+Usage: openpoti update [OPTIONS] WORK_NUMBER
 
-  Command to update the annotations, must be run making edits to base-text.
+  Command to update the base text with your edits.
 
 Options:
-  -i, --id TEXT  Work ID of poti to be updated
-  --help         Show this message and exit.
+  --help  Show this message and exit.
 ```
 
 Exporting and Extracting layer
 ```
 $ openpoti layer --help 
-Usage: openpoti layer [OPTIONS] OPF_PATH OUT
+Usage: openpoti layer [OPTIONS] WORK_NUMBER OUT
 
-  Command to apply a single layer, multiple layers or all available layers (by default) and then export to markdown.
+  Command to apply a single layer, multiple layers or all available layers
+  (by default) and then export to markdown.
 
   Args:
-      - OPF_PATH is the path to opf directory of poti
+
+      - ID is the work-id of the poti, from which given layer will be
+      applied
+
       - OUT is the filename to the write the result. Currently support only
       Markdown file.
 
