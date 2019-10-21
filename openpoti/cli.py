@@ -268,12 +268,12 @@ def repo_reset(repo, branch_name):
 
 # Update annotations command
 @cli.command()
-@click.option('--number', '-n', help='Work number of poti to be updated')
+@click.argument('work_number')
 def update(**kwargs):
     """
     Command to update the base text with your edits.
     """
-    work_id = get_work_id(kwargs['number'])
+    work_id = get_work_id(kwargs['work_number'])
     if work_id:
         if work_id in poti_list():
             repo_path = config["OP_DATA_PATH"]/work_id
