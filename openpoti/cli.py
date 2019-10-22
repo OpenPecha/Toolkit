@@ -217,17 +217,30 @@ def check_edits(w_id):
     return srcbl != dstbl, srcbl, dstbl
 
 
-def github_push(repo, branch_name, msg='made edits'):
+def setup_credential(repo):
     # setup authentication, if not done
-    if not '@' in repo.remotes.origin.url:
-        
+    if not (config['CONFIG_PATH']/'credential').is_file():
         username = click.prompt('Github Username')
         password = click.prompt('Github Password', hide_input=True)
+        # save credential
+        (config['CONFIG_PATH']/'credential').write_text(f'{username},{password}')
 
+    if not '@' in repo.remotes.origin.url:
+        # get user credentials
+        credential = (config['CONFIG_PATH']/'credential').read_text()
+        username, password = [s.strip() for s in credential.split(',')]
+        
         old_url = repo.remotes.origin.url.split('//')
         repo.remotes.origin.set_url(
             f'{old_url[0]}//{username}:{password}@{old_url[1]}'
         )
+    
+    return repo
+
+
+def github_push(repo, branch_name, msg='made edits'):
+    # credential
+    repo = setup_credential(repo)
 
     # checkout to edited branch
     if branch_name in repo.heads:
@@ -242,7 +255,8 @@ def github_push(repo, branch_name, msg='made edits'):
         repo.git.commit(m=msg)
         try: 
             repo.git.push('--set-upstream', 'origin', current)
-        except:
+        except Exception as e:
+            print(e)
             msg = f'Authentication failed: Try again later'
             click.echo(ERROR.format(msg))
             return False
