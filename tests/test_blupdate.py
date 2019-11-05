@@ -4,7 +4,7 @@ import shutil
 import pytest
 import yaml
 
-from openpoti.blupdate import Blupdate
+from openpecha.blupdate import Blupdate
 
 
 @pytest.fixture(params=[{'srcbl': 'abefghijkl', 'dstbl': 'abcdefgkl'}])  

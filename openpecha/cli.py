@@ -8,14 +8,14 @@ from github import Github
 from git import Repo
 from tqdm import tqdm
 
-from openpoti.serializemd import SerializeMd
-from openpoti.blupdate import Blupdate
+from openpecha.serializemd import SerializeMd
+from openpecha.blupdate import Blupdate
 
 
-OP_PATH = Path('./.openpoti')
+OP_PATH = Path('./.openpecha')
 config = {
     # Github
-    'OP_CATALOG_URL': 'https://raw.githubusercontent.com/OpenPoti/openpoti-catalog/master/data/catalog.csv',
+    'OP_CATALOG_URL': 'https://raw.githubusercontent.com/OpenPoti/openpecha-catalog/master/data/catalog.csv',
     'OP_ORG': 'https://github.com/OpenPoti',
 
     # Local
@@ -55,7 +55,7 @@ def get_poti(id, batch_path, layers):
                 else:
                     poti_list.append(id)
             else:
-                msg = f'{id} not found in OpenPoti catalog'
+                msg = f'{id} not found in OpenPecha catalog'
                 click.echo(ERROR.format(msg))
 
     def _get_batch(batch_path):
@@ -126,13 +126,13 @@ def download_poti(poti, out):
 
 # Poti Download command
 @cli.command()
-@click.option('--number', '-n', help='Work number of poti, for single poti download')
+@click.option('--number', '-n', help='Work number of pecha, for single pecha download')
 @click.option('--batch', '-b', help="path to text file containg list of names of \
-                                     poti in separate line. Poti batch download")
-@click.option('--filter', '-f', help='filter poti by layer availability, specify \
+                                     pecha in separate line. Poti batch download")
+@click.option('--filter', '-f', help='filter pecha by layer availability, specify \
                                      layer names in comma separated, eg: title,yigchung,..')
-@click.option('--out', '-o', default='./poti',
-                            help='directory to store all the poti')
+@click.option('--out', '-o', default='./pehca',
+                            help='directory to store all the pecha')
 def download(**kwargs):
     '''
     Command to download poti.
@@ -159,7 +159,7 @@ def download(**kwargs):
         config_path.write_text(str(config['data'].resolve()))
 
     # print location of data
-    msg = f'Poti saved at: {Path(kwargs["out"])}'
+    msg = f'Pecha saved at: {Path(kwargs["out"])}'
     click.echo(INFO.format(msg))
 
 
@@ -177,7 +177,7 @@ def layer(**kwargs):
     """
     Command to apply a single layer, multiple layers or all available layers (by default) and then export to markdown.\n
     Args:\n
-        - ID is the work-id of the poti, from which given layer will be applied\n
+        - WORK_NUMBER is the work number of the pecha, from which given layer will be applied\n
         - OUT is the filename to the write the result. Currently support only Markdown file.
     """
     work_id = get_work_id(kwargs['work_number'])
@@ -319,12 +319,12 @@ def update(**kwargs):
 
                 # logging
                 if status:
-                    msg = f'Poti {work_id} is uploaded for futher validation'
+                    msg = f'Pecha edits {work_id} are uploaded for futher validation'
                     click.echo(INFO.format(msg))
                 else:
                     repo_reset(repo, branch_name)
             else:
-                msg = f'There is no changes in Poti {work_id}'
+                msg = f'There are no changes in Pecha {work_id}'
                 click.echo(ERROR.format(msg))
         else:
             msg = f'{work_id} does not exits, check the work-id'

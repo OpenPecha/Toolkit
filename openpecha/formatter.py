@@ -5,7 +5,7 @@ import yaml
 
 class OPFormatter:
     '''
-    OpenPoti Formatter class to parse annotated text into openpoti format.
+    OpenPoti Formatter class to parse annotated text into openpecha format.
 
     Example of OpenPoti format
     ==========================

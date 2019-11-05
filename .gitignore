@@ -1,7 +1,7 @@
 # Environment
 .env/
 .vscode/
-openpoti.egg-info/
+openpecha.egg-info/
 .pytest_cache/
 
 # data

@@ -8,14 +8,14 @@ For NLP this toolkit will provide a way to have annoated corpra with minimal err
 
 ## Installation
 ```
-$ pip install openpoti
+$ pip install openpecha
 ```
 
 ## Usage
-Frist we need to download all the poti which are in openpoti format.
+Frist we need to download all the poti which are in openpecha format.
 ```
-$ openpoti download --help
-Usage: openpoti download [OPTIONS]
+$ openpecha download --help
+Usage: openpecha download [OPTIONS]
 
   Command to download poti. If id and batch options are not provided then it
   will download all the poti.
@@ -32,8 +32,8 @@ Options:
 
 Automatic updating annotations from source base-text (original) and destination base-text (edited)
 ```
-$ openpoti update --help
-Usage: openpoti update [OPTIONS] WORK_NUMBER
+$ openpecha update --help
+Usage: openpecha update [OPTIONS] WORK_NUMBER
 
   Command to update the base text with your edits.
 
@@ -43,8 +43,8 @@ Options:
 
 Exporting and Extracting layer
 ```
-$ openpoti layer --help 
-Usage: openpoti layer [OPTIONS] WORK_NUMBER OUT
+$ openpecha layer --help 
+Usage: openpecha layer [OPTIONS] WORK_NUMBER OUT
 
   Command to apply a single layer, multiple layers or all available layers
   (by default) and then export to markdown.
@@ -70,8 +70,8 @@ Options:
 
 ## Developer Installation.
 ```
-$ git clone https://github.com/OpenPoti/openpoti-toolkit.git
-$ cd openpoti-toolkit
+$ git clone https://github.com/OpenPoti/openpecha-toolkit.git
+$ cd openpecha-toolkit
 $ pip install -r requirements.txt
 $ pip install -e .
 ```

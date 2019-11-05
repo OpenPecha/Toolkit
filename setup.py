@@ -8,16 +8,16 @@ def read(fname):
         return f.read()
 
 setup(
-    name="openpoti",
+    name="openpecha",
     version="0.2.4",
     author="Esukhia developers",
     author_email="esukhiadev@gmail.com",
-    description="OpenPoti Toolkit allows state of the art for distributed standoff annotations on moving texts",
+    description="OpenPecha Toolkit allows state of the art for distributed standoff annotations on moving texts",
     long_description=read("README.md"),
     long_description_content_type="text/markdown",
     license="Apache2",
-    url="https://github.com/OpenPoti/openpoti-toolkit",
-    packages=["openpoti"],
+    url="https://github.com/OpenPoti/openpecha-toolkit",
+    packages=["openpecha"],
     install_requires=[
         'Click==7.0',
         'diff-match-patch==20181111',
@@ -30,6 +30,6 @@ setup(
     python_requires=">=3.6",
     tests_require=["pytest"],
     entry_points={
-        "console_scripts": ["openpoti=openpoti.cli:cli"] # command=package.module:function
+        "console_scripts": ["openpecha=openpecha.cli:cli"] # command=package.module:function
     },
 )

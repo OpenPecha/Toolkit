@@ -216,7 +216,7 @@ class OpenPoti:
                     elif c.startswith('='):  # test for titles (to be improved)
                         lyrs['book_title'].append(c)
                 else:
-                    raise ValueError('This should not happen: the file used to create an openpoti is')
+                    raise ValueError('This should not happen: the file used to create an openpecha is')
             else:
                 for k in lyrs.keys():
                     lyrs[k].append(c)

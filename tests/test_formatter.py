@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from openpoti.formatter import OPFormatter
+from openpecha.formatter import OPFormatter
 
 m_text = Path('tests/data/formatter/v2.txt').read_text()
 

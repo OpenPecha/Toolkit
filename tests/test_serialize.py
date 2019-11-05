@@ -2,14 +2,14 @@ from pathlib import Path
 
 import pytest
 
-from openpoti.serialize import Serialize
-from openpoti.serializemd import SerializeMd
+from openpecha.serialize import Serialize
+from openpecha.serializemd import SerializeMd
 
 
 # For testing read_base_layer, add_chars and apply_layer
 @pytest.fixture(scope='module')
 def opf_path():
-    opf_path = './data/W1OP000001/W1OP000001.opf'
+    opf_path = 'tests/data/W1OP000001/W1OP000001.opf'
     return opf_path
 
 # # Test case for get_result on muttiple OpenPoi
@@ -99,7 +99,7 @@ def test_apply_layers(opf_path):
 
 @pytest.fixture(scope='module')
 def get_result_opf_path():
-    opf_path = './data/W1OP000198/W1OP000198.opf'
+    opf_path = 'tests/data/W1OP000198/W1OP000198.opf'
     return opf_path
 
 def test_get_result(get_result_opf_path):
@@ -121,11 +121,11 @@ def test_get_result(get_result_opf_path):
     result_sapche = serializer_sapche.get_result()
     result = Serializer.get_result()
 
-    expected_result_title = Path('data/serialize_test/W1OP000198/title_expected.txt').read_text()
-    expected_result_yigchung = Path('data/serialize_test/W1OP000198/yigchung_expected.txt').read_text()
-    expected_result_quotes = Path('data/serialize_test/W1OP000198/quotes_expected.txt').read_text()
-    expected_result_sapche = Path('data/serialize_test/W1OP000198/sapche_expected.txt').read_text()
-    expected_result = Path('data/serialize_test/W1OP000198/all_expected.txt').read_text()
+    expected_result_title = Path('tests/data/serialize_test/W1OP000198/title_expected.txt').read_text()
+    expected_result_yigchung = Path('tests/data/serialize_test/W1OP000198/yigchung_expected.txt').read_text()
+    expected_result_quotes = Path('tests/data/serialize_test/W1OP000198/quotes_expected.txt').read_text()
+    expected_result_sapche = Path('tests/data/serialize_test/W1OP000198/sapche_expected.txt').read_text()
+    expected_result = Path('tests/data/serialize_test/W1OP000198/all_expected.txt').read_text()
 
     assert result_title == expected_result_title
     assert result_yigchung == expected_result_yigchung
