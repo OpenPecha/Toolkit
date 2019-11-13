@@ -5,7 +5,7 @@ from openpecha.formatters import BaseFormatter
 
 class TsadraFormatter(BaseFormatter):
     '''
-    Formatter for Tsadra DarmaCloud ebooks
+    OpenPecha Formatter for Tsadra DarmaCloud ebooks
     '''
 
     def text_preprocess(self, text):
