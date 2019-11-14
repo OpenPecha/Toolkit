@@ -72,7 +72,7 @@ class BaseFormatter:
         return self.normalizeUni(m_text)
 
 
-    def layers_postprocess(self, layers):
+    def format_layer(self, layers):
         '''
         Post-processing for various layer to easily dump into yaml file. For eg, title annotation has only one char coord, #<title_text>
         yigchung annotations has part of char coord, *<yigchun_text>*.
