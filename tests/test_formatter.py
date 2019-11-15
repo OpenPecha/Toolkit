@@ -1,10 +1,10 @@
 from pathlib import Path
 
 from openpecha.formatters import TsadraFormatter
+from openpecha.formatters import kangyurFormatter
 
 
-
-def test_build_layers():
+def test_tsadra_formatter():
     m_text = Path('tests/data/formatter/tsadra_01.txt').read_text()
     formatter = TsadraFormatter()
 
@@ -25,7 +25,7 @@ def test_build_layers():
 def test_kangyur_formatter():
     m_test = Path('tests/data/formatter/kangyur_01.txt').read_text()
     formatter = kangyurFormatter()
-    
+
     text = formatter.text_preprocess(m_text)
     result = formatter.build_layers(text)
 
