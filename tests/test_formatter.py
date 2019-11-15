@@ -2,9 +2,9 @@ from pathlib import Path
 
 from openpecha.formatter import OPFormatter
 
-m_text = Path('tests/data/formatter/v2.txt').read_text()
 
 def test_build_layers():
+    m_text = Path('tests/data/formatter/tsadra_01.txt').read_text()
     formatter = OPFormatter()
     
     text = formatter.text_preprocess(m_text)
