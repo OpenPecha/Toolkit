@@ -1,11 +1,10 @@
-from collections import defaultdict
 from pathlib import Path
 import yaml
 
 
-class OPFormatter:
+class BaseFormatter:
     '''
-    OpenPoti Formatter class to parse annotated text into openpecha format.
+    OpenPecha Base class Formatter to parse annotated text into openpecha format.
 
     Example of OpenPoti format
     ==========================
@@ -20,11 +19,11 @@ class OPFormatter:
 
     def __init__(self, output_path='./output'):
         self.output_path = Path(output_path)
-        
+
 
     def _build_dirs(self):
         '''
-        Build the necessary directories for OpenPoti format.
+        Build the necessary directories for OpenPecha format.
         '''
         _work_no = self.input_file.stem
 
@@ -33,24 +32,6 @@ class OPFormatter:
         
         self.dirs['opf_path'].mkdir(parents=True, exist_ok=True)
         self.dirs['layers_path'].mkdir(parents=True, exist_ok=True)
-
-    
-    def text_preprocess(self, text):
-        '''
-        This is temporary method to remove all the critic markups and make existing
-        markup consistent.
-        '''
-        # remove critic markup
-        text = text.replace('{++', '')
-        text = text.replace('++}', '')
-
-        # edit the existing markup
-        text = text.replace('###', '#') # book_title to title
-        text = text.replace('##', '#')  # chapter_title to title
-        text = text.replace("**", "`")  # change tsawa markup
-        text = text.replace("~~", '~')  # change quote markup
-
-        return text
 
     
     def normalizeUni(self, strNFC):
@@ -78,6 +59,11 @@ class OPFormatter:
         return strNFC
 
 
+    def text_preprocess(self, text):
+        raise NotImplementedError('Text preprocessing depends on type of text format, \
+                                   should be implemented in sub-class.')
+
+
     def get_input_text(self):
         '''
         Return a preprocess text from given input_file path
@@ -86,62 +72,34 @@ class OPFormatter:
         return self.normalizeUni(m_text)
 
 
-    def layers_postprocess(self, layers):
+    def format_layer(self, layers):
         '''
         Post-processing for various layer to easily dump into yaml file. For eg, title annotation has only one char coord, #<title_text>
         yigchung annotations has part of char coord, *<yigchun_text>*.
         '''
-        for layer, anns in layers.items():
-            out = {}
-            anns = [e-1 if i%2 == 0 else e for i, e in enumerate(anns, start=1)]
-            for i, e in enumerate(range(0, len(anns), 2)):
-                out[i] = anns[e:e+2]
-            layers[layer] = out            
-        return layers
+        raise NotImplementedError('Layers PostProcessing depends on the type of annotations, \
+                                   should be implemented in sub-class.')
 
 
     def build_layers(self, text):
         '''
         Parse all the layers annotation from the given text.
         '''
-        layers = defaultdict(list)
-        i =  0
-        is_title = False
-        for c in text:
-            if c == '#':
-                layers['title'].append(i)
-                is_title = True
-            elif is_title and c == '\n':
-                layers['title'].append(i)
-                is_title = False
-                i += 1
-            elif c == '*':
-                layers['yigchung'].append(i)
-            elif c == '`':
-                layers['tsawa'].append(i)
-            elif c == '~':
-                layers['quotes'].append(i)
-            elif c == '[' or c == ']':
-                layers['sapche'].append(i)
-            else:
-                i += 1
+        raise NotImplementedError('Parsing annotation depends type of annotation in the text, \
+                                  should be implemented in sub-class.')
 
-        return self.layers_postprocess(layers)
 
     def get_base_text(self, m_text):
-        m_text = m_text.replace('#', '')
-        m_text = m_text.replace('*', '')
-        m_text = m_text.replace('`', '')
-        m_text = m_text.replace('~', '')
-        m_text = m_text.replace('[', '')
-        text = m_text.replace(']', '')
-        return text
+        'Retuns text with all annotation removed'
+        raise NotImplementedError('Every type of text have different format for annotation, \
+                                  should be implemented in sub_class.')
 
+    
     def dump(self, data, output_fn):
         with output_fn.open('w') as fn:
             yaml.dump(data, fn, default_flow_style=False)
-            
-        
+
+
     def new_poti(self, input_file):
         self.input_file = Path(input_file)
         self._build_dirs()
@@ -157,8 +115,3 @@ class OPFormatter:
 
         # save base_text
         (self.dirs['opf_path']/'base.txt').write_text(base_text)
-
-
-if __name__ == "__main__":
-    formatter = OPFormatter('usage/new_layer_output')
-    formatter.new_poti('usage/input/W1OP000002.txt')
