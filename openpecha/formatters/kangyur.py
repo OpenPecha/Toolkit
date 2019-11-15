@@ -10,10 +10,10 @@ class kangyurFormatter(BaseFormatter):
     
 
     def format_layer(self, layers):
-        pages = {'id':, 'type': 'page', 'rev': "012123", 'log':, 'content': []}
-        lines = {'id':, 'type': 'line', 'rev': "012123", 'log':, 'content': []}
+        pages = {'id': None, 'type': 'page', 'rev': "012123", 'log': None, 'content': []}
+        lines = {'id': None, 'type': 'line', 'rev': "012123", 'log': None, 'content': []}
 
-        for page, lines in zip(layers['page'], layers['line']):1
+        for page, lines in zip(layers['page'], layers['line']):
             page_id = get_unique_id()
             pages['content'].append({
                 'id': page_id,
@@ -30,7 +30,7 @@ class kangyurFormatter(BaseFormatter):
                         'start_char': line[0], 
                         'end_char': line[1]
                     },
-                    'part_of': f'page/{page_id}'
+                    'part_of': f'page/{page_id}',
                     'part_index': i+1
                 })
 

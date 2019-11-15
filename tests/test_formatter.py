@@ -23,7 +23,7 @@ def test_tsadra_formatter():
         assert result[layer][0] == expected_result[layer]
 
 def test_kangyur_formatter():
-    m_test = Path('tests/data/formatter/kangyur_01.txt').read_text()
+    m_text = Path('tests/data/formatter/kangyur_01.txt').read_text()
     formatter = kangyurFormatter()
 
     text = formatter.text_preprocess(m_text)

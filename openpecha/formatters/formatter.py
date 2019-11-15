@@ -105,7 +105,7 @@ class BaseFormatter:
         self._build_dirs()
 
         m_text = self.get_input_text()
-        layers = self.build_layers(m_text)
+        layers = self.format_layer(self.build_layers(m_text))
         base_text = self.get_base_text(m_text)
 
         # save layers
