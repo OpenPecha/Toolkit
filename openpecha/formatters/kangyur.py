@@ -1,3 +1,5 @@
+from uuid import uuid4
+
 from .formatter import BaseFormatter
 
 class kangyurFormatter(BaseFormatter):
@@ -14,7 +16,7 @@ class kangyurFormatter(BaseFormatter):
         lines = {'id': None, 'type': 'line', 'rev': "012123", 'log': None, 'content': []}
 
         for page, lines in zip(layers['page'], layers['line']):
-            page_id = get_unique_id()
+            page_id = uuid4().hex
             pages['content'].append({
                 'id': page_id,
                 'span': {
@@ -23,7 +25,7 @@ class kangyurFormatter(BaseFormatter):
                 }
             })
             for i, line in enumerate(lines):
-                line_id = get_unique_id()
+                line_id = uuid().hex
                 lines['content'].append({
                     'id': line_id,
                     'span': {
@@ -37,7 +39,6 @@ class kangyurFormatter(BaseFormatter):
         return {'page': pages, 'line': lines}
 
 
-    
     def build_layers(self, text):
         pass
 
