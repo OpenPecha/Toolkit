@@ -41,4 +41,5 @@ def test_kangyur_formatter():
     }
 
     for layer in result:
+        print(result[layer])
         assert result[layer] == expected_result[layer]
