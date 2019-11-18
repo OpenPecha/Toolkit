@@ -2,8 +2,8 @@ from pathlib import Path
 
 import pytest
 
-from openpecha.serialize import Serialize
-from openpecha.serializemd import SerializeMd
+from openpecha.serializers import Serialize
+from openpecha.serializers import SerializeMd
 
 
 # For testing read_base_layer, add_chars and apply_layer
