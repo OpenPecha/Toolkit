@@ -4,6 +4,7 @@ import pytest
 
 from openpecha.serializers import Serialize
 from openpecha.serializers import SerializeMd
+from openpecha.serializers import SerializeHFML
 
 
 # For testing read_base_layer, add_chars and apply_layer
@@ -131,4 +132,17 @@ def test_get_result(get_result_opf_path):
     assert result_yigchung == expected_result_yigchung
     assert result_quotes == expected_result_quotes
     assert result_sapche == expected_result_sapche
+    assert result == expected_result
+
+
+# Test HFML Serializer
+hfml_opf_path = Path('tests/data/serialize_test/hfml/hfml.opf')
+
+def test_hfml_serializer():
+    serializer = SerializeHFML(hfml_opf_path)
+    serializer.apply_layers()
+
+    result = serializer.get_result()
+
+    expected_result = Path('tests/data/serialize_test/hfml/expected.txt').read_text()
     assert result == expected_result

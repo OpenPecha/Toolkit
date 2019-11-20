@@ -7,4 +7,8 @@ class SerializeHFML(Serialize):
     """
 
     def apply_annotation(self, ann):
-        pass
+        if ann.type == 'page':
+            self.add_chars(ann.start_cc-1, True, '[Page]')
+        elif ann.type == 'line':
+            self.add_chars(ann.start_cc, True, '[Line]')
+        
