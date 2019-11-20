@@ -47,10 +47,12 @@ class kangyurFormatter(BaseFormatter):
         lines=[] # list variable to store line annotation according to base string index
         text_id=[] # list variable to store text id annotation according to base string index
         chapter_id=[] # list variable to store chapter id annotation according to base string index
+        error_id=[]
         pat1="\[\w+\]" # regular expression to detect page annotation
         pat2="\[\w+\.\d+\]" # regular expression to detect line annotation
         pat3="\{\w+\}" # regular expression to detect textid annotation
-        pat4="{\w+\-\w+\}" #regular expression to detect chapterID annotation
+        pat4="\{\w+\-\w+\}" #regular expression to detect chapterID annotation
+        pat5="\(\S+\,\S+\)"
         start_page=0 # starting index of page
         end_page=0 # ending index of page
         start_line=0 #starting index of line
@@ -59,6 +61,8 @@ class kangyurFormatter(BaseFormatter):
         end_text=0 # ending index of text_Id
         start_chapter=0 #starting index of chapter_Id
         end_chapter=0 #ending index of chapter_Id
+        start_error=0 #starting index of error
+        end_error=0 #ending index of error
         text_lines=text.splitlines()
         n_line=len(text_lines)
         for idx,line in enumerate(text_lines):
@@ -66,6 +70,7 @@ class kangyurFormatter(BaseFormatter):
                 l1=0 #length of line pattern
                 l2=0 #length of textId pattern
                 l3=0 #length of chapterID pattern
+                l4=0 #length of error pattern
                 if(re.search(pat1,line)):  # checking current line contains page annotation or not
                     start_page=end_page
                     end_page=end_line
@@ -80,8 +85,15 @@ class kangyurFormatter(BaseFormatter):
                     l1=len(x[0])
                     start_line=i
                     length=len(line)
+                    if(re.search(pat5,line)):
+                        s=re.search(pat5,line)
+                        suggestion=s[0].split(',')[1][:-1]
+                        error=s[0].split(',')[0][1:]
+                        start_error=s.start()-1+i
+                        end_error=start_error+len(error)-2
+                        error_id.append((start_error,end_error,suggestion))
+                        l4=len(s[0])-len(error)
                     if(re.search(pat3,line)): #checking current line contain textID annotation or not
-
                         y=re.search(pat3,line)
                         l2=len(y[0])
                         h=y.start()
@@ -89,7 +101,6 @@ class kangyurFormatter(BaseFormatter):
                         end_text=h-6+i
                         if(start_text!=end_text):
                             text_id.append((start_text,end_text))
-                
                     if(re.search(pat4,line)): #checking current line contain chapterID annotation or not
                         z=re.search(pat4,line)
                         l3=len(z[0])
@@ -98,15 +109,15 @@ class kangyurFormatter(BaseFormatter):
                         end_chapter=k-l1-l2+i
                         if(start_chapter!=end_chapter):
                             chapter_id.append((start_chapter,end_chapter))
-                    end_line=length-l1-l2-l3+start_line-1
+                    end_line=length-l1-l2-l3-l4+start_line-1
                     lines.append((start_line,end_line))
                     i=end_line+2
                     if(idx == n_line-1):
                         start_page=end_page
                         start_text=end_text
                         start_chapter=end_chapter
-                        text_id.append((start_text,i))
-                        chapter_id.append((start_chapter,i))
+                        text_id.append((start_text,i-2))
+                        chapter_id.append((start_chapter,i-2))
                         pages.append((start_page,i-2))
                         Line.append(lines)
 
