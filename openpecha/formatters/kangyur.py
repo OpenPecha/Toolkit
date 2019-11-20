@@ -81,7 +81,6 @@ class kangyurFormatter(BaseFormatter):
                     start_line=i
                     length=len(line)
                     if(re.search(pat3,line)): #checking current line contain textID annotation or not
-
                         y=re.search(pat3,line)
                         l2=len(y[0])
                         h=y.start()
@@ -89,7 +88,6 @@ class kangyurFormatter(BaseFormatter):
                         end_text=h-6+i
                         if(start_text!=end_text):
                             text_id.append((start_text,end_text))
-                
                     if(re.search(pat4,line)): #checking current line contain chapterID annotation or not
                         z=re.search(pat4,line)
                         l3=len(z[0])
