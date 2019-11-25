@@ -1,4 +1,5 @@
 import re
+import itertools
 
 from .formatter import BaseFormatter
 
@@ -39,9 +40,42 @@ class kangyurFormatter(BaseFormatter):
         return {'page': pages, 'line': lines}
 
 
+    def total_pattern(self, plist, line):
+
+        tl=0
+        for pp in dict(itertools.islice(plist.items(),1, 4)):
+            if re.search(plist[pp],line):
+                tl=tl+len(re.search(plist[pp],line)[0])
+        if re.search(plist['error_pattern'],line):
+            s=re.search(plist['error_pattern'],line)
+            error=s[0].split(',')[0][1:]
+            tl=tl+(len(s[0])-len(error))
+            
+        if re.search(plist['yigchung_pattern'],line):
+            tl=tl+2
+        if re.search(plist['unreadable_pattern'],line):
+            tl=tl+1
+        return tl
+
+
+    def search_before(self, p, plist, line):
+        ll=0
+        for pp in dict(itertools.islice(plist.items(),1, 4)):
+            if re.search(plist[pp],line) and re.search(p,line).start()>re.search(plist[pp],line).start():
+                ll=ll+len(re.search(plist[pp],line)[0])
+        if re.search(plist['error_pattern'],line) and re.search(p,line).start()>re.search(plist['error_pattern'],line).start():
+            s=re.search(plist['error_pattern'],line)
+            error=s[0].split(',')[0][1:]
+            ll=ll+(len(s[0])-len(error))
+            
+        if re.search(plist['yigchung_pattern'],line) and re.search(p,line).start()>re.search(plist['yigchung_pattern'],line).start():
+            ll=ll+2
+        if re.search(plist['unreadable_pattern'],line) and re.search(p,line).start()>re.search(plist['unreadable_pattern'],line).start():
+            ll=ll+1
+        return ll
     
     def build_layers(self, text):
-
+        
         i = 0  # tracker variable through out the text 
 
         Line = [] # list of lines in a page eg : [[(sl1,el1),(sl2,el2)],[(sl1,el1),(sl2,el2),(sl3,el3)]]
@@ -51,12 +85,12 @@ class kangyurFormatter(BaseFormatter):
         text_id = [] # list variable to store text id annotation according to base string index eg : [(st,et)]
         chapter_id = [] # list variable to store chapter id annotation according to base string index eg : [(sc,ec)]
         error_id = [] # list variable to store error annotation according to base string index eg : [(es,ee,'suggestion')]
+        yigchung_id = [] # list variable to store yigchung annotation 
+        unreadable_id = []
 
-        pat1 = "\[\w+\]" # regular expression to detect page annotation
-        pat2 = "\[\w+\.\d+\]" # regular expression to detect line annotation
-        pat3 = "\{\w+\}" # regular expression to detect textid annotation
-        pat4 = "\{\w+\-\w+\}" #regular expression to detect chapterID annotation
-        pat5 = "\(\S+\,\S+\)" # regular expression to detect error annotation
+        pat_list={ 'page_pattern':'\[[0-9]+[a-z]{1}\]','line_pattern':'\[\w+\.\d+\]','text_pattern':'\{\w+\}',
+                    'chapter_pattern':'\{\w+\-\w+\}','error_pattern':'\(\S+\,\S+\)','yigchung_pattern':'\[[^0-9].*?\]',
+                    'unreadable_pattern':'#'}
 
         start_page = 0 # starting index of page
         end_page = 0 # ending index of page
@@ -68,6 +102,9 @@ class kangyurFormatter(BaseFormatter):
         end_chapter = 0 #ending index of chapter_Id
         start_error = 0 #starting index of error
         end_error = 0 #ending index of error
+        start_yigchung = 0
+        end_yigchung = 0
+        unreadable=0
 
         text_lines = text.splitlines() # list of all the lines in the text
         n_line = len(text_lines) # number of lines in the text 
@@ -76,12 +113,14 @@ class kangyurFormatter(BaseFormatter):
 
                 line = line.strip() 
 
-                l1 = 0 #length of line pattern
-                l2 = 0 #length of textId pattern
-                l3 = 0 #length of chapterID pattern
-                l4 = 0 #length of error pattern
+                l1 = 0 #length of pattern recognised before text annotation
+                l2 = 0 #length of pattern recognised before chapter annotation
+                l3 = 0 #length of pattern recognised before error annotation
+                l4 = 0 #length of pattern recognised before yigchung annotation
+                l5 = 0 #length of pattern recognised before unreadable annotation
+                l6 = 0 #length of pattern recognised in a line
 
-                if re.search(pat1, line):  # checking current line contains page annotation or not
+                if re.search(pat_list['page_pattern'], line):  # checking current line contains page annotation or not
                     start_page = end_page
                     end_page = end_line
 
@@ -91,33 +130,31 @@ class kangyurFormatter(BaseFormatter):
                         i = i+1  # To accumulate the \n character 
                         end_page = end_page+3
                         lines = []
-
-                elif re.search(pat2, line): #checking current line contains line annotation or not
-                    x = re.search(pat2, line)
-                    l1 = len(x[0])
+                elif re.search(pat_list['line_pattern'], line): #checking current line contains line annotation or not
+                    #x = re.search(pat2, line)
                     start_line = i
                     length = len(line)
 
-                    if re.search(pat3, line): #checking current line contain textID annotation or not
-                        y = re.search(pat3, line)
-                        l2 = len(y[0])
+                    if re.search(pat_list['text_pattern'], line): #checking current line contain textID annotation or not
+                        y = re.search(pat_list['text_pattern'], line)
+                        l1=self.search_before(pat_list['text_pattern'],pat_list,line)
                         h = y.start()
                         start_text = end_text
-                        end_text = h-6+i
+                        end_text = h+i-l1
 
                         if start_text != end_text:
                             text_id.append((start_text, end_text))
                             chapter.append(chapter_id[1:])
                             chapter_id = []
 
-                    if re.search(pat4, line): #checking current line contain chapterID annotation or not
-                        z = re.search(pat4, line)
-                        l3 = len(z[0])
+                    if re.search(pat_list['chapter_pattern'], line): #checking current line contain chapterID annotation or not
+                        z = re.search(pat_list['chapter_pattern'], line)
+                        #l3 = len(z[0])
                         k = z.start()
-
+                        l2=self.search_before(pat_list['chapter_pattern'],pat_list,line)
                         if start_chapter  == 0:
                             start_chapter = end_chapter
-                            end_chapter = k-l1-l2+i-1
+                            end_chapter = k+i-l2-1
 
                             if start_chapter != end_chapter:
                                 chapter_id.append((start_chapter, end_chapter))
@@ -125,25 +162,44 @@ class kangyurFormatter(BaseFormatter):
 
                         else:
                             start_chapter = end_chapter
-                            end_chapter = k-l1-l2+i-2
+                            end_chapter = k+i-l2-2
 
                             if start_chapter != end_chapter:
                                 chapter_id.append((start_chapter, end_chapter))
                                 end_chapter = end_chapter+1
-
-                    if re.search(pat5, line):   # checking current line contain error annotation or not
-                        s = re.search(pat5, line)
+                    
+                    if re.search(pat_list['error_pattern'], line):   # checking current line contain error annotation or not
+                        s = re.search(pat_list['error_pattern'], line)
                         suggestion = s[0].split(',')[1][:-1] # extracting the suggestion component
                         error = s[0].split(',')[0][1:]       # extracting the error component
-                        start_error = s.start()+i-l1-l2-l3
+                        l3=self.search_before(pat_list['error_pattern'],pat_list,line)
+                        start_error = s.start()+i-l3
+
                         end_error = start_error+len(error)-1
                         error_id.append((start_error, end_error, suggestion))
-                        l4 = len(s[0])-len(error)             # finding the length of recognised pattern excluding the error
-                    
-                    end_line = length-l1-l2-l3-l4+start_line-1
+                        
+
+                    if re.search(pat_list['yigchung_pattern'], line):
+                        yig=re.search(pat_list['yigchung_pattern'],line)
+                        l4=self.search_before(pat_list['yigchung_pattern'],pat_list,line)
+                        start_yigchung = yig.start()+i-l4
+                        
+                        end_yigchung = start_yigchung + len(yig[0])-3
+                        yigchung_id.append((start_yigchung,end_yigchung))
+                        
+
+                    if re.search(pat_list['unreadable_pattern'], line):
+                        ur=re.search(pat_list['unreadable_pattern'],line)
+                        l5=self.search_before(pat_list['unreadable_pattern'],pat_list,line)
+                        unreadable=ur.start()+i-l5
+                        unreadable_id.append(unreadable)
+                        
+
+                    l6=self.total_pattern(pat_list,line)
+                    end_line = start_line+length-l6-1
                     lines.append((start_line, end_line))
                     i = end_line+2
-                    
+
                     if idx   ==  n_line-1:  # Last line case
                         start_page = end_page
                         start_text = end_text
@@ -154,8 +210,10 @@ class kangyurFormatter(BaseFormatter):
                         Line.append(lines)
                         chapter.append(chapter_id[1:])
 
-        return {'page': pages, 'line': Line ,'text':text_id[1:],'sub_text':chapter[1:],'error':error_id}
+        return {'page': pages, 'line': Line ,'text':text_id[1:],'sub_text':chapter[1:],'error':error_id,'yigchung':yigchung_id,'unreadable':unreadable_id}
 
 
     def get_base_text(self, m_text):
         pass
+
+
