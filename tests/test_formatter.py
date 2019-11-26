@@ -40,7 +40,8 @@ class TestGoogleOCRFormatter:
     
     def test_get_base_text(self, get_resources):
         formatter, opf_path, responses = get_resources
-
+        formatter.build_layers(responses)
+        
         result = formatter.get_base_text(responses)
 
         expected = (opf_path/'bases/v001.txt').read_text()

@@ -13,6 +13,7 @@ class GoogleOCRFormatter(BaseFormatter):
         super().__init__(output_path=output_path)
         self.n_page_breaker_char = 3
         self.page_break = '\n' * self.n_page_breaker_char
+        self.base_text = []
 
 
     def text_preprocess(self, text):
@@ -89,6 +90,7 @@ class GoogleOCRFormatter(BaseFormatter):
         img_char_coord = []
         last_pg_end_idx = 0
         for n_pg, response in enumerate(responses):
+            # extract annotation
             text, page_coord = self.__get_page(response)
             lines, last_pg_end_idx = self.__get_lines(text, last_pg_end_idx, n_pg == 0)
             page_lines.append(lines)
@@ -96,6 +98,8 @@ class GoogleOCRFormatter(BaseFormatter):
             img_urls.append(response['image_url'])
             img_char_coord.append(self.__get_symbols(response))
 
+            # create base_text
+            self.base_text.append(text)
 
         result = {
             'page': pages,
@@ -108,9 +112,5 @@ class GoogleOCRFormatter(BaseFormatter):
 
     
     def get_base_text(self, responses):
-        base_text = []
-        for response in responses:
-            text, _ = self.__get_page(response)
-            base_text.append(text)
         
-        return f'{self.page_break}'.join(base_text)
+        return f'{self.page_break}'.join(self.base_text)
