@@ -21,11 +21,11 @@ class BaseFormatter:
         self.output_path = Path(output_path)
 
 
-    def _build_dirs(self, input_fn):
+    def _build_dirs(self, input_path):
         '''
         Build the necessary directories for OpenPecha format.
         '''
-        _work_no = input_file.stem
+        _work_no = input_path.stem
 
         self.dirs = {'opf_path': self.output_path/f'{_work_no}/{_work_no}.opf'}
         self.dirs['layers_path'] = self.dirs['opf_path']/'layers'
@@ -64,11 +64,11 @@ class BaseFormatter:
                                    should be implemented in sub-class.')
 
 
-    def get_input_text(self, input_fn):
+    def get_input(self, input_path):
         '''
         Return a preprocess text from given input_file path
         '''
-        m_text = self.text_preprocess(input_fn.read_text())
+        m_text = self.text_preprocess(input_path.read_text())
         return self.normalizeUni(m_text)
 
 
@@ -100,11 +100,11 @@ class BaseFormatter:
             yaml.dump(data, fn, default_flow_style=False)
 
 
-    def new_poti(self, input_fn):
-        input_fn = Path(input_fn)
-        self._build_dirs(input_fn)
+    def new_poti(self, input_path):
+        input_path = Path(input_path)
+        self._build_dirs(input_path)
 
-        m_text = self.get_input_text(input_fn)
+        m_text = self.get_input(input_path)
         layers = self.build_layers(m_text)
         base_text = self.get_base_text(m_text)
 
