@@ -40,38 +40,55 @@ class kangyurFormatter(BaseFormatter):
         return {'page': pages, 'line': lines}
 
 
-    def total_pattern(self, plist, line):
-
+    def total_pattern(self,plist,line):
         tl=0
         for pp in dict(itertools.islice(plist.items(),1, 4)):
             if re.search(plist[pp],line):
-                tl=tl+len(re.search(plist[pp],line)[0])
+                t=re.finditer(plist[pp],line)
+                for i in t:
+                    tl=tl+len(i[0])
         if re.search(plist['error_pattern'],line):
-            s=re.search(plist['error_pattern'],line)
-            error=s[0].split(',')[0][1:]
-            tl=tl+(len(s[0])-len(error))
+            t1=re.finditer(plist['error_pattern'],line)
+            for s in t1:
+                error=s[0].split(',')[0][1:]
+                tl=tl+(len(s[0])-len(error))
             
         if re.search(plist['yigchung_pattern'],line):
-            tl=tl+2
+            t2=re.finditer(plist['yigchung_pattern'],line)
+            for k in t2:
+                tl=tl+2
         if re.search(plist['unreadable_pattern'],line):
-            tl=tl+1
+            t3=re.finditer(plist['unreadable_pattern'],line)
+            for l in t3:
+                tl=tl+1
         return tl
 
-
-    def search_before(self, p, plist, line):
+    #
+    def search_before(self,p,plist,line):
         ll=0
         for pp in dict(itertools.islice(plist.items(),1, 4)):
-            if re.search(plist[pp],line) and re.search(p,line).start()>re.search(plist[pp],line).start():
-                ll=ll+len(re.search(plist[pp],line)[0])
-        if re.search(plist['error_pattern'],line) and re.search(p,line).start()>re.search(plist['error_pattern'],line).start():
-            s=re.search(plist['error_pattern'],line)
-            error=s[0].split(',')[0][1:]
-            ll=ll+(len(s[0])-len(error))
+            if re.search(plist[pp],line):
+                t=re.finditer(plist[pp],line)
+                for i in t:
+                    if p.start()>i.start():
+                        ll=ll+len(i[0])
+        if re.search(plist['error_pattern'],line):
+            t1=re.finditer(plist['error_pattern'],line)
+            for s in t1:
+                if p.start()>s.start():
+                    error=s[0].split(',')[0][1:]
+                    ll=ll+(len(s[0])-len(error))
             
-        if re.search(plist['yigchung_pattern'],line) and re.search(p,line).start()>re.search(plist['yigchung_pattern'],line).start():
-            ll=ll+2
-        if re.search(plist['unreadable_pattern'],line) and re.search(p,line).start()>re.search(plist['unreadable_pattern'],line).start():
-            ll=ll+1
+        if re.search(plist['yigchung_pattern'],line):
+            t2=re.finditer(plist['yigchung_pattern'],line)
+            for j in t2:
+                if p.start()>j.start():
+                    ll=ll+2
+        if re.search(plist['unreadable_pattern'],line):
+            t3=re.finditer(plist['unreadable_pattern'],line)
+            for k in t3:
+                if p.start()>k.start():
+                    ll=ll+1
         return ll
     
     def build_layers(self, text):
@@ -137,7 +154,7 @@ class kangyurFormatter(BaseFormatter):
 
                     if re.search(pat_list['text_pattern'], line): #checking current line contain textID annotation or not
                         y = re.search(pat_list['text_pattern'], line)
-                        l1=self.search_before(pat_list['text_pattern'],pat_list,line)
+                        l1=self.search_before(y,pat_list,line)
                         h = y.start()
                         start_text = end_text
                         end_text = h+i-l1
@@ -151,7 +168,7 @@ class kangyurFormatter(BaseFormatter):
                         z = re.search(pat_list['chapter_pattern'], line)
                         #l3 = len(z[0])
                         k = z.start()
-                        l2=self.search_before(pat_list['chapter_pattern'],pat_list,line)
+                        l2=self.search_before(z,pat_list,line)
                         if start_chapter  == 0:
                             start_chapter = end_chapter
                             end_chapter = k+i-l2-1
@@ -169,30 +186,33 @@ class kangyurFormatter(BaseFormatter):
                                 end_chapter = end_chapter+1
                     
                     if re.search(pat_list['error_pattern'], line):   # checking current line contain error annotation or not
-                        s = re.search(pat_list['error_pattern'], line)
-                        suggestion = s[0].split(',')[1][:-1] # extracting the suggestion component
-                        error = s[0].split(',')[0][1:]       # extracting the error component
-                        l3=self.search_before(pat_list['error_pattern'],pat_list,line)
-                        start_error = s.start()+i-l3
+                        t=re.finditer(pat_list['error_pattern'],line)
+                        for s in t:
+                            suggestion = s[0].split(',')[1][:-1] # extracting the suggestion component
+                            error = s[0].split(',')[0][1:]       # extracting the error component
+                            l3=self.search_before(s,pat_list,line)
+                            start_error = s.start()+i-l3
 
-                        end_error = start_error+len(error)-1
-                        error_id.append((start_error, end_error, suggestion))
-                        
+                            end_error = start_error+len(error)-1
+                            error_id.append((start_error, end_error, suggestion))
+                            #l4 = len(s[0])-len(error)             # finding the length of recognised pattern excluding the error
 
                     if re.search(pat_list['yigchung_pattern'], line):
-                        yig=re.search(pat_list['yigchung_pattern'],line)
-                        l4=self.search_before(pat_list['yigchung_pattern'],pat_list,line)
-                        start_yigchung = yig.start()+i-l4
+                        t1=re.finditer(pat_list['yigchung_pattern'],line)
+                        for j in t1:
+                            l4=self.search_before(j,pat_list,line)
+                            start_yigchung = j.start()+i-l4
                         
-                        end_yigchung = start_yigchung + len(yig[0])-3
-                        yigchung_id.append((start_yigchung,end_yigchung))
-                        
+                            end_yigchung = start_yigchung + len(j[0])-3
+                            yigchung_id.append((start_yigchung,end_yigchung))
+                            #l5 = 2
 
                     if re.search(pat_list['unreadable_pattern'], line):
-                        ur=re.search(pat_list['unreadable_pattern'],line)
-                        l5=self.search_before(pat_list['unreadable_pattern'],pat_list,line)
-                        unreadable=ur.start()+i-l5
-                        unreadable_id.append(unreadable)
+                        t2=re.finditer(pat_list['unreadable_pattern'],line)
+                        for k in t2:
+                            l5=self.search_before(k,pat_list,line)
+                            unreadable=k.start()+i-l5
+                            unreadable_id.append(unreadable)
                         
 
                     l6=self.total_pattern(pat_list,line)
