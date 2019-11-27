@@ -46,3 +46,15 @@ def test_kangyur_formatter():
     for layer in result:
         print(result[layer])
         assert result[layer] == expected_result[layer]
+
+def test_kangyur_get_base_text():
+    m_text = Path('tests/data/formatter/kangyur_01.txt').read_text()
+    formatter = kangyurFormatter()
+
+    text = formatter.text_preprocess(m_text)
+    formatter.build_layers(text)
+    result = formatter.get_base_text()
+
+    expected = Path('tests/data/formatter/kangyur_base.txt').read_text()
+
+    assert result == expected

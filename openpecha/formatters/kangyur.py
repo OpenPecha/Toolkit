@@ -8,6 +8,11 @@ class kangyurFormatter(BaseFormatter):
     OpenPecha Formatter for digitized wooden-printed Pecha based on annotation scheme from Esukhia.
     '''
 
+    def __init__(self, output_path='./output'):
+        super().__init__(output_path=output_path)
+        self.base_text = ''
+
+
     def text_preprocess(self, text):
         return text
     
@@ -40,7 +45,7 @@ class kangyurFormatter(BaseFormatter):
         return {'page': pages, 'line': lines}
 
 
-    def total_pattern(self,plist,line):
+    def total_pattern(self, plist, line): # returns the total length of annotation detected in a line
         tl=0
         for pp in dict(itertools.islice(plist.items(),1, 4)):
             if re.search(plist[pp],line):
@@ -63,8 +68,8 @@ class kangyurFormatter(BaseFormatter):
                 tl=tl+1
         return tl
 
-    #
-    def search_before(self,p,plist,line):
+
+    def search_before(self, p, plist, line): # returns the length of annotation detected in a line before the p annotation
         ll=0
         for pp in dict(itertools.islice(plist.items(),1, 4)):
             if re.search(plist[pp],line):
@@ -90,8 +95,26 @@ class kangyurFormatter(BaseFormatter):
                 if p.start()>k.start():
                     ll=ll+1
         return ll
+
+    def base_extract(self, plist, line): # Extract the base text from the given line
+        t = line
+        for p in dict(itertools.islice(plist.items(),1, 4)):
+            t = re.sub(plist[p], '', t)
+        if re.search(plist['error_pattern'], line):
+            t1 = re.finditer(plist['error_pattern'], line)
+            for s in t1:
+                error = s[0].split(',')[0][1:]
+                t = re.sub(plist['error_pattern'], error, t, 1)
+            
+        if re.search(plist['yigchung_pattern'], line):
+            t2 = re.finditer(plist['yigchung_pattern'], line)
+            for k in t2:
+                t = re.sub(plist['yigchung_pattern'], k[0][1:-1], t, 1)
+        if re.search(plist['unreadable_pattern'], line):
+            t = re.sub(plist['unreadable_pattern'], '', t)
+        return t
     
-    def build_layers(self, text):
+    def build_layers(self, m_text):
         
         i = 0  # tracker variable through out the text 
 
@@ -103,7 +126,7 @@ class kangyurFormatter(BaseFormatter):
         chapter_id = [] # list variable to store chapter id annotation according to base string index eg : [(sc,ec)]
         error_id = [] # list variable to store error annotation according to base string index eg : [(es,ee,'suggestion')]
         yigchung_id = [] # list variable to store yigchung annotation 
-        unreadable_id = []
+        unreadable_id = [] # list variable to store unreadable annotation '#"
 
         pat_list={ 'page_pattern':'\[[0-9]+[a-z]{1}\]','line_pattern':'\[\w+\.\d+\]','text_pattern':'\{\w+\}',
                     'chapter_pattern':'\{\w+\-\w+\}','error_pattern':'\(\S+\,\S+\)','yigchung_pattern':'\[[^0-9].*?\]',
@@ -119,11 +142,11 @@ class kangyurFormatter(BaseFormatter):
         end_chapter = 0 #ending index of chapter_Id
         start_error = 0 #starting index of error
         end_error = 0 #ending index of error
-        start_yigchung = 0
-        end_yigchung = 0
-        unreadable=0
+        start_yigchung = 0 #starting index of yigchung
+        end_yigchung = 0 #ending index of yigchung
+        unreadable=0 #index of unreadable 
 
-        text_lines = text.splitlines() # list of all the lines in the text
+        text_lines = m_text.splitlines() # list of all the lines in the text
         n_line = len(text_lines) # number of lines in the text 
 
         for idx, line in enumerate(text_lines):
@@ -147,6 +170,7 @@ class kangyurFormatter(BaseFormatter):
                         i = i+1  # To accumulate the \n character 
                         end_page = end_page+3
                         lines = []
+                        self.base_text = self.base_text + '\n'
                 elif re.search(pat_list['line_pattern'], line): #checking current line contains line annotation or not
                     #x = re.search(pat2, line)
                     start_line = i
@@ -218,7 +242,10 @@ class kangyurFormatter(BaseFormatter):
                     l6=self.total_pattern(pat_list,line)
                     end_line = start_line+length-l6-1
                     lines.append((start_line, end_line))
-                    i = end_line+2
+                    i = end_line + 2
+                    temp = self.base_extract(pat_list, line) + '\n'
+                    self.base_text = self.base_text + temp
+                    temp = ''
 
                     if idx   ==  n_line-1:  # Last line case
                         start_page = end_page
@@ -230,10 +257,21 @@ class kangyurFormatter(BaseFormatter):
                         Line.append(lines)
                         chapter.append(chapter_id[1:])
 
-        return {'page': pages, 'line': Line ,'text':text_id[1:],'sub_text':chapter[1:],'error':error_id,'yigchung':yigchung_id,'unreadable':unreadable_id}
+        result = {
+            'page': pages,
+            'line': Line ,
+            'text':text_id[1:],
+            'sub_text':chapter[1:],
+            'error':error_id,
+            'yigchung':yigchung_id,
+            'unreadable':unreadable_id
+        }
+
+        return result
 
 
-    def get_base_text(self, m_text):
-        pass
+    def get_base_text(self):
+        
+        return self.base_text.strip()
 
 
