@@ -136,7 +136,7 @@ class GoogleOCRFormatter(BaseFormatter):
             lines, last_pg_end_idx = self.__get_lines(text, last_pg_end_idx, n_pg == 0)
             page_lines.append(lines)
             pages.append((lines[0][0], lines[-1][1], page_coord))
-            img_urls.append(response['image_url'])
+            img_urls.append(response['image_link'])
             # img_char_coord.append(self.__get_symbols(response))
 
             # create base_text
