@@ -169,6 +169,7 @@ class GoogleOCRFormatter(BaseFormatter):
         (self.dirs['opf_path']/'bases').mkdir(exist_ok=True)
 
         for i, vol_path in enumerate(sorted(input_path.iterdir())):
+            print(f'[INFO] Processing Vol {vol_path.name} ...')
             base_id = f'v{i+1:04}'
             responses = self.get_input(vol_path/'resources')
             layers = self.build_layers(responses)
