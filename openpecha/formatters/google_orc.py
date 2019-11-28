@@ -163,9 +163,9 @@ class GoogleOCRFormatter(BaseFormatter):
         self._build_dirs(input_path)
         (self.dirs['opf_path']/'bases').mkdir(exist_ok=True)
 
-        for i, vol_path in enumerate(sorted((input_path/'resources').iterdir())):
+        for i, vol_path in enumerate(sorted(input_path.iterdir())):
             base_id = f'v{i+1:04}'
-            responses = self.get_input(vol_path)
+            responses = self.get_input(vol_path/'resources')
             layers = self.build_layers(responses)
             formatted_layers = self.format_layer(layers, base_id)
             base_text = self.get_base_text()
