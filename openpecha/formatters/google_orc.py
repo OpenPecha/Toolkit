@@ -37,7 +37,10 @@ class GoogleOCRFormatter(BaseFormatter):
         load and return all jsons in the input_path.
         '''
         for fn in sorted(list(input_path.iterdir())):
-            yield json.load(fn.open())
+            try: 
+                yield json.load(fn.open())
+            except:
+                return None
          
         
     def format_layer(self, layers, base_id):
@@ -136,6 +139,9 @@ class GoogleOCRFormatter(BaseFormatter):
         last_pg_end_idx = 0
         for n_pg, response in enumerate(responses):
             # extract annotation
+            if not response
+                print(f'[ERROR] Failed : {n_pg+1}')
+                continue
             text, page_coord = self.__get_page(response)
             if not text: continue # skip empty page
             lines, last_pg_end_idx = self.__get_lines(text, last_pg_end_idx, n_pg == 0)
@@ -169,7 +175,7 @@ class GoogleOCRFormatter(BaseFormatter):
         (self.dirs['opf_path']/'bases').mkdir(exist_ok=True)
 
         for i, vol_path in enumerate(sorted(input_path.iterdir())):
-            print(f'[INFO] Processing Vol {vol_path.name} ...')
+            print(f'[INFO] Processing Vol {i+1:04} : {vol_path.name} ...')
             base_id = f'v{i+1:04}'
             if (self.dirs['opf_path']/'bases'/f'{base_id}.txt').is_file(): continue
             responses = self.get_input(vol_path/'resources')
