@@ -83,7 +83,11 @@ class GoogleOCRFormatter(BaseFormatter):
 
 
     def __get_page(self, response):
-        page = response['textAnnotations'][0]
+        try:
+            page = response['textAnnotations'][0]
+        except KeyError:
+            return None, None
+        
         text = page['description']
         # vertices = page['boundingPoly']['vertices']  # get text box
         
@@ -133,6 +137,7 @@ class GoogleOCRFormatter(BaseFormatter):
         for n_pg, response in enumerate(responses):
             # extract annotation
             text, page_coord = self.__get_page(response)
+            if not text: continue # skip empty page
             lines, last_pg_end_idx = self.__get_lines(text, last_pg_end_idx, n_pg == 0)
             page_lines.append(lines)
             pages.append((lines[0][0], lines[-1][1], page_coord))
