@@ -139,7 +139,7 @@ class GoogleOCRFormatter(BaseFormatter):
         last_pg_end_idx = 0
         for n_pg, response in enumerate(responses):
             # extract annotation
-            if not response
+            if not response:
                 print(f'[ERROR] Failed : {n_pg+1}')
                 continue
             text, page_coord = self.__get_page(response)
