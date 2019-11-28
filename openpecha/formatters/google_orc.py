@@ -40,7 +40,7 @@ class GoogleOCRFormatter(BaseFormatter):
             try: 
                 yield json.load(fn.open())
             except:
-                return None
+                yield None
          
         
     def format_layer(self, layers, base_id):
