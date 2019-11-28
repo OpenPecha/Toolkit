@@ -10,6 +10,7 @@ from tqdm import tqdm
 
 from openpecha.serializemd import SerializeMd
 from openpecha.blupdate import Blupdate
+from openpecha.formatters import GoogleOCRFormatter
 
 
 OP_PATH = Path('./.openpecha')
@@ -329,3 +330,19 @@ def update(**kwargs):
         else:
             msg = f'{work_id} does not exits, check the work-id'
             click.echo(ERROR.format(msg))
+
+
+# OpenPecha Formatter
+formatter_types = ['ocr', 'hfml']
+
+@cli.command()
+@click.option('--name', '-n', type=click.Choice(formatter_types),
+                              help='Type of formatter')
+@click.argument('input_path')
+def formatter(**kwargs):
+    '''
+    Cammand to format pecha into opf
+    '''
+    if kwargs['name'] == 'ocr':
+        formatter = GoogleOCRFormatter()
+        formatter.new_poti(kwargs['input_path'])

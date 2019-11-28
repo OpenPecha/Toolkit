@@ -1,4 +1,5 @@
 from pathlib import Path
+from uuid import uuid4
 import yaml
 
 
@@ -19,6 +20,10 @@ class BaseFormatter:
 
     def __init__(self, output_path='./output'):
         self.output_path = Path(output_path)
+
+
+    def get_unique_id(self):
+        return uuid4().hex
 
 
     def _build_dirs(self, input_path):
@@ -97,7 +102,7 @@ class BaseFormatter:
     
     def dump(self, data, output_fn):
         with output_fn.open('w') as fn:
-            yaml.dump(data, fn, default_flow_style=False)
+            yaml.dump(data, fn, default_flow_style=False,  sort_keys=False)
 
 
     def new_poti(self, input_path):

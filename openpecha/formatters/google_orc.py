@@ -1,4 +1,5 @@
 import json
+from pathlib import Path
 import re
 import yaml
 
@@ -10,7 +11,7 @@ PAGINATION = {
     'id': None,
     'annotation_type': "pagination",
     'rev': None,
-    'content', []
+    'content': []
 }
 
 
@@ -41,21 +42,23 @@ class GoogleOCRFormatter(BaseFormatter):
         
     def format_layer(self, layers, base_id):
         pagination = PAGINATION.copy()
+        pagination['id'] = self.get_unique_id()
+        pagination['rev'] = f'{1:05}'
         for i, (page, lines, pg_img_url) in enumerate(zip(layers['page'], layers['line'], layers['img_url'])):
-            page_id = get_unique_id()
+            page_id = self.get_unique_id()
             pagination['content'].append({
                 'id': page_id,
-                'type': 'page'
+                'type': 'page',
                 'span': {'start_char': page[0], 'end_char': page[1]},
                 'part_of': f'bases/{base_id}',
                 'part_index': i+1,
                 'pg_img_ref': pg_img_url
             })
             for i, line in enumerate(lines):
-                line_id = get_unique_id()
+                line_id = self.get_unique_id()
                 pagination['content'].append({
                     'id': line_id,
-                    'type': 'line'
+                    'type': 'line',
                     'span': {
                         'start_char': line[0],
                         'end_char': line[1]
@@ -149,8 +152,10 @@ class GoogleOCRFormatter(BaseFormatter):
 
     
     def get_base_text(self):
-        
-        return f'{self.page_break}'.join(self.base_text)
+        base_text = f'{self.page_break}'.join(self.base_text)
+        self.base_text = []
+
+        return base_text 
 
 
     def new_poti(self,  input_path):
@@ -158,11 +163,11 @@ class GoogleOCRFormatter(BaseFormatter):
         self._build_dirs(input_path)
         (self.dirs['opf_path']/'bases').mkdir(exist_ok=True)
 
-        for i, vol_path in enumerate(sorted(input_path.iterdir())):
+        for i, vol_path in enumerate(sorted((input_path/'resources').iterdir())):
             base_id = f'v{i+1:04}'
-            responses = self.get_input(vol_path/'resources')
+            responses = self.get_input(vol_path)
             layers = self.build_layers(responses)
-            formatted_layers = self.format_layer(layer, base_id)
+            formatted_layers = self.format_layer(layers, base_id)
             base_text = self.get_base_text()
 
             # save base_text
@@ -171,6 +176,6 @@ class GoogleOCRFormatter(BaseFormatter):
             # save layers
             vol_layer_path = self.dirs['layers_path']/base_id
             vol_layer_path.mkdir(exist_ok=True)
-            for layer, ann in layers.item():
+            for layer, ann in formatted_layers.items():
                 layer_fn = vol_layer_path/f'{layer}.yml'
                 self.dump(ann, layer_fn)
