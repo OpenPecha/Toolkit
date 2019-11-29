@@ -32,24 +32,24 @@ class TestGoogleOCRFormatter:
 
     @pytest.fixture(scope='class')
     def get_resources(self):
-        opf_path = Path('tests/data/google_ocr/01.opf')
-        responses = [json.load(fn.open()) for fn in sorted(list((opf_path/'resources/v001').iterdir()))]
+        data_path = Path('tests/data/google_ocr/W0001/v002')
+        responses = [json.load(fn.open()) for fn in sorted(list((data_path/'resources').iterdir()))]
         formatter = GoogleOCRFormatter()
-        return formatter, opf_path, responses
+        return formatter, data_path, responses
 
     
     def test_get_base_text(self, get_resources):
-        formatter, opf_path, responses = get_resources
+        formatter, data_path, responses = get_resources
         formatter.build_layers(responses)
         
-        result = formatter.get_base_text(responses)
+        result = formatter.get_base_text()
 
-        expected = (opf_path/'bases/v001.txt').read_text()
+        expected = (data_path/'v0002.txt').read_text()
         assert result == expected
 
     
     def test_build_layers(self, get_resources):
-        formatter, opf_path, responses = get_resources
+        formatter, data_path, responses = get_resources
 
         result = formatter.build_layers(responses)
 
