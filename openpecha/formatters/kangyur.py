@@ -127,19 +127,17 @@ class kangyurFormatter(BaseFormatter):
         
         i = 0  # tracker variable through out the text 
 
-        Line = [] # list of lines in a page eg : [[(sl1,el1),(sl2,el2)],[(sl1,el1),(sl2,el2),(sl3,el3)]]
         sub_topic = [] # list of sub_topics in a topicID eg : [[(27, 1351), (1352, 1494), (1495, 2163)]]
         pages = [] # list variable to store page annotation according to base string index eg : [(startPage,endPage)]
-        lines = [] # list variable to store line annotation according to base string index eg : [(startLine,endLine)]
         topic_id = [] # list variable to store topic id annotation according to base string index eg : [(st,et)]
         sub_topic_id = [] # list variable to store sub_topic id annotation according to base string index eg : [(sc,ec)]
         error_id = [] # list variable to store error annotation according to base string index eg : [(es,ee,'suggestion')]
         yigchung_id = [] # list variable to store yigchung annotation 
         absolute_error_id = [] # list variable to store absolute_error annotation '#"
 
-        pat_list={ 'page_pattern':'\[[0-9]+[a-z]{1}\]','line_pattern':'\[\w+\.\d+\]','topic_pattern':'\{\w+\}',
-                    'sub_topic_pattern':'\{\w+\-\w+\}','error_pattern':'\(\S+\,\S+\)','yigchung_pattern':'\[[^0-9].*?\]',
-                    'absolute_error_pattern':'#'}
+        pat_list={ 'page_pattern':r'\[[0-9]+[a-z]{1}\]','line_pattern':r'\[\w+\.\d+\]','topic_pattern':r'\{\w+\}',
+                    'sub_topic_pattern':r'\{\w+\-\w+\}','error_pattern':r'\(\S+\,\S+\)','yigchung_pattern':r'\[[^0-9].*?\]',
+                    'absolute_error_pattern':r'#'}
 
         start_page = 0 # starting index of page
         end_page = 0 # ending index of page
@@ -167,11 +165,9 @@ class kangyurFormatter(BaseFormatter):
                     end_page = end_line
 
                     if start_page != end_page:
-                        Line.append(lines)
                         pages.append((start_page, end_page))
                         i = i+1  # To accumulate the \n character 
                         end_page = end_page+3
-                        lines = []
                         self.base_text = self.base_text + '\n'
                 elif re.search(pat_list['line_pattern'], line): #checking current line contains line annotation or not
                     
@@ -236,10 +232,9 @@ class kangyurFormatter(BaseFormatter):
                     
                     pat_len_before_ann = self.total_pattern(pat_list, line)
                     end_line = start_line+length-pat_len_before_ann-1
-                    lines.append((start_line, end_line))
                     i = end_line + 2
-                    temp = self.base_extract(pat_list, line) + '\n'
-                    self.base_text = self.base_text + temp
+                    base_line = self.base_extract(pat_list, line) + '\n'
+                    self.base_text = self.base_text + base_line
                     
                     if idx   ==  n_line-1:  # Last line case
                         start_page = end_page
@@ -248,12 +243,10 @@ class kangyurFormatter(BaseFormatter):
                         topic_id.append((start_topic, i-2))
                         sub_topic_id.append((start_sub_topic, i-2))
                         pages.append((start_page, i-2))
-                        Line.append(lines)
                         sub_topic.append(sub_topic_id[1:])
 
         result = {
             'page': pages,
-            'line': Line ,
             'topic':topic_id[1:],
             'sub_topic':sub_topic[1:],
             'error':error_id,
