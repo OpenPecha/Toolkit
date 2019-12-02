@@ -8,6 +8,7 @@ def get_pg_layer(path):
     pecha_id = pecha_path.name
     layer_path = pecha_path/f'{pecha_id}.opf'/'layers'
     for vol_path in layer_path.iterdir():
+        print(f'[INFO] Processing {vol_path} ...')
         pg_fn = vol_path/'pagination.yml'
         yield pg_fn
 
