@@ -30,15 +30,26 @@ def test_kangyur_formatter():
     result = formatter.build_layers(text)
 
     expected_result = {
-        'page': [(0, 24), (27, 676), (679, 2157)],
-        'line': [
-            [(0, 24)],
-            [(27, 139),(141, 267), (269, 403), (405, 540), (542, 676)],
-            [(679, 870), (872, 1088), (1090, 1296), (1298, 1494), (1496, 1707), (1709, 1930), (1932, 2157)]
-        ],
-        'text': [(27, 2157)],
-        'sub_text': [[(27, 1351), (1352, 1494), (1495, 2157)]]
+        'page': [(0, 24), (27, 676), (679, 2173)],
+        'topic': [(27, 2173)],
+        'sub_topic': [[(27, 1351), (1352, 1494), (1495, 2173)]],
+        'error': [(1838,1843,'མཆིའོ་')],
+        'yigchung': [(2040,2042),(2044,2045)],
+        'absolute_error':[1518,1624,1938]
     }
 
     for layer in result:
+        print(result[layer])
         assert result[layer] == expected_result[layer]
+
+def test_kangyur_get_base_text():
+    m_text = Path('tests/data/formatter/kangyur_01.txt').read_text()
+    formatter = kangyurFormatter()
+
+    text = formatter.text_preprocess(m_text)
+    formatter.build_layers(text)
+    result = formatter.get_base_text()
+
+    expected = Path('tests/data/formatter/kangyur_base.txt').read_text()
+
+    assert result == expected

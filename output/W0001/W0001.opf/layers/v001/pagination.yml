@@ -1,0 +1,36 @@
+id: ef2779241ea547c59bdc5494e7c77272
+annotation_type: pagination
+rev: '00001'
+content:
+- id: 9af123735acb4a128f5c2782706d2768
+  type: page
+  span:
+    start_char: 0
+    end_char: 19
+  part_of: bases/v001
+  part_index: 1
+  pg_img_ref: https://iiif.bdrc.io/bdr:V22083_I3727::37270709.tif/full/max/0/default.png
+- id: ff425493bfdd46ec96f1c35a5d7180f4
+  type: page
+  span:
+    start_char: 24
+    end_char: 888
+  part_of: bases/v001
+  part_index: 2
+  pg_img_ref: https://iiif.bdrc.io/bdr:V22083_I3727::37270709.tif/full/max/0/default.png
+- id: e701ba3db8c746668b4e7fd6e3837769
+  type: page
+  span:
+    start_char: 893
+    end_char: 1607
+  part_of: bases/v001
+  part_index: 3
+  pg_img_ref: https://iiif.bdrc.io/bdr:V22083_I3727::37270709.tif/full/max/0/default.png
+- id: 2e146b0247414776b96b4bdc83b328d2
+  type: page
+  span:
+    start_char: 1612
+    end_char: 1809
+  part_of: bases/v001
+  part_index: 4
+  pg_img_ref: https://iiif.bdrc.io/bdr:V22083_I3727::37270709.tif/full/max/0/default.png
