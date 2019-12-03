@@ -55,17 +55,7 @@ class TestGoogleOCRFormatter:
 
         expected = {
             'page': [(0, 19), (24, 888), (893, 1607), (1612, 1809)],
-            'line': [
-                [(0, 19)],
-                [
-                    (24, 41), (43, 46), (48, 94), (96, 151), (153, 208), (210, 263),
-                    (265, 318), (320, 369), (371, 428), (430, 485), (487, 542), (544, 594),
-                    (596, 653), (655, 714), (716, 772), (774, 830), (832, 888)
-                ]
-            ]
         }
 
         for result_page, expected_page in zip(result['page'], expected['page']):
             assert result_page[:2] == expected_page
-        
-        assert result['line'][:2] == expected['line']
