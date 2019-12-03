@@ -30,7 +30,7 @@ def test_kangyur_formatter():
     result = formatter.build_layers(text)
 
     expected_result = {
-        'page': [(0, 24), (27, 676), (679, 2173)],
+        'page': [(0, 24,'kk'), (27, 676,'kl'), (679, 2173,'lm')],
         'topic': [(27, 2173)],
         'sub_topic': [[(27, 1351), (1352, 1494), (1495, 2173)]],
         'error': [(1838,1843,'མཆིའོ་')],
