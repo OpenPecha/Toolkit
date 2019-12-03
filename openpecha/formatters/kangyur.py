@@ -103,6 +103,7 @@ class kangyurFormatter(BaseFormatter):
                     length_before = length_before+1
         return length_before
 
+
     def base_extract(self, plist, line): 
         '''
         Extract the base text from the given line
@@ -124,6 +125,7 @@ class kangyurFormatter(BaseFormatter):
             base_line = re.sub(plist['absolute_error_pattern'], '', base_line)
         return base_line
     
+
     def build_layers(self, m_text):
         
         i = 0  # tracker variable through out the text 
@@ -135,7 +137,7 @@ class kangyurFormatter(BaseFormatter):
         error_id = [] # list variable to store error annotation according to base string index eg : [(es,ee,'suggestion')]
         yigchung_id = [] # list variable to store yigchung annotation 
         absolute_error_id = [] # list variable to store absolute_error annotation '#"
-
+        pg_info = []
         pat_list={ 'page_pattern':r'\[[0-9]+[a-z]{1}\]','line_pattern':r'\[\w+\.\d+\]','topic_pattern':r'\{\w+\}',
                     'sub_topic_pattern':r'\{\w+\-\w+\}','error_pattern':r'\(\S+\,\S+\)','yigchung_pattern':r'\[[^0-9].*?\]',
                     'absolute_error_pattern':r'#'}
@@ -164,9 +166,10 @@ class kangyurFormatter(BaseFormatter):
                 if re.search(pat_list['page_pattern'], line):  # checking current line contains page annotation or not
                     start_page = end_page
                     end_page = end_line
-
+                    page_info = line[re.search(pat_list['page_pattern'],line).end():]
+                    pg_info.append(page_info)
                     if start_page != end_page:
-                        pages.append((start_page, end_page))
+                        pages.append((start_page, end_page,pg_info[-2]))
                         i = i+1  # To accumulate the \n character 
                         end_page = end_page+3
                         self.base_text = self.base_text + '\n'
@@ -243,7 +246,8 @@ class kangyurFormatter(BaseFormatter):
                         start_sub_topic = end_sub_topic
                         topic_id.append((start_topic, i-2))
                         sub_topic_id.append((start_sub_topic, i-2))
-                        pages.append((start_page, i-2))
+                        #page_info = line[re.search(pat_list['page_pattern'],line).end():]
+                        pages.append((start_page, i-2,pg_info[-1]))
                         sub_topic.append(sub_topic_id[1:])
 
         result = {
