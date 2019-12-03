@@ -31,10 +31,13 @@ p_with_citations = []
 
 
 def find_titles(soup, output):
+    i=0 # The walker
     # find all titles
     book_title = ''
     chapter_title = ''
-
+    book_title = []
+    book_sub_title = []
+    chapter_title = []
 
     front_title = soup.find('p', class_='credits-page_front-title')
     if front_title:
@@ -67,7 +70,9 @@ def find_titles(soup, output):
                     break
 
         #write markdown
-        if book_title: output += f'{{++#++}}{book_title}\n\n'
+        if book_title:
+            book_title.append((i,len(preprocess_text)))
+            output += f'{{++#++}}{book_title}\n\n'
         if book_sub_title: output += f'{{++##++}}{book_sub_title}\n\n'
         if chapter_title: output += f'{{++###++}}{chapter_title}\n\n'
 
@@ -89,7 +94,7 @@ def find_the_rest(soup, output):
     i = 0  # The walker
     root_text = [] # list variable to store root text index
     citation = [] # list variable to store citation index
-    commentary = [] # list variable to store commentary index
+    #commentary = [] # list variable to store commentary index
     sabche = [] # list variable to store sabche index
     yigchung = [] # list variable to store yigchung index
 
@@ -101,11 +106,14 @@ def find_the_rest(soup, output):
                p['class'][0] == root_text_classes['middle']:
                 root_text_tmp += preprocess_text(p.text) + '\n'
             elif p['class'][0] == root_text_classes['last']:
-                root_text_tmp += preprocess_text(p.text) + '\n'
-                #output += f'{{++**++}}\n{root_text_tmp}{{++**++}}\n\n'
-                root_text.append((i,len(root_text_tmp)-1+i))
-                i += len(root_text_tmp)
-                root_text_tmp = ''
+                for s in p.contents:
+                    if 'root' in s['class'][0]:
+                        root_text_tmp += preprocess_text(s.text)
+                        root_text.append((i,len(root_text_tmp)+i))
+                        i += len(root_text_tmp) + 1
+                        root_text_tmp = ''
+                    else:
+                        i += len(preprocess_text(s.text))
 
         elif 'tibetan-chapter' in p['class'][0]:
             chapter.append((i, len(preprocess_text(p.text))-1+i))
@@ -119,7 +127,7 @@ def find_the_rest(soup, output):
             elif p['class'][0] == com_classes['last']:
                 commentary_tmp += preprocess_text(p.text) + '\n'
                 #output += f'{{++**++}}\n{root_text_tmp}{{++**++}}\n\n'
-                commentary.append((i,len(commentary_tmp)-1+i))
+                #commentary.append((i,len(commentary_tmp)-1+i))
                 i += len(commentary_tmp)
                 commentary_tmp = ''
             
@@ -134,7 +142,7 @@ def find_the_rest(soup, output):
                         s['class'][0]
                     except:
                         p_tmp += preprocess_text(s.text)
-                    continue
+                        continue
 
                     if 'small' in s['class'][0]:
                     # p_tmp += f'{{++*++}}{preprocess_text(s.text)}{{++*++}}'
@@ -143,7 +151,7 @@ def find_the_rest(soup, output):
                             citation.append((p_walker,len(citation_tmp)-1+p_walker))
                             p_walker += len(citation_tmp)
                             citation_tmp = ''
-                        yigchung.append((p_walker,len(preprocess_text(s.text)-1+p_walker)))
+                        yigchung.append((p_walker,len(preprocess_text(s.text))+p_walker))
                         p_walker += len(preprocess_text(s.text))
 
                     elif 'external-citations' in s['class'][0]:
@@ -172,9 +180,8 @@ def find_the_rest(soup, output):
                     citation_tmp = ''
             
 
-                commentary_tmp = preprocess_text(p.text)
-                #commentary.append((i,len(commentary_tmp)-1+p_walker))
-                i += len(commentary_tmp) + 1
+                commentary_tmp = preprocess_text(p.text) + '\n'
+                i += len(commentary_tmp)
                 commentary_tmp = ''
                 p_walker = 0
 
@@ -198,10 +205,9 @@ def find_the_rest(soup, output):
 
             #when sabche ends the para
             if sabche_tmp:
-                    sabche.append((k,len(sabche_tmp)-1+k))
-                    #k = len(sabche_tmp)
+                    sabche.append((k,len(sabche_tmp)+k))
                     sabche_tmp=''             
-            i += len(preprocess_text(p.text))+2
+            i += len(preprocess_text(p.text))+1
             k = 0
         elif cit_base in p['class'][0]:
             if p['class'][0] == cit_classes['first'] or \
@@ -209,7 +215,6 @@ def find_the_rest(soup, output):
                 citation_tmp += preprocess_text(p.text) + '\n'
             elif p['class'][0] == cit_classes['last']:
                 citation_tmp += preprocess_text(p.text) + '\n'
-                #output += f'{{++**++}}\n{root_text_tmp}{{++**++}}\n\n'
                 citation.append((i,len(citation_tmp)-1+i))
                 i += len(citation_tmp)
                 citation_tmp = ''
@@ -224,11 +229,9 @@ def find_the_rest(soup, output):
     output = {
     'tsawa': root_text,
     'quotes': citation,
-    'commentary': commentary,
     'sabche': sabche,
     'yigchung': yigchung
     }
-
 
     return output
 

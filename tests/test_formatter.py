@@ -93,3 +93,33 @@ class TestGoogleOCRFormatter:
 
         for result_page, expected_page in zip(result['page'], expected['page']):
             assert result_page[:2] == expected_page
+
+class TestTsadraFormatter:
+
+    def test_tsadra_formatter(self):
+        m_text = Path('tests/data/formatter/tsadra/tsadra_01.xhtml').read_text()
+        formatter = kangyurFormatter()
+
+        text = formatter.text_preprocess(m_text)
+        result = formatter.build_layers(text)
+
+        expected_result = {
+            
+        }
+
+        for layer in result:
+            print(result[layer])
+            assert result[layer] == expected_result[layer]
+
+
+    def test_tsadra_get_base_text(self):
+        m_text = Path('tests/data/formatter/kangyur_01.txt').read_text()
+        formatter = kangyurFormatter()
+
+        text = formatter.text_preprocess(m_text)
+        formatter.build_layers(text)
+        result = formatter.get_base_text()
+
+        expected = Path('tests/data/formatter/kangyur_base.txt').read_text()
+
+        assert result == expected
