@@ -11,7 +11,7 @@ def get_vol_id(path):
 def rename_in_base(opf_path):
     base_path = opf_path/'base'
     for fn in base_path.iterdir():
-        target_fn = base_path/get_vol_id(fn)
+        target_fn = base_path/f'{get_vol_id(fn)}.txt'
         fn.rename(target_fn)
 
 
