@@ -9,6 +9,7 @@ openpecha.egg-info/
 **/__pycache__/
 usage/input/
 usage/layer_output/
+output/
 
 # scripts
 usage/
