@@ -4,33 +4,29 @@ from pathlib import Path
 import pytest
 
 from openpecha.formatters import TsadraFormatter
-from openpecha.formatters import kangyurFormatter
+from openpecha.formatters import HFMLFormatter
 from openpecha.formatters import GoogleOCRFormatter
 
 
-def test_tsadra_formatter():
-    m_text = Path('tests/data/formatter/tsadra/tsadra_01.txt').read_text()
-    formatter = TsadraFormatter()
 
-    text = formatter.text_preprocess(m_text)
-    result = formatter.build_layers(text)
+class TestHFMLFormatter:
 
-    expected_result = {
-        'title': [0, 17],
-        'yigchung': [193, 830],
-        'tsawa': [919, 1073],
-        'quotes': [1733, 1777],
-        'sapche': [1318, 1393]
-    }
-
-    for layer, ann in expected_result.items():
-        assert result[layer][0] == expected_result[layer]
-
-class TestkangyurFormatter:
-
-    def test_kangyur_formatter(self):
+    def test_get_base_text(self):
         m_text = Path('tests/data/formatter/hfml/kangyur_01.txt').read_text()
-        formatter = kangyurFormatter()
+        formatter = HFMLFormatter()
+
+        text = formatter.text_preprocess(m_text)
+        formatter.build_layers(text)
+        result = formatter.get_base_text()
+
+        expected = Path('tests/data/formatter/hfml/kangyur_base.txt').read_text()
+
+        assert result == expected
+
+
+    def test_build_layers(self):
+        m_text = Path('tests/data/formatter/hfml/kangyur_01.txt').read_text()
+        formatter = HFMLFormatter()
 
         text = formatter.text_preprocess(m_text)
         result = formatter.build_layers(text)
@@ -48,18 +44,6 @@ class TestkangyurFormatter:
             print(result[layer])
             assert result[layer] == expected_result[layer]
 
-
-    def test_kangyur_get_base_text(self):
-        m_text = Path('tests/data/formatter/hfml/kangyur_01.txt').read_text()
-        formatter = kangyurFormatter()
-
-        text = formatter.text_preprocess(m_text)
-        formatter.build_layers(text)
-        result = formatter.get_base_text()
-
-        expected = Path('tests/data/formatter/hfml/kangyur_base.txt').read_text()
-
-        assert result == expected
 
 
 class TestGoogleOCRFormatter:

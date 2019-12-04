@@ -1,10 +1,9 @@
-from uuid import uuid4
 import re
 
 from .formatter import BaseFormatter
 
 
-class kangyurFormatter(BaseFormatter):
+class HFMLFormatter(BaseFormatter):
     '''
     OpenPecha Formatter for digitized wooden-printed Pecha based on annotation scheme from Esukhia.
     '''
@@ -23,7 +22,7 @@ class kangyurFormatter(BaseFormatter):
         lines = {'id': None, 'type': 'line', 'rev': "012123", 'log': None, 'content': []}
 
         for page, lines in zip(layers['page'], layers['line']):
-            page_id = uuid4().hex
+            page_id = self.get_unique_id()
             pages['content'].append({
                 'id': page_id,
                 'span': {
@@ -31,17 +30,6 @@ class kangyurFormatter(BaseFormatter):
                     'end_char': page[1]
                 }
             })
-            for i, line in enumerate(lines):
-                line_id = uuid().hex
-                lines['content'].append({
-                    'id': line_id,
-                    'span': {
-                        'start_char': line[0], 
-                        'end_char': line[1]
-                    },
-                    'part_of': f'page/{page_id}',
-                    'part_index': i+1
-                })
 
         return {'page': pages, 'line': lines}
 
