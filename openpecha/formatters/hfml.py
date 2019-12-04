@@ -321,12 +321,12 @@ class HFMLFormatter(BaseFormatter):
             formatted_layers = self.format_layer(layers, base_id)
             base_text = self.get_base_text()
 
-            # save base_text
-            (self.dirs['opf_path']/'base'/f'{base_id}.txt').write_text(base_text)
-
             # save layers
             vol_layer_path = self.dirs['layers_path']/base_id
             vol_layer_path.mkdir(exist_ok=True)
             for layer, ann in formatted_layers.items():
                 layer_fn = vol_layer_path/f'{layer}.yml'
                 self.dump(ann, layer_fn)
+            
+            # save base_text
+            (self.dirs['opf_path']/'base'/f'{base_id}.txt').write_text(base_text)
