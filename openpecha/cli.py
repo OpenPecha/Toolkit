@@ -11,6 +11,7 @@ from tqdm import tqdm
 from openpecha.serializemd import SerializeMd
 from openpecha.blupdate import Blupdate
 from openpecha.formatters import GoogleOCRFormatter
+from openpecha.formatters import HFMLFormatter
 
 
 OP_PATH = Path('./.openpecha')
@@ -345,4 +346,7 @@ def formatter(**kwargs):
     '''
     if kwargs['name'] == 'ocr':
         formatter = GoogleOCRFormatter()
+        formatter.new_poti(kwargs['input_path'])
+    elif kwargs['name'] == 'hfml':
+        formatter = HFMLFormatter()
         formatter.new_poti(kwargs['input_path'])

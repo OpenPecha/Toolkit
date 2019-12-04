@@ -1,7 +1,9 @@
+from copy import deepcopy
+from pathlib import Path
 import re
 
 from .formatter import BaseFormatter
-
+from .format import *
 
 class HFMLFormatter(BaseFormatter):
     '''
@@ -15,23 +17,71 @@ class HFMLFormatter(BaseFormatter):
 
     def text_preprocess(self, text):
         return text
+
+
+    def get_input(self, input_path):
+        for fn in sorted(list(input_path.iterdir())):
+            yield fn.read_text(), fn
     
 
-    def format_layer(self, layers):
-        pages = {'id': None, 'type': 'page', 'rev': "012123", 'log': None, 'content': []}
-        lines = {'id': None, 'type': 'line', 'rev': "012123", 'log': None, 'content': []}
+    def format_layer(self, layers, base_id):
+        # Page annotation
+        Pagination = deepcopy(Layer)
+        Pagination['id'] = self.get_unique_id()
+        Pagination['annotation_type'] = 'pagination'
+        Pagination['rev'] = f'{1:05}'
+        for i, pg in enumerate(layers['page']):
+            page = deepcopy(Page)
+            page['id'] = self.get_unique_id()
+            page['span']['start_char'] = pg[0]
+            page['span']['end_char'] = pg[1]
+            page['part_of'] = f'bases/{base_id}'
+            page['part_index'] =  i+1
+            page['payload'] = pg[2]
+            Pagination['content'].append(page)
 
-        for page, lines in zip(layers['page'], layers['line']):
-            page_id = self.get_unique_id()
-            pages['content'].append({
-                'id': page_id,
-                'span': {
-                    'start_char': page[0], 
-                    'end_char': page[1]
-                }
-            })
+        # Correction annotation
+        Correction = deepcopy(Layer)
+        Correction['id'] = self.get_unique_id()
+        Correction['annotation_type'] = 'error'
+        Correction['rev'] = f'{1:05}'
+        for err in layers['error']:
+            error = deepcopy(Error)
+            error['id'] = self.get_unique_id()
+            error['span']['start_char'] = err[0]
+            error['span']['end_char'] = err[1]
+            error['type'] = 'correction'
+            error['correction'] = err[2]
+            Correction['content'].append(error)
 
-        return {'page': pages, 'line': lines}
+        for idx in layers['absolute_error']:
+            error = deepcopy(Error)
+            error['id'] = self.get_unique_id()
+            error['span']['start_char'] = idx
+            error['span']['end_char'] = idx
+            error['type'] = 'absolute_error'
+            Correction['content'].append(error)
+
+        # Yigchung annotation
+        Yigchung = deepcopy(Layer)
+        Yigchung['id'] = self.get_unique_id()
+        Yigchung['annotation_type'] = 'yigchung'
+        Yigchung['rev'] = f'{1:05}'
+        for yig in layers['yigchung']:
+            yigchung = deepcopy(Yigchung)
+            yigchung['id'] = self.get_unique_id()
+            yigchung['span']['start_char'] = yig[0]
+            yigchung['span']['end_char'] = yig[1]
+            Yigchung['content'].append(yigchung)
+
+
+        result = {
+            'pagination': Pagination,
+            'correction': Correction,
+            'yigchung': Yigchung,
+        }
+
+        return result
 
 
     def total_pattern(self, plist, line):
@@ -72,23 +122,26 @@ class HFMLFormatter(BaseFormatter):
                 for i in match_list:
                     if p.start() > i.start():
                         length_before = length_before + len(i[0])
+
         if re.search(plist['error_pattern'], line):
             errors = re.finditer(plist['error_pattern'], line) # list of match object of error pattern in line
             for error in errors:
                 if p.start() > error.start():
                     error_part = error[0].split(',')[0][1:]
-                    length_before = length_before + (len(s[0])-len(error_part))
-            
+                    length_before = length_before + (len(error[0])-len(error_part))
+
         if re.search(plist['yigchung_pattern'], line):
             yigchungs = re.finditer(plist['yigchung_pattern'], line) # list of match object of yigchung pattern in line
             for yigchung in yigchungs:
                 if p.start() > yigchung.start():
                     length_before = length_before + 2
+
         if re.search(plist['absolute_error_pattern'], line):
             abs_errors = re.finditer(plist['absolute_error_pattern'], line) # list of match object of absolute error pattern in line
             for abs_error in abs_errors:
                 if p.start() > abs_error.start():
                     length_before = length_before+1
+
         return length_before
 
 
@@ -253,3 +306,27 @@ class HFMLFormatter(BaseFormatter):
     def get_base_text(self):
         
         return self.base_text.strip()
+
+
+    def new_poti(self,  input_path):
+        input_path = Path(input_path)
+        self._build_dirs(input_path)
+        (self.dirs['opf_path']/'base').mkdir(exist_ok=True)
+
+        for i, (m_text, vol_fn) in enumerate(self.get_input(input_path)):
+            print(f'[INFO] Processing Vol {i+1:03} : {vol_fn.name} ...')
+            base_id = f'v{i+1:03}'
+            if (self.dirs['opf_path']/'base'/f'{base_id}.txt').is_file(): continue
+            layers = self.build_layers(m_text)
+            formatted_layers = self.format_layer(layers, base_id)
+            base_text = self.get_base_text()
+
+            # save base_text
+            (self.dirs['opf_path']/'base'/f'{base_id}.txt').write_text(base_text)
+
+            # save layers
+            vol_layer_path = self.dirs['layers_path']/base_id
+            vol_layer_path.mkdir(exist_ok=True)
+            for layer, ann in formatted_layers.items():
+                layer_fn = vol_layer_path/f'{layer}.yml'
+                self.dump(ann, layer_fn)

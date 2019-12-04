@@ -44,13 +44,14 @@ class GoogleOCRFormatter(BaseFormatter):
         Pagination['annotation_type'] = 'pagination'
         Pagination['rev'] = f'{1:05}'
         for i, (pg, pg_img_url) in enumerate(zip(layers['page'], layers['img_url'])):
-            Page['id'] = self.get_unique_id()
-            Page['span']['start_char'] = pg[0]
-            Page['span']['end_char'] = pg[1]
-            Page['part_of'] = f'bases/{base_id}'
-            Page['part_index'] =  i+1
-            Page['pg_img_ref'] = pg_img_url
-            Pagination['content'].append(Page)
+            page = deepcopy(Page)
+            page['id'] = self.get_unique_id()
+            page['span']['start_char'] = pg[0]
+            page['span']['end_char'] = pg[1]
+            page['part_of'] = f'bases/{base_id}'
+            page['part_index'] =  i+1
+            page['ref'] = pg_img_url
+            Pagination['content'].append(page)
 
         result = {
             'pagination': Pagination
@@ -153,4 +154,4 @@ class GoogleOCRFormatter(BaseFormatter):
             vol_layer_path.mkdir(exist_ok=True)
             for layer, ann in formatted_layers.items():
                 layer_fn = vol_layer_path/f'{layer}.yml'
-                self.dump(ann, layer_fn)    
+                self.dump(ann, layer_fn)
