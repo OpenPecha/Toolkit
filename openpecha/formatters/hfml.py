@@ -63,22 +63,22 @@ class HFMLFormatter(BaseFormatter):
             Correction['content'].append(error)
 
         # Yigchung annotation
-        Yigchung = deepcopy(Layer)
-        Yigchung['id'] = self.get_unique_id()
-        Yigchung['annotation_type'] = 'yigchung'
-        Yigchung['rev'] = f'{1:05}'
+        Yigchung_layer = deepcopy(Layer)
+        Yigchung_layer['id'] = self.get_unique_id()
+        Yigchung_layer['annotation_type'] = 'yigchung'
+        Yigchung_layer['rev'] = f'{1:05}'
         for yig in layers['yigchung']:
             yigchung = deepcopy(Yigchung)
             yigchung['id'] = self.get_unique_id()
             yigchung['span']['start_char'] = yig[0]
             yigchung['span']['end_char'] = yig[1]
-            Yigchung['content'].append(yigchung)
+            Yigchung_layer['content'].append(yigchung)
 
 
         result = {
             'pagination': Pagination,
             'correction': Correction,
-            'yigchung': Yigchung,
+            'yigchung': Yigchung_layer,
         }
 
         return result
