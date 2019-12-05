@@ -304,8 +304,10 @@ class HFMLFormatter(BaseFormatter):
 
 
     def get_base_text(self):
-        
-        return self.base_text.strip()
+        base_text = self.base_text.strip()
+        self.base_text = ''
+
+        return base_text
 
 
     def new_poti(self,  input_path):
