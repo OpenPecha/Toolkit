@@ -65,7 +65,7 @@ class HFMLFormatter(BaseFormatter):
         # Yigchung annotation
         Note_layer = deepcopy(Layer)
         Note_layer['id'] = self.get_unique_id()
-        Note_layer['annotation_type'] = 'yigchung'
+        Note_layer['annotation_type'] = 'note_marker'
         Note_layer['rev'] = f'{1:05}'
         for nt in layers['note']:
             note = deepcopy(Note)
