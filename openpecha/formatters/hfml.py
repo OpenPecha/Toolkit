@@ -78,7 +78,7 @@ class HFMLFormatter(BaseFormatter):
         result = {
             'pagination': Pagination,
             'correction': Correction,
-            'yigchung': Note_layer,
+            'note': Note_layer,
         }
 
         return result
