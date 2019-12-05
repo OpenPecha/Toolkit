@@ -36,12 +36,11 @@ class TestHFMLFormatter:
             'topic': [(27, 2173)],
             'sub_topic': [[(27, 1351), (1352, 1494), (1495, 2173)]],
             'error': [(1838,1843,'མཆིའོ་')],
-            'yigchung': [(2040,2042),(2044,2045)],
-            'absolute_error':[1518,1624,1938]
+            'absolute_error': [(2040,2042),(2044,2045)],
+            'note':[1518,1624,1938]
         }
 
         for layer in result:
-            print(result[layer])
             assert result[layer] == expected_result[layer]
 
 
