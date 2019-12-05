@@ -12,7 +12,15 @@ class kangyurFormatter(BaseFormatter):
     def __init__(self, output_path='./output'):
         super().__init__(output_path=output_path)
         self.base_text = ''
-
+        self.vol_walker = 0
+        self.topic_id = []
+        self.current_topic_id = []
+        self.sub_topic = []
+        self.page = []
+        self.error_id = []
+        self.yigchung_id = []
+        self.abs_error_id = []
+        self.sub_topic_Id = []
 
     def text_preprocess(self, text):
         return text
@@ -89,7 +97,7 @@ class kangyurFormatter(BaseFormatter):
             for error in errors:
                 if p.start() > error.start():
                     error_part = error[0].split(',')[0][1:]
-                    length_before = length_before + (len(s[0])-len(error_part))
+                    length_before = length_before + (len(error[0])-len(error_part))
             
         if re.search(plist['yigchung_pattern'], line):
             yigchungs = re.finditer(plist['yigchung_pattern'], line) # list of match object of yigchung pattern in line
@@ -124,20 +132,32 @@ class kangyurFormatter(BaseFormatter):
         if re.search(plist['absolute_error_pattern'], line):
             base_line = re.sub(plist['absolute_error_pattern'], '', base_line)
         return base_line
+
+    def get_result(self):
+
+        result = {
+            'page': self.page,
+            'topic':self.topic_id[1:],
+            'sub_topic':self.sub_topic[1:],
+            'error':self.error_id,
+            'yigchung':self.yigchung_id,
+            'absolute_error':self.abs_error_id}
+        return result
+
     
 
-    def build_layers(self, m_text):
+    def build_layers(self, m_text, num_vol):
         
         i = 0  # tracker variable through out the text 
 
-        sub_topic = [] # list of sub_topics in a topicID eg : [[(27, 1351), (1352, 1494), (1495, 2163)]]
         pages = [] # list variable to store page annotation according to base string index eg : [(startPage,endPage)]
-        topic_id = [] # list variable to store topic id annotation according to base string index eg : [(st,et)]
         sub_topic_id = [] # list variable to store sub_topic id annotation according to base string index eg : [(sc,ec)]
-        error_id = [] # list variable to store error annotation according to base string index eg : [(es,ee,'suggestion')]
-        yigchung_id = [] # list variable to store yigchung annotation 
+        cur_vol_error_id = [] # list variable to store error annotation according to base string index eg : [(es,ee,'suggestion')]
+        cur_vol_yigchung_id = [] # list variable to store yigchung annotation 
         absolute_error_id = [] # list variable to store absolute_error annotation '#"
         pg_info = []
+        pg_ann = []
+        vol_id = 'v' + str(self.vol_walker%1000)
         pat_list={ 'page_pattern':r'\[[0-9]+[a-z]{1}\]','line_pattern':r'\[\w+\.\d+\]','topic_pattern':r'\{\w+\}',
                     'sub_topic_pattern':r'\{\w+\-\w+\}','error_pattern':r'\(\S+\,\S+\)','yigchung_pattern':r'\[[^0-9].*?\]',
                     'absolute_error_pattern':r'#'}
@@ -167,9 +187,10 @@ class kangyurFormatter(BaseFormatter):
                     start_page = end_page
                     end_page = end_line
                     page_info = line[re.search(pat_list['page_pattern'],line).end():]
+                    pg_ann.append(re.search(pat_list['page_pattern'],line)[0][1:-1])
                     pg_info.append(page_info)
                     if start_page != end_page:
-                        pages.append((start_page, end_page,pg_info[-2]))
+                        pages.append((start_page, end_page, pg_info[-2], pg_ann[-2]  ))
                         i = i+1  # To accumulate the \n character 
                         end_page = end_page+3
                         self.base_text = self.base_text + '\n'
@@ -177,17 +198,6 @@ class kangyurFormatter(BaseFormatter):
                     
                     start_line = i
                     length = len(line)
-
-                    if re.search(pat_list['topic_pattern'], line): #checking current line contain topicID annotation or not
-                        topic = re.search(pat_list['topic_pattern'], line)
-                        pat_len_before_ann = self.search_before(topic, pat_list, line)
-                        start_topic = end_topic
-                        end_topic = topic.start()+i-pat_len_before_ann
-
-                        if start_topic != end_topic:
-                            topic_id.append((start_topic, end_topic))
-                            sub_topic.append(sub_topic_id[1:])
-                            sub_topic_id = []
 
                     if re.search(pat_list['sub_topic_pattern'], line): #checking current line contain sub_topicID annotation or not
                         sub_topic_match = re.search(pat_list['sub_topic_pattern'], line)
@@ -197,7 +207,7 @@ class kangyurFormatter(BaseFormatter):
                             end_sub_topic = sub_topic_match.start()+i-pat_len_before_ann-1
 
                             if start_sub_topic != end_sub_topic:
-                                sub_topic_id.append((start_sub_topic, end_sub_topic))
+                                self.sub_topic_Id.append((start_sub_topic, end_sub_topic, vol_id))
                                 end_sub_topic = end_sub_topic+1
 
                         else:
@@ -205,8 +215,24 @@ class kangyurFormatter(BaseFormatter):
                             end_sub_topic = sub_topic_match.start()+i-pat_len_before_ann-2
 
                             if start_sub_topic != end_sub_topic:
-                                sub_topic_id.append((start_sub_topic, end_sub_topic))
+                                self.sub_topic_Id.append((start_sub_topic, end_sub_topic,vol_id))
                                 end_sub_topic = end_sub_topic+1
+
+                    if re.search(pat_list['topic_pattern'], line): #checking current line contain topicID annotation or not
+                        topic = re.search(pat_list['topic_pattern'], line)
+                        pat_len_before_ann = self.search_before(topic, pat_list, line)
+                        start_topic = end_topic
+                        end_topic = topic.start()+i-pat_len_before_ann
+
+                        if start_topic != end_topic:
+                            self.current_topic_id.append((start_topic, end_topic, vol_id))
+                            self.topic_id.append(self.current_topic_id)
+                            self.current_topic_id = []
+                            if self.sub_topic_Id:
+                                self.sub_topic.append(self.sub_topic_Id)
+                                self.sub_topic_Id = []
+
+
                     
                     if re.search(pat_list['error_pattern'], line):   # checking current line contain error annotation or not
                         errors = re.finditer(pat_list['error_pattern'], line)
@@ -217,7 +243,7 @@ class kangyurFormatter(BaseFormatter):
                             start_error = error.start()+i-pat_len_before_ann
 
                             end_error = start_error+len(error_part)-1
-                            error_id.append((start_error, end_error, suggestion))
+                            cur_vol_error_id.append((start_error, end_error, suggestion))
                             
                     if re.search(pat_list['yigchung_pattern'], line):
                         yigchungs = re.finditer(pat_list['yigchung_pattern'],line)
@@ -225,7 +251,7 @@ class kangyurFormatter(BaseFormatter):
                             pat_len_before_ann=self.search_before(yigchung, pat_list, line)
                             start_yigchung = yigchung.start()+i-pat_len_before_ann
                             end_yigchung = start_yigchung + len(yigchung[0])-3
-                            yigchung_id.append((start_yigchung,end_yigchung))
+                            cur_vol_yigchung_id.append((start_yigchung,end_yigchung))
         
                     if re.search(pat_list['absolute_error_pattern'], line):
                         abs_errors=re.finditer(pat_list['absolute_error_pattern'],line)
@@ -244,24 +270,29 @@ class kangyurFormatter(BaseFormatter):
                         start_page = end_page
                         start_topic = end_topic
                         start_sub_topic = end_sub_topic
-                        topic_id.append((start_topic, i-2))
-                        sub_topic_id.append((start_sub_topic, i-2))
-                        #page_info = line[re.search(pat_list['page_pattern'],line).end():]
-                        pages.append((start_page, i-2,pg_info[-1]))
-                        sub_topic.append(sub_topic_id[1:])
+                        self.sub_topic_Id.append((start_sub_topic, i-2, vol_id))
+                        self.current_topic_id.append((start_topic, i -2, vol_id))
+                        pages.append((start_page, i-2,pg_info[-1], pg_ann[-1]))
+                        self.page.append(pages)
+                        pages = []
+                        if cur_vol_error_id:
+                            self.error_id.append(cur_vol_error_id)
+                            cur_vol_error_id = []
+                        if cur_vol_yigchung_id:
+                            self.yigchung_id.append(cur_vol_yigchung_id)
+                            cur_vol_yigchung_id = []
+                        if absolute_error_id:
+                            self.abs_error_id.append(absolute_error_id)
+                            absolute_error_id = []
+                        self.vol_walker += 1
+        if num_vol == self.vol_walker: # checks the last volume
+            self.topic_id.append(self.current_topic_id)
+            self.current_topic_id = []
+            self.sub_topic.append(self.sub_topic_Id)
 
-        result = {
-            'page': pages,
-            'topic':topic_id[1:],
-            'sub_topic':sub_topic[1:],
-            'error':error_id,
-            'yigchung':yigchung_id,
-            'absolute_error':absolute_error_id
-        }
-
-        return result
+        pass
 
 
     def get_base_text(self):
-        
+
         return self.base_text.strip()
