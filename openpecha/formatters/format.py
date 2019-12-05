@@ -2,7 +2,7 @@
 This module contains format variable for all the annotations
 '''
 
-__all__ = ['Layer', 'Page', 'Text', 'Error', 'Yigchung']
+__all__ = ['Layer', 'Page', 'Text', 'Error', 'Note']
 
 # General layer format
 Layer = {
@@ -46,8 +46,8 @@ Error = {
     'certainty': None       # Certainty of the suggested correct text. type: int
 }
 
-# Yigchung
-Yigchung = {
+# Note
+Note = {
     'id': None,
     'span': Span
 }

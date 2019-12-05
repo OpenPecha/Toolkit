@@ -54,31 +54,31 @@ class HFMLFormatter(BaseFormatter):
             error['correction'] = err[2]
             Correction['content'].append(error)
 
-        for idx in layers['absolute_error']:
+        for err in layers['absolute_error']:
             error = deepcopy(Error)
             error['id'] = self.get_unique_id()
-            error['span']['start_char'] = idx
-            error['span']['end_char'] = idx
+            error['span']['start_char'] = err[0]
+            error['span']['end_char'] = err[1]
             error['type'] = 'absolute_error'
             Correction['content'].append(error)
 
         # Yigchung annotation
-        Yigchung_layer = deepcopy(Layer)
-        Yigchung_layer['id'] = self.get_unique_id()
-        Yigchung_layer['annotation_type'] = 'yigchung'
-        Yigchung_layer['rev'] = f'{1:05}'
-        for yig in layers['yigchung']:
-            yigchung = deepcopy(Yigchung)
-            yigchung['id'] = self.get_unique_id()
-            yigchung['span']['start_char'] = yig[0]
-            yigchung['span']['end_char'] = yig[1]
-            Yigchung_layer['content'].append(yigchung)
+        Note_layer = deepcopy(Layer)
+        Note_layer['id'] = self.get_unique_id()
+        Note_layer['annotation_type'] = 'yigchung'
+        Note_layer['rev'] = f'{1:05}'
+        for nt in layers['note']:
+            note = deepcopy(Note)
+            note['id'] = self.get_unique_id()
+            note['span']['start_char'] = nt
+            note['span']['end_char'] = nt
+            Note_layer['content'].append(note)
 
 
         result = {
             'pagination': Pagination,
             'correction': Correction,
-            'yigchung': Yigchung_layer,
+            'yigchung': Note_layer,
         }
 
         return result
@@ -293,11 +293,11 @@ class HFMLFormatter(BaseFormatter):
 
         result = {
             'page': pages,
-            'topic':topic_id[1:],
-            'sub_topic':sub_topic[1:],
-            'error':error_id,
-            'yigchung':yigchung_id,
-            'absolute_error':absolute_error_id
+            'topic': topic_id[1:],
+            'sub_topic': sub_topic[1:],
+            'error': error_id,
+            'absolute_error': yigchung_id,
+            'note': absolute_error_id
         }
 
         return result
