@@ -26,6 +26,8 @@ class HFMLFormatter(BaseFormatter):
         self.sub_topic_info = []
     
     def text_preprocess(self, text):
+        if text[0] == '\ufeff':
+            return text[1:]
         return text
 
 
@@ -33,7 +35,7 @@ class HFMLFormatter(BaseFormatter):
         fns = list(input_path.iterdir())
         fns_len = len(fns)
         for fn in sorted(fns):
-            yield fn.read_text(), fn, fns_len
+            yield self.text_preprocess(fn.read_text()), fn, fns_len
     
 
     def format_layer(self, layers):
@@ -41,7 +43,7 @@ class HFMLFormatter(BaseFormatter):
         non_cross_vol_anns = [layers['page'], layers['error'], layers['absolute_error'], layers['note']]
         anns = {'cross_vol': cross_vol_anns, 'non_cross_vol': non_cross_vol_anns}
         for ann in anns:
-            if ann == 'non_corss_vol':
+            if ann == 'non_cross_vol':
                 for i, (pecha_pg, pecha_err, pecha_abs_err, pecha_note) in enumerate(zip(*anns[ann])):
                     base_id = f'v{i+1:03}'
                     # Page annotation
@@ -127,12 +129,13 @@ class HFMLFormatter(BaseFormatter):
                             sub_text['base'] = f'base/v{vol_id:03}'
                             sub_text['part_index'] = index
                             Topic['sub_text'].append(sub_text)
+                        Index_layer['content'].append(Topic)
 
-            result = {
-                'index': Index_layer
-            }                        
+                result = {
+                    'index': Index_layer
+                }
 
-            return result
+                yield result, None
 
     def total_pattern(self, plist, line):
         '''
@@ -349,9 +352,9 @@ class HFMLFormatter(BaseFormatter):
                         start_page = end_page
                         start_topic = end_topic
                         start_sub_topic = end_sub_topic
-                        self.sub_topic_Id.append((start_sub_topic, i-2, self.vol_walker+1,self.sub_topic_info[-1]))
-                        self.current_topic_id.append((start_topic, i -2, self.vol_walker+1,self.topic_info[-1]))
-                        cur_vol_pages.append((start_page, i-2,pg_info[-1], pg_ann[-1]))
+                        self.sub_topic_Id.append((start_sub_topic, i-2, self.vol_walker+1, self.sub_topic_info[-1] if self.sub_topic_info else None))
+                        self.current_topic_id.append((start_topic, i-2, self.vol_walker+1, self.topic_info[-1]))
+                        cur_vol_pages.append((start_page, i-2, pg_info[-1], pg_ann[-1]))
                         self.page.append(cur_vol_pages)
                         pages = []
                         self.error_id.append(cur_vol_error_id)
@@ -404,11 +407,14 @@ class HFMLFormatter(BaseFormatter):
         # save pecha layers
         layers = self.get_result()
         for vol_layers, base_id in self.format_layer(layers):
-            print(base_id)
-            vol_layer_path = self.dirs['layers_path']/base_id
-            vol_layer_path.mkdir(exist_ok=True)
+            if base_id:
+                vol_layer_path = self.dirs['layers_path']/base_id
+                vol_layer_path.mkdir(exist_ok=True)
             for layer, ann in vol_layers.items():
-                layer_fn = vol_layer_path/f'{layer}.yml'
+                if layer == 'index':
+                    layer_fn = self.dirs['opf_path']/f'{layer}.yml'
+                else:
+                    layer_fn = vol_layer_path/f'{layer}.yml'
                 self.dump(ann, layer_fn)
 
 
