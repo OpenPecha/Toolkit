@@ -113,13 +113,13 @@ class TestTsadraFormatter:
 
 
     def test_tsadra_get_base_text(self):
-        m_text = Path('tests/data/formatter/kangyur_01.txt').read_text()
+        m_text = Path('tests/data/formatter/tsadra/tsadra_01.xhtml').read_text()
         formatter = kangyurFormatter()
 
         text = formatter.text_preprocess(m_text)
         formatter.build_layers(text)
         result = formatter.get_base_text()
 
-        expected = Path('tests/data/formatter/kangyur_base.txt').read_text()
+        expected = Path('tests/data/formatter/tsadra/tasdra_base.txt').read_text()
 
         assert result == expected

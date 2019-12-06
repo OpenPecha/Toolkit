@@ -35,9 +35,9 @@ def find_titles(soup, output):
     # find all titles
     book_title = ''
     chapter_title = ''
-    book_title = []
-    book_sub_title = []
-    chapter_title = []
+    book_title_idx = []
+    book_sub_title_idx = []
+    chapter_title_idx = []
 
     front_title = soup.find('p', class_='credits-page_front-title')
     if front_title:
@@ -71,10 +71,23 @@ def find_titles(soup, output):
 
         #write markdown
         if book_title:
-            book_title.append((i,len(preprocess_text)))
-            output += f'{{++#++}}{book_title}\n\n'
-        if book_sub_title: output += f'{{++##++}}{book_sub_title}\n\n'
-        if chapter_title: output += f'{{++###++}}{chapter_title}\n\n'
+            book_title_idx.append((i,len(preprocess_text(book_title)-1)))
+            i += len(preprocess_text(book_title)) + 1
+            #output += f'{{++#++}}{book_title}\n\n'
+        if book_sub_title:
+            book_sub_title_idx.append((i,len(preprocess_text(book_sub_title)-1)))
+            i += len(preprocess_text(book_sub_title)) + 1
+            #output += f'{{++##++}}{book_sub_title}\n\n'
+        if chapter_title:
+            chapter_title_idx.append((i,len(preprocess_text(chapter_title_idx))-1))
+            i += len(preprocess_text(chapter_title_idx)) + 1
+            #output += f'{{++###++}}{chapter_title}\n\n'
+        
+        output = {
+            'book_title': book_title_idx,
+            'book_sub_title': book_sub_title_idx,
+            'chapter_title': chapter_title_idx
+        }
 
         return output, False
 
