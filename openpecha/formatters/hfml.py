@@ -22,7 +22,7 @@ class HFMLFormatter(BaseFormatter):
         self.abs_er_id = []
         self.notes_id = []
         self.sub_topic_Id = [] # made class variable as it needs to update cross poti
-
+        self.topic_info = []
     
     def text_preprocess(self, text):
         return text
@@ -190,7 +190,8 @@ class HFMLFormatter(BaseFormatter):
         note_id = [] # list variable to store note annotation '#"
         pg_info = []
         pg_ann = []
-        vol_id = 'v' + str(self.vol_walker%1000)
+        
+        
         pat_list={ 
             'page_pattern': r'\[[0-9]+[a-z]{1}\]',
             'line_pattern': r'\[\w+\.\d+\]','topic_pattern':r'\{\w+\}',
@@ -242,24 +243,28 @@ class HFMLFormatter(BaseFormatter):
                             end_sub_topic = sub_topic_match.start()+i-pat_len_before_ann-1
 
                             if start_sub_topic != end_sub_topic:
-                                self.sub_topic_Id.append((start_sub_topic, end_sub_topic, vol_id))
+                                self.sub_topic_Id.append((start_sub_topic, end_sub_topic, self.vol_walker+1))
                                 end_sub_topic = end_sub_topic+1
                         else:
                             start_sub_topic = end_sub_topic
                             end_sub_topic = sub_topic_match.start()+i-pat_len_before_ann-2
 
                             if start_sub_topic != end_sub_topic:
-                                self.sub_topic_Id.append((start_sub_topic, end_sub_topic,vol_id))
+                                self.sub_topic_Id.append((start_sub_topic, end_sub_topic,self.vol_walker+1))
                                 end_sub_topic = end_sub_topic+1
 
                     if re.search(pat_list['topic_pattern'], line): #checking current line contain topicID annotation or not
                         topic = re.search(pat_list['topic_pattern'], line)
                         pat_len_before_ann = self.search_before(topic, pat_list, line)
+                        self.topic_info.append(topic[0][1:-1])
                         start_topic = end_topic
                         end_topic = topic.start()+i-pat_len_before_ann
 
                         if start_topic != end_topic:
-                            self.current_topic_id.append((start_topic, end_topic, vol_id))
+                            if len(self.topic_info) >= 2: # as we are ignoring the self.topic[0]
+                                self.current_topic_id.append((start_topic, end_topic, self.vol_walker+1, self.topic_info[-2])) # -2 as we need the secondlast item
+                            else:
+                                self.current_topic_id.append((start_topic, end_topic, self.vol_walker+1, self.topic_info[-1]))
                             self.topic_id.append(self.current_topic_id)
                             self.current_topic_id = []
                             self.sub_topic.append(self.sub_topic_Id)
@@ -303,8 +308,8 @@ class HFMLFormatter(BaseFormatter):
                         start_page = end_page
                         start_topic = end_topic
                         start_sub_topic = end_sub_topic
-                        self.sub_topic_Id.append((start_sub_topic, i-2, vol_id))
-                        self.current_topic_id.append((start_topic, i -2, vol_id))
+                        self.sub_topic_Id.append((start_sub_topic, i-2, self.vol_walker+1))
+                        self.current_topic_id.append((start_topic, i -2, self.vol_walker+1,self.topic_info[-1]))
                         cur_vol_pages.append((start_page, i-2,pg_info[-1], pg_ann[-1]))
                         self.page.append(cur_vol_pages)
                         pages = []
