@@ -2,8 +2,8 @@ from copy import deepcopy
 from pathlib import Path
 import re
 
-from .formatter import BaseFormatter
-from .format import *
+from openpecha.formatters.formatter import BaseFormatter
+from openpecha.formatters.format import *
 
 class HFMLFormatter(BaseFormatter):
     '''
@@ -23,73 +23,79 @@ class HFMLFormatter(BaseFormatter):
         self.notes_id = []
         self.sub_topic_Id = [] # made class variable as it needs to update cross poti
 
+    
     def text_preprocess(self, text):
         return text
 
 
     def get_input(self, input_path):
-        for fn in sorted(list(input_path.iterdir())):
-            yield fn.read_text(), fn
+        fns = list(input_path.iterdir())
+        fns_len = len(fns)
+        for fn in sorted(fns):
+            yield fn.read_text(), fn, fns_len
     
 
-    def format_layer(self, layers, base_id):
-        # Page annotation
-        Pagination = deepcopy(Layer)
-        Pagination['id'] = self.get_unique_id()
-        Pagination['annotation_type'] = 'pagination'
-        Pagination['rev'] = f'{1:05}'
-        for i, pg in enumerate(layers['page']):
-            page = deepcopy(Page)
-            page['id'] = self.get_unique_id()
-            page['span']['start_char'] = pg[0]
-            page['span']['end_char'] = pg[1]
-            page['part_of'] = f'bases/{base_id}'
-            page['part_index'] =  i+1
-            page['payload'] = pg[2]
-            Pagination['content'].append(page)
+    def format_layer(self, layers):
+        non_cross_vol_anns = [layers['page'], layers['error'], layers['absolute_error'], layers['note']]
+        for i, (pecha_pg, pecha_err, pecha_abs_err, pecha_note) in enumerate(zip(*non_cross_vol_anns)):
+            base_id = f'v{i+1:03}'
+            # Page annotation
+            Pagination = deepcopy(Layer)
+            Pagination['id'] = self.get_unique_id()
+            Pagination['annotation_type'] = 'pagination'
+            Pagination['rev'] = f'{1:05}'
+            for start, end, pg_info, index in pecha_pg:
+                page = deepcopy(Page)
+                page['id'] = self.get_unique_id()
+                page['span']['start_char'] = start
+                page['span']['end_char'] = end
+                page['part_of'] = f'bases/{base_id}'
+                page['part_index'] = index
+                page['payload'] = pg_info
+                Pagination['content'].append(page)
 
-        # Correction annotation
-        Correction = deepcopy(Layer)
-        Correction['id'] = self.get_unique_id()
-        Correction['annotation_type'] = 'error'
-        Correction['rev'] = f'{1:05}'
-        for err in layers['error']:
-            error = deepcopy(Error)
-            error['id'] = self.get_unique_id()
-            error['span']['start_char'] = err[0]
-            error['span']['end_char'] = err[1]
-            error['type'] = 'correction'
-            error['correction'] = err[2]
-            Correction['content'].append(error)
+            # Correction annotation
+            Correction = deepcopy(Layer)
+            Correction['id'] = self.get_unique_id()
+            Correction['annotation_type'] = 'error'
+            Correction['rev'] = f'{1:05}'
+            for err in pecha_err:
+                error = deepcopy(Error)
+                error['id'] = self.get_unique_id()
+                error['span']['start_char'] = err[0]
+                error['span']['end_char'] = err[1]
+                error['type'] = 'correction'
+                error['correction'] = err[2]
+                Correction['content'].append(error)
 
-        for err in layers['absolute_error']:
-            error = deepcopy(Error)
-            error['id'] = self.get_unique_id()
-            error['span']['start_char'] = err[0]
-            error['span']['end_char'] = err[1]
-            error['type'] = 'absolute_error'
-            Correction['content'].append(error)
+            for err in pecha_abs_err:
+                error = deepcopy(Error)
+                error['id'] = self.get_unique_id()
+                error['span']['start_char'] = err[0]
+                error['span']['end_char'] = err[1]
+                error['type'] = 'absolute_error'
+                Correction['content'].append(error)
 
-        # Yigchung annotation
-        Note_layer = deepcopy(Layer)
-        Note_layer['id'] = self.get_unique_id()
-        Note_layer['annotation_type'] = 'note_marker'
-        Note_layer['rev'] = f'{1:05}'
-        for nt in layers['note']:
-            note = deepcopy(Note)
-            note['id'] = self.get_unique_id()
-            note['span']['start_char'] = nt
-            note['span']['end_char'] = nt
-            Note_layer['content'].append(note)
+            # Yigchung annotation
+            Note_layer = deepcopy(Layer)
+            Note_layer['id'] = self.get_unique_id()
+            Note_layer['annotation_type'] = 'note_marker'
+            Note_layer['rev'] = f'{1:05}'
+            for nt in pecha_note:
+                note = deepcopy(Note)
+                note['id'] = self.get_unique_id()
+                note['span']['start_char'] = nt
+                note['span']['end_char'] = nt
+                Note_layer['content'].append(note)
 
 
-        result = {
-            'pagination': Pagination,
-            'correction': Correction,
-            'note': Note_layer,
-        }
+            result = {
+                'pagination': Pagination,
+                'correction': Correction,
+                'note': Note_layer,
+            }
 
-        return result
+            yield result, base_id
 
 
     def total_pattern(self, plist, line):
@@ -172,18 +178,6 @@ class HFMLFormatter(BaseFormatter):
         if re.search(plist['note_pattern'], line):
             base_line = re.sub(plist['note_pattern'], '', base_line)
         return base_line
-
-    
-    def get_result(self):
-
-        result = {
-            'page': self.page, # page variable format (start_index,end_index,pg_Info,pg_ann)
-            'topic': self.topic_id[1:],
-            'sub_topic': self.sub_topic[1:],
-            'error': self.error_id,
-            'absolute_error': self.abs_er_id,
-            'note': self.notes_id}
-        return result
 
     
     def build_layers(self, m_text, num_vol):
@@ -314,21 +308,30 @@ class HFMLFormatter(BaseFormatter):
                         cur_vol_pages.append((start_page, i-2,pg_info[-1], pg_ann[-1]))
                         self.page.append(cur_vol_pages)
                         pages = []
-                        if cur_vol_error_id:
-                            self.error_id.append(cur_vol_error_id)
-                            cur_vol_error_id = []
-                        if cur_vol_abs_er_id:
-                            self.abs_er_id.append(cur_vol_abs_er_id)
-                            cur_vol_abs_er_id = []
-                        if note_id:
-                            self.notes_id.append(note_id)
-                            note_id = []
+                        self.error_id.append(cur_vol_error_id)
+                        cur_vol_error_id = []
+                        self.abs_er_id.append(cur_vol_abs_er_id)
+                        cur_vol_abs_er_id = []
+                        self.notes_id.append(note_id)
+                        note_id = []
                         self.vol_walker += 1
         
         if num_vol == self.vol_walker: # checks the last volume
             self.topic_id.append(self.current_topic_id)
             self.current_topic_id = []
             self.sub_topic.append(self.sub_topic_Id)
+ 
+    
+    def get_result(self):
+        result = {
+            'page': self.page, # page variable format (start_index,end_index,pg_Info,pg_ann)
+            'topic': self.topic_id[1:],
+            'sub_topic': self.sub_topic[1:],
+            'error': self.error_id,
+            'absolute_error': self.abs_er_id,
+            'note': self.notes_id}
+       
+        return result
 
 
     def get_base_text(self):
@@ -343,20 +346,26 @@ class HFMLFormatter(BaseFormatter):
         self._build_dirs(input_path)
         (self.dirs['opf_path']/'base').mkdir(exist_ok=True)
 
-        for i, (m_text, vol_fn) in enumerate(self.get_input(input_path)):
-            print(f'[INFO] Processing Vol {i+1:03} : {vol_fn.name} ...')
+        for i, (m_text, vol_fn, n_vol) in enumerate(self.get_input(input_path)):
+            print(f'[INFO] Processing Vol {i+1:03} of {n_vol}: {vol_fn.name} ...')
             base_id = f'v{i+1:03}'
+            self.build_layers(m_text, n_vol)
+            # save base_text
             if (self.dirs['opf_path']/'base'/f'{base_id}.txt').is_file(): continue
-            layers = self.build_layers(m_text)
-            formatted_layers = self.format_layer(layers, base_id)
             base_text = self.get_base_text()
+            (self.dirs['opf_path']/'base'/f'{base_id}.txt').write_text(base_text)
 
-            # save layers
+        # save pecha layers
+        layers = self.get_result()
+        for vol_layers, base_id in self.format_layer(layers):
+            print(base_id)
             vol_layer_path = self.dirs['layers_path']/base_id
             vol_layer_path.mkdir(exist_ok=True)
-            for layer, ann in formatted_layers.items():
+            for layer, ann in vol_layers.items():
                 layer_fn = vol_layer_path/f'{layer}.yml'
                 self.dump(ann, layer_fn)
-            
-            # save base_text
-            (self.dirs['opf_path']/'base'/f'{base_id}.txt').write_text(base_text)
+
+
+if __name__ == "__main__":
+    formatter = HFMLFormatter()
+    formatter.new_poti('./tests/data/formatter/hfml/P000002/')
