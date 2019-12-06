@@ -340,7 +340,7 @@ formatter_types = ['ocr', 'hfml']
 @click.option('--name', '-n', type=click.Choice(formatter_types),
                               help='Type of formatter')
 @click.argument('input_path')
-def formatter(**kwargs):
+def format(**kwargs):
     '''
     Cammand to format pecha into opf
     '''

@@ -2,7 +2,7 @@
 This module contains format variable for all the annotations
 '''
 
-__all__ = ['Layer', 'Page', 'Text', 'Error', 'Note']
+__all__ = ['Layer', 'Page', 'Text', 'Error', 'Note', 'CrossVolSpan', 'SubText']
 
 # General layer format
 Layer = {
@@ -28,13 +28,26 @@ Page = {
     'ref': None,            # Any reference of page, eg: img_url. type: str
 }
 
+# Cross vol Span
+CrossVolSpan = {
+    'vol': None,
+    'span': Span
+}
+
+# Sub_text annotation
+SubText = {
+    'id': None,              # Unique id for the sub_text
+    'span': Span,            # span of the sub_text
+    'base': None,            # Which volume the sub_text is from
+    'part_index': None       # index of the sub_text
+}
+
 # Text annotation
 Text = {
     'id': None,             # Unique id for particular Text. type: str
-    'type': None,           # Whether annotation is `text` or `sub_text`. type: str
-    'span': Span,           # Span of `text` or `sub_text`,
-    'part_of': None,
-    'part_index': None,     # Order of the `sub_text`. type: int
+    'span': [],             # list of CrossVolSpan
+    'index': None,          # Order of the `sub_text`. type: int
+    'sub_text': []          # list of SubText
 }
 
 # Error and Suggestion annotation

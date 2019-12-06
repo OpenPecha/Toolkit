@@ -36,67 +36,102 @@ class HFMLFormatter(BaseFormatter):
     
 
     def format_layer(self, layers):
+        cross_vol_anns = [layers['topic'], layers['sub_topic']]
         non_cross_vol_anns = [layers['page'], layers['error'], layers['absolute_error'], layers['note']]
-        for i, (pecha_pg, pecha_err, pecha_abs_err, pecha_note) in enumerate(zip(*non_cross_vol_anns)):
-            base_id = f'v{i+1:03}'
-            # Page annotation
-            Pagination = deepcopy(Layer)
-            Pagination['id'] = self.get_unique_id()
-            Pagination['annotation_type'] = 'pagination'
-            Pagination['rev'] = f'{1:05}'
-            for start, end, pg_info, index in pecha_pg:
-                page = deepcopy(Page)
-                page['id'] = self.get_unique_id()
-                page['span']['start_char'] = start
-                page['span']['end_char'] = end
-                page['part_of'] = f'bases/{base_id}'
-                page['part_index'] = index
-                page['payload'] = pg_info
-                Pagination['content'].append(page)
+        anns = {'cross_vol': cross_vol_anns, 'non_cross_vol': non_cross_vol_anns}
+        for ann in anns:
+            if ann == 'non_corss_vol':
+                for i, (pecha_pg, pecha_err, pecha_abs_err, pecha_note) in enumerate(zip(*anns[ann])):
+                    base_id = f'v{i+1:03}'
+                    # Page annotation
+                    Pagination = deepcopy(Layer)
+                    Pagination['id'] = self.get_unique_id()
+                    Pagination['annotation_type'] = 'pagination'
+                    Pagination['rev'] = f'{1:05}'
+                    for start, end, pg_info, index in pecha_pg:
+                        page = deepcopy(Page)
+                        page['id'] = self.get_unique_id()
+                        page['span']['start_char'] = start
+                        page['span']['end_char'] = end
+                        page['part_of'] = f'bases/{base_id}'
+                        page['part_index'] = index
+                        page['payload'] = pg_info
+                        Pagination['content'].append(page)
 
-            # Correction annotation
-            Correction = deepcopy(Layer)
-            Correction['id'] = self.get_unique_id()
-            Correction['annotation_type'] = 'error'
-            Correction['rev'] = f'{1:05}'
-            for err in pecha_err:
-                error = deepcopy(Error)
-                error['id'] = self.get_unique_id()
-                error['span']['start_char'] = err[0]
-                error['span']['end_char'] = err[1]
-                error['type'] = 'correction'
-                error['correction'] = err[2]
-                Correction['content'].append(error)
+                    # Correction annotation
+                    Correction = deepcopy(Layer)
+                    Correction['id'] = self.get_unique_id()
+                    Correction['annotation_type'] = 'error'
+                    Correction['rev'] = f'{1:05}'
+                    for err in pecha_err:
+                        error = deepcopy(Error)
+                        error['id'] = self.get_unique_id()
+                        error['span']['start_char'] = err[0]
+                        error['span']['end_char'] = err[1]
+                        error['type'] = 'correction'
+                        error['correction'] = err[2]
+                        Correction['content'].append(error)
 
-            for err in pecha_abs_err:
-                error = deepcopy(Error)
-                error['id'] = self.get_unique_id()
-                error['span']['start_char'] = err[0]
-                error['span']['end_char'] = err[1]
-                error['type'] = 'absolute_error'
-                Correction['content'].append(error)
+                    for err in pecha_abs_err:
+                        error = deepcopy(Error)
+                        error['id'] = self.get_unique_id()
+                        error['span']['start_char'] = err[0]
+                        error['span']['end_char'] = err[1]
+                        error['type'] = 'absolute_error'
+                        Correction['content'].append(error)
 
-            # Yigchung annotation
-            Note_layer = deepcopy(Layer)
-            Note_layer['id'] = self.get_unique_id()
-            Note_layer['annotation_type'] = 'note_marker'
-            Note_layer['rev'] = f'{1:05}'
-            for nt in pecha_note:
-                note = deepcopy(Note)
-                note['id'] = self.get_unique_id()
-                note['span']['start_char'] = nt
-                note['span']['end_char'] = nt
-                Note_layer['content'].append(note)
+                    # Yigchung annotation
+                    Note_layer = deepcopy(Layer)
+                    Note_layer['id'] = self.get_unique_id()
+                    Note_layer['annotation_type'] = 'note_marker'
+                    Note_layer['rev'] = f'{1:05}'
+                    for nt in pecha_note:
+                        note = deepcopy(Note)
+                        note['id'] = self.get_unique_id()
+                        note['span']['start_char'] = nt
+                        note['span']['end_char'] = nt
+                        Note_layer['content'].append(note)
 
+
+                    result = {
+                        'pagination': Pagination,
+                        'correction': Correction,
+                        'note': Note_layer,
+                    }
+
+                yield result, base_id
+            else:
+                Index_layer = deepcopy(Layer)
+                Index_layer['id'] = self.get_unique_id()
+                Index_layer['annotation_type'] = 'index'
+                Index_layer['rev'] = f'{1:05}'
+                # loop over each topic
+                for topic, sub_topic in zip(*anns[ann]):
+                    Topic = deepcopy(Text)
+                    Topic['id'] = self.get_unique_id()
+                    for start, end, vol_id, index in topic:
+                        Topic['index'] = index
+                        cross_vol_span = deepcopy(CrossVolSpan)
+                        cross_vol_span['vol'] = f'base/v{vol_id:03}'
+                        cross_vol_span['span']['start_char'] = start
+                        cross_vol_span['span']['end_char'] = end
+                        Topic['span'].append(cross_vol_span)
+
+                        # loop over each sub_topic
+                        for start, end, vol_id, index in sub_topic:
+                            sub_text = deepcopy(SubText)
+                            sub_text['id'] = self.get_unique_id()
+                            sub_text['span']['start_char'] = start
+                            sub_text['span']['end_char'] = end
+                            sub_text['base'] = f'base/v{vol_id:03}'
+                            sub_text['part_index'] = index
+                            Topic['sub_text'].append(sub_text)
 
             result = {
-                'pagination': Pagination,
-                'correction': Correction,
-                'note': Note_layer,
-            }
+                'index': Index_layer
+            }                        
 
-            yield result, base_id
-
+            return result
 
     def total_pattern(self, plist, line):
         '''
