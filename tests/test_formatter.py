@@ -8,23 +8,6 @@ from openpecha.formatters import kangyurFormatter
 from openpecha.formatters import GoogleOCRFormatter
 
 
-def test_tsadra_formatter():
-    m_text = Path('tests/data/formatter/tsadra_01.txt').read_text()
-    formatter = TsadraFormatter()
-
-    text = formatter.text_preprocess(m_text)
-    result = formatter.build_layers(text)
-
-    expected_result = {
-        'title': [0, 17],
-        'yigchung': [193, 830],
-        'tsawa': [919, 1073],
-        'quotes': [1733, 1777],
-        'sapche': [1318, 1393]
-    }
-
-    for layer, ann in expected_result.items():
-        assert result[layer][0] == expected_result[layer]
 
 class TestkangyurFormatter:
 
@@ -97,14 +80,23 @@ class TestGoogleOCRFormatter:
 class TestTsadraFormatter:
 
     def test_tsadra_formatter(self):
-        m_text = Path('tests/data/formatter/tsadra/tsadra_01.xhtml').read_text()
-        formatter = kangyurFormatter()
-
-        text = formatter.text_preprocess(m_text)
-        result = formatter.build_layers(text)
-
+        m_text_01 = Path('tests/data/formatter/tsadra/tsadra_01.xhtml').read_text()
+        m_text_02 = Path('tests/data/formatter/tsadra/tsadra_02.xhtml').read_text()
+        m_texts = [m_text_01, m_text_02]
+        formatter = TsadraFormatter()
+        for m_text in m_texts:
+            text = formatter.text_preprocess(m_text)
+            formatter.build_layers(text)
+        result = formatter.get_result()
+       
         expected_result = {
-            
+            'book_title':[(0,85)],
+            'author':[(86,110),(111,135),(136,182)],
+            'chapter_title':[(183,201)],
+            'tsawa':[(4150,4301),(5122,5299)],
+            'quotes':[(3993,4132),(4302,4418)],
+            'sabche':[(5091,5121),(7313,7376)],
+            'yigchung':[(7273,7312)]
         }
 
         for layer in result:
@@ -113,13 +105,18 @@ class TestTsadraFormatter:
 
 
     def test_tsadra_get_base_text(self):
-        m_text = Path('tests/data/formatter/tsadra/tsadra_01.xhtml').read_text()
-        formatter = kangyurFormatter()
+        m_text1 = Path('tests/data/formatter/tsadra/tsadra_01.xhtml').read_text()
+        m_text2 = Path('tests/data/formatter/tsadra/tsadra_02.xhtml').read_text()
+        texts = [m_text1, m_text2]
+        result = []
+        formatter = TsadraFormatter()
+        for text in texts:
+            text = formatter.text_preprocess(text)
+            formatter.build_layers(text)
+            result.append(formatter.get_base_text())
 
-        text = formatter.text_preprocess(m_text)
-        formatter.build_layers(text)
-        result = formatter.get_base_text()
-
-        expected = Path('tests/data/formatter/tsadra/tasdra_base.txt').read_text()
-
-        assert result == expected
+        expected1 = Path('tests/data/formatter/tsadra/tsadra_base1.txt').read_text()
+        expected2 = Path('tests/data/formatter/tsadra/tsadra_base2.txt').read_text()
+        expecteds = [expected1, expected2]
+        for i in range(0,2):
+            assert result[i] == expecteds[i]

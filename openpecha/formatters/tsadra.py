@@ -1,4 +1,5 @@
 from openpecha.formatters import BaseFormatter
+from bs4 import BeautifulSoup
 
 
 class TsadraFormatter(BaseFormatter):
@@ -9,125 +10,114 @@ class TsadraFormatter(BaseFormatter):
     def __init__(self, output_path='./output'):
         super().__init__(output_path=output_path)
         self.base_text = ''
-        self.walker = 0
+        self.walker = 0 # The walker to traverse every character in the pecha
+        self.book_title = [] # list variable to store book title index
+        self.author = [] # list variable to store author annotion index
+        self.chapter = [] # list variable to store chapter annotation index
+        self.root_text = [] # list variable to store root text index
+        self.citation = [] # list variable to store citation index
+        self.sabche = [] # list variable to store sabche index
+        self.yigchung = [] # list variable to store yigchung index
 
 
     def text_preprocess(self, text):
         
         return text
     
-    def __find_titles(self, soup, output):
-        i = self.walker # The walker
-        # find all titles
-        book_title = ''
-        chapter_title = ''
-        book_title_idx = []
-        book_sub_title_idx = []
-        chapter_title_idx = []
+    def preprocess_text(self,text):
+        #text = text.replace('{', '')
+        return text
 
-        front_title = soup.find('p', class_='credits-page_front-title')
-        if front_title:
-            meta = {'Book Title': '', 'Vol Number': '', 'Book Author': ''}
-            meta['Book Title'] = front_title.text
-            book_number = soup.find('p', class_='credits-page_front-page---book-number')
-            text_author = soup.find('p', class_='credits-page_front-page---text-author')
-            if book_number: meta['Vol Number'] = book_number.text
-            if text_author: meta['Book Author'] = ' '.join((text_author.text).split(' ')[1:])
-            return meta, True
-        else:
-            book_sub_title = soup.find('p', class_='tibetan-book-sub-title')
-            if not book_sub_title:
-                book_sub_title = soup.find('p', class_='tibetan-book-title')
-                if book_sub_title: book_sub_title = book_sub_title.text
-            else:
-                book_sub_title = book_sub_title.text
-                book_title = soup.find('p', class_='tibetan-book-title')
-                if book_title: book_title = book_title.text
+    def format_layer(self, layers):
+        pass
 
-            
-            chapter = soup.find_all('p', class_=f'tibetan-chapter')
-            if chapter: 
-                chapter_title = ''.join([c.text for c in chapter])
-            else:
-                for i in range(1, 4):
-                    chapter = soup.find_all('p', class_=f'tibetan-chapter{i}')
-                    if chapter: 
-                        chapter_title = ''.join([c.text for c in chapter])
-                        break
-
-            #write markdown
-            if book_title:
-                book_title_idx.append((i,len(preprocess_text(book_title)-1)))
-                i += len(preprocess_text(book_title)) + 1
-                self.base_text += f'{book_title}\n\n'
-            if book_sub_title:
-                book_sub_title_idx.append((i,len(preprocess_text(book_sub_title)-1)))
-                i += len(preprocess_text(book_sub_title)) + 1
-                self.base_text += f'{book_sub_title}\n\n'
-            if chapter_title:
-                chapter_title_idx.append((i,len(preprocess_text(chapter_title_idx))-1))
-                i += len(preprocess_text(chapter_title_idx)) + 1
-                self.base_text += f'{chapter_title}\n\n'
-        output = {
-            'book_title': book_title_idx,
-            'book_sub_title': book_sub_title_idx,
-            'chapter_title': chapter_title_idx
-        }
-
-        return output, False
-
-    def __find_the_rest(self, soup, output):
-
+    def build_layers(self, htmls):
+        '''
+        To Build the layer
+        '''
+        soup = BeautifulSoup(htmls, 'html.parser')
+        book_title_tmp = ''
+        author_tmp = ''
+        chapter_title_tmp = ''
         root_text_tmp = ''
         sabche_tmp = ''
         commentary_tmp = ''
         citation_tmp = ''
+        rt_base = 'tibetan-root-text_tibetan-root-text'
+        cit_base = 'tibetan-citations-in-verse_'
+        com_base = 'tibetan-commentary'
 
-        i = self.walker  # The walker
-        root_text = [] # list variable to store root text index
-        citation = [] # list variable to store citation index
-        sabche = [] # list variable to store sabche index
-        yigchung = [] # list variable to store yigchung index
-
+        com_classes = {
+            'first': f'{com_base}-first-line',
+            'middle': f'{com_base}-middle-lines',
+            'last': f'{com_base}-last-line',
+            'non': f'{com_base}-non-indent1'
+        }
+        cit_classes = {
+            'first': f'{cit_base}tibetan-citations-first-line',
+            'middle': f'{cit_base}tibetan-citations-middle-lines',
+            'last': f'{cit_base}tibetan-citations-last-line',
+            'indent': f'{cit_base}tibetan-regular-indented'
+        }
+        root_text_classes = {
+            'first': f'{rt_base}-first-line',
+            'middle': f'{rt_base}-middle-lines',
+            'last': f'{rt_base}-last-line'
+        }
+        p_with_citations = []
         ps = soup.find_all('p')
-        for p in ps[output.count('\n')//2:]:
-            if rt_base in p['class'][0]:
-                #TODO: one line root text.
+        for p in ps:
+            if 'credits-page_front-title' in  p['class'][0]: # to get the book title index
+                book_title_tmp = self.preprocess_text(p.text) + '\n'
+                self.book_title.append((self.walker, len(book_title_tmp)-1+self.walker))
+                self.base_text += book_title_tmp
+                self.walker += len(book_title_tmp)
+
+            if 'text-author' in p['class'][0]: # to get the author annotation index
+                author_tmp = self.preprocess_text(p.text) + '\n'
+                self.author.append((self.walker, len(author_tmp)-1+self.walker))
+                self.base_text += author_tmp
+                self.walker += len(author_tmp)
+
+            if rt_base in p['class'][0]: # to get the root text or 'tsawa' annotation index (verse form)
+                #TODO: one line root text.   
                 if p['class'][0] == root_text_classes['first'] or \
                 p['class'][0] == root_text_classes['middle']:
-                    root_text_tmp += preprocess_text(p.text) + '\n'
-                    self.base_text += preprocess_text(p.text) + '\n'
+                    root_text_tmp += self.preprocess_text(p.text) + '\n'
+                    self.base_text += self.preprocess_text(p.text) + '\n'
                 elif p['class'][0] == root_text_classes['last']:
                     for s in p.contents:
                         if 'root' in s['class'][0]:
-                            root_text_tmp += preprocess_text(s.text)
-                            root_text.append((i,len(root_text_tmp)+i))
-                            i += len(root_text_tmp) + 1
+                            root_text_tmp += self.preprocess_text(s.text)
+                            self.root_text.append((self.walker,len(root_text_tmp)+self.walker))
+                            self.walker+= len(root_text_tmp) + 1
                             root_text_tmp = ''
                         else:
-                            i += len(preprocess_text(s.text))
-                    self.base_text += preprocess_text(p.text) + '\n'
+                            self.walker+= len(self.preprocess_text(s.text))
+                    self.base_text += self.preprocess_text(p.text) + '\n'
 
-            elif 'tibetan-chapter' in p['class'][0]:
-                chapter.append((i, len(preprocess_text(p.text))-1+i))
-                i += len(preprocess_text(p.text))
-                self.base_text += preprocess_text(p.text) + '\n'
+            elif 'tibetan-chapter' in p['class'][0]: # to get chapter title index
+                chapter_title_tmp = self.preprocess_text(p.text) +'\n'
+                self.chapter.append((self.walker, len(chapter_title_tmp)-1+self.walker))
+                self.walker+= len(chapter_title_tmp)
+                self.base_text += chapter_title_tmp
 
             elif 'commentary' in p['class'][0] or 'tibetan-regular-indented' in p['class'][0]:
 
+                # travesing through commetary which are in verse form
                 if p['class'][0] == com_classes['first'] or \
                 p['class'][0] == com_classes['middle']:
-                    commentary_tmp += preprocess_text(p.text) + '\n'
-                    self.base_text += preprocess_text(p.text) + '\n'
+                    commentary_tmp += self.preprocess_text(p.text) + '\n'
+                    self.base_text += self.preprocess_text(p.text) + '\n'
                 elif p['class'][0] == com_classes['last']:
-                    commentary_tmp += preprocess_text(p.text) + '\n'
-                    self.base_text += preprocess_text(p.text) + '\n'
-                    i += len(commentary_tmp)
+                    commentary_tmp += self.preprocess_text(p.text) + '\n'
+                    self.base_text += self.preprocess_text(p.text) + '\n'
+                    self.walker+= len(commentary_tmp)
                     commentary_tmp = ''
-                
+                #travesing through each span of commentary and regular ptag to search annotations
                 else:            
                     p_tmp = ''
-                    p_walker=i 
+                    p_walker=self.walker
                     for s in p.contents:
                         #check for page with no content and skip the page
                         if isinstance(s, str): return '' 
@@ -135,142 +125,113 @@ class TsadraFormatter(BaseFormatter):
                         try:
                             s['class'][0]
                         except:
-                            p_tmp += preprocess_text(s.text)
+                            p_tmp += self.preprocess_text(s.text)
                             continue
 
-                        if 'small' in s['class'][0]:
-                        # p_tmp += f'{{++*++}}{preprocess_text(s.text)}{{++*++}}'
+                        if 'small' in s['class'][0]: # checking for yigchung annotation
+                        # p_tmp += f'{{++*++}}{self.preprocess_text(s.text)}{{++*++}}'
                             if citation_tmp:
                             #citation_tmp += citation_tmp
-                                citation.append((p_walker,len(citation_tmp)-1+p_walker))
+                                self.citation.append((p_walker,len(citation_tmp)-1+p_walker))
                                 p_walker += len(citation_tmp)
                                 citation_tmp = ''
-                            yigchung.append((p_walker,len(preprocess_text(s.text))+p_walker))
-                            p_walker += len(preprocess_text(s.text))
+                            self.yigchung.append((p_walker,len(self.preprocess_text(s.text))+p_walker))
+                            p_walker += len(self.preprocess_text(s.text))
 
-                        elif 'external-citations' in s['class'][0]:
-                            citation_tmp += preprocess_text(s.text)
-                            #p_tmp += preprocess_text(s.text)
+                        elif 'external-citations' in s['class'][0]: # checking for citation annotation
+                            citation_tmp += self.preprocess_text(s.text)
                         
                         elif 'front-title' in s['class'][0]:
                             if citation_tmp:
-                            #citation_tmp += citation_tmp
-                                citation.append((p_walker,len(citation_tmp)-1+p_walker))
+                                self.citation.append((p_walker,len(citation_tmp)-1+p_walker))
                                 p_walker += len(citation_tmp)
                                 citation_tmp = ''
-                            p_walker += len(preprocess_text(s.text))
+                            p_walker += len(self.preprocess_text(s.text))
                         else:
                             if citation_tmp:
-                            #citation_tmp += citation_tmp
-                                citation.append((p_walker,len(citation_tmp)-1+p_walker))
+                                self.citation.append((p_walker,len(citation_tmp)-1+p_walker))
                                 p_walker += len(citation_tmp)
                                 citation_tmp = ''
-                            p_walker += len(preprocess_text(s.text))
+                            p_walker += len(self.preprocess_text(s.text))
 
                     #when citation ends the para
                     if citation_tmp: 
-                        citation.append((p_walker,len(citation_tmp)-1+p_walker))
+                        self.citation.append((p_walker,len(citation_tmp)-1+p_walker))
                         p_walker += len(citation_tmp)
                         citation_tmp = ''
                 
 
-                    commentary_tmp = preprocess_text(p.text) + '\n'
-                    self.base_text += preprocess_text(commentary_tmp)
-                    i += len(commentary_tmp)
+                    commentary_tmp = self.preprocess_text(p.text) + '\n'
+                    self.base_text += self.preprocess_text(commentary_tmp)
+                    self.walker+= len(commentary_tmp)
                     commentary_tmp = ''
                     p_walker = 0
 
-            elif 'sabche' in p['class'][0]:
+            elif 'sabche' in p['class'][0]: # checking for sabche annotation
                 sabche_tmp = ''
                 p_with_sabche_tmp = ''
-                k = i
+                k = self.walker
                 for s in p.contents:
                     try:
                         s['class'][0]
                     except:
-                    p_with_sabche_tmp += preprocess_text(s.text)
-                    continue
+                        p_with_sabche_tmp += self.preprocess_text(s.text)
+                        continue
 
                     if 'sabche' in s['class'][0]:
-                        sabche_tmp += preprocess_text(s.text)
+                        sabche_tmp += self.preprocess_text(s.text)
                     
                     elif 'front-tile' in s['class'][0]:
-                        k += len(preprocess_text(s.text))
+                        k += len(self.preprocess_text(s.text))
                 
 
                 #when sabche ends the para
                 if sabche_tmp:
-                        sabche.append((k,len(sabche_tmp)+k))
+                        self.sabche.append((k,len(sabche_tmp)+k))
                         sabche_tmp=''             
-                i += len(preprocess_text(p.text))+1
-                self.base_text += preprocess_text(p.text) + '\n'
+                self.walker+= len(self.preprocess_text(p.text))+1
+                self.base_text += self.preprocess_text(p.text) + '\n'
                 k = 0
-            elif cit_base in p['class'][0]:
+            elif cit_base in p['class'][0]: # checking for citation annotation first two if for verse form and last for non verse
                 if p['class'][0] == cit_classes['first'] or \
                     p['class'][0] == cit_classes['middle']:
-                    citation_tmp += preprocess_text(p.text) + '\n'
-                    self.base_text += preprocess_text(p.text) + '\n'
+                    citation_tmp += self.preprocess_text(p.text) + '\n'
+                    self.base_text += self.preprocess_text(p.text)  + '\n'
                 elif p['class'][0] == cit_classes['last']:
-                    citation_tmp += preprocess_text(p.text) + '\n'
-                    citation.append((i,len(citation_tmp)-1+i))
-                    self.base_text += preprocess_text(p.text) + '\n'
-                    i += len(citation_tmp)
+                    citation_tmp += self.preprocess_text(p.text) + '\n'
+                    self.citation.append((self.walker,len(citation_tmp)-1+self.walker))
+                    self.base_text += self.preprocess_text(p.text) + '\n'
+                    self.walker+= len(citation_tmp)
                     citation_tmp = ''
                 elif p['class'][0] == cit_classes['indent']:
-                    citation_tmp += preprocess_text(p.text) + '\n'
-                    self.base_text += preprocess_text(p.text) + '\n'
-                    citation.append(i, len(citation_tmp)-1+i)
-                    i += len(citation_tmp)
+                    citation_tmp += self.preprocess_text(p.text) + '\n'
+                    self.base_text += self.preprocess_text(p.text) + '\n'
+                    self.citation.append(self.walker, len(citation_tmp)-1+self.walker)
+                    self.walker+= len(citation_tmp)
                     citation_tmp = ''
 
-            else:
-                i += len(preprocess_text(p.text))
         
-        output = {
-        'tsawa': root_text,
-        'quotes': citation,
-        'sabche': sabche,
-        'yigchung': yigchung
-        }
-
-        return output
-
-
-    def format_layer(self, layers):
         pass
-
-
-    def build_layers(self, htmls):
-
-        tsawa_idx = []
-        quotes_idx = []
-        sabche_idx = []
-        yigchung_idx = []
-
-        for html in htmls:
-            soup = BeautifulSoup(html, 'html.parser')
-            title_output, is_front_page = find_titles(soup, output)
-            if not is_front_page:
-                rest_output = self.find_the_rest(self, soup, output)
-                tsawa_idx.append(rest_output['tsawa'])
-                quotes_idx.append(rest_output['quotes'])
-                sabche_idx.append(rest_output['sabche'])
-                yigchung_idx.append(rest_output['yigchung'])
-        
-        rest_result={
-            'tsawa': tsawa_idx,
-            'quotes': quotes_idx,
-            'sabche': sabche_idx,
-            'yigchung': yigchung_idx
+       
+    def get_result(self):
+        '''
+        To return all the result
+        '''
+        result = {
+            'book_title': self.book_title,
+            'author': self.author,
+            'chapter_title': self.chapter,
+            'tsawa': self.root_text,
+            'quotes': self.citation,
+            'sabche': self.sabche,
+            'yigchung': self.yigchung
         }
-
-        result = dict(title_output)
-        result.update(rest_result)
-
         return result
-        
 
-
-    def get_base_text(self, m_text):
-
-        return self.base_text
+    def get_base_text(self):
+        '''
+        To return base text of each processed page
+        '''
+        base_text = self.base_text # to avoid accumulation of base text
+        self.base_text = ''
+        return base_text
