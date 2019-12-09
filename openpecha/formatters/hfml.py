@@ -1,6 +1,7 @@
 from copy import deepcopy
 from pathlib import Path
 import re
+import time
 
 from openpecha.formatters.formatter import BaseFormatter
 from openpecha.formatters.format import *
@@ -24,7 +25,8 @@ class HFMLFormatter(BaseFormatter):
         self.sub_topic_Id = [] # made class variable as it needs to update cross poti
         self.topic_info = []
         self.sub_topic_info = []
-    
+
+
     def text_preprocess(self, text):
         if text[0] == '\ufeff':
             return text[1:]
@@ -36,7 +38,7 @@ class HFMLFormatter(BaseFormatter):
         fns_len = len(fns)
         for fn in sorted(fns):
             yield self.text_preprocess(fn.read_text()), fn, fns_len
-    
+
 
     def format_layer(self, layers):
         cross_vol_anns = [layers['topic'], layers['sub_topic']]
@@ -50,92 +52,97 @@ class HFMLFormatter(BaseFormatter):
                     Pagination = deepcopy(Layer)
                     Pagination['id'] = self.get_unique_id()
                     Pagination['annotation_type'] = 'pagination'
-                    Pagination['rev'] = f'{1:05}'
+                    Pagination['revison'] = f'{1:05}'
                     for start, end, pg_info, index in pecha_pg:
                         page = deepcopy(Page)
                         page['id'] = self.get_unique_id()
-                        page['span']['start_char'] = start
-                        page['span']['end_char'] = end
-                        page['part_of'] = f'bases/{base_id}'
-                        page['part_index'] = index
-                        page['payload'] = pg_info
-                        Pagination['content'].append(page)
+                        page['span']['start'] = start
+                        page['span']['end'] = end
+                        page['page_index'] = index
+                        page['page_info'] = pg_info
+                        Pagination['annotations'].append(page)
 
                     # Correction annotation
                     Correction = deepcopy(Layer)
                     Correction['id'] = self.get_unique_id()
-                    Correction['annotation_type'] = 'error'
-                    Correction['rev'] = f'{1:05}'
+                    Correction['annotation_type'] = 'correction'
+                    Correction['revision'] = f'{1:05}'
                     for err in pecha_err:
                         error = deepcopy(Error)
                         error['id'] = self.get_unique_id()
-                        error['span']['start_char'] = err[0]
-                        error['span']['end_char'] = err[1]
+                        error['span']['start'] = err[0]
+                        error['span']['end'] = err[1]
                         error['type'] = 'correction'
                         error['correction'] = err[2]
-                        Correction['content'].append(error)
+                        Correction['annotations'].append(error)
 
+                    # Absolute_error annotation
+                    AbsError = deepcopy(Layer)
+                    AbsError['id'] = self.get_unique_id()
+                    AbsError['annotation_type'] = 'absolute_error'
+                    AbsError['revision'] = f'{1:05}'
                     for err in pecha_abs_err:
                         error = deepcopy(Error)
                         error['id'] = self.get_unique_id()
-                        error['span']['start_char'] = err[0]
-                        error['span']['end_char'] = err[1]
-                        error['type'] = 'absolute_error'
-                        Correction['content'].append(error)
+                        error['span']['start'] = err[0]
+                        error['span']['end'] = err[1]
+                        AbsError['annotations'].append(error)
 
                     # Yigchung annotation
                     Note_layer = deepcopy(Layer)
                     Note_layer['id'] = self.get_unique_id()
                     Note_layer['annotation_type'] = 'note_marker'
-                    Note_layer['rev'] = f'{1:05}'
+                    Note_layer['revision'] = f'{1:05}'
                     for nt in pecha_note:
                         note = deepcopy(Note)
                         note['id'] = self.get_unique_id()
-                        note['span']['start_char'] = nt
-                        note['span']['end_char'] = nt
-                        Note_layer['content'].append(note)
+                        note['span']['start'] = nt
+                        note['span']['end'] = nt
+                        Note_layer['annotations'].append(note)
 
 
                     result = {
                         'pagination': Pagination,
                         'correction': Correction,
                         'note': Note_layer,
+                        'absolute_error': AbsError
                     }
 
-                yield result, base_id
+                    yield result, base_id
             else:
                 Index_layer = deepcopy(Layer)
                 Index_layer['id'] = self.get_unique_id()
                 Index_layer['annotation_type'] = 'index'
-                Index_layer['rev'] = f'{1:05}'
+                Index_layer['revision'] = f'{1:05}'
                 # loop over each topic
                 for topic, sub_topic in zip(*anns[ann]):
                     Topic = deepcopy(Text)
                     Topic['id'] = self.get_unique_id()
                     for start, end, vol_id, index in topic:
-                        Topic['index'] = index
+                        Topic['text_index'] = index
                         cross_vol_span = deepcopy(CrossVolSpan)
                         cross_vol_span['vol'] = f'base/v{vol_id:03}'
-                        cross_vol_span['span']['start_char'] = start
-                        cross_vol_span['span']['end_char'] = end
+                        cross_vol_span['span']['start'] = start
+                        cross_vol_span['span']['end'] = end
                         Topic['span'].append(cross_vol_span)
 
                         # loop over each sub_topic
                         for start, end, vol_id, index in sub_topic:
                             sub_text = deepcopy(SubText)
                             sub_text['id'] = self.get_unique_id()
-                            sub_text['span']['start_char'] = start
-                            sub_text['span']['end_char'] = end
+                            sub_text['span']['start'] = start
+                            sub_text['span']['end'] = end
                             sub_text['base'] = f'base/v{vol_id:03}'
-                            sub_text['part_index'] = index
+                            sub_text['sub_text_index'] = index
                             Topic['sub_text'].append(sub_text)
-                        Index_layer['content'].append(Topic)
+                        Index_layer['annotations'].append(Topic)
 
                 result = {
                     'index': Index_layer
                 }
 
                 yield result, None
+
 
     def total_pattern(self, plist, line):
         '''
@@ -147,6 +154,7 @@ class HFMLFormatter(BaseFormatter):
                 match_list = re.finditer(plist[pp], line) # list of match object of given pattern in line
                 for i in match_list:
                     total_length = total_length + len(i[0])
+
         if re.search(plist['error_pattern'], line):
             errors = re.finditer(plist['error_pattern'], line) # list of match object of error pattern in line
             for error in errors:
@@ -157,10 +165,12 @@ class HFMLFormatter(BaseFormatter):
             abs_ers = re.finditer(plist['abs_er_pattern'], line) # list of match object of abs_er pattern in line
             for abs_er in abs_ers:
                 total_length = total_length + 2
+
         if re.search(plist['note_pattern'], line):
             abs_errors = re.finditer(plist['note_pattern'], line) # list of match object of note pattern in line
             for abs_error in abs_errors:
                 total_length = total_length + 1
+
         return total_length
 
 
@@ -188,6 +198,7 @@ class HFMLFormatter(BaseFormatter):
             for abs_er in abs_ers:
                 if p.start() > abs_er.start():
                     length_before = length_before + 2
+
         if re.search(plist['note_pattern'], line):
             abs_errors = re.finditer(plist['note_pattern'], line) # list of match object of note pattern in line
             for abs_error in abs_errors:
@@ -204,6 +215,7 @@ class HFMLFormatter(BaseFormatter):
         base_line = line # stores the base_line which is line without annotation
         for p in ['line_pattern','topic_pattern','sub_topic_pattern']:
             base_line = re.sub(plist[p], '', base_line)
+
         if re.search(plist['error_pattern'], line):
             errors = re.finditer(plist['error_pattern'], line) # list of match object of error pattern in line
             for error in errors:
@@ -214,8 +226,10 @@ class HFMLFormatter(BaseFormatter):
             abs_ers = re.finditer(plist['abs_er_pattern'], line)# list of match object of abs_er pattern in line
             for abs_er in abs_ers:
                 base_line = re.sub(plist['abs_er_pattern'], abs_er[0][1:-1], base_line, 1)
+
         if re.search(plist['note_pattern'], line):
             base_line = re.sub(plist['note_pattern'], '', base_line)
+
         return base_line
 
     
@@ -284,17 +298,17 @@ class HFMLFormatter(BaseFormatter):
 
                             if start_sub_topic != end_sub_topic:
                                 if len(self.sub_topic_info) >= 2:
-                                    self.sub_topic_Id.append((start_sub_topic, end_sub_topic, self.vol_walker+1,self.sub_topic_info[-2]))
+                                    self.sub_topic_Id.append((start_sub_topic, end_sub_topic, self.vol_walker+1, self.sub_topic_info[-2]))
                                     end_sub_topic = end_sub_topic+1
                                 else:
-                                    self.sub_topic_Id.append((start_sub_topic, end_sub_topic, self.vol_walker+1,self.sub_topic_info[-1]))
+                                    self.sub_topic_Id.append((start_sub_topic, end_sub_topic, self.vol_walker+1, self.sub_topic_info[-1]))
                                     end_sub_topic = end_sub_topic+1
                         else:
                             start_sub_topic = end_sub_topic
                             end_sub_topic = sub_topic_match.start()+i-pat_len_before_ann-2
 
                             if start_sub_topic != end_sub_topic:
-                                self.sub_topic_Id.append((start_sub_topic, end_sub_topic,self.vol_walker+1,self.sub_topic_info[-2]))
+                                self.sub_topic_Id.append((start_sub_topic, end_sub_topic, self.vol_walker+1, self.sub_topic_info[-2]))
                                 end_sub_topic = end_sub_topic+1
 
                     if re.search(pat_list['topic_pattern'], line): #checking current line contain topicID annotation or not
@@ -346,7 +360,7 @@ class HFMLFormatter(BaseFormatter):
                     end_line = start_line+length-pat_len_before_ann-1
                     i = end_line + 2
                     base_line = self.base_extract(pat_list, line) + '\n'
-                    self.base_text = self.base_text + base_line
+                    self.base_text += base_line
                     
                     if idx   ==  n_line-1:  # Last line case
                         start_page = end_page
@@ -374,8 +388,8 @@ class HFMLFormatter(BaseFormatter):
     def get_result(self):
         result = {
             'page': self.page, # page variable format (start_index,end_index,pg_Info,pg_ann)
-            'topic': self.topic_id[1:],
-            'sub_topic': self.sub_topic[1:],
+            'topic': self.topic_id,
+            'sub_topic': self.sub_topic,
             'error': self.error_id,
             'absolute_error': self.abs_er_id,
             'note': self.notes_id}
@@ -398,9 +412,11 @@ class HFMLFormatter(BaseFormatter):
         for i, (m_text, vol_fn, n_vol) in enumerate(self.get_input(input_path)):
             print(f'[INFO] Processing Vol {i+1:03} of {n_vol}: {vol_fn.name} ...')
             base_id = f'v{i+1:03}'
+            start = time.time()
             self.build_layers(m_text, n_vol)
+            print(f'[Profile] Time: {time.time() - start:.03}s')
             # save base_text
-            if (self.dirs['opf_path']/'base'/f'{base_id}.txt').is_file(): continue
+            # if (self.dirs['opf_path']/'base'/f'{base_id}.txt').is_file(): continue
             base_text = self.get_base_text()
             (self.dirs['opf_path']/'base'/f'{base_id}.txt').write_text(base_text)
 
@@ -408,8 +424,12 @@ class HFMLFormatter(BaseFormatter):
         layers = self.get_result()
         for vol_layers, base_id in self.format_layer(layers):
             if base_id:
+                print(f'[INFO] Creating layers for {base_id} ...')
                 vol_layer_path = self.dirs['layers_path']/base_id
                 vol_layer_path.mkdir(exist_ok=True)
+            else:
+                print('[INFO] Creating index layer for Pecha ...')
+
             for layer, ann in vol_layers.items():
                 if layer == 'index':
                     layer_fn = self.dirs['opf_path']/f'{layer}.yml'
