@@ -27,20 +27,22 @@ class TestHFMLFormatter:
     def test_build_layers(self):
         m_text1 = Path('tests/data/formatter/hfml/kangyur_01.txt').read_text()
         m_text2 = Path('tests/data/formatter/hfml/kangyur_02.txt').read_text()
+        m_text3 = Path('tests/data/formatter/hfml/kangyur_03.txt').read_text()
         formatter = HFMLFormatter()
 
         text1 = formatter.text_preprocess(m_text1)
         text2 = formatter.text_preprocess(m_text2)
-        texts = [text1, text2, text2]
+        text3 = formatter.text_preprocess(m_text3)
+        texts = [text1, text2, text3]
         for text in texts:
             result = formatter.build_layers(text, len(texts))
 
         result = formatter.get_result()
         
         expected_result = {
-            'page': [[(0, 24, 'kk', '1a'), (27, 676, 'kl', '1b'), (679, 2173, 'lm', '2a')], [(0, 266, 'kk', '1a')], [(0, 266, 'kk', '1a')]],
-            'topic': [[(27, 2173, 1,'T1'),(0, 26, 2,'T1')],[(26, 266, 2,'T2'), (0, 26, 3,'T2')], [(26, 266, 3,'T2')]],
-            'sub_topic': [[(27, 1351, 1,'T1-1'), (1352, 1494, 1,'T1-2'), (1495, 2173, 1,'T1-6'), (0, 25, 2,'T1-6')], [(26, 266, 2,'T1-8'),(0,25, 3,'T1-8')],[(26, 266, 3,'T1-8')]],
+            'page': [[(0, 24, 'kk', '1a'), (27, 676, 'kl', '1b'), (679, 2173, 'lm', '2a')], [(0, 0, 'kk', '1a'),(0,266,'','1b')], [(0, 266, 'ko', '1a')]],
+            'topic': [[(27, 2173, 1,'T1')],[(0, 266, 2,'T2'),(0,26,3,'T2')], [(26, 266, 3,'T3')]],
+            'sub_topic': [[(28, 1352, 1,'T1-1'), (1353, 1494, 1,'T1-2'), (1495, 2173, 1,'T1-6')], [(0, 140, 2,'T1-8'),(141,266,2,'T1-9'),(0,26,3,'T1-9')],[(27,266,3,'T3-1')]],
             'error': [[(1838, 1843, 'མཆིའོ་')], [], []],
             'absolute_error': [[(2040, 2042), (2044, 2045)], [], []],
             'note':[[1518, 1624, 1938], [], []]
