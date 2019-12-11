@@ -52,7 +52,7 @@ class HFMLFormatter(BaseFormatter):
                     Pagination = deepcopy(Layer)
                     Pagination['id'] = self.get_unique_id()
                     Pagination['annotation_type'] = 'pagination'
-                    Pagination['revison'] = f'{1:05}'
+                    Pagination['revision'] = f'{1:05}'
                     for start, end, pg_info, index in pecha_pg:
                         page = deepcopy(Page)
                         page['id'] = self.get_unique_id()
@@ -280,10 +280,11 @@ class HFMLFormatter(BaseFormatter):
                     page_info = line[re.search(pat_list['page_pattern'], line).end():]
                     pg_ann.append(re.search(pat_list['page_pattern'], line)[0][1:-1])
                     pg_info.append(page_info)
-                    if start_page != end_page:
+                    if len(pg_info)>=2:
                         cur_vol_pages.append((start_page, end_page, pg_info[-2], pg_ann[-2]))
-                        i = i+1  # To accumulate the \n character 
-                        end_page = end_page+3
+                        if start_page < end_page: # to ignore the empty pages
+                            i = i+1  # To accumulate the \n character 
+                            end_page = end_page+3
                         self.base_text = self.base_text + '\n'
                 elif re.search(pat_list['line_pattern'], line): #checking current line contains line annotation or not
                     start_line = i
@@ -294,9 +295,9 @@ class HFMLFormatter(BaseFormatter):
                         pat_len_before_ann = self.search_before(sub_topic_match, pat_list, line)
                         if start_sub_topic  == 0:
                             start_sub_topic = end_sub_topic
-                            end_sub_topic = sub_topic_match.start()+i-pat_len_before_ann-1
+                            end_sub_topic = sub_topic_match.start()+i-pat_len_before_ann
 
-                            if start_sub_topic != end_sub_topic:
+                            if start_sub_topic < end_sub_topic:
                                 if len(self.sub_topic_info) >= 2:
                                     self.sub_topic_Id.append((start_sub_topic, end_sub_topic, self.vol_walker+1, self.sub_topic_info[-2]))
                                     end_sub_topic = end_sub_topic+1
@@ -318,18 +319,17 @@ class HFMLFormatter(BaseFormatter):
                         start_topic = end_topic
                         end_topic = topic.start()+i-pat_len_before_ann
 
-                        if start_topic != end_topic:
+                        if (start_topic != end_topic or len(self.topic_info)>=2):
                             if len(self.topic_info) >= 2: # as we are ignoring the self.topic[0]
-                                self.current_topic_id.append((start_topic, end_topic, self.vol_walker+1, self.topic_info[-2])) # -2 as we need the secondlast item
+                                if start_topic < end_topic:
+                                    self.current_topic_id.append((start_topic, end_topic, self.vol_walker+1, self.topic_info[-2])) # -2 as we need the secondlast item
                             else:
                                 self.current_topic_id.append((start_topic, end_topic, self.vol_walker+1, self.topic_info[-1]))
                             self.topic_id.append(self.current_topic_id)
                             self.current_topic_id = []
                             self.sub_topic.append(self.sub_topic_Id)
                             self.sub_topic_Id = []
-
-
-                    
+                        
                     if re.search(pat_list['error_pattern'], line):   # checking current line contain error annotation or not
                         errors = re.finditer(pat_list['error_pattern'], line)
                         for error in errors:
@@ -386,6 +386,10 @@ class HFMLFormatter(BaseFormatter):
  
     
     def get_result(self):
+        if self.topic_id[0][0][3] == self.topic_id[1][0][3]:
+            self.topic_id = self.topic_id[1:]
+        if self.sub_topic[0][0][3] == self.sub_topic[1][0][3]:
+            self.sub_topic = self.sub_topic[1:]
         result = {
             'page': self.page, # page variable format (start_index,end_index,pg_Info,pg_ann)
             'topic': self.topic_id,
