@@ -79,7 +79,8 @@ def test_get_all_layer(opf_path):
 
     result = serializer.get_all_layer()
     
-    assert result == ['title', 'yigchung']
+    for r in result:
+        assert r in ['title', 'yigchung']
 
 
 def test_apply_layers(opf_path):
