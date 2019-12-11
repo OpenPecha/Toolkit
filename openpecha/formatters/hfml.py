@@ -334,10 +334,14 @@ class HFMLFormatter(BaseFormatter):
  
     
     def get_result(self):
+        if self.topic_id[0][0][3] == self.topic_id[1][0][3]:
+            self.topic_id = self.topic_id[1:]
+        if self.sub_topic[0][0][3] == self.sub_topic[1][0][3]:
+            self.sub_topic = self.sub_topic[1:]
         result = {
             'page': self.page, # page variable format (start_index,end_index,pg_Info,pg_ann)
-            'topic': self.topic_id[1:],
-            'sub_topic': self.sub_topic[1:],
+            'topic': self.topic_id,
+            'sub_topic': self.sub_topic,
             'error': self.error_id,
             'absolute_error': self.abs_er_id,
             'note': self.notes_id}
