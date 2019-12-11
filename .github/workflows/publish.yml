@@ -1,8 +1,6 @@
 name: Upload Python Package
 
-on:
-  release:
-    types: [created]
+on: [push]
 
 jobs:
   deploy:
@@ -25,6 +23,7 @@ jobs:
         python setup.py sdist bdist_wheel
     
     - name: Publish
+      if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags')
       uses: pypa/gh-action-pypi-publish@master
       with:
         user: __token__
