@@ -8,7 +8,7 @@ __all__ = ['Layer', 'Page', 'Text', 'Error', 'Note', 'CrossVolSpan', 'SubText']
 Layer = {
     'id': None,              # Uique id for annotation of specific Pecha or Abstract work. type: str
     'annotation_type': None, # Name of annotation, type: str
-    'revison': None,             # Revision number. type: int
+    'revision': None,             # Revision number. type: int
     'annotations': []            # Annotations are stored in list . type: list
 }
 

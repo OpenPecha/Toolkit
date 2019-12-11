@@ -52,7 +52,7 @@ class HFMLFormatter(BaseFormatter):
                     Pagination = deepcopy(Layer)
                     Pagination['id'] = self.get_unique_id()
                     Pagination['annotation_type'] = 'pagination'
-                    Pagination['revison'] = f'{1:05}'
+                    Pagination['revision'] = f'{1:05}'
                     for start, end, pg_info, index in pecha_pg:
                         page = deepcopy(Page)
                         page['id'] = self.get_unique_id()
