@@ -2,7 +2,7 @@
 This module contains format variable for all the annotations
 '''
 
-__all__ = ['Layer', 'Page', 'Text', 'Error', 'Note', 'CrossVolSpan', 'SubText']
+__all__ = ['Layer', 'Page', 'Text', 'Error', 'Note', 'CrossVolSpan', 'SubText', 'Peydurma']
 
 # General layer format
 Layer = {
@@ -57,7 +57,7 @@ Error = {
     'certainty': None       # Certainty of the suggested correct text. type: int
 }
 
-AbsoluteError = {
+Peydurma = {
     'id': None,
     'span': Span
 }

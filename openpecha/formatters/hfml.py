@@ -1,7 +1,6 @@
 from copy import deepcopy
 from pathlib import Path
 import re
-import time
 
 from openpecha.formatters.formatter import BaseFormatter
 from openpecha.formatters.format import *
@@ -42,11 +41,11 @@ class HFMLFormatter(BaseFormatter):
 
     def format_layer(self, layers):
         cross_vol_anns = [layers['topic'], layers['sub_topic']]
-        non_cross_vol_anns = [layers['page'], layers['error'], layers['absolute_error'], layers['note']]
+        non_cross_vol_anns = [layers['page'], layers['error'], layers['peydurma'], layers['note']]
         anns = {'cross_vol': cross_vol_anns, 'non_cross_vol': non_cross_vol_anns}
         for ann in anns:
             if ann == 'non_cross_vol':
-                for i, (pecha_pg, pecha_err, pecha_abs_err, pecha_note) in enumerate(zip(*anns[ann])):
+                for i, (pecha_pg, pecha_err, pecha_peydurma, pecha_note) in enumerate(zip(*anns[ann])):
                     base_id = f'v{i+1:03}'
                     # Page annotation
                     Pagination = deepcopy(Layer)
@@ -77,16 +76,16 @@ class HFMLFormatter(BaseFormatter):
                         Correction['annotations'].append(error)
 
                     # Absolute_error annotation
-                    AbsError = deepcopy(Layer)
-                    AbsError['id'] = self.get_unique_id()
-                    AbsError['annotation_type'] = 'absolute_error'
-                    AbsError['revision'] = f'{1:05}'
-                    for err in pecha_abs_err:
-                        error = deepcopy(Error)
-                        error['id'] = self.get_unique_id()
-                        error['span']['start'] = err[0]
-                        error['span']['end'] = err[1]
-                        AbsError['annotations'].append(error)
+                    Peydurma_layer = deepcopy(Layer)
+                    Peydurma_layer['id'] = self.get_unique_id()
+                    Peydurma_layer['annotation_type'] = 'peydurma'
+                    Peydurma_layer['revision'] = f'{1:05}'
+                    for start, end in pecha_peydurma:
+                        peydurma = deepcopy(Peydurma)
+                        peydurma['id'] = self.get_unique_id()
+                        peydurma['span']['start'] = start
+                        peydurma['span']['end'] = end
+                        Peydurma_layer['annotations'].append(peydurma)
 
                     # Yigchung annotation
                     Note_layer = deepcopy(Layer)
@@ -105,7 +104,7 @@ class HFMLFormatter(BaseFormatter):
                         'pagination': Pagination,
                         'correction': Correction,
                         'note': Note_layer,
-                        'absolute_error': AbsError
+                        'peydurma': Peydurma_layer
                     }
 
                     yield result, base_id
@@ -118,6 +117,17 @@ class HFMLFormatter(BaseFormatter):
                 for topic, sub_topic in zip(*anns[ann]):
                     Topic = deepcopy(Text)
                     Topic['id'] = self.get_unique_id()
+
+                    # loop over each sub_topic
+                    for start, end, vol_id, index in sub_topic:
+                        sub_text = deepcopy(SubText)
+                        sub_text['id'] = self.get_unique_id()
+                        sub_text['span']['start'] = start
+                        sub_text['span']['end'] = end
+                        sub_text['base'] = f'base/v{vol_id:03}'
+                        sub_text['sub_text_index'] = index
+                        Topic['sub_text'].append(sub_text)
+
                     for start, end, vol_id, index in topic:
                         Topic['text_index'] = index
                         cross_vol_span = deepcopy(CrossVolSpan)
@@ -126,16 +136,7 @@ class HFMLFormatter(BaseFormatter):
                         cross_vol_span['span']['end'] = end
                         Topic['span'].append(cross_vol_span)
 
-                        # loop over each sub_topic
-                        for start, end, vol_id, index in sub_topic:
-                            sub_text = deepcopy(SubText)
-                            sub_text['id'] = self.get_unique_id()
-                            sub_text['span']['start'] = start
-                            sub_text['span']['end'] = end
-                            sub_text['base'] = f'base/v{vol_id:03}'
-                            sub_text['sub_text_index'] = index
-                            Topic['sub_text'].append(sub_text)
-                        Index_layer['annotations'].append(Topic)
+                    Index_layer['annotations'].append(Topic)
 
                 result = {
                     'index': Index_layer
@@ -388,14 +389,14 @@ class HFMLFormatter(BaseFormatter):
     def get_result(self):
         if self.topic_id[0][0][3] == self.topic_id[1][0][3]:
             self.topic_id = self.topic_id[1:]
-        if self.sub_topic[0][0][3] == self.sub_topic[1][0][3]:
             self.sub_topic = self.sub_topic[1:]
+
         result = {
             'page': self.page, # page variable format (start_index,end_index,pg_Info,pg_ann)
             'topic': self.topic_id,
             'sub_topic': self.sub_topic,
             'error': self.error_id,
-            'absolute_error': self.abs_er_id,
+            'peydurma': self.abs_er_id,
             'note': self.notes_id}
        
         return result
@@ -416,9 +417,7 @@ class HFMLFormatter(BaseFormatter):
         for i, (m_text, vol_fn, n_vol) in enumerate(self.get_input(input_path)):
             print(f'[INFO] Processing Vol {i+1:03} of {n_vol}: {vol_fn.name} ...')
             base_id = f'v{i+1:03}'
-            start = time.time()
             self.build_layers(m_text, n_vol)
-            print(f'[Profile] Time: {time.time() - start:.03}s')
             # save base_text
             # if (self.dirs['opf_path']/'base'/f'{base_id}.txt').is_file(): continue
             base_text = self.get_base_text()
@@ -444,4 +443,4 @@ class HFMLFormatter(BaseFormatter):
 
 if __name__ == "__main__":
     formatter = HFMLFormatter()
-    formatter.new_poti('./tests/data/formatter/hfml/P000002/')
+    formatter.new_poti('./tests/data/formatter/hfml/P000001/')
