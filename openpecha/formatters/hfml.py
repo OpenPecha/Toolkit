@@ -329,18 +329,20 @@ class HFMLFormatter(BaseFormatter):
                                 self.current_topic_id.append((start_topic, end_topic, self.vol_walker+1, self.topic_info[-1]))
                             self.topic_id.append(self.current_topic_id)
                             self.current_topic_id = []
-                            l.append(self.sub_topic_Id[0])
-                            for s in range(1,len(self.sub_topic_Id)):
-                                if self.sub_topic_Id[s][3] != self.sub_topic_Id[s-1][3]:
-                                    self.cur_sub.append(l)
-                                    l=[]
-                                l.append(self.sub_topic_Id[s])
-                            #l.append(self.sub_topic_Id[-1])
-                            self.cur_sub.append(l)
-                            self.sub_topic.append(self.cur_sub)
-                            self.sub_topic_Id = []
-                            self.cur_sub= []
-                            l=[]
+                            if self.sub_topic_Id:
+                                if len(self.sub_topic_Id)>1 and start_topic < end_topic:
+                                    self.sub_topic_Id.append((start_topic,end_topic,self.vol_walker+1,self.sub_topic_Id[-1][3]))
+                                l.append(self.sub_topic_Id[0])
+                                for s in range(1,len(self.sub_topic_Id)):
+                                    if self.sub_topic_Id[s][3] != self.sub_topic_Id[s-1][3]:
+                                        self.cur_sub.append(l)
+                                        l=[]
+                                    l.append(self.sub_topic_Id[s])
+                                self.cur_sub.append(l)
+                                self.sub_topic.append(self.cur_sub)
+                                self.sub_topic_Id = []
+                                self.cur_sub= []
+                                l=[]
                         
                     if re.search(pat_list['error_pattern'], line):   # checking current line contain error annotation or not
                         errors = re.finditer(pat_list['error_pattern'], line)
@@ -378,7 +380,8 @@ class HFMLFormatter(BaseFormatter):
                         start_page = end_page
                         start_topic = end_topic
                         start_sub_topic = end_sub_topic
-                        self.sub_topic_Id.append((start_sub_topic, i-2, self.vol_walker+1, self.sub_topic_info[-1] if self.sub_topic_info else None))
+                        if self.sub_topic_Id:
+                            self.sub_topic_Id.append((start_sub_topic, i-2, self.vol_walker+1, self.sub_topic_info[-1] if self.sub_topic_info else None))
                         self.current_topic_id.append((start_topic, i-2, self.vol_walker+1, self.topic_info[-1]))
                         cur_vol_pages.append((start_page, i-2, pg_info[-1], pg_ann[-1]))
                         self.page.append(cur_vol_pages)
@@ -394,18 +397,25 @@ class HFMLFormatter(BaseFormatter):
         if num_vol == self.vol_walker: # checks the last volume
             self.topic_id.append(self.current_topic_id)
             self.current_topic_id = []
-            l.append(self.sub_topic_Id[0])
-            for s in range(1,len(self.sub_topic_Id)):
-                if self.sub_topic_Id[s][3] != self.sub_topic_Id[s-1][3]:
-                    self.cur_sub.append(l)
-                    l=[]
-                l.append(self.sub_topic_Id[s])
-                            #l.append(self.sub_topic_Id[-1])
-            self.cur_sub.append(l)
-            self.sub_topic.append(self.cur_sub)
-            self.sub_topic_Id = []
-            self.cur_sub= []
-            #self.sub_topic.append(self.sub_topic_Id)
+            if self.sub_topic_Id:
+                
+                l.append(self.sub_topic_Id[0])
+                for s in range(1,len(self.sub_topic_Id)):
+                    if self.sub_topic_Id[s][3] != self.sub_topic_Id[s-1][3]:
+                        self.cur_sub.append(l)
+                        l=[]
+                    l.append(self.sub_topic_Id[s])
+                                #l.append(self.sub_topic_Id[-1])
+                self.cur_sub.append(l)
+                self.sub_topic.append(self.cur_sub)
+                self.sub_topic_Id = []
+                self.cur_sub= []
+            else:
+                l=[]
+                self.cur_sub.append(l)
+                self.sub_topic.append(self.cur_sub)
+                self.cur_sub =[]
+        
  
     
     def get_result(self):
