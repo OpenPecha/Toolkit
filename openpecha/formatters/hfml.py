@@ -24,6 +24,7 @@ class HFMLFormatter(BaseFormatter):
         self.sub_topic_Id = [] # made class variable as it needs to update cross poti
         self.topic_info = []
         self.sub_topic_info = []
+        self.cur_sub = []
 
 
     def text_preprocess(self, text):
@@ -244,7 +245,7 @@ class HFMLFormatter(BaseFormatter):
         note_id = [] # list variable to store note annotation '#"
         pg_info = []
         pg_ann = []
-        
+        l =[]
         
         pat_list={ 
             'page_pattern': r'\[[0-9]+[a-z]{1}\]',
@@ -328,8 +329,18 @@ class HFMLFormatter(BaseFormatter):
                                 self.current_topic_id.append((start_topic, end_topic, self.vol_walker+1, self.topic_info[-1]))
                             self.topic_id.append(self.current_topic_id)
                             self.current_topic_id = []
-                            self.sub_topic.append(self.sub_topic_Id)
+                            l.append(self.sub_topic_Id[0])
+                            for s in range(1,len(self.sub_topic_Id)):
+                                if self.sub_topic_Id[s][3] != self.sub_topic_Id[s-1][3]:
+                                    self.cur_sub.append(l)
+                                    l=[]
+                                l.append(self.sub_topic_Id[s])
+                            #l.append(self.sub_topic_Id[-1])
+                            self.cur_sub.append(l)
+                            self.sub_topic.append(self.cur_sub)
                             self.sub_topic_Id = []
+                            self.cur_sub= []
+                            l=[]
                         
                     if re.search(pat_list['error_pattern'], line):   # checking current line contain error annotation or not
                         errors = re.finditer(pat_list['error_pattern'], line)
@@ -383,7 +394,18 @@ class HFMLFormatter(BaseFormatter):
         if num_vol == self.vol_walker: # checks the last volume
             self.topic_id.append(self.current_topic_id)
             self.current_topic_id = []
-            self.sub_topic.append(self.sub_topic_Id)
+            l.append(self.sub_topic_Id[0])
+            for s in range(1,len(self.sub_topic_Id)):
+                if self.sub_topic_Id[s][3] != self.sub_topic_Id[s-1][3]:
+                    self.cur_sub.append(l)
+                    l=[]
+                l.append(self.sub_topic_Id[s])
+                            #l.append(self.sub_topic_Id[-1])
+            self.cur_sub.append(l)
+            self.sub_topic.append(self.cur_sub)
+            self.sub_topic_Id = []
+            self.cur_sub= []
+            #self.sub_topic.append(self.sub_topic_Id)
  
     
     def get_result(self):
