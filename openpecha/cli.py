@@ -133,7 +133,7 @@ def download_poti(poti, out):
                                      pecha in separate line. Poti batch download")
 @click.option('--filter', '-f', help='filter pecha by layer availability, specify \
                                      layer names in comma separated, eg: title,yigchung,..')
-@click.option('--out', '-o', default='./pehca',
+@click.option('--out', '-o', default='./pecha',
                             help='directory to store all the pecha')
 def download(**kwargs):
     '''

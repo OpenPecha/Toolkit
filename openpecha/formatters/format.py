@@ -2,7 +2,7 @@
 This module contains format variable for all the annotations
 '''
 
-__all__ = ['Layer', 'Page', 'Text', 'Error', 'Note', 'CrossVolSpan', 'SubText', 'Peydurma']
+__all__ = ['Layer', 'Page', 'Text', 'Correction', 'ErrorCandidate', 'CrossVolSpan', 'SubText', 'Peydurma']
 
 # General layer format
 Layer = {
@@ -43,28 +43,28 @@ SubText = {
 
 # Text annotation
 Text = {
-    'id': None,             # Unique id for particular Text. type: str
-    'span': [],             # list of CrossVolSpan
-    'text_index': None,     # Order of the `sub_text`. type: int
-    'sub_text': []          # list of SubText
+    'id': None,              # Unique id for particular Text. type: str
+    'work': None,            # id of the `text`. type: int
+    'sub_work': [],          # list of SubText
+    'span': []               # list of CrossVolSpan
 }
 
 # Error and Suggestion annotation
-Error = {
+Correction = {
     'id': None,             # Unque id for particular error text. type: int
-    'span': Span,           # Span of error text. type: Span
     'correction': None,     # Correct text suggestion. type: str
     'certainty': None       # Certainty of the suggested correct text. type: int
+    'span': Span           # Span of error text. type: Span
 }
 
-Peydurma = {
+ErrorCandidate = {
     'id': None,
     'span': Span
 }
 
 # Note
-Note = {
+Peydurma = {
     'id': None,
-    'span': Span,
     'note': None
+    'span': Span
 }

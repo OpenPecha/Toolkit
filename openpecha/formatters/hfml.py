@@ -41,11 +41,11 @@ class HFMLFormatter(BaseFormatter):
 
     def format_layer(self, layers):
         cross_vol_anns = [layers['topic'], layers['sub_topic']]
-        non_cross_vol_anns = [layers['page'], layers['error'], layers['peydurma'], layers['note']]
+        non_cross_vol_anns = [layers['page'], layers['correction'], layers['peydurma'], layers['error_candidate']]
         anns = {'cross_vol': cross_vol_anns, 'non_cross_vol': non_cross_vol_anns}
         for ann in anns:
             if ann == 'non_cross_vol':
-                for i, (pecha_pg, pecha_err, pecha_peydurma, pecha_note) in enumerate(zip(*anns[ann])):
+                for i, (pecha_pg, pecha_correction, pecha_peydurma, pecha_error) in enumerate(zip(*anns[ann])):
                     base_id = f'v{i+1:03}'
                     # Page annotation
                     Pagination = deepcopy(Layer)
@@ -66,19 +66,31 @@ class HFMLFormatter(BaseFormatter):
                     Correction['id'] = self.get_unique_id()
                     Correction['annotation_type'] = 'correction'
                     Correction['revision'] = f'{1:05}'
-                    for err in pecha_err:
-                        error = deepcopy(Error)
-                        error['id'] = self.get_unique_id()
-                        error['span']['start'] = err[0]
-                        error['span']['end'] = err[1]
-                        error['type'] = 'correction'
-                        error['correction'] = err[2]
-                        Correction['annotations'].append(error)
+                    for start, end, sug in pecha_correction:
+                        correction = deepcopy(Correction)
+                        correction['id'] = self.get_unique_id()
+                        correction['span']['start'] = start
+                        correction['span']['end'] = end
+                        correction['type'] = 'correction'
+                        correction['correction'] = sug
+                        Correction['annotations'].append(correction)
 
-                    # Absolute_error annotation
+                    # Error_candidate annotation
+                    Error_layer = deepcopy(Layer)
+                    Error_layer['id'] = self.get_unique_id()
+                    Error_layer['annotation_type'] = 'error_candidate'
+                    Error_layer['revision'] = f'{1:05}'
+                    for start, end in pecha_error:
+                        error = deepcopy(ErrorCandidate)
+                        error['id'] = self.get_unique_id()
+                        error['span']['start'] = start
+                        error['span']['end'] = end
+                        Error_layer['annotations'].append(error)
+
+                    # Yigchung annotation
                     Peydurma_layer = deepcopy(Layer)
                     Peydurma_layer['id'] = self.get_unique_id()
-                    Peydurma_layer['annotation_type'] = 'peydurma'
+                    Peydurma_layer['annotation_type'] = 'note_marker'
                     Peydurma_layer['revision'] = f'{1:05}'
                     for start, end in pecha_peydurma:
                         peydurma = deepcopy(Peydurma)
@@ -87,24 +99,12 @@ class HFMLFormatter(BaseFormatter):
                         peydurma['span']['end'] = end
                         Peydurma_layer['annotations'].append(peydurma)
 
-                    # Yigchung annotation
-                    Note_layer = deepcopy(Layer)
-                    Note_layer['id'] = self.get_unique_id()
-                    Note_layer['annotation_type'] = 'note_marker'
-                    Note_layer['revision'] = f'{1:05}'
-                    for nt in pecha_note:
-                        note = deepcopy(Note)
-                        note['id'] = self.get_unique_id()
-                        note['span']['start'] = nt
-                        note['span']['end'] = nt
-                        Note_layer['annotations'].append(note)
-
 
                     result = {
                         'pagination': Pagination,
                         'correction': Correction,
-                        'note': Note_layer,
-                        'peydurma': Peydurma_layer
+                        'peydurma': Peydurma_layer,
+                        'error_candidate': Error_layer
                     }
 
                     yield result, base_id
@@ -126,10 +126,10 @@ class HFMLFormatter(BaseFormatter):
                         sub_text['span']['end'] = end
                         sub_text['base'] = f'base/v{vol_id:03}'
                         sub_text['sub_text_index'] = index
-                        Topic['sub_text'].append(sub_text)
+                        Topic['sub_work'].append(sub_text)
 
                     for start, end, vol_id, index in topic:
-                        Topic['text_index'] = index
+                        Topic['work'] = index
                         cross_vol_span = deepcopy(CrossVolSpan)
                         cross_vol_span['vol'] = f'base/v{vol_id:03}'
                         cross_vol_span['span']['start'] = start
@@ -395,9 +395,9 @@ class HFMLFormatter(BaseFormatter):
             'page': self.page, # page variable format (start_index,end_index,pg_Info,pg_ann)
             'topic': self.topic_id,
             'sub_topic': self.sub_topic,
-            'error': self.error_id,
-            'peydurma': self.abs_er_id,
-            'note': self.notes_id}
+            'correction': self.error_id,
+            'error_candidate': self.abs_er_id,
+            'peydurma': self.notes_id}
        
         return result
 
