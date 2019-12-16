@@ -53,8 +53,8 @@ Text = {
 Correction = {
     'id': None,             # Unque id for particular error text. type: int
     'correction': None,     # Correct text suggestion. type: str
-    'certainty': None       # Certainty of the suggested correct text. type: int
-    'span': Span           # Span of error text. type: Span
+    'certainty': None,      # Certainty of the suggested correct text. type: int
+    'span': Span            # Span of error text. type: Span
 }
 
 ErrorCandidate = {
@@ -65,6 +65,6 @@ ErrorCandidate = {
 # Note
 Peydurma = {
     'id': None,
-    'note': None
+    'note': None,
     'span': Span
 }

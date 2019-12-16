@@ -62,10 +62,10 @@ class HFMLFormatter(BaseFormatter):
                         Pagination['annotations'].append(page)
 
                     # Correction annotation
-                    Correction = deepcopy(Layer)
-                    Correction['id'] = self.get_unique_id()
-                    Correction['annotation_type'] = 'correction'
-                    Correction['revision'] = f'{1:05}'
+                    Correction_layer = deepcopy(Layer)
+                    Correction_layer['id'] = self.get_unique_id()
+                    Correction_layer['annotation_type'] = 'correction'
+                    Correction_layer['revision'] = f'{1:05}'
                     for start, end, sug in pecha_correction:
                         correction = deepcopy(Correction)
                         correction['id'] = self.get_unique_id()
@@ -73,7 +73,7 @@ class HFMLFormatter(BaseFormatter):
                         correction['span']['end'] = end
                         correction['type'] = 'correction'
                         correction['correction'] = sug
-                        Correction['annotations'].append(correction)
+                        Correction_layer['annotations'].append(correction)
 
                     # Error_candidate annotation
                     Error_layer = deepcopy(Layer)
@@ -92,11 +92,11 @@ class HFMLFormatter(BaseFormatter):
                     Peydurma_layer['id'] = self.get_unique_id()
                     Peydurma_layer['annotation_type'] = 'note_marker'
                     Peydurma_layer['revision'] = f'{1:05}'
-                    for start, end in pecha_peydurma:
+                    for pey in pecha_peydurma:
                         peydurma = deepcopy(Peydurma)
                         peydurma['id'] = self.get_unique_id()
-                        peydurma['span']['start'] = start
-                        peydurma['span']['end'] = end
+                        peydurma['span']['start'] = pey
+                        peydurma['span']['end'] = pey
                         Peydurma_layer['annotations'].append(peydurma)
 
 
@@ -443,4 +443,4 @@ class HFMLFormatter(BaseFormatter):
 
 if __name__ == "__main__":
     formatter = HFMLFormatter()
-    formatter.new_poti('./tests/data/formatter/hfml/P000001/')
+    formatter.new_poti('./tests/data/formatter/hfml/P000002/')
