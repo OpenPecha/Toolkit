@@ -328,8 +328,13 @@ class HFMLFormatter(BaseFormatter):
                                 self.current_topic_id.append((start_topic, end_topic, self.vol_walker+1, self.topic_info[-1]))
                             self.topic_id.append(self.current_topic_id)
                             self.current_topic_id = []
+                            if self.sub_topic_Id and end_sub_topic != end_topic:
+                                self.sub_topic_Id.append((end_sub_topic,end_topic,self.vol_walker+1,self.sub_topic_info[-1]))
                             self.sub_topic.append(self.sub_topic_Id)
                             self.sub_topic_Id = []
+                            last=self.sub_topic_info[-1]
+                            self.sub_topic_info =[]
+                            self.sub_topic_info.append(last)
                         
                     if re.search(pat_list['error_pattern'], line):   # checking current line contain error annotation or not
                         errors = re.finditer(pat_list['error_pattern'], line)
@@ -367,7 +372,9 @@ class HFMLFormatter(BaseFormatter):
                         start_page = end_page
                         start_topic = end_topic
                         start_sub_topic = end_sub_topic
-                        self.sub_topic_Id.append((start_sub_topic, i-2, self.vol_walker+1, self.sub_topic_info[-1] if self.sub_topic_info else None))
+                        if self.sub_topic_Id:
+
+                            self.sub_topic_Id.append((start_sub_topic, i-2, self.vol_walker+1, self.sub_topic_info[-1] if self.sub_topic_info else None))
                         self.current_topic_id.append((start_topic, i-2, self.vol_walker+1, self.topic_info[-1]))
                         cur_vol_pages.append((start_page, i-2, pg_info[-1], pg_ann[-1]))
                         self.page.append(cur_vol_pages)
@@ -390,7 +397,7 @@ class HFMLFormatter(BaseFormatter):
         if self.topic_id[0][0][3] == self.topic_id[1][0][3]:
             self.topic_id = self.topic_id[1:]
             self.sub_topic = self.sub_topic[1:]
-
+        #self.sub_topic = self.__final_sub_topic(self.sub_topic)
         result = {
             'page': self.page, # page variable format (start_index,end_index,pg_Info,pg_ann)
             'topic': self.topic_id,
@@ -401,6 +408,31 @@ class HFMLFormatter(BaseFormatter):
        
         return result
 
+    def __final_sub_topic(self, sub_topics):
+        result = []
+        cur_sub = []
+        l=[]
+        sub_topic = sub_topics
+        walker = 0;
+        for i in range(0,len(sub_topic)):
+            if sub_topic[i]:
+                l.append(sub_topic[i][0])
+            for walker in range(1,len(sub_topic[i])):
+                if sub_topic[i][walker][3]==sub_topic[i][walker-1][3]:
+                    l.append(sub_topic[i][walker])
+                else:
+                    cur_sub.append(l)
+                    l=[]
+                    l.append(sub_topic[i][walker])
+            if l:
+                cur_sub.append(l)
+                l=[]       
+            if len(cur_sub)==0:
+                l=[]
+                cur_sub.append(l)
+            result.append(cur_sub)
+            cur_sub = []
+        return result
 
     def get_base_text(self):
         base_text = self.base_text.strip()
