@@ -373,7 +373,6 @@ class HFMLFormatter(BaseFormatter):
                         start_topic = end_topic
                         start_sub_topic = end_sub_topic
                         if self.sub_topic_Id:
-
                             self.sub_topic_Id.append((start_sub_topic, i-2, self.vol_walker+1, self.sub_topic_info[-1] if self.sub_topic_info else None))
                         self.current_topic_id.append((start_topic, i-2, self.vol_walker+1, self.topic_info[-1]))
                         cur_vol_pages.append((start_page, i-2, pg_info[-1], pg_ann[-1]))
@@ -397,7 +396,7 @@ class HFMLFormatter(BaseFormatter):
         if self.topic_id[0][0][3] == self.topic_id[1][0][3]:
             self.topic_id = self.topic_id[1:]
             self.sub_topic = self.sub_topic[1:]
-        #self.sub_topic = self.__final_sub_topic(self.sub_topic)
+        self.sub_topic = self.__final_sub_topic(self.sub_topic)
         result = {
             'page': self.page, # page variable format (start_index,end_index,pg_Info,pg_ann)
             'topic': self.topic_id,
@@ -409,29 +408,32 @@ class HFMLFormatter(BaseFormatter):
         return result
 
     def __final_sub_topic(self, sub_topics):
+        '''
+        To include all the same subtopic in one list
+        '''
         result = []
+        cur_topic = []
         cur_sub = []
-        l=[]
         sub_topic = sub_topics
         walker = 0;
-        for i in range(0,len(sub_topic)):
-            if sub_topic[i]:
-                l.append(sub_topic[i][0])
-            for walker in range(1,len(sub_topic[i])):
-                if sub_topic[i][walker][3]==sub_topic[i][walker-1][3]:
-                    l.append(sub_topic[i][walker])
-                else:
-                    cur_sub.append(l)
-                    l=[]
-                    l.append(sub_topic[i][walker])
-            if l:
-                cur_sub.append(l)
-                l=[]       
-            if len(cur_sub)==0:
-                l=[]
-                cur_sub.append(l)
-            result.append(cur_sub)
-            cur_sub = []
+        for i in range(0, len(sub_topic)):
+            if len(sub_topic[i]) != 0:
+                cur_sub.append(sub_topic[i][0])
+                for walker in range(1, len(sub_topic[i])):
+                    if sub_topic[i][walker][3] == sub_topic[i][walker-1][3]:
+                        cur_sub.append(sub_topic[i][walker])
+                    else:
+                        cur_topic.append(cur_sub)
+                        cur_sub = []
+                        cur_sub.append(sub_topic[i][walker])
+                if cur_sub:
+                    cur_topic.append(cur_sub)
+                    cur_sub = []       
+            else:
+                cur_topic.append(cur_sub)
+                cur_sub = []
+            result.append(cur_topic)
+            cur_topic = []
         return result
 
     def get_base_text(self):
