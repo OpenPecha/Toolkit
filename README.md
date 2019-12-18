@@ -1,4 +1,6 @@
 # OpenPecha Toolkit
+![](https://github.com/OpenPecha/openpecha-toolkit/workflows/Test/badge.svg)
+![](https://github.com/OpenPecha/openpecha-toolkit/workflows/Pypi%20Publish/badge.svg)
 
 OpenPecha Toolkit allows state of the art for distributed standoff annotations on moving texts, in which Base layer can be edited without affecting annotations. 
 
