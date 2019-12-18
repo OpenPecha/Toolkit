@@ -37,7 +37,6 @@ CrossVolSpan = {
 SubText = {
     'id': None,              # Unique id for the sub_text
     'work': None,            # index of the sub_text
-    'base': None,            # Which volume the sub_text is from
     'span': []               # span of the sub_text
 }
 

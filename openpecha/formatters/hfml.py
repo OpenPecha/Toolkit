@@ -72,7 +72,6 @@ class HFMLFormatter(BaseFormatter):
                         correction['id'] = self.get_unique_id()
                         correction['span']['start'] = start
                         correction['span']['end'] = end
-                        correction['type'] = 'correction'
                         correction['correction'] = sug
                         Correction_layer['annotations'].append(correction)
 
@@ -103,7 +102,7 @@ class HFMLFormatter(BaseFormatter):
 
                     result = {
                         'pagination': Pagination,
-                        'correction': Correction,
+                        'correction': Correction_layer,
                         'peydurma': Peydurma_layer,
                         'error_candidate': Error_layer
                     }
@@ -129,8 +128,10 @@ class HFMLFormatter(BaseFormatter):
                             cross_vol_span['vol'] = f'base/v{vol_id:03}'
                             cross_vol_span['span']['start'] = start
                             cross_vol_span['span']['end'] = end
+                            sub_text['span'].append(cross_vol_span)
 
-                        Topic['parts'].append(sub_text)
+                        if corss_sub_topic:
+                            Topic['parts'].append(sub_text)
 
                     for start, end, vol_id, work in topic:
                         Topic['work'] = work
@@ -336,9 +337,10 @@ class HFMLFormatter(BaseFormatter):
                                 self.sub_topic_Id.append((end_sub_topic,end_topic,self.vol_walker+1,self.sub_topic_info[-1]))
                             self.sub_topic.append(self.sub_topic_Id)
                             self.sub_topic_Id = []
-                            last=self.sub_topic_info[-1]
-                            self.sub_topic_info =[]
-                            self.sub_topic_info.append(last)
+                            if self.sub_topic_Id:
+                                last = self.sub_topic_info[-1]
+                                self.sub_topic_info =[]
+                                self.sub_topic_info.append(last)
                         
                     if re.search(pat_list['error_pattern'], line):   # checking current line contain error annotation or not
                         errors = re.finditer(pat_list['error_pattern'], line)
