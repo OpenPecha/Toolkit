@@ -36,16 +36,16 @@ CrossVolSpan = {
 # Sub_text annotation
 SubText = {
     'id': None,              # Unique id for the sub_text
-    'span': Span,            # span of the sub_text
+    'work': None,            # index of the sub_text
     'base': None,            # Which volume the sub_text is from
-    'sub_text_index': None   # index of the sub_text
+    'span': []               # span of the sub_text
 }
 
 # Text annotation
 Text = {
     'id': None,              # Unique id for particular Text. type: str
     'work': None,            # id of the `text`. type: int
-    'sub_work': [],          # list of SubText
+    'parts': [],             # list of SubText
     'span': []               # list of CrossVolSpan
 }
 
