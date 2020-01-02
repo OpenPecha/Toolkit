@@ -14,6 +14,9 @@ class HFMLFormatter(BaseFormatter):
         super().__init__(output_path=output_path)
         self.base_text = ''
         self.vol_walker = 0
+        self.pecha_title = []
+        self.poti_title = []
+        self.chapter_title = []
         self.topic_id = [] # made class variable as it needs to update cross poti
         self.current_topic_id = [] # made class variable as it needs to update cross poti
         self.sub_topic = [] # made class variable as it needs to update cross poti
@@ -176,6 +179,16 @@ class HFMLFormatter(BaseFormatter):
             for abs_error in abs_errors:
                 total_length = total_length + 1
 
+        for pp in ['pecha_title_pattern','poti_title_pattern','chapter_title_pattern']:
+            title_pattern = re.search(plist[pp],line)
+            if title_pattern:
+                total_length += 4
+        
+        for pp in ['citation_pattern','sabche_pattern','root_text_pattern','yigchung_pattern']:
+            pattern = re.search(plist[pp],line)
+            if pattern:
+                total_length += 3
+
         return total_length
 
 
@@ -210,6 +223,18 @@ class HFMLFormatter(BaseFormatter):
                 if p.start() > abs_error.start():
                     length_before = length_before+1
 
+        for pp in ['pecha_title_pattern','poti_title_pattern','chapter_title_pattern']:
+            title_pattern = re.search(plist[pp],line)
+            if title_pattern:
+                if p.start() > title_pattern.start():
+                    length_before += 4
+        
+        for pp in ['citation_pattern','sabche_pattern','root_text_pattern','yigchung_pattern']:
+            pattern = re.search(plist[pp],line)
+            if pattern:
+                if p.start() > pattern.start():
+                    length_before += 3
+
         return length_before
 
 
@@ -220,6 +245,18 @@ class HFMLFormatter(BaseFormatter):
         base_line = line # stores the base_line which is line without annotation
         for p in ['line_pattern','topic_pattern','sub_topic_pattern']:
             base_line = re.sub(plist[p], '', base_line)
+        
+        for p in ['pecha_title_pattern','poti_title_pattern','chapter_title_pattern']:
+            title_pattern = re.search(plist[p],line)
+            if title_pattern:
+                title = title_pattern[0][3:-1]
+                base_line = re.sub(plist[p], title, base_line, 1)
+        
+        for p in ['citation_pattern','sabche_pattern','root_text_pattern','yigchung_pattern']:
+            pattern = re.search(plist[p],line)
+            if pattern:
+                title = pattern[0][2:-1]
+                base_line = re.sub(plist[p], title, base_line, 1)
 
         if re.search(plist['error_pattern'], line):
             errors = re.finditer(plist['error_pattern'], line) # list of match object of error pattern in line
@@ -251,8 +288,15 @@ class HFMLFormatter(BaseFormatter):
         
         
         pat_list={ 
+            'pecha_title_pattern': r'\(K1.+?\)',
+            'poti_title_pattern': r'\(K2.+?\)',
+            'chapter_title_pattern': r'\(K3.+?\)',
             'page_pattern': r'\[[0-9]+[a-z]{1}\]',
             'line_pattern': r'\[\w+\.\d+\]','topic_pattern':r'\{\w+\}',
+            'citation_pattern': r'\(G.+?\)',
+            'sabche_pattern': r'\(Q.+?\)',
+            'root_text_pattern': r'\(M.+?\)',
+            'yigchung_pattern': r'\(Y.+?\)',
             'sub_topic_pattern': r'\{\w+\-\w+\}',
             'error_pattern': r'\(\S+\,\S+\)',
             'abs_er_pattern': r'\[[^0-9].*?\]',
@@ -263,6 +307,12 @@ class HFMLFormatter(BaseFormatter):
         end_page = 0 # ending index of page
         start_line = 0 #starting index of line
         end_line = 0 # ending index of line
+        start_title = 0 # starting of the pecha title
+        end_title = 0 # ending of the pecha title
+        # start_poti_title = 0 # starting of the poti title
+        # end_poti_title = 0 # ending of the poti title
+        # start_chapter_title = 0 # starting of the chapter title
+        # end_chapter_tite = 0 # ending of the chapter title
         start_topic = 0 #starting index of topic_Id
         end_topic = 0 # ending index of topic_Id
         start_sub_topic = 0 #starting index of sub_topic_Id
@@ -294,6 +344,20 @@ class HFMLFormatter(BaseFormatter):
                 elif re.search(pat_list['line_pattern'], line): #checking current line contains line annotation or not
                     start_line = i
                     length = len(line)
+
+                    for pp in ['pecha_title_pattern','poti_title_pattern','chapter_title_pattern']:
+                        title_pattern = re.search(pat_list[pp],line)
+                        if title_pattern:
+                            pat_len_before_ann = self.search_before(title_pattern, pat_list, line)
+                            start_title = title_pattern.start()+i-pat_len_before_ann
+                            end_title = start_title + len(title_pattern[0]) - 5
+                            if pp == 'pecha_title_pattern':
+                                self.pecha_title.append((start_title,end_title))
+                            if pp == 'poti_title_pattern':
+                                self.poti_title.append((start_title,end_title))
+                            if pp == 'chapter_title_pattern':
+                                self.chapter_title.append((start_title,end_title))
+
                     if re.search(pat_list['sub_topic_pattern'], line): #checking current line contain sub_topicID annotation or not
                         sub_topic_match = re.search(pat_list['sub_topic_pattern'], line)
                         self.sub_topic_info.append(sub_topic_match[0][1:-1])
@@ -336,9 +400,10 @@ class HFMLFormatter(BaseFormatter):
                                 self.sub_topic_Id.append((end_sub_topic,end_topic,self.vol_walker+1,self.sub_topic_info[-1]))
                             self.sub_topic.append(self.sub_topic_Id)
                             self.sub_topic_Id = []
-                            last=self.sub_topic_info[-1]
-                            self.sub_topic_info =[]
-                            self.sub_topic_info.append(last)
+                            if self.sub_topic_Id:
+                                last=self.sub_topic_info[-1]
+                                self.sub_topic_info =[]
+                                self.sub_topic_info.append(last)
                         
                     if re.search(pat_list['error_pattern'], line):   # checking current line contain error annotation or not
                         errors = re.finditer(pat_list['error_pattern'], line)
@@ -402,6 +467,8 @@ class HFMLFormatter(BaseFormatter):
             self.sub_topic = self.sub_topic[1:]
         self.sub_topic = self.__final_sub_topic(self.sub_topic)
         result = {
+            'poti_title': self.poti_title,
+            'chapter_title': self.chapter_title,
             'page': self.page, # page variable format (start_index,end_index,pg_Info,pg_ann)
             'topic': self.topic_id,
             'sub_topic': self.sub_topic,
