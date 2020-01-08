@@ -31,6 +31,8 @@ class HFMLFormatter(BaseFormatter):
         self.author_pattern = []
         self.citation_pattern = []
         self.sabche_pattern = []
+        self.tsawa_pattern = []
+        self.yigchung_pattern = []
 
 
     def text_preprocess(self, text):
@@ -94,7 +96,7 @@ class HFMLFormatter(BaseFormatter):
                         error['span']['end'] = end
                         Error_layer['annotations'].append(error)
 
-                    # Yigchung annotation
+                    # Peydurma annotation
                     Peydurma_layer = deepcopy(Layer)
                     Peydurma_layer['id'] = self.get_unique_id()
                     Peydurma_layer['annotation_type'] = 'note_marker'
@@ -160,7 +162,7 @@ class HFMLFormatter(BaseFormatter):
         returns the total length of annotation detected in a line
         '''
         total_length = 0 # total length of annotation detected in a line
-        for pp in ['line_pattern','topic_pattern','sub_topic_pattern']:
+        for pp in ['line_pattern', 'topic_pattern', 'sub_topic_pattern']:
             if re.search(plist[pp], line):
                 match_list = re.finditer(plist[pp], line) # list of match object of given pattern in line
                 for i in match_list:
@@ -182,32 +184,46 @@ class HFMLFormatter(BaseFormatter):
             for abs_error in abs_errors:
                 total_length = total_length + 1
 
-        for pp in ['author_pattern','pecha_title_pattern','poti_title_pattern','chapter_title_pattern']:
-            title_pattern = re.search(plist[pp],line)
+        for pp in ['author_pattern', 'pecha_title_pattern', 'poti_title_pattern', 'chapter_title_pattern']:
+            title_pattern = re.search(plist[pp], line)
             if title_pattern:
                 total_length += 4
         
-        for pp in ['start_cit_pattern','end_cit_pattern']:
-            cit_patterns = re.finditer(plist[pp],line)
+        for pp in ['start_cit_pattern', 'end_cit_pattern']:
+            cit_patterns = re.finditer(plist[pp], line)
             for cit_pattern in cit_patterns:
                 total_length = total_length+2
 
-        for pp in ['start_sabche_pattern','end_sabche_pattern']:
-            sabche_patterns = re.finditer(plist[pp],line)
+        for pp in ['start_sabche_pattern', 'end_sabche_pattern']:
+            sabche_patterns = re.finditer(plist[pp], line)
             for sabche_pattern in sabche_patterns:
+                total_length = total_length+2
+        
+        for pp in ['start_tsawa_pattern', 'end_tsawa_pattern']:
+            tsawa_patterns = re.finditer(plist[pp], line)
+            for tsawa_pattern in tsawa_patterns:
+                total_length = total_length+2
+        
+        for pp in ['start_yigchung_pattern', 'end_yigchung_pattern']:
+            yigchung_patterns = re.finditer(plist[pp], line)
+            for yigchung_pattern in yigchung_patterns:
                 total_length = total_length+2
 
         return total_length
 
-    def merge(self, start_list, end_list, pattern):
+    def merge(self, start_list, end_list):
+        '''
+        The starting  and ending of annotation(citaion,yigchung,sabche and tsawa) are 
+        stored in start_list and end_list. Merging these two list will generate a list 
+        in which both starting and ending of an annotation together in a tuple. It is applicable
+        only if the annotaions are not cross volume.
+        '''
         walker = 0
-        while walker<len(end_list):
-            if pattern == 'cit':
-                self.citation_pattern.append((start_list[walker],end_list[walker]))
-            elif pattern == 'sab':
-                self.sabche_pattern.append((start_list[walker],end_list[walker]))
-            walker +=1
-        pass
+        result = []
+        while walker < len(end_list) and walker < len(start_list):
+            result.append((start_list[walker],end_list[walker]))
+            walker += 1
+        return result
 
     def search_before(self, p, plist, line): 
         '''
@@ -240,25 +256,36 @@ class HFMLFormatter(BaseFormatter):
                 if p.start() > abs_error.start():
                     length_before = length_before+1
 
-        for pp in ['author_pattern','pecha_title_pattern','poti_title_pattern','chapter_title_pattern']:
-            title_pattern = re.search(plist[pp],line)
+        for pp in ['author_pattern', 'pecha_title_pattern', 'poti_title_pattern', 'chapter_title_pattern']:
+            title_pattern = re.search(plist[pp], line)
             if title_pattern:
                 if p.start() > title_pattern.start():
                     length_before += 4
         
-        for pp in ['start_cit_pattern','end_cit_pattern']:
-            cit_patterns = re.finditer(plist[pp],line)
+        for pp in ['start_cit_pattern', 'end_cit_pattern']:
+            cit_patterns = re.finditer(plist[pp], line)
             for cit_pattern in cit_patterns:
                 if p.start() > cit_pattern.start():
                     length_before = length_before+2
 
-        for pp in ['start_sabche_pattern','end_sabche_pattern']:
-            sabche_patterns = re.finditer(plist[pp],line)
+        for pp in ['start_sabche_pattern', 'end_sabche_pattern']:
+            sabche_patterns = re.finditer(plist[pp], line)
             for sabche_pattern in sabche_patterns:
                 if p.start() > sabche_pattern.start():
                     length_before = length_before+2
         
-
+        for pp in ['start_tsawa_pattern', 'end_tsawa_pattern']:
+            tsawa_patterns = re.finditer(plist[pp], line)
+            for tsawa_pattern in tsawa_patterns:
+                if p.start() > tsawa_pattern.start():
+                    length_before = length_before+2
+        
+        for pp in ['start_yigchung_pattern', 'end_yigchung_pattern']:
+            yigchung_patterns = re.finditer(plist[pp], line)
+            for yigchung_pattern in yigchung_patterns:
+                if p.start() > yigchung_pattern.start():
+                    length_before = length_before+2
+        
         return length_before
 
 
@@ -267,16 +294,17 @@ class HFMLFormatter(BaseFormatter):
         Extract the base text from the given line
         '''
         base_line = line # stores the base_line which is line without annotation
-        for p in ['line_pattern','topic_pattern','sub_topic_pattern']:
+        for p in ['line_pattern', 'topic_pattern', 'sub_topic_pattern', 'note_pattern']:
             base_line = re.sub(plist[p], '', base_line)
         
-        for p in ['author_pattern','pecha_title_pattern','poti_title_pattern','chapter_title_pattern']:
-            title_pattern = re.search(plist[p],line)
+        for p in ['author_pattern', 'pecha_title_pattern', 'poti_title_pattern', 'chapter_title_pattern']:
+            title_pattern = re.search(plist[p], line)
             if title_pattern:
                 title = title_pattern[0][3:-1]
                 base_line = re.sub(plist[p], title, base_line, 1)
         
-        for p in ['start_cit_pattern','end_cit_pattern','start_sabche_pattern','end_sabche_pattern']:
+        for p in ['start_cit_pattern', 'end_cit_pattern', 'start_sabche_pattern', 'end_sabche_pattern',
+        'start_tsawa_pattern', 'end_tsawa_pattern', 'start_yigchung_pattern', 'end_yigchung_pattern']:
             base_line = re.sub(plist[p],'', base_line, 1)
 
         if re.search(plist['error_pattern'], line):
@@ -289,9 +317,6 @@ class HFMLFormatter(BaseFormatter):
             abs_ers = re.finditer(plist['abs_er_pattern'], line)# list of match object of abs_er pattern in line
             for abs_er in abs_ers:
                 base_line = re.sub(plist['abs_er_pattern'], abs_er[0][1:-1], base_line, 1)
-
-        if re.search(plist['note_pattern'], line):
-            base_line = re.sub(plist['note_pattern'], '', base_line)
 
         return base_line
 
@@ -310,18 +335,22 @@ class HFMLFormatter(BaseFormatter):
         end_cit_patterns = []
         start_sabche_pattern = []
         end_sabche_pattern = []
+        start_tsawa_pattern = []
+        end_tsawa_pattern = []
+        start_yigchung_pattern = []
+        end_yigchung_pattern = []
         
         pat_list={ 
-            'author_pattern': r'\(AU.+?\)',
-            'pecha_title_pattern': r'\(K1.+?\)',
-            'poti_title_pattern': r'\(K2.+?\)',
-            'chapter_title_pattern': r'\(K3.+?\)',
+            'author_pattern': r'\(au.+?\)',
+            'pecha_title_pattern': r'\(k1.+?\)',
+            'poti_title_pattern': r'\(k2.+?\)',
+            'chapter_title_pattern': r'\(k3.+?\)',
             'page_pattern': r'\[[0-9]+[a-z]{1}\]',
             'line_pattern': r'\[\w+\.\d+\]','topic_pattern':r'\{\w+\}',
-            'start_cit_pattern': r'\(G','end_cit_pattern': r'G\)',
-            'start_sabche_pattern': r'\(Q','end_sabche_pattern': r'Q\)',
-            'root_text_pattern': r'\(M',
-            'yigchung_pattern': r'\(Y.+?\)',
+            'start_cit_pattern': r'\(g','end_cit_pattern': r'g\)',
+            'start_sabche_pattern': r'\(q','end_sabche_pattern': r'q\)',
+            'start_tsawa_pattern': r'\(m','end_tsawa_pattern': r'm\)',
+            'start_yigchung_pattern': r'\(y','end_yigchung_pattern': r'y\)',
             'sub_topic_pattern': r'\{\w+\-\w+\}',
             'error_pattern': r'\(\S+\,\S+\)',
             'abs_er_pattern': r'\[[^0-9].*?\]',
@@ -481,6 +510,34 @@ class HFMLFormatter(BaseFormatter):
                             pat_len_before_ann = self.search_before(end_sabche,pat_list,line)
                             sabche_end = end_sabche.start()+i-pat_len_before_ann-1
                             end_sabche_pattern.append(sabche_end)
+                    
+                    if re.search(pat_list['start_tsawa_pattern'],line):
+                        start_tsawas = re.finditer(pat_list['start_tsawa_pattern'],line)
+                        for start_tsawa in start_tsawas:
+                            pat_len_before_ann = self.search_before(start_tsawa,pat_list,line)
+                            tsawa_start = start_tsawa.start()+i-pat_len_before_ann
+                            start_tsawa_pattern.append(tsawa_start)
+                    
+                    if re.search(pat_list['end_tsawa_pattern'], line):
+                        end_tsawas = re.finditer(pat_list['end_tsawa_pattern'], line)
+                        for end_tsawa in end_tsawas:
+                            pat_len_before_ann = self.search_before(end_tsawa, pat_list, line)
+                            tsawa_end = end_tsawa.start()+i-pat_len_before_ann-1
+                            end_tsawa_pattern.append(tsawa_end)
+                    
+                    if re.search(pat_list['start_yigchung_pattern'], line):
+                        start_yigchungs = re.finditer(pat_list['start_yigchung_pattern'], line)
+                        for start_yigchung in start_yigchungs:
+                            pat_len_before_ann = self.search_before(start_yigchung, pat_list, line)
+                            yigchung_start = start_yigchung.start()+i-pat_len_before_ann
+                            start_yigchung_pattern.append(yigchung_start)
+                    
+                    if re.search(pat_list['end_yigchung_pattern'], line):
+                        end_yigchungs = re.finditer(pat_list['end_yigchung_pattern'], line)
+                        for end_yigchung in end_yigchungs:
+                            pat_len_before_ann = self.search_before(end_yigchung, pat_list, line)
+                            yigchung_end = end_yigchung.start()+i-pat_len_before_ann-1
+                            end_yigchung_pattern.append(yigchung_end)
 
                     pat_len_before_ann = self.total_pattern(pat_list, line)
                     end_line = start_line+length-pat_len_before_ann-1
@@ -511,8 +568,10 @@ class HFMLFormatter(BaseFormatter):
             self.current_topic_id = []
             self.sub_topic.append(self.sub_topic_Id)
 
-        self.merge(start_cit_patterns, end_cit_patterns, pattern='cit') # The starting and ending of citation is merged
-        self.merge(start_sabche_pattern, end_sabche_pattern, pattern = 'sab')
+        self.citation_pattern.append(self.merge(start_cit_patterns, end_cit_patterns)) # The starting and ending of pattern is merged
+        self.sabche_pattern.append(self.merge(start_sabche_pattern, end_sabche_pattern))
+        self.tsawa_pattern.append(self.merge(start_tsawa_pattern, end_tsawa_pattern))
+        self.yigchung_pattern.append(self.merge(start_yigchung_pattern, end_yigchung_pattern))
     
     def get_result(self):
         if self.topic_id[0][0][3] == self.topic_id[1][0][3]:
@@ -527,6 +586,8 @@ class HFMLFormatter(BaseFormatter):
             'topic': self.topic_id,
             'sub_topic': self.sub_topic,
             'sabche': self.sabche_pattern,
+            'tsawa': self.tsawa_pattern,
+            'yigchung': self.yigchung_pattern,
             'correction': self.error_id,
             'error_candidate': self.abs_er_id,
             'peydurma': self.notes_id}
