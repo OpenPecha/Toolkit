@@ -15,10 +15,11 @@ class Serialize(object):
 
     To use it, instantiate a concrete class with the path of the opf file, and call apply_layers() then get_result()
     """
-    def __init__(self, opfpath, layers = None):
+    def __init__(self, opfpath, text_id, layers = None):
         self.opfpath = Path(opfpath)
-        self.baselayer = self.__read_base_layer()
-        self.Annotation = namedtuple('Annotation', 'type start_cc end_cc')  #annotation object
+        self.text_spans = self.get_text_spans(text_id)
+        self.base_layers = self.get_text_base_layer()
+        # self.Annotation = namedtuple('Annotation', 'type start_cc end_cc')  #annotation object
         """
         The chars_toapply is an important piece of the puzzle here. Basically applying the changes to the string directly is a
         bad idea for several reasons:
@@ -50,22 +51,56 @@ class Serialize(object):
         # by convention, when it is None, all layers are applied in alphabetical order (?)
         self.layers = layers
 
-    def __read_base_layer(self):
+
+    def load_layer(self, fn):
+        return yaml.safe_load(fn.open())
+
+
+    def get_text_spans(self, text_id):
         """
-        reads opfpath/base.txt and returns its content
+        get spans of text
         """
-        return (self.opfpath/'base.txt').read_text()
+        index_layer = self.load_layer(self.opfpath/'index.yml')
+        for anno in index_layer['annotations']:
+            if anno['work'] == text_id:
+                return anno['span']
+
+
+    def get_base_layer(self, span):
+        """
+        return text for given span
+        """
+        vol_base = (self.opfpath/f"{span['vol']}.txt").read_text()
+        start = span['span']['start']
+        end = span['span']['end']
+        return vol_base[start: end]
+
+
+    def get_text_base_layer(self):
+        """
+        returns base text of text's volumes: dict
+
+        for example:
+        {
+            'base/v005': text of given span of v001,
+            ....
+        }
+        """
+        for span in self.text_spans:
+            yield {span['vol'].split('/')[-1]: self.get_base_layer(span)}
+
 
     def apply_layer(self, layer_id):
         """
         This reads the file opfpath/layers/layer_id.yml and applies all the annotations it contains, in the order in which they appear.
         I think it can be implemented in this class by just calling self.apply_annotation on each annotation of the file.
         """
-        layer = yaml.safe_load((self.opfpath/'layers'/f'{layer_id}.yml').open())
-        for a in layer['content']:
-            ann = self.Annotation(layer_id, a['span']['start_char'], a['span']['end_char'])
-            self.apply_annotation(ann)
-        return layer
+        for vol, base_layer in self.
+            layer = yaml.safe_load((self.opfpath/'layers'/vol/f'{layer_id}.yml').open())
+            for a in layer['content']:
+                ann = self.Annotation(layer_id, a['span']['start_char'], a['span']['end_char'])
+                self.apply_annotation(ann)
+            return layer
 
     def get_all_layer(self):
         """
@@ -102,7 +137,7 @@ class Serialize(object):
         """
         raise NotImplementedError("The Serialize class doesn't provide any serialization, please use a subclass such ass SerializeMd")
 
-    def get_result(self):
+    def get_result(self, base_layer):
         """
         returns a string which is the base layer where the changes recorded in self.chars_toapply have been applied. 
 
@@ -112,7 +147,7 @@ class Serialize(object):
         # don't actually do naive string concatenations
         # see https://waymoot.org/home/python_string/ where method 5 is good
         i = 0
-        for c in self.baselayer:
+        for c in base_layer:
             # UTF bom \ufeff takes the 0th index
             if c == '\ufeff': continue
             if i in self.chars_toapply:
@@ -126,3 +161,13 @@ class Serialize(object):
                 res += c
             i += 1
         return res
+
+
+if __name__ == "__main__":
+    opf_path = 'tests/data/serialize/hfml/P000001/P000001.opf'
+    text_id = 'T1'
+    layers = ['pagination']
+
+    serializer = Serialize(opf_path, text_id, layers)
+    for base_layer in serializer.baselayer:
+        pass
