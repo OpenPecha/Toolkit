@@ -1,4 +1,4 @@
-from collections import namedtuple
+from collections import namedtuple, defaultdict
 from pathlib import Path
 
 import yaml
@@ -19,7 +19,6 @@ class Serialize(object):
         self.opfpath = Path(opfpath)
         self.text_spans = self.get_text_spans(text_id)
         self.base_layers = self.get_text_base_layer()
-        # self.Annotation = namedtuple('Annotation', 'type start_cc end_cc')  #annotation object
         """
         The chars_toapply is an important piece of the puzzle here. Basically applying the changes to the string directly is a
         bad idea for several reasons:
@@ -46,7 +45,7 @@ class Serialize(object):
             15: (["</title>"], [])
         }
         """
-        self.chars_toapply = {}
+        self.chars_toapply = defaultdict(dict)
         # layer lists the layers to be applied, in the order of which they should be applied
         # by convention, when it is None, all layers are applied in alphabetical order (?)
         self.layers = layers
@@ -86,21 +85,22 @@ class Serialize(object):
             ....
         }
         """
+        base_layers = {}
         for span in self.text_spans:
-            yield {span['vol'].split('/')[-1]: self.get_base_layer(span)}
+            base_layers[span['vol'].split('/')[-1]] = self.get_base_layer(span)
+        return base_layers
 
 
-    def apply_layer(self, layer_id):
+    def apply_layer(self, vol_id, layer_id):
         """
         This reads the file opfpath/layers/layer_id.yml and applies all the annotations it contains, in the order in which they appear.
         I think it can be implemented in this class by just calling self.apply_annotation on each annotation of the file.
         """
-        for vol, base_layer in self.
-            layer = yaml.safe_load((self.opfpath/'layers'/vol/f'{layer_id}.yml').open())
-            for a in layer['content']:
-                ann = self.Annotation(layer_id, a['span']['start_char'], a['span']['end_char'])
-                self.apply_annotation(ann)
-            return layer
+        layer = yaml.safe_load((self.opfpath/'layers'/vol_id/f'{layer_id}.yml').open())
+        for a in layer['annotations']:
+            a['type'] = layer_id
+            self.apply_annotation(vol_id, a)
+
 
     def get_all_layer(self):
         """
@@ -113,61 +113,54 @@ class Serialize(object):
         This applies all the layers recorded in self.layers. If self.layers is none, it reads all the layers from the layer directory.
         """
         if self.layers:
-            for layer_id in self.layers:
-                self.apply_layer(layer_id)
+            for vol_id in self.base_layers:
+                for layer_id in self.layers:
+                    self.apply_layer(vol_id, layer_id)
         else:
-            for layer_id in self.get_all_layer():
-                self.apply_layer(layer_id)
+            for vol_id in self.base_layers:
+                for layer_id in self.get_all_layer():
+                    self.apply_layer(layer_id)
 
-    def add_chars(self, cc, frombefore, charstoadd):
+    def add_chars(self, vol_id, cc, frombefore, charstoadd):
         """
         This records some characters to add at a character coordinate (cc), either frombefore (from the left) or after. before is a boolean.
         """
-        if cc not in self.chars_toapply:
-            self.chars_toapply[cc] = ([],[])
+        if cc not in self.chars_toapply[vol_id]:
+            self.chars_toapply[vol_id][cc] = ([],[])
         if frombefore: # if from the left, layers should be applied in reverse order
-            self.chars_toapply[cc][0].insert(0, charstoadd)
+            self.chars_toapply[vol_id][cc][0].insert(0, charstoadd)
         else:
-            self.chars_toapply[cc][1].append(charstoadd)
+            self.chars_toapply[vol_id][cc][1].append(charstoadd)
 
-    #@serialize.abstractmethod
-    def apply_annotation(self, annotation):
+
+    def apply_annotation(self, vol_id, annotation):
         """
         This applies the annotation given as argument. The annotation must contain at least a type
         """
         raise NotImplementedError("The Serialize class doesn't provide any serialization, please use a subclass such ass SerializeMd")
 
-    def get_result(self, base_layer):
+    def get_result(self):
         """
         returns a string which is the base layer where the changes recorded in self.chars_toapply have been applied. 
 
         The algorithm should be something like:
         """
-        res = "" 
+        res = ""
         # don't actually do naive string concatenations
         # see https://waymoot.org/home/python_string/ where method 5 is good
-        i = 0
-        for c in base_layer:
-            # UTF bom \ufeff takes the 0th index
-            if c == '\ufeff': continue
-            if i in self.chars_toapply:
-                apply = self.chars_toapply[i]
-                for s in apply[0]:
-                    res += s
-                res += c
-                for s in apply[1]:
-                    res += s
-            else:
-                res += c
-            i += 1
-        return res
-
-
-if __name__ == "__main__":
-    opf_path = 'tests/data/serialize/hfml/P000001/P000001.opf'
-    text_id = 'T1'
-    layers = ['pagination']
-
-    serializer = Serialize(opf_path, text_id, layers)
-    for base_layer in serializer.baselayer:
-        pass
+        for vol_id, base_layer in self.base_layers.items():
+            i = 0
+            for c in base_layer:
+                # UTF bom \ufeff takes the 0th index
+                if c == '\ufeff': continue
+                if i in self.chars_toapply[vol_id]:
+                    apply = self.chars_toapply[vol_id][i]
+                    for s in apply[0]:
+                        res += s
+                    res += c
+                    for s in apply[1]:
+                        res += s
+                else:
+                    res += c
+                i += 1
+            return res
