@@ -143,16 +143,43 @@ class Serialize(object):
         """
         raise NotImplementedError("The Serialize class doesn't provide any serialization, please use a subclass such ass SerializeMd")
 
+
+    def __assign_line_layer(self, result, vol_id):
+
+        def _get_page_index(line):
+            page_index = ''
+            i = 1
+            while line[i] != ']':
+                page_index += line[i]
+                i += 1
+            return page_index
+
+        result_with_line = ''
+        page_index = ''
+        n_line = 1
+        for line in result.split('\n'):
+            if not line: continue
+            if line[0] == '[' and line[1] != vol_id[0]:
+                page_index = _get_page_index(line)
+                n_line = 1
+            elif line[0] != '[':
+                line = f'[{page_index}.{n_line}]' + line
+                n_line += 1
+            result_with_line += line + '\n'
+        return result_with_line
+
+
     def get_result(self):
         """
         returns a string which is the base layer where the changes recorded in self.chars_toapply have been applied. 
 
         The algorithm should be something like:
         """
-        res = ""
+        result = ""
         # don't actually do naive string concatenations
         # see https://waymoot.org/home/python_string/ where method 5 is good
         for vol_id, base_layer in self.base_layers.items():
+            result += f'\n[{vol_id}]\n'
             i = 0
             for c in base_layer:
                 # UTF bom \ufeff takes the 0th index
@@ -160,11 +187,15 @@ class Serialize(object):
                 if i in self.chars_toapply[vol_id]:
                     apply = self.chars_toapply[vol_id][i]
                     for s in apply[0]:
-                        res += s
-                    res += c
+                        result += s
+                    result += c
                     for s in apply[1]:
-                        res += s
+                        result += s
                 else:
-                    res += c
+                    result += c
                 i += 1
-        return res
+
+        if 'pagination' in self.layers:
+            return self.__assign_line_layer(result, vol_id)
+        else:
+            return result
