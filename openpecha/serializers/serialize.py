@@ -62,16 +62,19 @@ class Serialize(object):
         index_layer = self.load_layer(self.opfpath/'index.yml')
         for anno in index_layer['annotations']:
             if anno['work'] == text_id:
-                return anno['span']
+                text_span = {}
+                for span in anno['span']:
+                    text_span[span['vol'].split('/')[-1]] = span['span']
+                return text_span
 
 
-    def get_base_layer(self, span):
+    def get_base_layer(self, vol_id):
         """
         return text for given span
         """
-        vol_base = (self.opfpath/f"{span['vol']}.txt").read_text()
-        start = span['span']['start']
-        end = span['span']['end']
+        vol_base = (self.opfpath/f"base/{vol_id}.txt").read_text()
+        start = self.text_spans[vol_id]['start']
+        end = self.text_spans[vol_id]['end']
         return vol_base[start: end]
 
 
@@ -86,8 +89,8 @@ class Serialize(object):
         }
         """
         base_layers = {}
-        for span in self.text_spans:
-            base_layers[span['vol'].split('/')[-1]] = self.get_base_layer(span)
+        for vol_id in self.text_spans:
+            base_layers[vol_id] = self.get_base_layer(vol_id)
         return base_layers
 
 
@@ -98,8 +101,9 @@ class Serialize(object):
         """
         layer = yaml.safe_load((self.opfpath/'layers'/vol_id/f'{layer_id}.yml').open())
         for a in layer['annotations']:
-            a['type'] = layer_id
-            self.apply_annotation(vol_id, a)
+            if a['span']['start'] >= self.text_spans[vol_id]['start']:
+                a['type'] = layer_id
+                self.apply_annotation(vol_id, a)
 
 
     def get_all_layer(self):
@@ -163,4 +167,4 @@ class Serialize(object):
                 else:
                     res += c
                 i += 1
-            return res
+        return res

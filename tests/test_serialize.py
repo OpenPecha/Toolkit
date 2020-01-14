@@ -26,3 +26,7 @@ def test_hfml_serializer():
     serializer.apply_layers()
     result = serializer.get_result()
     print(result)
+
+
+if __name__ == "__main__":
+    test_hfml_serializer()
