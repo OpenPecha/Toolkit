@@ -45,7 +45,7 @@ class HFMLFormatter(BaseFormatter):
         fns = list(input_path.iterdir())
         fns_len = len(fns)
         for fn in sorted(fns):
-            yield self.text_preprocess(fn.read_text()), fn, fns_len
+            yield self.text_preprocess(fn.read_text()), fn.name, fns_len
 
 
     def format_layer(self, layers):
@@ -407,6 +407,8 @@ class HFMLFormatter(BaseFormatter):
                                 self.pecha_title.append((start_title,end_title))
                             if pp == 'poti_title_pattern':
                                 self.poti_title.append((start_title,end_title))
+                                end_topic = len(title_pattern[0][2:])
+                                end_sub_topic = len(title_pattern[0][2:])
                             if pp == 'chapter_title_pattern':
                                 self.chapter_title.append((start_title,end_title))
 
@@ -427,9 +429,9 @@ class HFMLFormatter(BaseFormatter):
                                     end_sub_topic = end_sub_topic+1
                         else:
                             start_sub_topic = end_sub_topic
-                            end_sub_topic = sub_topic_match.start()+i-pat_len_before_ann-2
+                            end_sub_topic = sub_topic_match.start()+i-pat_len_before_ann
 
-                            if start_sub_topic != end_sub_topic:
+                            if start_sub_topic < end_sub_topic:
                                 self.sub_topic_Id.append((start_sub_topic, end_sub_topic, self.vol_walker+1, self.sub_topic_info[-2]))
                                 end_sub_topic = end_sub_topic+1
 
@@ -448,7 +450,7 @@ class HFMLFormatter(BaseFormatter):
                                 self.current_topic_id.append((start_topic, end_topic, self.vol_walker+1, self.topic_info[-1]))
                             self.topic_id.append(self.current_topic_id)
                             self.current_topic_id = []
-                            if self.sub_topic_Id and end_sub_topic != end_topic:
+                            if self.sub_topic_Id and end_sub_topic < end_topic:
                                 self.sub_topic_Id.append((end_sub_topic,end_topic,self.vol_walker+1,self.sub_topic_info[-1]))
                             self.sub_topic.append(self.sub_topic_Id)
                             self.sub_topic_Id = []
@@ -456,6 +458,7 @@ class HFMLFormatter(BaseFormatter):
                                 last=self.sub_topic_info[-1]
                                 self.sub_topic_info =[]
                                 self.sub_topic_info.append(last)
+                        
                         
                     if re.search(pat_list['error_pattern'], line):   # checking current line contain error annotation or not
                         errors = re.finditer(pat_list['error_pattern'], line)
@@ -551,7 +554,8 @@ class HFMLFormatter(BaseFormatter):
                         start_sub_topic = end_sub_topic
                         if self.sub_topic_Id:
                             self.sub_topic_Id.append((start_sub_topic, i-2, self.vol_walker+1, self.sub_topic_info[-1] if self.sub_topic_info else None))
-                        self.current_topic_id.append((start_topic, i-2, self.vol_walker+1, self.topic_info[-1]))
+                        if self.topic_info:
+                            self.current_topic_id.append((start_topic, i-2, self.vol_walker+1, self.topic_info[-1]))
                         cur_vol_pages.append((start_page, i-2, pg_info[-1], pg_ann[-1]))
                         self.page.append(cur_vol_pages)
                         pages = []
@@ -574,9 +578,10 @@ class HFMLFormatter(BaseFormatter):
         self.yigchung_pattern.append(self.merge(start_yigchung_pattern, end_yigchung_pattern))
     
     def get_result(self):
-        if self.topic_id[0][0][3] == self.topic_id[1][0][3]:
-            self.topic_id = self.topic_id[1:]
-            self.sub_topic = self.sub_topic[1:]
+        if self.topic_id[0]:
+            if self.topic_id[0][0][3] == self.topic_id[1][0][3]:
+                self.topic_id = self.topic_id[1:]
+                self.sub_topic = self.sub_topic[1:]
         self.sub_topic = self.__final_sub_topic(self.sub_topic)
         result = {
             'poti_title': self.poti_title,
@@ -630,17 +635,20 @@ class HFMLFormatter(BaseFormatter):
         return base_text
 
 
-    def new_poti(self,  input_path):
+    def new_poti(self, input_path, **kwargs):
         input_path = Path(input_path)
         self._build_dirs(input_path)
         (self.dirs['opf_path']/'base').mkdir(exist_ok=True)
 
-        for i, (m_text, vol_fn, n_vol) in enumerate(self.get_input(input_path)):
-            print(f'[INFO] Processing Vol {i+1:03} of {n_vol}: {vol_fn.name} ...')
+        for i, (m_text, vol_name, n_vol) in enumerate(self.get_input(input_path)):
+            print(f'[INFO] Processing Vol {i+1:03} of {n_vol}: {vol_name} ...')
             base_id = f'v{i+1:03}'
             self.build_layers(m_text, n_vol)
             # save base_text
             # if (self.dirs['opf_path']/'base'/f'{base_id}.txt').is_file(): continue
+            if 'is_text' in kwargs:
+                if kwargs['is_text']: continue
+
             base_text = self.get_base_text()
             (self.dirs['opf_path']/'base'/f'{base_id}.txt').write_text(base_text)
 
@@ -662,6 +670,44 @@ class HFMLFormatter(BaseFormatter):
                 self.dump(ann, layer_fn)
 
 
+class HFMLTextFromatter(HFMLFormatter):
+
+    def __init_(self, output_path='./output'):
+        super().__init__(output_path=output_path)
+
+    def get_input(self, input_path):
+        mtext = input_path.read_text()
+
+        vol_pattern = r'\[v\d{3}\]'
+        cur_vol_text =""
+        vol_text = []
+        vol_info = []
+        vol_walker = 0
+        lines = mtext.splitlines()
+        n_line = len(lines)
+        for idx, line in enumerate(lines):
+            vol_pat = re.search(vol_pattern,line)
+            if vol_pat:
+                vol_info.append(vol_pat[0][1:-1])
+                if vol_walker > 0:
+                    vol_text.append(cur_vol_text)
+                    cur_vol_text = ""
+                vol_walker += 1
+            else:
+                cur_vol_text += line +'\n'
+            if idx == n_line-1:
+                vol_text.append(cur_vol_text)
+                cur_vol_text = ""
+        
+        result= []
+        for i, vol_id in enumerate(vol_info):
+            result.append((self.text_preprocess(vol_text[i]), vol_id, vol_walker))
+        return result
+
+
 if __name__ == "__main__":
     formatter = HFMLFormatter()
     formatter.new_poti('./tests/data/formatter/hfml/P000002/')
+
+    # formatter = HFMLTextFromatter()
+    # formatter.new_poti('./tests/data/formatter/hfml/vol_sep_test')
