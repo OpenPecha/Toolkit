@@ -306,7 +306,7 @@ class HFMLFormatter(BaseFormatter):
         
         for p in ['start_cit_pattern', 'end_cit_pattern', 'start_sabche_pattern', 'end_sabche_pattern',
         'start_tsawa_pattern', 'end_tsawa_pattern', 'start_yigchung_pattern', 'end_yigchung_pattern']:
-            base_line = re.sub(plist[p],'', base_line, 1)
+            base_line = re.sub(plist[p],'', base_line)
 
         if re.search(plist['error_pattern'], line):
             errors = re.finditer(plist['error_pattern'], line) # list of match object of error pattern in line
@@ -424,17 +424,17 @@ class HFMLFormatter(BaseFormatter):
                             if start_sub_topic < end_sub_topic:
                                 if len(self.sub_topic_info) >= 2:
                                     self.sub_topic_Id.append((start_sub_topic, end_sub_topic, self.vol_walker+1, self.sub_topic_info[-2]))
-                                    end_sub_topic = end_sub_topic+1
+                                    end_sub_topic = end_sub_topic
                                 else:
                                     self.sub_topic_Id.append((start_sub_topic, end_sub_topic, self.vol_walker+1, self.sub_topic_info[-1]))
-                                    end_sub_topic = end_sub_topic+1
+                                    end_sub_topic = end_sub_topic
                         else:
                             start_sub_topic = end_sub_topic
                             end_sub_topic = sub_topic_match.start()+i-pat_len_before_ann
 
                             if start_sub_topic < end_sub_topic:
                                 self.sub_topic_Id.append((start_sub_topic, end_sub_topic, self.vol_walker+1, self.sub_topic_info[-2]))
-                                end_sub_topic = end_sub_topic+1
+                                end_sub_topic = end_sub_topic
 
                     if re.search(pat_list['topic_pattern'], line): #checking current line contain topicID annotation or not
                         topic = re.search(pat_list['topic_pattern'], line)
@@ -459,6 +459,7 @@ class HFMLFormatter(BaseFormatter):
                                 last = self.sub_topic_info[-1]
                                 self.sub_topic_info = []
                                 self.sub_topic_info.append(last)
+
                         
                     if re.search(pat_list['error_pattern'], line):   # checking current line contain error annotation or not
                         errors = re.finditer(pat_list['error_pattern'], line)
