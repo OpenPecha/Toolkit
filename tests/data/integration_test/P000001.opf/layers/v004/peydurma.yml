@@ -1,0 +1,19 @@
+id: b481c9bff09e46cabc3f57ffd24493d7
+annotation_type: note_marker
+revision: '00001'
+annotations:
+- id: b19de60583bf42fd906231da1034986e
+  note: null
+  span:
+    start: 841
+    end: 841
+- id: e47333a054a24630ae4bafe31a161c78
+  note: null
+  span:
+    start: 2792
+    end: 2792
+- id: e47333a054a24630ae4bafe31a161c78
+  note: null
+  span:
+    start: 2899
+    end: 2899
