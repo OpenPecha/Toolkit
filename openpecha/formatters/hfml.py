@@ -158,166 +158,188 @@ class HFMLFormatter(BaseFormatter):
                 yield result, None
 
 
-    def total_pattern(self, plist, line):
-        '''
-        returns the total length of annotation detected in a line
-        '''
-        total_length = 0 # total length of annotation detected in a line
-        for pp in ['line_pattern', 'topic_pattern', 'sub_topic_pattern']:
-            if re.search(plist[pp], line):
-                match_list = re.finditer(plist[pp], line) # list of match object of given pattern in line
-                for i in match_list:
-                    total_length = total_length + len(i[0])
+    def total_pattern(self, pat_list, annotated_line):
+        """ It calculates the length of all the annotation detected in a line.
 
-        if re.search(plist['error_pattern'], line):
-            errors = re.finditer(plist['error_pattern'], line) # list of match object of error pattern in line
+        Args:
+            pat_list (dict): It contains all the annotation's regex pattern as value and name of annotation as key.
+            annotated_line (str): It contains the annotated line to be process.
+        
+        Return:
+            total_length (int): It accumulates as annotations are detected in the line.
+        """
+        total_length = 0 # total length of annotation detected in a line
+        for pattern in ['line_pattern', 'topic_pattern', 'sub_topic_pattern']:
+            if re.search(pat_list[pattern], annotated_line):
+                match_list = re.finditer(pat_list[pattern], annotated_line) # list of match object of given pattern in line
+                for match in match_list:
+                    total_length = total_length + len(match[0])
+
+        if re.search(pat_list['error_pattern'], annotated_line):
+            errors = re.finditer(pat_list['error_pattern'], annotated_line) # list of match object of error pattern in line
             for error in errors:
                 error_part = error[0].split(',')[0][1:]
                 total_length = total_length + (len(error[0])-len(error_part))
             
-        if re.search(plist['abs_er_pattern'], line):
-            abs_ers = re.finditer(plist['abs_er_pattern'], line) # list of match object of abs_er pattern in line
-            for abs_er in abs_ers:
-                total_length = total_length + 2
+        if re.search(pat_list['abs_er_pattern'], annotated_line):
+            abs_ers = re.findall(pat_list['abs_er_pattern'], annotated_line) # list of match of abs_er pattern in line
+            total_length = total_length + 2 * len(abs_ers)
 
-        if re.search(plist['note_pattern'], line):
-            abs_errors = re.finditer(plist['note_pattern'], line) # list of match object of note pattern in line
-            for abs_error in abs_errors:
-                total_length = total_length + 1
+        if re.search(pat_list['note_pattern'], annotated_line):
+            note_patterns = re.findall(pat_list['note_pattern'], annotated_line) # list of match of note pattern in line
+            total_length = total_length + len(note_patterns)
 
-        for pp in ['author_pattern', 'pecha_title_pattern', 'poti_title_pattern', 'chapter_title_pattern']:
-            title_pattern = re.search(plist[pp], line)
+        for pattern in ['author_pattern', 'pecha_title_pattern', 'poti_title_pattern', 'chapter_title_pattern']:
+            title_pattern = re.search(pat_list[pattern], annotated_line)
             if title_pattern:
                 total_length += 4
         
-        for pp in ['start_cit_pattern', 'end_cit_pattern']:
-            cit_patterns = re.finditer(plist[pp], line)
-            for cit_pattern in cit_patterns:
-                total_length = total_length+2
+        for pattern in ['start_cit_pattern', 'end_cit_pattern']:
+            cit_patterns = re.findall(pat_list[pattern], annotated_line) # list of match of citation pattern in line
+            total_length = total_length + 2 * len(cit_patterns)
 
-        for pp in ['start_sabche_pattern', 'end_sabche_pattern']:
-            sabche_patterns = re.finditer(plist[pp], line)
-            for sabche_pattern in sabche_patterns:
-                total_length = total_length+2
+        for pattern in ['start_sabche_pattern', 'end_sabche_pattern']:
+            sabche_patterns = re.findall(pat_list[pattern], annotated_line) # list of match of sabche pattern in line
+            total_length = total_length + 2 * len(sabche_patterns)
         
-        for pp in ['start_tsawa_pattern', 'end_tsawa_pattern']:
-            tsawa_patterns = re.finditer(plist[pp], line)
-            for tsawa_pattern in tsawa_patterns:
-                total_length = total_length+2
+        for pattern in ['start_tsawa_pattern', 'end_tsawa_pattern']:
+            tsawa_patterns = re.findall(pat_list[pattern], annotated_line) # list of match of tsawa pattern in line
+            total_length = total_length + 2 * len(tsawa_patterns)
         
-        for pp in ['start_yigchung_pattern', 'end_yigchung_pattern']:
-            yigchung_patterns = re.finditer(plist[pp], line)
-            for yigchung_pattern in yigchung_patterns:
-                total_length = total_length+2
+        for pattern in ['start_yigchung_pattern', 'end_yigchung_pattern']:
+            yigchung_patterns = re.findall(pat_list[pattern], annotated_line) # list of match of yigchung pattern in line
+            total_length = total_length + 2 * len(yigchung_patterns)
 
         return total_length
 
     def merge(self, start_list, end_list):
-        '''
-        The starting  and ending of annotation(citaion,yigchung,sabche and tsawa) are 
-        stored in start_list and end_list. Merging these two list will generate a list 
-        in which both starting and ending of an annotation together in a tuple. It is applicable
-        only if the annotaions are not cross volume.
-        '''
+        """ It merges two list.
+
+        The starting  and ending of annotation(citaion,yigchung,sabche and tsawa) are stored in two list.
+        Merging these two list will generate a list in which both starting and ending of an annotation together in a tuple.
+        It is applicable only if the annotaions are not cross volume.
+
+        Args:
+            start_list (list): It contains index of where starting annotations(citaion,yigchung,sabche and tsawa) are detected.
+            end_list (list): It contains index of where ending annotations(citaion,yigchung,sabche and tsawa) are detected.
+        
+        Return:
+            result (list): It contains tuples where starting and ending of an annotation(citaion,yigchung,sabche and tsawa) is combined.
+        """
         walker = 0
         result = []
         while walker < len(end_list) and walker < len(start_list):
-            result.append((start_list[walker],end_list[walker]))
+            result.append((start_list[walker], end_list[walker]))
             walker += 1
         return result
 
-    def search_before(self, p, plist, line): 
-        '''
-        returns the length of annotation detected in a line before the p annotation
-        '''
+    def search_before(self, ann, pat_list, line): 
+        """ It calculates the length of annotation detected in a given line before a given annotation.
+
+        Args:
+            ann (match object): It is a match object of the annotation of which we want to calculate
+                                the length of any annotation detected before it.
+            pat_list (dict): It contains all the annotation's regex pattern as value and name of annotation as key.
+            line (str): It contains the line in which we wants to calculate the legth of annotation found before the given annotation.
+
+        Return:
+            length_before (int): It accumalates as we detect annotation which is before the given annotation and
+                                finally gives the total length of annotation caught before the given annotation in the given line.
+        """
         length_before = 0
         for pp in ['line_pattern','topic_pattern','sub_topic_pattern']:
-            if re.search(plist[pp], line):
-                match_list = re.finditer(plist[pp], line) # list of match object of given pattern in line
-                for i in match_list:
-                    if p.start() > i.start():
-                        length_before = length_before + len(i[0])
+            if re.search(pat_list[pp], line):
+                match_list = re.finditer(pat_list[pp], line) # list of match object of given pattern in line
+                for match in match_list:
+                    if ann.start() > match.start():
+                        length_before = length_before + len(match[0])
 
-        if re.search(plist['error_pattern'], line):
-            errors = re.finditer(plist['error_pattern'], line) # list of match object of error pattern in line
+        if re.search(pat_list['error_pattern'], line):
+            errors = re.finditer(pat_list['error_pattern'], line) # list of match object of error pattern in line
             for error in errors:
-                if p.start() > error.start():
+                if ann.start() > error.start():
                     error_part = error[0].split(',')[0][1:]
-                    length_before = length_before + (len(error[0])-len(error_part))
+                    length_before = length_before + (len(error[0]) - len(error_part))
             
-        if re.search(plist['abs_er_pattern'], line):
-            abs_ers = re.finditer(plist['abs_er_pattern'], line) # list of match object of abs_er pattern in line
+        if re.search(pat_list['abs_er_pattern'], line):
+            abs_ers = re.finditer(pat_list['abs_er_pattern'], line) # list of match object of abs_er pattern in line
             for abs_er in abs_ers:
-                if p.start() > abs_er.start():
+                if ann.start() > abs_er.start():
                     length_before = length_before + 2
 
-        if re.search(plist['note_pattern'], line):
-            abs_errors = re.finditer(plist['note_pattern'], line) # list of match object of note pattern in line
+        if re.search(pat_list['note_pattern'], line):
+            abs_errors = re.finditer(pat_list['note_pattern'], line) # list of match object of note pattern in line
             for abs_error in abs_errors:
-                if p.start() > abs_error.start():
+                if ann.start() > abs_error.start():
                     length_before = length_before+1
 
         for pp in ['author_pattern', 'pecha_title_pattern', 'poti_title_pattern', 'chapter_title_pattern']:
-            title_pattern = re.search(plist[pp], line)
+            title_pattern = re.search(pat_list[pp], line)
             if title_pattern:
-                if p.start() > title_pattern.start():
+                if ann.start() > title_pattern.start():
                     length_before += 4
         
         for pp in ['start_cit_pattern', 'end_cit_pattern']:
-            cit_patterns = re.finditer(plist[pp], line)
+            cit_patterns = re.finditer(pat_list[pp], line) # list of match object of citation pattern in line
             for cit_pattern in cit_patterns:
-                if p.start() > cit_pattern.start():
+                if ann.start() > cit_pattern.start():
                     length_before = length_before+2
 
         for pp in ['start_sabche_pattern', 'end_sabche_pattern']:
-            sabche_patterns = re.finditer(plist[pp], line)
+            sabche_patterns = re.finditer(pat_list[pp], line) # list of match object of sabche pattern in line
             for sabche_pattern in sabche_patterns:
-                if p.start() > sabche_pattern.start():
+                if ann.start() > sabche_pattern.start():
                     length_before = length_before+2
         
         for pp in ['start_tsawa_pattern', 'end_tsawa_pattern']:
-            tsawa_patterns = re.finditer(plist[pp], line)
+            tsawa_patterns = re.finditer(pat_list[pp], line) # list of match object of tsawa pattern in line
             for tsawa_pattern in tsawa_patterns:
-                if p.start() > tsawa_pattern.start():
+                if ann.start() > tsawa_pattern.start():
                     length_before = length_before+2
         
         for pp in ['start_yigchung_pattern', 'end_yigchung_pattern']:
-            yigchung_patterns = re.finditer(plist[pp], line)
+            yigchung_patterns = re.finditer(pat_list[pp], line) # list of match object of yigchung pattern in line
             for yigchung_pattern in yigchung_patterns:
-                if p.start() > yigchung_pattern.start():
+                if ann.start() > yigchung_pattern.start():
                     length_before = length_before+2
         
         return length_before
 
 
-    def base_extract(self, plist, line): 
-        '''
-        Extract the base text from the given line
-        '''
-        base_line = line # stores the base_line which is line without annotation
-        for p in ['line_pattern', 'topic_pattern', 'sub_topic_pattern', 'note_pattern']:
-            base_line = re.sub(plist[p], '', base_line)
+    def base_extract(self, pat_list, annotated_line): 
+        """ It extract the base text from annotated text.
+
+        Args:
+            pat_list (dict): It contains all the annotation's regex pattern as value and name of annotation as key.
+            annotated_line (str): It contains the annotated line from which we want to extract the base text.
         
-        for p in ['author_pattern', 'pecha_title_pattern', 'poti_title_pattern', 'chapter_title_pattern']:
-            title_pattern = re.search(plist[p], line)
+        Return:
+            base_line (str): It contains the base text which is being extracted from the given annotated line.
+        """
+        base_line = annotated_line # stores the base_line which is line without annotation
+        for pattern in ['line_pattern', 'topic_pattern', 'sub_topic_pattern', 'note_pattern']:
+            base_line = re.sub(pat_list[pattern], '', base_line)
+        
+        for pattern in ['author_pattern', 'pecha_title_pattern', 'poti_title_pattern', 'chapter_title_pattern']:
+            title_pattern = re.search(pat_list[pattern], annotated_line)
             if title_pattern:
                 title = title_pattern[0][3:-1]
-                base_line = re.sub(plist[p], title, base_line, 1)
+                base_line = re.sub(pat_list[pattern], title, base_line, 1)
         
-        for p in ['start_cit_pattern', 'end_cit_pattern', 'start_sabche_pattern', 'end_sabche_pattern',
+        for pattern in ['start_cit_pattern', 'end_cit_pattern', 'start_sabche_pattern', 'end_sabche_pattern',
         'start_tsawa_pattern', 'end_tsawa_pattern', 'start_yigchung_pattern', 'end_yigchung_pattern']:
-            base_line = re.sub(plist[p],'', base_line)
+            base_line = re.sub(pat_list[pattern],'', base_line)
 
-        if re.search(plist['error_pattern'], line):
-            errors = re.finditer(plist['error_pattern'], line) # list of match object of error pattern in line
+        if re.search(pat_list['error_pattern'], annotated_line):
+            errors = re.finditer(pat_list['error_pattern'], annotated_line) # list of match object of error pattern in line
             for error in errors:
                 error_part = error[0].split(',')[0][1:]
-                base_line = re.sub(plist['error_pattern'], error_part, base_line, 1)
+                base_line = re.sub(pat_list['error_pattern'], error_part, base_line, 1)
             
-        if re.search(plist['abs_er_pattern'], line):
-            abs_ers = re.finditer(plist['abs_er_pattern'], line)# list of match object of abs_er pattern in line
+        if re.search(pat_list['abs_er_pattern'], annotated_line):
+            abs_ers = re.finditer(pat_list['abs_er_pattern'], annotated_line)# list of match object of abs_er pattern in line
             for abs_er in abs_ers:
-                base_line = re.sub(plist['abs_er_pattern'], abs_er[0][1:-1], base_line, 1)
+                base_line = re.sub(pat_list['abs_er_pattern'], abs_er[0][1:-1], base_line, 1)
 
         return base_line
 
@@ -330,16 +352,16 @@ class HFMLFormatter(BaseFormatter):
         cur_vol_error_id = [] # list variable to store error annotation according to base string index eg : [(es,ee,'suggestion')]
         cur_vol_abs_er_id = [] # list variable to store abs_er annotation 
         note_id = [] # list variable to store note annotation '#"
-        pg_info = []
-        pg_ann = []
-        start_cit_patterns = []
-        end_cit_patterns = []
-        start_sabche_pattern = []
-        end_sabche_pattern = []
-        start_tsawa_pattern = []
-        end_tsawa_pattern = []
-        start_yigchung_pattern = []
-        end_yigchung_pattern = []
+        pg_info = [] # lsit variable to store page info component
+        pg_ann = [] # list variable to store page annotation content
+        start_cit_patterns = [] # list variable to store index of start citation pattern => (g
+        end_cit_patterns = [] # list variable to store index of start citation pattern => g)
+        start_sabche_pattern = [] # list variable to store index of start sabche pattern => (q
+        end_sabche_pattern = [] # list variable to store index of end sabche pattern => q)
+        start_tsawa_pattern = []  # list variable to store index of start tsawa pattern => (m
+        end_tsawa_pattern = [] # list variable to store index of end sabche pattern => m)
+        start_yigchung_pattern = [] # list variable to store index of start yigchung pattern => (y  
+        end_yigchung_pattern = [] # list variable to store index of end yigchung pattern => y)
         
         pat_list={ 
             'author_pattern': r'\(au.+?\)',
@@ -559,7 +581,6 @@ class HFMLFormatter(BaseFormatter):
                             self.current_topic_id.append((start_topic, i-2, self.vol_walker+1, self.topic_info[-1]))
                         cur_vol_pages.append((start_page, i-2, pg_info[-1], pg_ann[-1]))
                         self.page.append(cur_vol_pages)
-                        pages = []
                         self.error_id.append(cur_vol_error_id)
                         cur_vol_error_id = []
                         self.abs_er_id.append(cur_vol_abs_er_id)
@@ -573,12 +594,13 @@ class HFMLFormatter(BaseFormatter):
             self.current_topic_id = []
             self.sub_topic.append(self.sub_topic_Id)
 
-        self.citation_pattern.append(self.merge(start_cit_patterns, end_cit_patterns)) # The starting and ending of pattern is merged
-        self.sabche_pattern.append(self.merge(start_sabche_pattern, end_sabche_pattern))
-        self.tsawa_pattern.append(self.merge(start_tsawa_pattern, end_tsawa_pattern))
-        self.yigchung_pattern.append(self.merge(start_yigchung_pattern, end_yigchung_pattern))
+        self.citation_pattern.append(self.merge(start_cit_patterns, end_cit_patterns)) # The starting and ending of  citation pattern is merged
+        self.sabche_pattern.append(self.merge(start_sabche_pattern, end_sabche_pattern)) # The starting and ending of  sabche pattern is merged
+        self.tsawa_pattern.append(self.merge(start_tsawa_pattern, end_tsawa_pattern)) # The starting and ending of  tsawa pattern is merged
+        self.yigchung_pattern.append(self.merge(start_yigchung_pattern, end_yigchung_pattern)) # The starting and ending of  yigchung pattern is merged
     
     def get_result(self):
+
         if self.topic_id[0]:
             if self.topic_id[0][0][3] == self.topic_id[1][0][3]:
                 self.topic_id = self.topic_id[1:]
@@ -601,9 +623,14 @@ class HFMLFormatter(BaseFormatter):
         return result
 
     def __final_sub_topic(self, sub_topics):
-        '''
-        To include all the same subtopic in one list
-        '''
+        """ It include all the sub topic belonging in one topic in a list.
+
+        Args:
+            sub_topic (list): It contains all the sub topic annotation's starting and ending index along with sub-topic info.
+
+        Return:
+            result (list): It contains list in which sub topic belonging to same topics are grouped together.
+        """
         result = []
         cur_topic = []
         cur_sub = []
