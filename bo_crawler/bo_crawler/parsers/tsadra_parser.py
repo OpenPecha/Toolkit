@@ -7,6 +7,21 @@ from tqdm import tqdm
 
 #Global vars
 rt_base = 'tibetan-root-text_tibetan-root-text'
+cit_base = 'tibetan-citations-in-verse_'
+com_base = 'tibetan-commentary'
+
+com_classes = {
+    'first': f'{com_base}-first-line',
+    'middle': f'{com_base}-middle-lines',
+    'last': f'{com_base}-last-line',
+    'non': f'{com_base}-non-indent1'
+}
+cit_classes = {
+    'first': f'{cit_base}tibetan-citations-first-line',
+    'middle': f'{cit_base}tibetan-citations-middle-lines',
+    'last': f'{cit_base}tibetan-citations-last-line',
+    'indent': f'{cit_base}tibetan-regular-indented'
+}
 root_text_classes = {
     'first': f'{rt_base}-first-line',
     'middle': f'{rt_base}-middle-lines',
@@ -65,8 +80,18 @@ def preprocess_text(text):
     return text
 
 def find_the_rest(soup, output):
+
     root_text_tmp = ''
     sabche_tmp = ''
+    commentary_tmp = ''
+    citation_tmp = ''
+
+    i = 0  # The walker
+    root_text = [] # list variable to store root text index
+    citation = [] # list variable to store citation index
+    #commentary = [] # list variable to store commentary index
+    sabche = [] # list variable to store sabche index
+    yigchung = [] # list variable to store yigchung index
 
     ps = soup.find_all('p')
     for p in ps[output.count('\n')//2:]:
@@ -76,44 +101,90 @@ def find_the_rest(soup, output):
                p['class'][0] == root_text_classes['middle']:
                 root_text_tmp += preprocess_text(p.text) + '\n'
             elif p['class'][0] == root_text_classes['last']:
-                root_text_tmp += preprocess_text(p.text) + '\n'
-                output += f'{{++**++}}\n{root_text_tmp}{{++**++}}\n\n'
-                root_text_tmp = ''
-        elif 'commentary' in p['class'][0] or 'regular' in p['class'][0]:
-            citation_tmp = ''
-            p_tmp = ''
-            for s in p.contents:
-                #check for page with no content and skip the page
-                if isinstance(s, str): return '' 
-                #some child are not <span> rather like <a> and some <span> has no 'class' attr
-                try:
-                    s['class'][0]
-                except:
-                   p_tmp += preprocess_text(s.text)
-                   continue
+                for s in p.contents:
+                    if 'root' in s['class'][0]:
+                        root_text_tmp += preprocess_text(s.text)
+                        root_text.append((i,len(root_text_tmp)+i))
+                        i += len(root_text_tmp) + 1
+                        root_text_tmp = ''
+                    else:
+                        i += len(preprocess_text(s.text))
 
-                if 'small' in s['class'][0]:
-                    p_tmp += f'{{++*++}}{preprocess_text(s.text)}{{++*++}}'
-                elif 'external-citations' in s['class'][0]:
-                    citation_tmp += preprocess_text(s.text)
-                elif citation_tmp:
-                    p_tmp += f'{{++~~++}}{citation_tmp}{{++~~++}}'
+        elif 'tibetan-chapter' in p['class'][0]:
+            chapter.append((i, len(preprocess_text(p.text))-1+i))
+            i += len(preprocess_text(p.text))
+
+        elif 'commentary' in p['class'][0] or 'tibetan-regular-indented' in p['class'][0]:
+
+            if p['class'][0] == com_classes['first'] or \
+               p['class'][0] == com_classes['middle']:
+                commentary_tmp += preprocess_text(p.text) + '\n'
+            elif p['class'][0] == com_classes['last']:
+                commentary_tmp += preprocess_text(p.text) + '\n'
+                #output += f'{{++**++}}\n{root_text_tmp}{{++**++}}\n\n'
+                #commentary.append((i,len(commentary_tmp)-1+i))
+                i += len(commentary_tmp)
+                commentary_tmp = ''
+            
+            else:            
+                p_tmp = ''
+                p_walker=i 
+                for s in p.contents:
+                    #check for page with no content and skip the page
+                    if isinstance(s, str): return '' 
+                    #some child are not <span> rather like <a> and some <span> has no 'class' attr
+                    try:
+                        s['class'][0]
+                    except:
+                        p_tmp += preprocess_text(s.text)
+                        continue
+
+                    if 'small' in s['class'][0]:
+                    # p_tmp += f'{{++*++}}{preprocess_text(s.text)}{{++*++}}'
+                        if citation_tmp:
+                        #citation_tmp += citation_tmp
+                            citation.append((p_walker,len(citation_tmp)-1+p_walker))
+                            p_walker += len(citation_tmp)
+                            citation_tmp = ''
+                        yigchung.append((p_walker,len(preprocess_text(s.text))+p_walker))
+                        p_walker += len(preprocess_text(s.text))
+
+                    elif 'external-citations' in s['class'][0]:
+                        citation_tmp += preprocess_text(s.text)
+                        #p_tmp += preprocess_text(s.text)
+                    
+                    elif 'front-title' in s['class'][0]:
+                        if citation_tmp:
+                        #citation_tmp += citation_tmp
+                            citation.append((p_walker,len(citation_tmp)-1+p_walker))
+                            p_walker += len(citation_tmp)
+                            citation_tmp = ''
+                        p_walker += len(preprocess_text(s.text))
+                    else:
+                        if citation_tmp:
+                        #citation_tmp += citation_tmp
+                            citation.append((p_walker,len(citation_tmp)-1+p_walker))
+                            p_walker += len(citation_tmp)
+                            citation_tmp = ''
+                        p_walker += len(preprocess_text(s.text))
+
+                #when citation ends the para
+                if citation_tmp: 
+                    citation.append((p_walker,len(citation_tmp)-1+p_walker))
+                    p_walker += len(citation_tmp)
                     citation_tmp = ''
-                    p_tmp += preprocess_text(s.text)
-                else:
-                    p_tmp += preprocess_text(s.text)
+            
 
-            #when citation ends the para
-            if citation_tmp: p_tmp += f'{{++~~++}}{citation_tmp}{{++~~++}}'
-            if p_tmp:
-                output += f'{p_tmp}\n\n'
-                if '~~' in p_tmp:
-                    p_with_citations.append(p_tmp)
-            else:
-                output += '\n\n'
+                commentary_tmp = preprocess_text(p.text) + '\n'
+                #commentary.append((i,len(commentary_tmp)-1+p_walker))
+                i += len(commentary_tmp)
+                commentary_tmp = ''
+                p_walker = 0
+
         elif 'sabche' in p['class'][0]:
             sabche_tmp = ''
             p_with_sabche_tmp = ''
+            k = i
             for s in p.contents:
                 try:
                     s['class'][0]
@@ -123,18 +194,41 @@ def find_the_rest(soup, output):
 
                 if 'sabche' in s['class'][0]:
                     sabche_tmp += preprocess_text(s.text)
-                elif sabche_tmp:
-                    p_with_sabche_tmp += f'{{++[++}}{sabche_tmp}{{++]++}}'
-                    sabche_tmp = ''
-                    p_with_sabche_tmp += preprocess_text(s.text)
-                else:
-                    p_with_sabche_tmp += preprocess_text(s.text)
+                
+                elif 'front-tile' in s['class'][0]:
+                    k += len(preprocess_text(s.text))
+              
 
             #when sabche ends the para
-            if sabche_tmp: p_with_sabche_tmp += f'{{++[++}}{sabche_tmp}{{++]++}}'
-            output += f'{p_with_sabche_tmp}\n\n'
+            if sabche_tmp:
+                    sabche.append((k,len(sabche_tmp)+k))
+                    sabche_tmp=''             
+            i += len(preprocess_text(p.text))+1
+            k = 0
+        elif cit_base in p['class'][0]:
+            if p['class'][0] == cit_classes['first'] or \
+                 p['class'][0] == cit_classes['middle']:
+                citation_tmp += preprocess_text(p.text) + '\n'
+            elif p['class'][0] == cit_classes['last']:
+                citation_tmp += preprocess_text(p.text) + '\n'
+                citation.append((i,len(citation_tmp)-1+i))
+                i += len(citation_tmp)
+                citation_tmp = ''
+            elif p['class'][0] == cit_classes['indent']:
+                citation_tmp += preprocess_text(p.text) + '\n'
+                citation.append(i, len(citation_tmp)-1+i)
+                i += len(citation_tmp)
+
         else:
-            output  += f'{preprocess_text(p.text)}\n\n'
+            i += len(preprocess_text(p.text))
+    
+    output = {
+    'tsawa': root_text,
+    'quotes': citation,
+    'sabche': sabche,
+    'yigchung': yigchung
+    }
+
 
     return output
 
