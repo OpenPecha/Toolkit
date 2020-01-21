@@ -354,6 +354,8 @@ class HFMLFormatter(BaseFormatter):
         note_id = [] # list variable to store note annotation '#"
         pg_info = [] # lsit variable to store page info component
         pg_ann = [] # list variable to store page annotation content
+        poti_titles = []
+        chapter_titles = []
         start_cit_patterns = [] # list variable to store index of start citation pattern => (g
         end_cit_patterns = [] # list variable to store index of start citation pattern => g)
         start_sabche_pattern = [] # list variable to store index of start sabche pattern => (q
@@ -429,11 +431,11 @@ class HFMLFormatter(BaseFormatter):
                             if pp == 'pecha_title_pattern':
                                 self.pecha_title.append((start_title,end_title))
                             if pp == 'poti_title_pattern':
-                                self.poti_title.append((start_title,end_title))
+                                poti_titles.append((start_title,end_title))
                                 end_topic = len(title_pattern[0][2:])
                                 end_sub_topic = len(title_pattern[0][2:])
                             if pp == 'chapter_title_pattern':
-                                self.chapter_title.append((start_title,end_title))
+                                chapter_titles.append((start_title,end_title))
 
                     if re.search(pat_list['sub_topic_pattern'], line): #checking current line contain sub_topicID annotation or not
                         sub_topic_match = re.search(pat_list['sub_topic_pattern'], line)
@@ -587,6 +589,8 @@ class HFMLFormatter(BaseFormatter):
                         cur_vol_abs_er_id = []
                         self.notes_id.append(note_id)
                         note_id = []
+                        self.poti_title.append(poti_titles)
+                        self.chapter_title.append(chapter_titles)
                         self.vol_walker += 1
         
         if num_vol == self.vol_walker: # checks the last volume
@@ -702,6 +706,7 @@ class HFMLTextFromatter(HFMLFormatter):
 
     def __init_(self, output_path='./output'):
         super().__init__(output_path=output_path)
+        self.text_id = None
 
     def get_input(self, input_path):
         mtext = input_path.read_text()
@@ -713,6 +718,7 @@ class HFMLTextFromatter(HFMLFormatter):
         vol_walker = 0
         lines = mtext.splitlines()
         n_line = len(lines)
+        self.text_id = re.search(r'\{\w+\}',mtext)[0]
         for idx, line in enumerate(lines):
             vol_pat = re.search(vol_pattern,line)
             if vol_pat:
@@ -732,10 +738,131 @@ class HFMLTextFromatter(HFMLFormatter):
             result.append((self.text_preprocess(vol_text[i]), vol_id, vol_walker))
         return result
 
+    def __adapt_span_to_vol(self, extra, vol_walker):
 
+        first_vol = []
+        if self.poti_title[0]:
+            start = self.poti_title[0][0] + extra
+            end = self.poti_title[0][1] + extra
+            first_vol.append((start, end))
+            first_vol.append(self.poti_title[1:])
+            self.poti_title = first_vol
+            first_vol = []
+        if self.chapter_title[0]:
+            start = self.chapter_title[0][0] + extra
+            end = self.chapter_title[0][1] + extra
+            first_vol.append((start, end))
+            first_vol.append(self.chapter_title[1:])
+            self.poti_title = first_vol
+            first_vol = []
+        if self.citation_pattern[0]:
+            for cit in self.citation_pattern[0]:
+                start = cit[0]+extra
+                end = cit[1]+extra
+                first_vol.append((start, end))
+            self.citation_pattern[0] =first_vol
+            first_vol = []
+        if self.sabche_pattern[0]:
+            for sabche in self.sabche_pattern[0]:
+                start = sabche[0]+extra
+                end = sabche[1]+extra
+                first_vol.append((start, end))
+            self.sabche_pattern[0] =first_vol
+            first_vol = []
+        if self.yigchung_pattern[0]:
+            for yig in self.yigchung_pattern[0]:
+                start = yig[0]+extra
+                end = yig[1]+extra
+                first_vol.append((start, end))
+            self.yigchung_pattern[0] =first_vol
+            first_vol = []
+        if self.tsawa_pattern[0]:
+            for tsawa in self.tsawa_pattern[0]:
+                start = tsawa[0]+extra
+                end = tsawa[1]+extra
+                first_vol.append((start, end))
+            self.tsawa_pattern[0] =first_vol
+            first_vol = []
+        if self.error_id[0]:
+            for cor in self.error_id[0]:
+                start = cor[0]+extra
+                end = cor[1]+extra
+                first_vol.append((start, end, cor[2]))
+            self.error_id[0] =first_vol
+            first_vol = []
+        if self.notes_id[0]:
+            for cor in self.notes_id[0]:
+                start = cor[0]+extra
+                first_vol.append(start)
+            self.notes_id[0] =first_vol
+            first_vol = []
+        if self.abs_er_id[0]:
+            for er in self.abs_er_id[0]:
+                start = er[0]+extra
+                end = er[1]+extra
+                first_vol.append((start, end))
+            self.abs_er_id[0] =first_vol
+            first_vol = []
+        if self.page[0]:
+            for pg in self.page[0]:
+                start = pg[0]+extra
+                end = pg[1]+extra
+                first_vol.append((start, end, pg[2], pg[3]))
+            self.page[0] =first_vol
+            first_vol = []
+
+        if self.topic_id:
+            cur_top = []
+            for cur_vol_top in self.topic_id[0]:
+                start = cur_vol_top[0]
+                end = cur_vol_top[1]
+                if cur_vol_top[2] == 1:
+                    start += extra
+                    end += extra
+                cur_top.append((start, end, cur_vol_top[2]+vol_walker, cur_vol_top[3]))
+            self.topic_id[0] = cur_top
+
+        if self.sub_topic[0][0]:
+            cur_topic = []
+            for st in self.sub_topic[0][0]:
+                cur_sub_top = []
+                for cst in st:
+                    start = cst[0]
+                    end = cst[1]
+                    if cst[2] == 1:
+                        start += extra
+                        end += extra
+                    cur_sub_top.append((start, end, t[2]+vol_walker, t[3]))
+                cur_topic.append(cur_sub_top)
+            self.sub_topic[0] = cur_topic
+
+    def get_result(self):
+        index = self.load(self.dirs['opf_path']/'index.yml')
+        extra = 0 
+        for i, ann in enumerate(index['annotations']):
+            if ann['work'] == self.text_id:
+                extra = ann['work']['span'][0]['vol']['span']['start']
+                break
+        self.__adapt_span_to_vol(extra, i)
+
+        result = {
+            'poti_title': self.poti_title,
+            'chapter_title': self.chapter_title,
+            'citation': self.citation_pattern,
+            'page': self.page, # page variable format (start_index,end_index,pg_Info,pg_ann)
+            'topic': self.topic_id,
+            'sub_topic': self.sub_topic,
+            'sabche': self.sabche_pattern,
+            'tsawa': self.tsawa_pattern,
+            'yigchung': self.yigchung_pattern,
+            'correction': self.error_id,
+            'error_candidate': self.abs_er_id,
+            'peydurma': self.notes_id}
+       
+        return result
 if __name__ == "__main__":
-    formatter = HFMLFormatter()
-    formatter.new_poti('./tests/data/formatter/hfml/P000002/')
+    # formatter = HFMLFormatter()
+    # formatter.new_poti('./tests/data/formatter/hfml/P000002/')
 
-    # formatter = HFMLTextFromatter()
-    # formatter.new_poti('./tests/data/formatter/hfml/vol_sep_test')
+    formatter = HFMLTextFromatter()
+    formatter.new_poti('./tests/data/formatter/hfml/vol_sep_test')
