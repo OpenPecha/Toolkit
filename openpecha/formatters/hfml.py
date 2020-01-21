@@ -449,7 +449,7 @@ class HFMLFormatter(BaseFormatter):
         return base_text
 
 
-    def new_poti(self,  input_path):
+    def create_opf(self,  input_path):
         input_path = Path(input_path)
         self._build_dirs(input_path)
         (self.dirs['opf_path']/'base').mkdir(exist_ok=True)
@@ -483,4 +483,4 @@ class HFMLFormatter(BaseFormatter):
 
 if __name__ == "__main__":
     formatter = HFMLFormatter()
-    formatter.new_poti('./tests/data/formatter/hfml/P000002/')
+    formatter.create_opf('./tests/data/formatter/hfml/P000002/')

@@ -30,9 +30,10 @@ class BaseFormatter:
         '''
         Build the necessary directories for OpenPecha format.
         '''
-        _work_no = input_path.stem
+        pecha_no = input_path.stem
 
-        self.dirs = {'opf_path': self.output_path/f'{_work_no}/{_work_no}.opf'}
+        self.dirs = {'pecha_path': self.output_path/pecha_no}
+        self.dirs['opf_path'] = self.dirs['pecha_path']/f'{pecha_no}.opf'
         self.dirs['layers_path'] = self.dirs['opf_path']/'layers'
         
         self.dirs['opf_path'].mkdir(parents=True, exist_ok=True)
@@ -105,7 +106,7 @@ class BaseFormatter:
             yaml.dump(data, fn, default_flow_style=False,  sort_keys=False, allow_unicode=True)
 
 
-    def new_poti(self, input_path):
+    def create_opf(self, input_path):
         input_path = Path(input_path)
         self._build_dirs(input_path)
 

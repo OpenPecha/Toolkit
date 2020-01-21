@@ -81,4 +81,4 @@ class TsadraFormatter(BaseFormatter):
 
 if __name__ == "__main__":
     formatter = TsadraFormatter('usage/new_layer_output')
-    formatter.new_poti('usage/input/W1OP000002.txt')
+    formatter.create_opf('usage/input/W1OP000002.txt')
