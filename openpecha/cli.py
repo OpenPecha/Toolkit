@@ -19,7 +19,7 @@ OP_PATH = Path('./.openpecha')
 config = {
     # Github
     'OP_CATALOG_URL': 'https://raw.githubusercontent.com/OpenPoti/openpecha-catalog/master/data/catalog.csv',
-    'OP_ORG': 'https://github.com/OpenPoti',
+    'OP_ORG': 'https://github.com/OpenPecha',
 
     # Local
     'OP_DATA_PATH': (OP_PATH/'data').resolve(),
@@ -31,8 +31,8 @@ config = {
 ERROR = '[ERROR] {}'
 INFO = '[INFO] {}'
 
-def get_work_id(n):
-    return f'W1OP{int(n):06}'
+def get_pecha_id(n):
+    return f'P{int(n):06}'
 
 @click.group()
 def cli():
@@ -44,19 +44,19 @@ def create_config_dirs():
     config['CONFIG_PATH'].mkdir(parents=True, exist_ok=True)
 
 
-def get_poti(id, batch_path, layers):
+def get_pecha(id, batch_path, layers):
 
-    def _check_poti(id=None, potis=None, layer=None, poti_list=None):
-        if id not in poti_list:
-            if id in potis:
+    def _check_pecha(id=None, pechas=None, layer=None, pecha_list=None):
+        if id not in pecha_list:
+            if id in pechas:
                 if layer:
-                    if layer in potis[id][-1].split('_'):
-                        poti_list.append(id)
+                    if layer in pechas[id][-1].split('_'):
+                        pecha_list.append(id)
                     else:
                         msg = f'{layer} layer is not found in {id}'
                         click.echo(ERROR.format(msg))
                 else:
-                    poti_list.append(id)
+                    pecha_list.append(id)
             else:
                 msg = f'{id} not found in OpenPecha catalog'
                 click.echo(ERROR.format(msg))
@@ -67,18 +67,7 @@ def get_poti(id, batch_path, layers):
         return batch_ids
 
 
-    poti_list = []
-
-    catalog_path = config['OP_CATALOG_PATH']
-    if not catalog_path.is_file():
-        # download the catalog
-        r = requests.get(config['OP_CATALOG_URL'])
-        catalog_path.write_text(r.content.decode('utf-8'))
-    
-    # Create hash map of poti
-    with catalog_path.open('r') as f:
-        reader = csv.reader(f, delimiter=',')
-        potis = {poti[0]: poti[1:] for poti in reader if poti[0].startswith('W')}
+    pecha_list = []
 
     # If filter by layers
     if layers:
@@ -86,50 +75,43 @@ def get_poti(id, batch_path, layers):
         for layer in layers_name:
             batch_ids = None
             if id:
-                _check_poti(id=id, potis=potis, layer=layer, poti_list=poti_list)
+                _check_pecha(id=id, pechas=pechas, layer=layer, pecha_list=pecha_list)
             elif batch_path:
                 if not batch_ids: batch_ids = _get_batch(batch_path)
                 for b_id in batch_ids:
-                    _check_poti(id=b_id, potis=potis, layer=layer, poti_list=poti_list)
+                    _check_pecha(id=b_id, pechas=pechas, layer=layer, pecha_list=pecha_list)
             else:
-                for p_id in potis:
-                    _check_poti(id=p_id, potis=potis, layer=layer, poti_list=poti_list)
+                for p_id in pechas:
+                    _check_pecha(id=p_id, pechas=pechas, layer=layer, pecha_list=pecha_list)
     else:
         if id:
-            _check_poti(id=id, potis=potis, poti_list=poti_list)
+            _check_pecha(id=id, pechas=pechas, pecha_list=pecha_list)
         elif batch_path:
             batch_ids = _get_batch(batch_path)
             for b_id in batch_ids:
-                _check_poti(id=b_id, potis=potis, poti_list=poti_list)
+                _check_pecha(id=b_id, pechas=pechas, pecha_list=pecha_list)
         else:
-            for p_id in potis:
-                _check_poti(id=p_id, potis=potis, poti_list=poti_list)
+            for p_id in pechas:
+                _check_pecha(id=p_id, pechas=pechas, pecha_list=pecha_list)
 
-    return poti_list
+    return pecha_list
 
 
-def download_poti(poti, out):
+def download_pecha(pecha, out):
     # clone the repo
-    poti_url = f"{config['OP_ORG']}/{poti}.git"
-    poti_path = config['OP_DATA_PATH']/poti
-    if poti_path.is_dir(): # if repo is already exits at local then try to pull
-        repo = Repo(str(poti_path))
+    pecha_url = f"{config['OP_ORG']}/{pecha}.git"
+    pecha_path = config['OP_DATA_PATH']/pecha
+    if pecha_path.is_dir(): # if repo is already exits at local then try to pull
+        repo = Repo(str(pecha_path))
         repo.heads['master'].checkout()
         repo.remotes.origin.pull()
     else:
-        Repo.clone_from(poti_url, str(poti_path))
-    
-    # Create duplicate base-text for editing
-    base_text = poti_path/f'{poti}.opf'/'base.txt'
-    out_dir = Path(out)
-    if not out_dir.is_dir(): out_dir.mkdir()
-    dup_base_text = Path(out)/f'{poti}.txt'
-    shutil.copy(str(base_text), str(dup_base_text))
+        Repo.clone_from(pecha_url, str(pecha_path))
 
 
 # Poti Download command
 @cli.command()
-@click.option('--number', '-n', help='Work number of pecha, for single pecha download')
+@click.option('--number', '-n', help='Pecha number of pecha, for single pecha download')
 @click.option('--batch', '-b', help="path to text file containg list of names of \
                                      pecha in separate line. Poti batch download")
 @click.option('--filter', '-f', help='filter pecha by layer availability, specify \
@@ -138,10 +120,10 @@ def download_poti(poti, out):
                             help='directory to store all the pecha')
 def download(**kwargs):
     '''
-    Command to download poti.
-    If id and batch options are not provided then it will download all the poti.
+    Command to download pecha.
+    If id and batch options are not provided then it will download all the pecha.
     '''
-    work_id = get_work_id(kwargs['number'])
+    pecha_id = get_pecha_id(kwargs['number'])
 
     # create config dirs
     create_config_dirs()
@@ -149,12 +131,13 @@ def download(**kwargs):
     # configure the data_path
     config['data'] = Path(kwargs['out']).resolve()
 
-    # get poti
-    potis = get_poti(work_id, kwargs['batch'], kwargs['filter'])
+    # get pecha
+    # pechas = get_pecha(work_id, kwargs['batch'], kwargs['filter'])
+    pechas = [pecha_id]
 
     # download the repo
-    for poti in tqdm(potis):
-        download_poti(poti, kwargs['out'])
+    for pecha in tqdm(pechas):
+        download_pecha(pecha, kwargs['out'])
 
     # save data_path in data_config
     config_path = config['DATA_CONFIG_PATH']
@@ -162,7 +145,7 @@ def download(**kwargs):
         config_path.write_text(str(config['data'].resolve()))
 
     # print location of data
-    msg = f'Pecha saved at: {Path(kwargs["out"])}'
+    msg = f'Downloaded {pecha_id} ... ok'
     click.echo(INFO.format(msg))
 
 
@@ -183,7 +166,7 @@ def layer(**kwargs):
         - WORK_NUMBER is the work number of the pecha, from which given layer will be applied\n
         - OUT is the filename to the write the result. Currently support only Markdown file.
     """
-    work_id = get_work_id(kwargs['work_number'])
+    work_id = get_pecha_id(kwargs['work_number'])
     opfpath = config["OP_DATA_PATH"]/work_id/f'{work_id}.opf'
     serializer = SerializeMd(opfpath)
     if kwargs['name']:
@@ -203,8 +186,8 @@ def layer(**kwargs):
     click.echo(INFO.format(msg))
 
 
-def poti_list():
-    return [poti.name for poti in config['OP_DATA_PATH'].iterdir()]
+def pecha_list():
+    return [pecha.name for pecha in config['OP_DATA_PATH'].iterdir()]
 
 def get_data_path():
     return Path(config['DATA_CONFIG_PATH'].read_text().strip())
@@ -290,9 +273,9 @@ def update(**kwargs):
     """
     Command to update the base text with your edits.
     """
-    work_id = get_work_id(kwargs['work_number'])
+    work_id = get_pecha_id(kwargs['work_number'])
     if work_id:
-        if work_id in poti_list():
+        if work_id in pecha_list():
             repo_path = config["OP_DATA_PATH"]/work_id
             repo = Repo(str(repo_path))
 
@@ -340,17 +323,19 @@ formatter_types = ['ocr', 'hfml', 'tsadra']
 @cli.command()
 @click.option('--name', '-n', type=click.Choice(formatter_types),
                               help='Type of formatter')
-@click.argument('input_path')
+@click.option('--id', '-i', type=int,
+                            help='Id of the pecha')
+@click.argument('pecha_id')
 def format(**kwargs):
     '''
-    Cammand to format pecha into opf
+    Command to format pecha into opf
     '''
     if kwargs['name'] == 'ocr':
         formatter = GoogleOCRFormatter()
-        formatter.new_poti(kwargs['input_path'])
+        formatter.new_pecha(kwargs['input_path'])
     elif kwargs['name'] == 'hfml':
         formatter = HFMLFormatter()
-        formatter.new_poti(kwargs['input_path'])
+        formatter.new_pecha(kwargs['input_path'])
     elif kwargs['name'] == 'tsadra':
         formatter = TsadraFormatter()
-        formatter.new_poti(kwargs['input_path'])
+        formatter.new_pecha(kwargs['input_path'], kwargs['id'])

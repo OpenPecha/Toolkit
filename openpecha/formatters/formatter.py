@@ -26,13 +26,16 @@ class BaseFormatter:
         return uuid4().hex
 
 
-    def _build_dirs(self, input_path):
+    def _build_dirs(self, input_path, id=None):
         '''
         Build the necessary directories for OpenPecha format.
         '''
-        _work_no = input_path.stem
+        if id:
+            pecha_id = f'P{id:06}'
+        else:
+            pecha_id = input_path.stem
 
-        self.dirs = {'opf_path': self.output_path/f'{_work_no}/{_work_no}.opf'}
+        self.dirs = {'opf_path': self.output_path/f'{pecha_id}/{pecha_id}.opf'}
         self.dirs['layers_path'] = self.dirs['opf_path']/'layers'
         
         self.dirs['opf_path'].mkdir(parents=True, exist_ok=True)

@@ -12,7 +12,7 @@ class TsadraFormatter(BaseFormatter):
     OpenPecha Formatter for Tsadra DarmaCloud ebooks
     '''
 
-    def __init__(self, output_path='./output'):
+    def __init__(self, output_path='./opfs'):
         super().__init__(output_path=output_path)
         self.base_text = ''
         self.walker = 0 # The walker to traverse every character in the pecha
@@ -365,9 +365,9 @@ class TsadraFormatter(BaseFormatter):
             yield Path(html_fn).read_text()
 
 
-    def new_poti(self, input_path):
+    def new_poti(self, input_path, id):
         input_path = Path(input_path)
-        self._build_dirs(input_path)
+        self._build_dirs(input_path, id=id)
         (self.dirs['opf_path']/'base').mkdir(exist_ok=True)
 
         # parse layers
@@ -384,10 +384,3 @@ class TsadraFormatter(BaseFormatter):
         for layer, ann in self.format_layer(layers).items():
             layer_fn = vol_layer_path/f'{layer}.yml'
             self.dump(ann, layer_fn)
-
-
-
-
-if __name__ == "__main__":
-    formatter = TsadraFormatter()
-    formatter.new_poti('tests/data/formatter/tsadra/htmls')
