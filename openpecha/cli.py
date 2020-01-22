@@ -12,6 +12,7 @@ from openpecha.serializemd import SerializeMd
 from openpecha.blupdate import Blupdate
 from openpecha.formatters import GoogleOCRFormatter
 from openpecha.formatters import HFMLFormatter
+from openpecha.formatters import TsadraFormatter
 
 
 OP_PATH = Path('./.openpecha')
@@ -334,7 +335,7 @@ def update(**kwargs):
 
 
 # OpenPecha Formatter
-formatter_types = ['ocr', 'hfml']
+formatter_types = ['ocr', 'hfml', 'tsadra']
 
 @cli.command()
 @click.option('--name', '-n', type=click.Choice(formatter_types),
@@ -349,4 +350,7 @@ def format(**kwargs):
         formatter.new_poti(kwargs['input_path'])
     elif kwargs['name'] == 'hfml':
         formatter = HFMLFormatter()
+        formatter.new_poti(kwargs['input_path'])
+    elif kwargs['name'] == 'tsadra':
+        formatter = TsadraFormatter()
         formatter.new_poti(kwargs['input_path'])

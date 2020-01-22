@@ -75,8 +75,8 @@ Peydurma = {
 }
 
 # Book titlle and author
-Book_title = {'span': span}
-Author = {'span': span}
+Book_title = {'span': Span}
+Author = {'span': Span}
 
 # Chapter
 Chapter = {

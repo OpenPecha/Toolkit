@@ -1,6 +1,7 @@
-from bs4 import BeautifulSoup
 from copy import deepcopy
-import re
+from pathlib import Path
+
+from bs4 import BeautifulSoup
 
 from openpecha.formatters import BaseFormatter
 from openpecha.formatters.format import *
@@ -25,12 +26,8 @@ class TsadraFormatter(BaseFormatter):
 
 
     def text_preprocess(self, text):
-        
         return text
-    
-    def preprocess_text(self,text):
-        #text = text.replace('{', '')
-        return text
+
 
     def format_layer(self, layers):
         for layer in layers:
@@ -120,11 +117,12 @@ class TsadraFormatter(BaseFormatter):
 
         return result
 
-    def build_layers(self, htmls):
+
+    def build_layers(self, html):
         '''
         To Build the layer
         '''
-        soup = BeautifulSoup(htmls, 'html.parser')
+        soup = BeautifulSoup(html, 'html.parser')
         book_title_tmp = ''
         author_tmp = ''
         chapter_title_tmp = ''
@@ -156,13 +154,13 @@ class TsadraFormatter(BaseFormatter):
         ps = soup.find_all('p')
         for p in ps:
             if 'credits-page_front-title' in  p['class'][0]: # to get the book title index
-                book_title_tmp = self.preprocess_text(p.text) + '\n'
+                book_title_tmp = self.text_preprocess(p.text) + '\n'
                 self.book_title.append((self.walker, len(book_title_tmp)-2+self.walker))
                 self.base_text += book_title_tmp
                 self.walker += len(book_title_tmp)
 
             if 'text-author' in p['class'][0]: # to get the author annotation index
-                author_tmp = self.preprocess_text(p.text) + '\n'
+                author_tmp = self.text_preprocess(p.text) + '\n'
                 self.author.append((self.walker, len(author_tmp)-2+self.walker))
                 self.base_text += author_tmp
                 self.walker += len(author_tmp)
@@ -171,21 +169,21 @@ class TsadraFormatter(BaseFormatter):
                 #TODO: one line root text.   
                 if p['class'][0] == root_text_classes['first'] or \
                 p['class'][0] == root_text_classes['middle']:
-                    root_text_tmp += self.preprocess_text(p.text) + '\n'
-                    self.base_text += self.preprocess_text(p.text) + '\n'
+                    root_text_tmp += self.text_preprocess(p.text) + '\n'
+                    self.base_text += self.text_preprocess(p.text) + '\n'
                 elif p['class'][0] == root_text_classes['last']:
                     for s in p.contents:
                         if 'root' in s['class'][0]:
-                            root_text_tmp += self.preprocess_text(s.text)
+                            root_text_tmp += self.text_preprocess(s.text)
                             self.root_text.append((self.walker,len(root_text_tmp)-1+self.walker))
                             self.walker+= len(root_text_tmp) + 1
                             root_text_tmp = ''
                         else:
-                            self.walker+= len(self.preprocess_text(s.text))
-                    self.base_text += self.preprocess_text(p.text) + '\n'
+                            self.walker+= len(self.text_preprocess(s.text))
+                    self.base_text += self.text_preprocess(p.text) + '\n'
 
             elif 'tibetan-chapter' in p['class'][0]: # to get chapter title index
-                chapter_title_tmp = self.preprocess_text(p.text) +'\n'
+                chapter_title_tmp = self.text_preprocess(p.text) +'\n'
                 self.chapter.append((self.walker, len(chapter_title_tmp)-2+self.walker))
                 self.walker+= len(chapter_title_tmp)
                 self.base_text += chapter_title_tmp
@@ -195,11 +193,11 @@ class TsadraFormatter(BaseFormatter):
                 # travesing through commetary which are in verse form
                 if p['class'][0] == com_classes['first'] or \
                 p['class'][0] == com_classes['middle']:
-                    commentary_tmp += self.preprocess_text(p.text) + '\n'
-                    self.base_text += self.preprocess_text(p.text) + '\n'
+                    commentary_tmp += self.text_preprocess(p.text) + '\n'
+                    self.base_text += self.text_preprocess(p.text) + '\n'
                 elif p['class'][0] == com_classes['last']:
-                    commentary_tmp += self.preprocess_text(p.text) + '\n'
-                    self.base_text += self.preprocess_text(p.text) + '\n'
+                    commentary_tmp += self.text_preprocess(p.text) + '\n'
+                    self.base_text += self.text_preprocess(p.text) + '\n'
                     self.walker+= len(commentary_tmp)
                     commentary_tmp = ''
                 #travesing through each span of commentary and regular ptag to search annotations
@@ -213,34 +211,34 @@ class TsadraFormatter(BaseFormatter):
                         try:
                             s['class'][0]
                         except:
-                            p_tmp += self.preprocess_text(s.text)
+                            p_tmp += self.text_preprocess(s.text)
                             continue
 
                         if 'small' in s['class'][0]: # checking for yigchung annotation
-                        # p_tmp += f'{{++*++}}{self.preprocess_text(s.text)}{{++*++}}'
+                        # p_tmp += f'{{++*++}}{self.text_preprocess(s.text)}{{++*++}}'
                             if citation_tmp:
                             #citation_tmp += citation_tmp
                                 self.citation.append((p_walker,len(citation_tmp)-2+p_walker))
                                 p_walker += len(citation_tmp)
                                 citation_tmp = ''
-                            self.yigchung.append((p_walker,len(self.preprocess_text(s.text))-1+p_walker))
-                            p_walker += len(self.preprocess_text(s.text))
+                            self.yigchung.append((p_walker,len(self.text_preprocess(s.text))-1+p_walker))
+                            p_walker += len(self.text_preprocess(s.text))
 
                         elif 'external-citations' in s['class'][0]: # checking for citation annotation
-                            citation_tmp += self.preprocess_text(s.text)
+                            citation_tmp += self.text_preprocess(s.text)
                         
                         elif 'front-title' in s['class'][0]:
                             if citation_tmp:
                                 self.citation.append((p_walker,len(citation_tmp)-2+p_walker))
                                 p_walker += len(citation_tmp)
                                 citation_tmp = ''
-                            p_walker += len(self.preprocess_text(s.text))
+                            p_walker += len(self.text_preprocess(s.text))
                         else:
                             if citation_tmp:
                                 self.citation.append((p_walker,len(citation_tmp)-2+p_walker))
                                 p_walker += len(citation_tmp)
                                 citation_tmp = ''
-                            p_walker += len(self.preprocess_text(s.text))
+                            p_walker += len(self.text_preprocess(s.text))
 
                     #when citation ends the para
                     if citation_tmp: 
@@ -249,8 +247,8 @@ class TsadraFormatter(BaseFormatter):
                         citation_tmp = ''
                 
 
-                    commentary_tmp = self.preprocess_text(p.text) + '\n'
-                    self.base_text += self.preprocess_text(commentary_tmp)
+                    commentary_tmp = self.text_preprocess(p.text) + '\n'
+                    self.base_text += self.text_preprocess(commentary_tmp)
                     self.walker+= len(commentary_tmp)
                     commentary_tmp = ''
                     p_walker = 0
@@ -263,37 +261,37 @@ class TsadraFormatter(BaseFormatter):
                     try:
                         s['class'][0]
                     except:
-                        p_with_sabche_tmp += self.preprocess_text(s.text)
+                        p_with_sabche_tmp += self.text_preprocess(s.text)
                         continue
 
                     if 'sabche' in s['class'][0]:
-                        sabche_tmp += self.preprocess_text(s.text)
+                        sabche_tmp += self.text_preprocess(s.text)
                     
                     elif 'front-tile' in s['class'][0]:
-                        k += len(self.preprocess_text(s.text))
+                        k += len(self.text_preprocess(s.text))
                 
 
                 #when sabche ends the para
                 if sabche_tmp:
                         self.sabche.append((k,len(sabche_tmp)-1+k))
                         sabche_tmp=''             
-                self.walker+= len(self.preprocess_text(p.text))+1
-                self.base_text += self.preprocess_text(p.text) + '\n'
+                self.walker+= len(self.text_preprocess(p.text))+1
+                self.base_text += self.text_preprocess(p.text) + '\n'
                 k = 0
             elif cit_base in p['class'][0]: # checking for citation annotation first two if for verse form and last for non verse
                 if p['class'][0] == cit_classes['first'] or \
                     p['class'][0] == cit_classes['middle']:
-                    citation_tmp += self.preprocess_text(p.text) + '\n'
-                    self.base_text += self.preprocess_text(p.text)  + '\n'
+                    citation_tmp += self.text_preprocess(p.text) + '\n'
+                    self.base_text += self.text_preprocess(p.text)  + '\n'
                 elif p['class'][0] == cit_classes['last']:
-                    citation_tmp += self.preprocess_text(p.text) + '\n'
+                    citation_tmp += self.text_preprocess(p.text) + '\n'
                     self.citation.append((self.walker,len(citation_tmp)-2+self.walker))
-                    self.base_text += self.preprocess_text(p.text) + '\n'
+                    self.base_text += self.text_preprocess(p.text) + '\n'
                     self.walker+= len(citation_tmp)
                     citation_tmp = ''
                 elif p['class'][0] == cit_classes['indent']:
-                    citation_tmp += self.preprocess_text(p.text) + '\n'
-                    self.base_text += self.preprocess_text(p.text) + '\n'
+                    citation_tmp += self.text_preprocess(p.text) + '\n'
+                    self.base_text += self.text_preprocess(p.text) + '\n'
                     self.citation.append(self.walker, len(citation_tmp)-2+self.walker)
                     self.walker+= len(citation_tmp)
                     citation_tmp = ''
@@ -324,3 +322,72 @@ class TsadraFormatter(BaseFormatter):
         To return base text of each processed page
         '''
         return self.base_text
+
+
+    def get_input(self, input_path):
+
+        def detect_fn_prefix(parts): 
+            for i, e in enumerate(parts): 
+                try:  
+                    int(e)  
+                    return i
+                except:  
+                    continue
+
+        def semantic_order(html_path):
+            html_fn = html_path.name
+            if '_-' in html_fn or '_.' in html_fn:
+                html_fn = html_fn.replace('_', '')
+            
+            parts = (Path(html_fn).stem).split('-')
+            if '_' in html_fn:
+                subtle_parts = []
+                for part in parts:
+                    if '_' in part:
+                        subtle_parts.extend(part.split('_'))
+                    else:
+                        subtle_parts.extend(part)
+                parts = subtle_parts
+
+            prefix_idx = detect_fn_prefix(parts)
+            if not prefix_idx: return '00'
+            order = parts[prefix_idx-1:]
+            if order:
+                return f'{int(order[-1]):02}'
+            else:
+                return '00'
+
+        html_paths = [o for o in input_path.iterdir() if o.suffix == '.xhtml' and o.stem != 'cover']
+        html_paths = sorted(html_paths, key=semantic_order)
+        html_paths.insert(0, input_path/'cover.xhtml')
+
+        for html_fn in html_paths:
+            yield Path(html_fn).read_text()
+
+
+    def new_poti(self, input_path):
+        input_path = Path(input_path)
+        self._build_dirs(input_path)
+        (self.dirs['opf_path']/'base').mkdir(exist_ok=True)
+
+        # parse layers
+        for html in self.get_input(input_path):
+            self.build_layers(html)
+        
+        # save base-text
+        (self.dirs['opf_path']/'base'/f'v001.txt').write_text(self.get_base_text())
+
+        # format and save layer
+        vol_layer_path = self.dirs['layers_path']/'v001'
+        vol_layer_path.mkdir(exist_ok=True)
+        layers = self.get_result()
+        for layer, ann in self.format_layer(layers).items():
+            layer_fn = vol_layer_path/f'{layer}.yml'
+            self.dump(ann, layer_fn)
+
+
+
+
+if __name__ == "__main__":
+    formatter = TsadraFormatter()
+    formatter.new_poti('tests/data/formatter/tsadra/htmls')
