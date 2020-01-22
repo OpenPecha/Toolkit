@@ -326,7 +326,7 @@ formatter_types = ['ocr', 'hfml', 'tsadra']
                               help='Type of formatter')
 @click.option('--id', '-i', type=int,
                             help='Id of the pecha')
-@click.argument('pecha_id')
+@click.argument('input_path')
 def format(**kwargs):
     '''
     Command to format pecha into opf
@@ -343,18 +343,21 @@ def format(**kwargs):
 
 
 @cli.command()
-@click.argument('input_path')
-@click.argument('out', type=click.File('w'))
+@click.argument('pecha_num')
 def edit(**kwargs):
     '''
     Command to export Pecha for editing work
     '''
-    serializer = SerializeHFML(kwargs['input_path'])
+    pecha_id = get_pecha_id(kwargs['pecha_num'])
+    opf_path = f'{config["OP_DATA_PATH"]}/{pecha_id}/{pecha_id}.opf'
+
+    serializer = SerializeHFML(opf_path)
     serializer.apply_layers()
     
+    out_fn = f'{pecha_id}.txt'
     result = serializer.get_result()
-    click.echo(result, file=kwargs['out'])
+    click.echo(result, file=open(out_fn, 'w'))
 
     # logging
-    msg = f'Output is save at: {kwargs["out"].name}'
+    msg = f'Output is save at: {out_fn}'
     click.echo(INFO.format(msg))

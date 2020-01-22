@@ -187,7 +187,8 @@ class Serialize(object):
         # don't actually do naive string concatenations
         # see https://waymoot.org/home/python_string/ where method 5 is good
         for vol_id, base_layer in self.base_layers.items():
-            result += f'\n[{vol_id}]\n'
+            if self.text_id:
+                result += f'\n[{vol_id}]\n'
             i = 0
             for c in base_layer:
                 # UTF bom \ufeff takes the 0th index
