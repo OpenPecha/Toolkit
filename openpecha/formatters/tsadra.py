@@ -1,5 +1,6 @@
 from openpecha.formatters import BaseFormatter
 from bs4 import BeautifulSoup
+import re
 
 
 class TsadraFormatter(BaseFormatter):
@@ -21,8 +22,23 @@ class TsadraFormatter(BaseFormatter):
 
 
     def text_preprocess(self, text):
-        
-        return text
+        p = r'\[p\]'
+        lines = text.splitlines()
+        result_text = ''
+        para = False
+        for line in (lines):
+            if re.search(p,line):
+                if para:
+                    para = False
+                    result_text += '\n'
+                else:
+                    para = True    
+            elif re.search(p,line) == None:
+                if para:
+                    result_text += line
+                else:
+                    result_text += line+'\n'
+        return result_text
     
     def preprocess_text(self,text):
         #text = text.replace('{', '')
@@ -222,7 +238,7 @@ class TsadraFormatter(BaseFormatter):
             'author': self.author,
             'chapter_title': self.chapter,
             'tsawa': self.root_text,
-            'quotes': self.citation,
+            'quotation': self.citation,
             'sabche': self.sabche,
             'yigchung': self.yigchung
         }
