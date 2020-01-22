@@ -2,7 +2,13 @@
 This module contains format variable for all the annotations
 '''
 
-__all__ = ['Layer', 'Page', 'Text', 'Correction', 'ErrorCandidate', 'CrossVolSpan', 'SubText', 'Peydurma']
+from collections import namedtuple
+
+
+__all__ = [
+    'Layer', 'Page', 'Text', 'Correction', 'ErrorCandidate', 'CrossVolSpan',
+    'SubText', 'Peydurma', 'Chapter', 'Tsawa', 'Quotation', 'Sabche', 'Yigchung',
+    'Book_title', 'Author']
 
 # General layer format
 Layer = {
@@ -65,5 +71,39 @@ ErrorCandidate = {
 Peydurma = {
     'id': None,
     'note': None,
+    'span': Span
+}
+
+# Book titlle and author
+Book_title = {'span': span}
+Author = {'span': span}
+
+# Chapter
+Chapter = {
+    'id': None,
+    'span': Span
+}
+
+# Tsawa
+Tsawa = {
+    'id': None,
+    'span': Span
+}
+
+# Quotation
+Quotation = {
+    'id': None,
+    'span': Span
+}
+
+# Sabche
+Sabche = {
+    'id': None,
+    'span': Span
+}
+
+# Yigchung:
+Yigchung = {
+    'id': None,
     'span': Span
 }
