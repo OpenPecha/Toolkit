@@ -22,23 +22,8 @@ class TsadraFormatter(BaseFormatter):
 
 
     def text_preprocess(self, text):
-        p = r'\[p\]'
-        lines = text.splitlines()
-        result_text = ''
-        para = False
-        for line in (lines):
-            if re.search(p,line):
-                if para:
-                    para = False
-                    result_text += '\n'
-                else:
-                    para = True    
-            elif re.search(p,line) == None:
-                if para:
-                    result_text += line
-                else:
-                    result_text += line+'\n'
-        return result_text
+        
+        return text
     
     def preprocess_text(self,text):
         #text = text.replace('{', '')
