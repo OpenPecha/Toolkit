@@ -17,21 +17,21 @@ def opf_path():
 # Test HFML Serializer
 hfml_opf_path = Path('tests/data/serialize_test/hfml/hfml.opf')
 
-def test_hfml_serializer():
-    opf_path = 'tests/data/serialize/hfml/P000001/P000001.opf'
-    text_id = 'T1'
-    layers = ['pagination']
+# def test_hfml_serializer():
+#     opf_path = 'tests/data/serialize/hfml/P000001/P000001.opf'
+#     text_id = 'T1'
+#     layers = ['pagination']
 
-    serializer = SerializeHFML(opf_path, text_id, layers)
-    serializer.apply_layers()
-    result = serializer.get_result()
-    print(result)
+#     serializer = SerializeHFML(opf_path, text_id, layers)
+#     serializer.apply_layers()
+#     result = serializer.get_result()
+#     print(result)
 
-def test_hfml_serializer_tsadra():
-    serializer = SerializeHFML('output/htmls/htmls.opf')
-    serializer.apply_layers()
-    result = serializer.get_result()
+# def test_hfml_serializer_tsadra():
+#     serializer = SerializeHFML('output/htmls/htmls.opf')
+#     serializer.apply_layers()
+#     result = serializer.get_result()
 
 
-if __name__ == "__main__":
-    test_hfml_serializer()
+# if __name__ == "__main__":
+#     test_hfml_serializer()
