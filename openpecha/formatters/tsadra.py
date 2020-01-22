@@ -64,18 +64,18 @@ class TsadraFormatter(BaseFormatter):
             'middle': f'{rt_base}-middle-lines',
             'last': f'{rt_base}-last-line'
         }
-        p_with_citations = []
+        #p_with_citations = []
         ps = soup.find_all('p')
         for p in ps:
             if 'credits-page_front-title' in  p['class'][0]: # to get the book title index
                 book_title_tmp = self.preprocess_text(p.text) + '\n'
-                self.book_title.append((self.walker, len(book_title_tmp)-1+self.walker))
+                self.book_title.append((self.walker, len(book_title_tmp)-2+self.walker))
                 self.base_text += book_title_tmp
                 self.walker += len(book_title_tmp)
 
             if 'text-author' in p['class'][0]: # to get the author annotation index
                 author_tmp = self.preprocess_text(p.text) + '\n'
-                self.author.append((self.walker, len(author_tmp)-1+self.walker))
+                self.author.append((self.walker, len(author_tmp)-2+self.walker))
                 self.base_text += author_tmp
                 self.walker += len(author_tmp)
 
@@ -89,7 +89,7 @@ class TsadraFormatter(BaseFormatter):
                     for s in p.contents:
                         if 'root' in s['class'][0]:
                             root_text_tmp += self.preprocess_text(s.text)
-                            self.root_text.append((self.walker,len(root_text_tmp)+self.walker))
+                            self.root_text.append((self.walker,len(root_text_tmp)-1+self.walker))
                             self.walker+= len(root_text_tmp) + 1
                             root_text_tmp = ''
                         else:
@@ -98,7 +98,7 @@ class TsadraFormatter(BaseFormatter):
 
             elif 'tibetan-chapter' in p['class'][0]: # to get chapter title index
                 chapter_title_tmp = self.preprocess_text(p.text) +'\n'
-                self.chapter.append((self.walker, len(chapter_title_tmp)-1+self.walker))
+                self.chapter.append((self.walker, len(chapter_title_tmp)-2+self.walker))
                 self.walker+= len(chapter_title_tmp)
                 self.base_text += chapter_title_tmp
 
@@ -132,10 +132,10 @@ class TsadraFormatter(BaseFormatter):
                         # p_tmp += f'{{++*++}}{self.preprocess_text(s.text)}{{++*++}}'
                             if citation_tmp:
                             #citation_tmp += citation_tmp
-                                self.citation.append((p_walker,len(citation_tmp)-1+p_walker))
+                                self.citation.append((p_walker,len(citation_tmp)-2+p_walker))
                                 p_walker += len(citation_tmp)
                                 citation_tmp = ''
-                            self.yigchung.append((p_walker,len(self.preprocess_text(s.text))+p_walker))
+                            self.yigchung.append((p_walker,len(self.preprocess_text(s.text))-1+p_walker))
                             p_walker += len(self.preprocess_text(s.text))
 
                         elif 'external-citations' in s['class'][0]: # checking for citation annotation
@@ -143,20 +143,20 @@ class TsadraFormatter(BaseFormatter):
                         
                         elif 'front-title' in s['class'][0]:
                             if citation_tmp:
-                                self.citation.append((p_walker,len(citation_tmp)-1+p_walker))
+                                self.citation.append((p_walker,len(citation_tmp)-2+p_walker))
                                 p_walker += len(citation_tmp)
                                 citation_tmp = ''
                             p_walker += len(self.preprocess_text(s.text))
                         else:
                             if citation_tmp:
-                                self.citation.append((p_walker,len(citation_tmp)-1+p_walker))
+                                self.citation.append((p_walker,len(citation_tmp)-2+p_walker))
                                 p_walker += len(citation_tmp)
                                 citation_tmp = ''
                             p_walker += len(self.preprocess_text(s.text))
 
                     #when citation ends the para
                     if citation_tmp: 
-                        self.citation.append((p_walker,len(citation_tmp)-1+p_walker))
+                        self.citation.append((p_walker,len(citation_tmp)-2+p_walker))
                         p_walker += len(citation_tmp)
                         citation_tmp = ''
                 
@@ -187,7 +187,7 @@ class TsadraFormatter(BaseFormatter):
 
                 #when sabche ends the para
                 if sabche_tmp:
-                        self.sabche.append((k,len(sabche_tmp)+k))
+                        self.sabche.append((k,len(sabche_tmp)-1+k))
                         sabche_tmp=''             
                 self.walker+= len(self.preprocess_text(p.text))+1
                 self.base_text += self.preprocess_text(p.text) + '\n'
@@ -199,14 +199,14 @@ class TsadraFormatter(BaseFormatter):
                     self.base_text += self.preprocess_text(p.text)  + '\n'
                 elif p['class'][0] == cit_classes['last']:
                     citation_tmp += self.preprocess_text(p.text) + '\n'
-                    self.citation.append((self.walker,len(citation_tmp)-1+self.walker))
+                    self.citation.append((self.walker,len(citation_tmp)-2+self.walker))
                     self.base_text += self.preprocess_text(p.text) + '\n'
                     self.walker+= len(citation_tmp)
                     citation_tmp = ''
                 elif p['class'][0] == cit_classes['indent']:
                     citation_tmp += self.preprocess_text(p.text) + '\n'
                     self.base_text += self.preprocess_text(p.text) + '\n'
-                    self.citation.append(self.walker, len(citation_tmp)-1+self.walker)
+                    self.citation.append(self.walker, len(citation_tmp)-2+self.walker)
                     self.walker+= len(citation_tmp)
                     citation_tmp = ''
 
@@ -233,5 +233,5 @@ class TsadraFormatter(BaseFormatter):
         To return base text of each processed page
         '''
         base_text = self.base_text # to avoid accumulation of base text
-        self.base_text = ''
+        #self.base_text = ''
         return base_text
