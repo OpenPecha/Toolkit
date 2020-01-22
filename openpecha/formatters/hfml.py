@@ -37,8 +37,24 @@ class HFMLFormatter(BaseFormatter):
 
     def text_preprocess(self, text):
         if text[0] == '\ufeff':
-            return text[1:]
-        return text
+            text = text[1:]
+        p = r'\[p\]'
+        lines = text.splitlines()
+        result_text = ''
+        para = False
+        for line in (lines):
+            if re.search(p,line):
+                if para:
+                    para = False
+                    result_text += '\n'
+                else:
+                    para = True    
+            elif re.search(p,line) == None:
+                if para:
+                    result_text += line
+                else:
+                    result_text += line+'\n'
+        return result_text
 
 
     def get_input(self, input_path):
