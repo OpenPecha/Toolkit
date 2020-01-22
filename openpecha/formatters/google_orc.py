@@ -1,18 +1,12 @@
+from copy import deepcopy
 import json
 from pathlib import Path
 import re
 import yaml
 
 from .formatter import BaseFormatter
-
-
-# opf annotation format
-PAGINATION = {
-    'id': None,
-    'annotation_type': "pagination",
-    'rev': None,
-    'content': []
-}
+from .format import Layer
+from .format import Page
 
 
 class GoogleOCRFormatter(BaseFormatter):
@@ -44,22 +38,23 @@ class GoogleOCRFormatter(BaseFormatter):
          
         
     def format_layer(self, layers, base_id):
-        pagination = PAGINATION.copy()
-        pagination['id'] = self.get_unique_id()
-        pagination['rev'] = f'{1:05}'
-        for i, (page, pg_img_url) in enumerate(zip(layers['page'], layers['img_url'])):
-            page_id = self.get_unique_id()
-            pagination['content'].append({
-                'id': page_id,
-                'type': 'page',
-                'span': {'start_char': page[0], 'end_char': page[1]},
-                'part_of': f'bases/{base_id}',
-                'part_index': i+1,
-                'pg_img_ref': pg_img_url
-            })
+        # Format page annotation
+        Pagination = deepcopy(Layer)
+        Pagination['id'] = self.get_unique_id()
+        Pagination['annotation_type'] = 'pagination'
+        Pagination['rev'] = f'{1:05}'
+        for i, (pg, pg_img_url) in enumerate(zip(layers['page'], layers['img_url'])):
+            page = deepcopy(Page)
+            page['id'] = self.get_unique_id()
+            page['span']['start_char'] = pg[0]
+            page['span']['end_char'] = pg[1]
+            page['part_of'] = f'bases/{base_id}'
+            page['part_index'] =  i+1
+            page['ref'] = pg_img_url
+            Pagination['content'].append(page)
 
         result = {
-            'pagination': pagination
+            'pagination': Pagination
         }
 
         return result
@@ -154,9 +149,9 @@ class GoogleOCRFormatter(BaseFormatter):
             # save base_text
             (self.dirs['opf_path']/'base'/f'{base_id}.txt').write_text(base_text)
 
-            # save layers6
+            # save layers
             vol_layer_path = self.dirs['layers_path']/base_id
             vol_layer_path.mkdir(exist_ok=True)
             for layer, ann in formatted_layers.items():
                 layer_fn = vol_layer_path/f'{layer}.yml'
-                self.dump(ann, layer_fn)    
+                self.dump(ann, layer_fn)

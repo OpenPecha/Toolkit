@@ -4,62 +4,52 @@ from pathlib import Path
 import pytest
 
 from openpecha.formatters import TsadraFormatter
-from openpecha.formatters import kangyurFormatter
+from openpecha.formatters import HFMLFormatter
 from openpecha.formatters import GoogleOCRFormatter
 
 
-def test_tsadra_formatter():
-    m_text = Path('tests/data/formatter/tsadra_01.txt').read_text()
-    formatter = TsadraFormatter()
 
-    text = formatter.text_preprocess(m_text)
-    result = formatter.build_layers(text)
+class TestHFMLFormatter:
 
-    expected_result = {
-        'title': [0, 17],
-        'yigchung': [193, 830],
-        'tsawa': [919, 1073],
-        'quotes': [1733, 1777],
-        'sapche': [1318, 1393]
-    }
-
-    for layer, ann in expected_result.items():
-        assert result[layer][0] == expected_result[layer]
-
-class TestkangyurFormatter:
-
-    def test_kangyur_formatter(self):
-        m_text = Path('tests/data/formatter/kangyur_01.txt').read_text()
-        formatter = kangyurFormatter()
+    def test_get_base_text(self):
+        m_text = Path('tests/data/formatter/hfml/kangyur_01.txt').read_text()
+        formatter = HFMLFormatter()
 
         text = formatter.text_preprocess(m_text)
-        result = formatter.build_layers(text)
+        formatter.build_layers(text, len([text]))
+        result = formatter.get_base_text()
 
+        expected = Path('tests/data/formatter/hfml/kangyur_base.txt').read_text()
+
+        assert result == expected
+
+
+    def test_build_layers(self):
+        m_text1 = Path('tests/data/formatter/hfml/kangyur_01.txt').read_text()
+        m_text2 = Path('tests/data/formatter/hfml/kangyur_02.txt').read_text()
+        m_text3 = Path('tests/data/formatter/hfml/kangyur_03.txt').read_text()
+        formatter = HFMLFormatter()
+
+        text1 = formatter.text_preprocess(m_text1)
+        text2 = formatter.text_preprocess(m_text2)
+        text3 = formatter.text_preprocess(m_text3)
+        texts = [text1, text2, text3]
+        for text in texts:
+            result = formatter.build_layers(text, len(texts))
+
+        result = formatter.get_result()
+        
         expected_result = {
-            'page': [(0, 24), (27, 676), (679, 2173)],
-            'topic': [(27, 2173)],
-            'sub_topic': [[(27, 1351), (1352, 1494), (1495, 2173)]],
-            'error': [(1838,1843,'མཆིའོ་')],
-            'yigchung': [(2040,2042),(2044,2045)],
-            'absolute_error':[1518,1624,1938]
+            'page': [[(0, 24, 'kk', '1a'), (27, 676, 'kl', '1b'), (679, 2173, 'lm', '2a')], [(0, 0, 'kk', '1a'),(0,266,'','1b')], [(0, 266, 'ko', '1a')]],
+            'topic': [[(0, 2046, 1,'T1')],[(2046,2173,1,'t2')],[(0, 266, 2,'T2'),(0,26,3,'T2')], [(26, 243, 3,'T3')],[(243,266,3,'t4')]],
+            'sub_topic': [[[(0, 1352, 1,'T1-1')], [(1353, 1496, 1,'T1-2')], [(1497, 2046, 1,'T1-6')]],[[]], [[(0, 140, 2,'T1-8')],[(141,266,2,'T1-9'),(0,26,3,'T1-9')]],[[]],[[]]],
+            'correction': [[(1838, 1843, 'མཆིའོ་')], [], []],
+            'error_candidate': [[(2040, 2042), (2044, 2045)], [], []],
+            'peydurma':[[1518, 1624, 1938], [], []]
         }
 
         for layer in result:
-            print(result[layer])
             assert result[layer] == expected_result[layer]
-
-
-    def test_kangyur_get_base_text(self):
-        m_text = Path('tests/data/formatter/kangyur_01.txt').read_text()
-        formatter = kangyurFormatter()
-
-        text = formatter.text_preprocess(m_text)
-        formatter.build_layers(text)
-        result = formatter.get_base_text()
-
-        expected = Path('tests/data/formatter/kangyur_base.txt').read_text()
-
-        assert result == expected
 
 
 class TestGoogleOCRFormatter:

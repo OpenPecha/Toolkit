@@ -11,6 +11,7 @@ from tqdm import tqdm
 from openpecha.serializemd import SerializeMd
 from openpecha.blupdate import Blupdate
 from openpecha.formatters import GoogleOCRFormatter
+from openpecha.formatters import HFMLFormatter
 
 
 OP_PATH = Path('./.openpecha')
@@ -132,7 +133,7 @@ def download_poti(poti, out):
                                      pecha in separate line. Poti batch download")
 @click.option('--filter', '-f', help='filter pecha by layer availability, specify \
                                      layer names in comma separated, eg: title,yigchung,..')
-@click.option('--out', '-o', default='./pehca',
+@click.option('--out', '-o', default='./pecha',
                             help='directory to store all the pecha')
 def download(**kwargs):
     '''
@@ -339,10 +340,13 @@ formatter_types = ['ocr', 'hfml']
 @click.option('--name', '-n', type=click.Choice(formatter_types),
                               help='Type of formatter')
 @click.argument('input_path')
-def formatter(**kwargs):
+def format(**kwargs):
     '''
     Cammand to format pecha into opf
     '''
     if kwargs['name'] == 'ocr':
         formatter = GoogleOCRFormatter()
+        formatter.new_poti(kwargs['input_path'])
+    elif kwargs['name'] == 'hfml':
+        formatter = HFMLFormatter()
         formatter.new_poti(kwargs['input_path'])

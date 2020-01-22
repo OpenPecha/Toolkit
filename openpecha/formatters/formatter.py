@@ -102,7 +102,7 @@ class BaseFormatter:
     
     def dump(self, data, output_fn):
         with output_fn.open('w') as fn:
-            yaml.dump(data, fn, default_flow_style=False,  sort_keys=False)
+            yaml.dump(data, fn, default_flow_style=False,  sort_keys=False, allow_unicode=True)
 
 
     def new_poti(self, input_path):

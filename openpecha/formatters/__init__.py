@@ -1,4 +1,4 @@
 from .formatter import *
 from .tsadra import TsadraFormatter
-from .kangyur import kangyurFormatter
+from .hfml import HFMLFormatter
 from .google_orc import GoogleOCRFormatter

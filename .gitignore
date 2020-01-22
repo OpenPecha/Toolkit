@@ -17,3 +17,6 @@ usage/
 # Deployment
 build/
 dist/
+
+# test
+.coverage
