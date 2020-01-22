@@ -38,6 +38,10 @@ class HFMLFormatter(BaseFormatter):
     def text_preprocess(self, text):
         if text[0] == '\ufeff':
             text = text[1:]
+        
+        if not self.is_book:
+            return text
+
         p = r'\[p\]'
         lines = text.splitlines()
         result_text = ''
@@ -695,7 +699,9 @@ class HFMLFormatter(BaseFormatter):
             # save base_text
             # if (self.dirs['opf_path']/'base'/f'{base_id}.txt').is_file(): continue
             if 'is_text' in kwargs:
-                if kwargs['is_text']: continue
+                if kwargs['is_text']:
+                    self.is_book = True
+                    continue
 
             base_text = self.get_base_text()
             (self.dirs['opf_path']/'base'/f'{base_id}.txt').write_text(base_text)
@@ -726,6 +732,8 @@ class HFMLTextFromatter(HFMLFormatter):
 
     def get_input(self, input_path):
         mtext = input_path.read_text()
+        if self.is_book:
+            return (self.text_preprocess(mtext), 'Book', 1)
 
         vol_pattern = r'\[v\d{3}\]'
         cur_vol_text =""
@@ -860,12 +868,13 @@ class HFMLTextFromatter(HFMLFormatter):
 
     def get_result(self):
         index = self.load(self.dirs['opf_path']/'index.yml')
-        extra = 0 
+        extra = 0
         for i, ann in enumerate(index['annotations']):
             if ann['work'] == self.text_id:
                 extra = ann['work']['span'][0]['vol']['span']['start']
                 break
-        self.__adapt_span_to_vol(extra, i)
+        if not self.is_book:
+            self.__adapt_span_to_vol(extra, i)
 
         result = {
             'poti_title': self.poti_title,
