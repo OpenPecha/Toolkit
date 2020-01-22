@@ -739,7 +739,13 @@ class HFMLTextFromatter(HFMLFormatter):
         return result
 
     def __adapt_span_to_vol(self, extra, vol_walker):
+        """ It adapts the index of parse output of serilized hfml file of a particular text id.
 
+        Agrs:
+            extra (int): start of text Id span which needs to be added to all the index of annotation present in that text id.
+            vol_walker (int): Adapts all the annotation which contains volume information.
+        """
+        
         first_vol = []
         if self.poti_title[0]:
             start = self.poti_title[0][0] + extra
