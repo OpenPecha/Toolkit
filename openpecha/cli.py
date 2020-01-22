@@ -8,7 +8,8 @@ from github import Github
 from git import Repo
 from tqdm import tqdm
 
-from openpecha.serializemd import SerializeMd
+from openpecha.serializers import SerializeMd
+from openpecha.serializers import SerializeHFML
 from openpecha.blupdate import Blupdate
 from openpecha.formatters import GoogleOCRFormatter
 from openpecha.formatters import HFMLFormatter
@@ -339,3 +340,21 @@ def format(**kwargs):
     elif kwargs['name'] == 'tsadra':
         formatter = TsadraFormatter()
         formatter.new_pecha(kwargs['input_path'], kwargs['id'])
+
+
+@cli.command()
+@click.argument('input_path')
+@click.argument('out', type=click.File('w'))
+def edit(**kwargs):
+    '''
+    Command to export Pecha for editing work
+    '''
+    serializer = SerializeHFML(kwargs['input_path'])
+    serializer.apply_layers()
+    
+    result = serializer.get_result()
+    click.echo(result, file=kwargs['out'])
+
+    # logging
+    msg = f'Output is save at: {kwargs["out"].name}'
+    click.echo(INFO.format(msg))
