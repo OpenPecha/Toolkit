@@ -27,6 +27,11 @@ def test_hfml_serializer():
     result = serializer.get_result()
     print(result)
 
+def test_hfml_serializer_tsadra():
+    serializer = SerializeHFML('output/htmls/htmls.opf')
+    serializer.apply_layers()
+    result = serializer.get_result()
+
 
 if __name__ == "__main__":
     test_hfml_serializer()

@@ -23,7 +23,7 @@ class SerializeHFML(Serialize):
         """
         adapted_start = span['start'] - self.text_spans[vol_id]['start']
         adapted_end = span['end'] - self.text_spans[vol_id]['start']
-        return adapted_start, adapted_start
+        return adapted_start, adapted_end
 
 
     def apply_annotation(self, vol_id, ann):
@@ -38,6 +38,10 @@ class SerializeHFML(Serialize):
 
         """
         only_start_ann = False
+        start_cc = 0
+        end_cc = 0
+        start_payload = ''
+        end_payload = ''
         if ann['type'] == 'pagination':
             start_cc, end_cc = self.__get_adapted_span(ann['span'], vol_id)
             start_payload = f'[{ann["page_index"]}] {ann["page_info"]}\n'
@@ -45,7 +49,7 @@ class SerializeHFML(Serialize):
         elif ann['type'] == 'correction':
             start_cc, end_cc = self.__get_adapted_span(ann['span'], vol_id)
             start_payload = '('
-            end_payload = f',{ann['correction']})'
+            end_payload = f',{ann["correction"]})'
         elif ann['type'] == 'peydurma':
             start_cc, end_cc = self.__get_adapted_span(ann['span'], vol_id)
             start_payload = '#'

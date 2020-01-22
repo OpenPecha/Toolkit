@@ -15,10 +15,15 @@ class Serialize(object):
 
     To use it, instantiate a concrete class with the path of the opf file, and call apply_layers() then get_result()
     """
-    def __init__(self, opfpath, text_id, layers = None):
+    def __init__(self, opfpath, text_id=None, layers=None):
         self.opfpath = Path(opfpath)
-        self.text_spans = self.get_text_spans(text_id)
-        self.base_layers = self.get_text_base_layer()
+        self.text_id = text_id
+        if self.text_id:
+            self.text_spans = self.get_text_spans(text_id)
+            self.base_layers = self.get_text_base_layer()
+        else:
+            self.text_spans = {'v001': {'start': 0}} 
+            self.base_layers = {'v001': self.get_base_layer('v001')}
         """
         The chars_toapply is an important piece of the puzzle here. Basically applying the changes to the string directly is a
         bad idea for several reasons:
@@ -72,10 +77,14 @@ class Serialize(object):
         """
         return text for given span
         """
-        vol_base = (self.opfpath/f"base/{vol_id}.txt").read_text()
-        start = self.text_spans[vol_id]['start']
-        end = self.text_spans[vol_id]['end']
-        return vol_base[start: end]
+        if self.text_id:
+            vol_base = (self.opfpath/f"base/{vol_id}.txt").read_text()
+            start = self.text_spans[vol_id]['start']
+            end = self.text_spans[vol_id]['end']
+            return vol_base[start: end]
+        else:
+           vol_base = (self.opfpath/f"base/{vol_id}.txt").read_text()
+           return vol_base
 
 
     def get_text_base_layer(self):
@@ -106,24 +115,23 @@ class Serialize(object):
                 self.apply_annotation(vol_id, a)
 
 
-    def get_all_layer(self):
+    def get_all_layer(self, vol_id):
         """
         Returns all the layerid of layer from the layer directory
         """
-        return [layer.stem for layer in (self.opfpath/'layers').iterdir() if layer.suffix == '.yml']
+        return [layer.stem for layer in (self.opfpath/'layers'/vol_id).iterdir() if layer.suffix == '.yml']
 
     def apply_layers(self):
         """
         This applies all the layers recorded in self.layers. If self.layers is none, it reads all the layers from the layer directory.
         """
-        if self.layers:
-            for vol_id in self.base_layers:
-                for layer_id in self.layers:
-                    self.apply_layer(vol_id, layer_id)
-        else:
-            for vol_id in self.base_layers:
-                for layer_id in self.get_all_layer():
-                    self.apply_layer(layer_id)
+
+        for vol_id in self.base_layers:
+            if not self.layers:
+                self.layers = self.get_all_layer(vol_id)
+            for layer_id in self.layers:
+                self.apply_layer(vol_id, layer_id)
+
 
     def add_chars(self, vol_id, cc, frombefore, charstoadd):
         """
