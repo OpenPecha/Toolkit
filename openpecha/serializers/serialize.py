@@ -110,7 +110,7 @@ class Serialize(object):
         """
         layer = yaml.safe_load((self.opfpath/'layers'/vol_id/f'{layer_id}.yml').open())
         for a in layer['annotations']:
-            if a['span']['start'] >= self.text_spans[vol_id]['start']:
+            if a['span']['end'] >= self.text_spans[vol_id]['start']:
                 a['type'] = layer_id
                 self.apply_annotation(vol_id, a)
 

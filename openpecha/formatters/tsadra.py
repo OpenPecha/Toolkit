@@ -110,7 +110,7 @@ class TsadraFormatter(BaseFormatter):
             'author': Author_layer,
             'chapter_title': Chapter_layer,
             'tsawa': Tsawa_layer,
-            'quotes': Quotation_layer,
+            'quotation': Quotation_layer,
             'sabche': Sabche_layer,
             'yigchung': Yigchung_layer
         }

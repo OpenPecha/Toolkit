@@ -64,7 +64,7 @@ class SerializeHFML(Serialize):
         elif ann['type'] == 'tsawa':
             start_payload = '(m'
             end_payload = 'm)'
-        elif ann['type'] == 'citation':
+        elif ann['type'] == 'quotes':
             start_payload = '(g'
             end_payload = 'g)'
         elif ann['type'] == 'sabche':
