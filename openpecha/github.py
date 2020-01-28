@@ -48,7 +48,7 @@ def create_local_repo(path, remote_url):
         return repo
 
 
-def github_publish(path, message=None):
+def github_publish(path, message=None, type=None):
     path = Path(path)
     remote_repo_url = create_github_repo(path)
     local_repo = create_local_repo(path, remote_repo_url)

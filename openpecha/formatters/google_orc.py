@@ -1,5 +1,6 @@
 from copy import deepcopy
 import json
+import math
 from pathlib import Path
 import re
 import yaml
@@ -35,23 +36,32 @@ class GoogleOCRFormatter(BaseFormatter):
                 yield json.load(fn.open())
             except:
                 yield None
-         
-        
+
+
+    def __get_page_index(self, n):
+        page_sides = 'ab'
+        div = n/2
+        page_num = math.ceil(div)
+        if div.is_integer():
+            return f'{page_num}{page_sides[1]}'
+        else:
+            return f'{page_num}{page_sides[0]}'
+
+
     def format_layer(self, layers, base_id):
         # Format page annotation
         Pagination = deepcopy(Layer)
         Pagination['id'] = self.get_unique_id()
         Pagination['annotation_type'] = 'pagination'
-        Pagination['rev'] = f'{1:05}'
+        Pagination['revision'] = f'{1:05}'
         for i, (pg, pg_img_url) in enumerate(zip(layers['page'], layers['img_url'])):
             page = deepcopy(Page)
             page['id'] = self.get_unique_id()
-            page['span']['start_char'] = pg[0]
-            page['span']['end_char'] = pg[1]
-            page['part_of'] = f'bases/{base_id}'
-            page['part_index'] =  i+1
-            page['ref'] = pg_img_url
-            Pagination['content'].append(page)
+            page['span']['start'] = pg[0]
+            page['span']['end'] = pg[1]
+            page['page_index'] = self.__get_page_index(i+1)
+            page['reference'] = pg_img_url
+            Pagination['annotations'].append(page)
 
         result = {
             'pagination': Pagination
@@ -59,7 +69,7 @@ class GoogleOCRFormatter(BaseFormatter):
 
         return result
 
-    
+
     def __get_coord(self, vertices):
         coord = []
         for vertice in vertices:
@@ -132,7 +142,7 @@ class GoogleOCRFormatter(BaseFormatter):
         return base_text
 
 
-    def new_poti(self,  input_path):
+    def create_opf(self, input_path):
         input_path = Path(input_path)
         self._build_dirs(input_path)
         (self.dirs['opf_path']/'base').mkdir(exist_ok=True)
@@ -141,7 +151,7 @@ class GoogleOCRFormatter(BaseFormatter):
             print(f'[INFO] Processing Vol {i+1:03} : {vol_path.name} ...')
             base_id = f'v{i+1:03}'
             if (self.dirs['opf_path']/'base'/f'{base_id}.txt').is_file(): continue
-            responses = self.get_input(vol_path/'resources')
+            responses = self.get_input(vol_path)
             layers = self.build_layers(responses)
             formatted_layers = self.format_layer(layers, base_id)
             base_text = self.get_base_text()
@@ -155,3 +165,5 @@ class GoogleOCRFormatter(BaseFormatter):
             for layer, ann in formatted_layers.items():
                 layer_fn = vol_layer_path/f'{layer}.yml'
                 self.dump(ann, layer_fn)
+        
+        return self.dirs['pecha_path']

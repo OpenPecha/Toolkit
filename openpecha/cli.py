@@ -14,6 +14,7 @@ from openpecha.blupdate import Blupdate
 from openpecha.formatters import GoogleOCRFormatter
 from openpecha.formatters import HFMLFormatter
 from openpecha.formatters import TsadraFormatter
+from openpecha.github import github_publish
 
 
 OP_PATH = Path('./.openpecha')

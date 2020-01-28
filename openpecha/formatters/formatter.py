@@ -108,7 +108,7 @@ class BaseFormatter:
             yaml.dump(data, fn, default_flow_style=False,  sort_keys=False, allow_unicode=True)
 
 
-    def new_poti(self, input_path):
+    def create_opf(self, input_path):
         input_path = Path(input_path)
         self._build_dirs(input_path)
 

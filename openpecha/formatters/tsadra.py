@@ -365,7 +365,7 @@ class TsadraFormatter(BaseFormatter):
             yield Path(html_fn).read_text()
 
 
-    def new_poti(self, input_path, id):
+    def create_opf(self, input_path, id):
         input_path = Path(input_path)
         self._build_dirs(input_path, id=id)
         (self.dirs['opf_path']/'base').mkdir(exist_ok=True)
