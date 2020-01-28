@@ -26,6 +26,7 @@ setup(
         'tqdm==4.35.0',
         'PyGithub==1.43.8',
         'GitPython==3.0.2',
+        'bs4',
     ],
     python_requires=">=3.6",
     tests_require=["pytest"],
