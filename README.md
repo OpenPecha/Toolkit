@@ -8,10 +8,11 @@ The motivation for this project it that for perfect base-text, there no big obst
 
 For NLP this toolkit will provide a way to have annoated corpra with minimal errors and extract a particular type of annotation or collection of different type of annotations. NLP researchers can then use these corpus to build language model, annotations to build NER model, entity linking, ect.
 
+## Prerequisite
+  - Python3, you can download from [here](https://www.python.org) 
+
 ## Installation
-```
-$ pip install openpecha
-```
+  - [Mac OS installer](https://github.com/OpenPecha/openpecha-toolkit/blob/master/installers/openpecha_mac_installer.zip?raw=true)
 
 ## Usage
 Frist we need to download all the poti which are in openpecha format.
