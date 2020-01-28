@@ -1,11 +1,15 @@
 import os
+import struct
 from pathlib import Path
 import platform
 
 
 M_TYPE = platform.system()
 GIT_URL = {
-   'Darwin': 'https://sourceforge.net/projects/git-osx-installer/files/git-2.23.0-intel-universal-mavericks.dmg',
+    'Darwin-64': 'https://sourceforge.net/projects/git-osx-installer/files/git-2.23.0-intel-universal-mavericks.dmg',
+    'Darwin-32': 'https://sourceforge.net/projects/git-osx-installer/files/git-2.23.0-intel-universal-mavericks.dmg',
+    'Windows-32': 'https://github.com/git-for-windows/git/releases/download/v2.25.0.windows.1/Git-2.25.0-32-bit.exe',
+    'Windows-64': 'https://github.com/git-for-windows/git/releases/download/v2.25.0.windows.1/Git-2.25.0-64-bit.exe',
 }
 
 
@@ -29,7 +33,7 @@ def git_pkg_fn():
     return git_pkg_path.replace(' ', '\ ')    
 
 
-def is_git_install():
+def is_git_installed():
     from shutil import which
     return which('git') is not None
 
@@ -58,16 +62,24 @@ def download_git(url):
 
 
 def install_git():
-    git_installer_fn = download_git(GIT_URL[M_TYPE])
-    
+    bit = sys_32_or_64()
+    if bit == 32:
+        git_installer_fn = download_git(GIT_URL[f'{M_TYPE}-32'])
+    else:
+        git_installer_fn = download_git(GIT_URL[f'{M_TYPE}-64'])
+        
     if M_TYPE == 'Darwin': 
         # mount and install git
         run_cmd(f'hdiutil attach {git_installer_fn}')
         run_cmd(f'sudo installer -pkg {git_pkg_fn()} -target /')
     elif M_TYPE == 'Windows':
-        pass
+        run_cmd(f'start {git_installer_fn}')
     else:
         pass
+
+
+def sys_32_or_64():
+    return struct.calcsize("P")*8
 
 
 def install_op_toolkit():
@@ -78,7 +90,7 @@ def install():
     install_dependencies()
 
     print('[INFO] Installing Git ...')
-    if None: #is_git_installed():
+    if is_git_installed():
         print('[INFO] Git already installed')
     else:
     	install_git()
