@@ -1,5 +1,6 @@
 from copy import deepcopy
 from pathlib import Path
+from functools import partial
 
 from bs4 import BeautifulSoup
 
@@ -326,39 +327,17 @@ class TsadraFormatter(BaseFormatter):
 
     def get_input(self, input_path):
 
-        def detect_fn_prefix(parts): 
-            for i, e in enumerate(parts): 
-                try:  
-                    int(e)  
-                    return i
-                except:  
-                    continue
-
-        def semantic_order(html_path):
-            html_fn = html_path.name
-            if '_-' in html_fn or '_.' in html_fn:
-                html_fn = html_fn.replace('_', '')
-            
-            parts = (Path(html_fn).stem).split('-')
-            if '_' in html_fn:
-                subtle_parts = []
-                for part in parts:
-                    if '_' in part:
-                        subtle_parts.extend(part.split('_'))
-                    else:
-                        subtle_parts.extend(part)
-                parts = subtle_parts
-
-            prefix_idx = detect_fn_prefix(parts)
-            if not prefix_idx: return '00'
-            order = parts[prefix_idx-1:]
+        def semantic_order(sku, html_path):
+            html_fn = html_path.stem
+            order = html_fn[len(sku)+1:]
             if order:
-                return f'{int(order[-1]):02}'
+                return int(order)
             else:
-                return '00'
+                return 0
 
         html_paths = [o for o in input_path.iterdir() if o.suffix == '.xhtml' and o.stem != 'cover']
-        html_paths = sorted(html_paths, key=semantic_order)
+        sku_sementic_order = partial(semantic_order, list(html_paths[0].parents)[1].name)
+        html_paths = sorted(html_paths, key=sku_sementic_order)
         html_paths.insert(0, input_path/'cover.xhtml')
 
         for html_fn in html_paths:
@@ -384,3 +363,8 @@ class TsadraFormatter(BaseFormatter):
         for layer, ann in self.format_layer(layers).items():
             layer_fn = vol_layer_path/f'{layer}.yml'
             self.dump(ann, layer_fn)
+
+if __name__ == "__main__":    
+    path = 'bo_crawler/bo_crawler/data/tsadra/data/ebooks/RDI-SS-05/OEBPS/'
+    formatter = TsadraFormatter(output_path='./test_opf')
+    formatter.create_opf(path, 1)
