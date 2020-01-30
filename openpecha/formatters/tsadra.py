@@ -326,6 +326,10 @@ class TsadraFormatter(BaseFormatter):
 
 
     def get_input(self, input_path):
+        
+        def get_prefix(html_paths):
+            self.sku = list(html_paths[0].parents)[1].name
+            return sorted(html_paths, key=lambda p: len(p.stem))[0].stem
 
         def semantic_order(sku, html_path):
             html_fn = html_path.stem
@@ -336,12 +340,25 @@ class TsadraFormatter(BaseFormatter):
                 return 0
 
         html_paths = [o for o in input_path.iterdir() if o.suffix == '.xhtml' and o.stem != 'cover']
-        sku_sementic_order = partial(semantic_order, list(html_paths[0].parents)[1].name)
+        sku_sementic_order = partial(semantic_order, get_prefix(html_paths))
         html_paths = sorted(html_paths, key=sku_sementic_order)
         html_paths.insert(0, input_path/'cover.xhtml')
 
         for html_fn in html_paths:
             yield Path(html_fn).read_text()
+
+
+    def create_metadata(self, layers):
+
+        def get_text(span):
+            return self.base_text[span[0]: span[1]+1].replace('\n', '')
+
+        meta_data = {}
+        meta_data['title'] = get_text(layers['book_title'][0])
+        meta_data['authors'] = [get_text(span) for span in layers['author']]
+        meta_data['sku'] = self.sku
+        meta_data['layers'] = [l for l in layers if layers[l]]
+        return meta_data
 
 
     def create_opf(self, input_path, id):
@@ -361,10 +378,16 @@ class TsadraFormatter(BaseFormatter):
         vol_layer_path.mkdir(exist_ok=True)
         layers = self.get_result()
         for layer, ann in self.format_layer(layers).items():
-            layer_fn = vol_layer_path/f'{layer}.yml'
-            self.dump(ann, layer_fn)
+            if ann['annotations']: 
+                layer_fn = vol_layer_path/f'{layer}.yml'
+                self.dump(ann, layer_fn)
 
-if __name__ == "__main__":    
-    path = 'bo_crawler/bo_crawler/data/tsadra/data/ebooks/RDI-SS-05/OEBPS/'
+        # save metatdata
+        meta_data = self.create_metadata(layers)
+        meta_fn = self.dirs['opf_path']/'meta.yml'
+        self.dump(meta_data, meta_fn)
+
+if __name__ == "__main__":
+    path = 'bo_crawler/bo_crawler/data/tsadra/data/ebooks/IBA-LG-04-1/OEBPS/'
     formatter = TsadraFormatter(output_path='./test_opf')
     formatter.create_opf(path, 1)
