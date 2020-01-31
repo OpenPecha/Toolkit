@@ -358,7 +358,7 @@ class TsadraFormatter(BaseFormatter):
         meta_data['authors'] = [get_text(span) for span in layers['author']]
         meta_data['sku'] = self.sku
         meta_data['layers'] = [l for l in layers if layers[l]]
-        return meta_data
+        return {'ebook_metadata': meta_data}
 
 
     def create_opf(self, input_path, id):
