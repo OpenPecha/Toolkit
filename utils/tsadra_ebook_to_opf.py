@@ -24,6 +24,9 @@ def format_ebooks(path):
     ebook_path = path/'OEBPS'
     cmd = f'openpecha format -n tsadra -i {START_PECHA} {str(ebook_path)}'
     os.system(cmd)
+    pecha_id = f'P{START_PECHA:06}'
+    if not Path(f'./opfs/{pecha_id}/{pecha_id}.opf/meta.yml').is_file():
+        raise Exception
     START_PECHA += 1
 
 
@@ -54,7 +57,7 @@ def create_meta_fn(path):
             create_readme(opf_meta, path)
             break
 
-    # update ID to ID
+    update ID to ID
     for row in ebook_meta:
         if row[-1] == sku:
             row[0] = path.name
@@ -71,20 +74,30 @@ if __name__ == "__main__":
     input = './bo_crawler/bo_crawler/data/tsadra/data/ebooks/'
     output = './opfs'
 
+    errors = ''
+    errors_fn = Path('errors.txt')
+
     # format all the ebooks to opf
     print('[INFO] OPF Formating ...')
     for path in Path(input).iterdir():
         if path.suffix == '.epub': continue
         print(f'\t- formatting {path.name}')
-        format_ebooks(path)
-        break
+        try:
+            format_ebooks(path)
+        except:
+            errors += path.name + '\n'
 
     # publish all the opfs to github
     print('[INFO] OpenPecha Publish ...')
     for path in Path(output).iterdir():
-        create_meta_fn(path)
-        print(f'\t- Publishing {path.name} ...')
-        github_publish(path)
+        try:
+            create_meta_fn(path)
+        except:
+            errors += path.name + '\n'
+        # print(f'\t- Publishing {path.name} ...')
+        # github_publish(path)
+
+    errors_fn.write_text(errors)
 
     # save ebook_metadata
     with ebook_meta_path.open('w') as f:
