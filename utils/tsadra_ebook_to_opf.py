@@ -5,7 +5,7 @@ import json
 import csv
 import yaml
 
-from openpecha.github import github_publish
+from openpecha.github_utils import github_publish
 
 
 START_PECHA = 10
