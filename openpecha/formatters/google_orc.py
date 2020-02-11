@@ -122,7 +122,7 @@ class GoogleOCRFormatter(BaseFormatter):
             if not text: continue # skip empty page
             lines, last_pg_end_idx = self.__get_lines(text, last_pg_end_idx, n_pg == 0)
             pages.append((lines[0][0], lines[-1][1], page_coord))
-            img_urls.append(response['image_link'])
+            img_urls.append(response.get('image_link', ''))
 
             # create base_text
             self.base_text.append(text)
@@ -148,19 +148,28 @@ class GoogleOCRFormatter(BaseFormatter):
         from pyewts import pyewts
         
         converter = pyewts()
-
-        bdrc_metadata_url = f'https://www.tbrc.org/xmldoc?rid={work_id}'
+        query_url = 'https://www.tbrc.org/xmldoc?rid={}'
+        bdrc_metadata_url = query_url.format(work_id)
         r = requests.get(bdrc_metadata_url)
         root = ET.fromstring(r.content.decode('utf-8'))        
-        bibliographical_title = converter.toUnicode(root[0].text)
-        title = converter.toUnicode(root[1].text)        
+        title_tag = root[0]
+        author_tag = root.find('{http://www.tbrc.org/models/work#}creator')
+        metadata = {
+            'id': f'opecha:{self.pecha_id}',
+            'initial_creation_type': 'ocr',
+            'source_metadata': {
+                'id': f'bdr:{work_id}',
+                'title': converter.toUnicode(title_tag.text),
+                'author': converter.toUnicode(author_tag.text) if author_tag else '',
+            }
+        }
 
-        print(root)
+        return metadata
 
 
-    def create_opf(self, input_path):
+    def create_opf(self, input_path, id):
         input_path = Path(input_path)
-        self._build_dirs(input_path)
+        self._build_dirs(input_path, id)
         (self.dirs['opf_path']/'base').mkdir(exist_ok=True)
 
         for i, vol_path in enumerate(sorted(input_path.iterdir())):
@@ -181,10 +190,12 @@ class GoogleOCRFormatter(BaseFormatter):
             for layer, ann in formatted_layers.items():
                 layer_fn = vol_layer_path/f'{layer}.yml'
                 self.dump(ann, layer_fn)
-        
-        return self.dirs['pecha_path']
+
+        # create meta.yml
+        meta_fn = self.dirs['opf_path']/'meta.yml'
+        self.dump(self.get_metadata(input_path.name), meta_fn)
 
 
 if __name__ == "__main__":
     formatter = GoogleOCRFormatter()
-    formatter.get_metadata('W22083')
+    formatter.create_opf('./tests/data/formatter/google_ocr/W3CN472', 300)

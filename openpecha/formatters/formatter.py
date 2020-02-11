@@ -35,6 +35,7 @@ class BaseFormatter:
         else:
             pecha_id = input_path.stem
 
+        self.pecha_id = pecha_id
         self.dirs = {'opf_path': self.output_path/f'{pecha_id}/{pecha_id}.opf'}
         self.dirs['layers_path'] = self.dirs['opf_path']/'layers'
         
