@@ -37,9 +37,10 @@ class BaseFormatter:
 
         self.dirs = {'opf_path': self.output_path/f'{pecha_id}/{pecha_id}.opf'}
         self.dirs['layers_path'] = self.dirs['opf_path']/'layers'
+        self.dirs['base_path'] = self.dirs['opf_path']/'base'
         
-        self.dirs['opf_path'].mkdir(parents=True, exist_ok=True)
         self.dirs['layers_path'].mkdir(parents=True, exist_ok=True)
+        self.dirs['base_path'].mkdir(parents=True, exist_ok=True)
 
     
     def normalizeUni(self, strNFC):

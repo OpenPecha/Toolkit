@@ -142,10 +142,9 @@ class GoogleOCRFormatter(BaseFormatter):
         return base_text
 
 
-    def create_opf(self, input_path):
+    def create_opf(self, input_path, pecha_id):
         input_path = Path(input_path)
-        self._build_dirs(input_path)
-        (self.dirs['opf_path']/'base').mkdir(exist_ok=True)
+        self._build_dirs(input_path, id=pecha_id)
 
         for i, vol_path in enumerate(sorted(input_path.iterdir())):
             print(f'[INFO] Processing Vol {i+1:03} : {vol_path.name} ...')
