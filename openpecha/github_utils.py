@@ -53,3 +53,12 @@ def github_publish(path, message=None, type=None):
     remote_repo_url = create_github_repo(path)
     local_repo = create_local_repo(path, remote_repo_url)
     commit(local_repo, message)
+
+
+def update_catalog_data(repo_name, path, content, msg, update=False):
+    repo = org.get_repo(repo_name)
+    if update:
+        old_content = repo.get_contents(path)
+        repo.update_file(old_content.path, msg, content, old_content.sha)
+    else:
+        repo.create_file(path, msg, content)

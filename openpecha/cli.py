@@ -14,7 +14,6 @@ from openpecha.blupdate import Blupdate
 from openpecha.formatters import GoogleOCRFormatter
 from openpecha.formatters import HFMLFormatter
 from openpecha.formatters import TsadraFormatter
-from openpecha.github import github_publish
 
 
 OP_PATH = Path('./.openpecha')
@@ -320,7 +319,7 @@ def update(**kwargs):
 
 
 # OpenPecha Formatter
-formatter_types = ['ocr', 'hfml', 'tsadra']
+formatter_types = ['ocr', 'hfml(default)', 'tsadra']
 
 @cli.command()
 @click.option('--name', '-n', type=click.Choice(formatter_types),
@@ -332,15 +331,13 @@ def format(**kwargs):
     '''
     Command to format pecha into opf
     '''
+    formatter = HFMLFormatter()
     if kwargs['name'] == 'ocr':
         formatter = GoogleOCRFormatter()
-        formatter.create_opf(kwargs['input_path'])
-    elif kwargs['name'] == 'hfml':
-        formatter = HFMLFormatter()
-        formatter.create_opf(kwargs['input_path'])
     elif kwargs['name'] == 'tsadra':
-        formatter = TsadraFormatter()
-        formatter.create_opf(kwargs['input_path'], kwargs['id'])
+        formatter = HFMLFormatter()
+
+    formatter.create_opf(kwargs['input_path'], kwargs['id'])
 
 
 @cli.command()
