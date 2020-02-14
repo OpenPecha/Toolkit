@@ -122,9 +122,10 @@ class GoogleOCRFormatter(BaseFormatter):
         path.write_bytes(zipped_boundingPolies)
 
 
-    def build_layers(self, responses, base_id):
-        resource_vol_path = self.dirs['resources_path']/base_id
-        resource_vol_path.mkdir(exist_ok=True)
+    def build_layers(self, responses, base_id=None):
+        if base_id:
+            resource_vol_path = self.dirs['resources_path']/base_id
+            resource_vol_path.mkdir(exist_ok=True)
 
         pages = []
         img_urls = []
@@ -144,8 +145,9 @@ class GoogleOCRFormatter(BaseFormatter):
             # create base_text
             self.base_text.append(text)
 
-            # save the boundingPoly to resources
-            self.save_boundingPoly(response, resource_vol_path/f'{n_pg+1:04}.json.gz')
+            if base_id:
+                # save the boundingPoly to resources
+                self.save_boundingPoly(response, resource_vol_path/f'{n_pg+1:04}.json.gz')
 
         result = {
             'page': pages,
