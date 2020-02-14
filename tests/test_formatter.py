@@ -6,7 +6,6 @@ import pytest
 from openpecha.formatters import TsadraFormatter
 from openpecha.formatters import HFMLFormatter
 from openpecha.formatters import GoogleOCRFormatter
-from openpecha.github import github_publish
 
 
 class TestHFMLFormatter:
