@@ -35,6 +35,7 @@ class BaseFormatter:
         else:
             pecha_id = input_path.stem
 
+        self.pecha_id = pecha_id
         self.dirs = {'opf_path': self.output_path/f'{pecha_id}/{pecha_id}.opf'}
         self.dirs['layers_path'] = self.dirs['opf_path']/'layers'
         self.dirs['base_path'] = self.dirs['opf_path']/'base'
@@ -107,6 +108,10 @@ class BaseFormatter:
     def dump(self, data, output_fn):
         with output_fn.open('w') as fn:
             yaml.dump(data, fn, default_flow_style=False,  sort_keys=False, allow_unicode=True)
+        
+    
+    def load(self, fn):
+        return yaml.safe_load(fn.open())
 
 
     def create_opf(self, input_path):

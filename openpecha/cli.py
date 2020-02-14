@@ -334,13 +334,13 @@ def format(**kwargs):
     '''
     if kwargs['name'] == 'ocr':
         formatter = GoogleOCRFormatter()
-        formatter.new_pecha(kwargs['input_path'])
+        formatter.create_opf(kwargs['input_path'])
     elif kwargs['name'] == 'hfml':
         formatter = HFMLFormatter()
-        formatter.new_pecha(kwargs['input_path'])
+        formatter.create_opf(kwargs['input_path'])
     elif kwargs['name'] == 'tsadra':
         formatter = TsadraFormatter()
-        formatter.new_pecha(kwargs['input_path'], kwargs['id'])
+        formatter.create_opf(kwargs['input_path'], kwargs['id'])
 
 
 @cli.command()

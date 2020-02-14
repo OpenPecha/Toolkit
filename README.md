@@ -12,7 +12,8 @@ For NLP this toolkit will provide a way to have annoated corpra with minimal err
   - Python3, you can download from [here](https://www.python.org) 
 
 ## Installation
-  - [Mac OS installer](https://github.com/OpenPecha/openpecha-toolkit/blob/master/installers/openpecha_mac_installer.zip?raw=true)
+  - [MacOS installer](https://github.com/OpenPecha/openpecha-toolkit/blob/master/installers/openpecha_mac_installer.zip?raw=true)
+  - [Windows installer](https://github.com/OpenPecha/openpecha-toolkit/blob/master/installers/openpecha_windows_installer.zip?raw=true)
 
 ## Usage
 Frist we need to download all the poti which are in openpecha format.
