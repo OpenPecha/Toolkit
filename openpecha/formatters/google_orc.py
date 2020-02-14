@@ -8,6 +8,7 @@ import yaml
 from openpecha.formatters import BaseFormatter
 from openpecha.formatters.format import Layer
 from openpecha.formatters.format import Page
+from openpecha.utils import gzip_str
 
 
 class GoogleOCRFormatter(BaseFormatter):
@@ -38,7 +39,7 @@ class GoogleOCRFormatter(BaseFormatter):
                 yield None
 
 
-    def __get_page_index(self, n):
+    def _get_page_index(self, n):
         page_sides = 'ab'
         div = n/2
         page_num = math.ceil(div)
@@ -59,7 +60,7 @@ class GoogleOCRFormatter(BaseFormatter):
             page['id'] = self.get_unique_id()
             page['span']['start'] = pg[0]
             page['span']['end'] = pg[1]
-            page['page_index'] = self.__get_page_index(i+1)
+            page['page_index'] = self._get_page_index(i+1)
             page['reference'] = pg_img_url
             Pagination['annotations'].append(page)
 
@@ -70,7 +71,7 @@ class GoogleOCRFormatter(BaseFormatter):
         return result
 
 
-    def __get_coord(self, vertices):
+    def _get_coord(self, vertices):
         coord = []
         for vertice in vertices:
             coord.append((vertice['x'], vertice['y']))
@@ -78,7 +79,7 @@ class GoogleOCRFormatter(BaseFormatter):
         return coord
 
 
-    def __get_page(self, response):
+    def _get_page(self, response):
         try:
             page = response['textAnnotations'][0]
         except KeyError:
@@ -87,10 +88,10 @@ class GoogleOCRFormatter(BaseFormatter):
         text = page['description']
         # vertices = page['boundingPoly']['vertices']  # get text box
         
-        return text, None #self.__get_coord(vertices)
+        return text, None #self._get_coord(vertices)
 
 
-    def __get_lines(self, text, last_pg_end_idx, first_pg):
+    def _get_lines(self, text, last_pg_end_idx, first_pg):
         lines = []
         line_breaks = [m.start() for m in re.finditer('\n', text)]
         
@@ -108,7 +109,23 @@ class GoogleOCRFormatter(BaseFormatter):
         return lines, line
 
 
-    def build_layers(self, responses):
+    def save_boundingPoly(self, response, path):
+
+        def tlbr(vertices):
+            return {'tl': vertices[0], 'br': vertices[2]}
+
+        boundingPolies = {}
+        for ann in response['textAnnotations']:
+            boundingPolies[ann['description']] = tlbr(ann['boundingPoly']['vertices'])
+
+        zipped_boundingPolies = gzip_str(json.dumps(boundingPolies))
+        path.write_bytes(zipped_boundingPolies)
+
+
+    def build_layers(self, responses, base_id):
+        resource_vol_path = self.dirs['resources_path']/base_id
+        resource_vol_path.mkdir(exist_ok=True)
+
         pages = []
         img_urls = []
         img_char_coord = []
@@ -118,14 +135,17 @@ class GoogleOCRFormatter(BaseFormatter):
             if not response:
                 print(f'[ERROR] Failed : {n_pg+1}')
                 continue
-            text, page_coord = self.__get_page(response)
+            text, page_coord = self._get_page(response)
             if not text: continue # skip empty page
-            lines, last_pg_end_idx = self.__get_lines(text, last_pg_end_idx, n_pg == 0)
+            lines, last_pg_end_idx = self._get_lines(text, last_pg_end_idx, n_pg == 0)
             pages.append((lines[0][0], lines[-1][1], page_coord))
             img_urls.append(response.get('image_link', ''))
 
             # create base_text
             self.base_text.append(text)
+
+            # save the boundingPoly to resources
+            self.save_boundingPoly(response, resource_vol_path/f'{n_pg+1:04}.json.gz')
 
         result = {
             'page': pages,
@@ -171,12 +191,15 @@ class GoogleOCRFormatter(BaseFormatter):
         input_path = Path(input_path)
         self._build_dirs(input_path, id=pecha_id)
 
+        self.dirs['resources_path'] = self.dirs['opf_path'].parent/'resources'
+        self.dirs['resources_path'].mkdir(exist_ok=True)
+
         for i, vol_path in enumerate(sorted(input_path.iterdir())):
             print(f'[INFO] Processing Vol {i+1:03} : {vol_path.name} ...')
             base_id = f'v{i+1:03}'
             if (self.dirs['opf_path']/'base'/f'{base_id}.txt').is_file(): continue
             responses = self.get_input(vol_path)
-            layers = self.build_layers(responses)
+            layers = self.build_layers(responses, base_id)
             formatted_layers = self.format_layer(layers, base_id)
             base_text = self.get_base_text()
 
