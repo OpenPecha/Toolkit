@@ -34,7 +34,7 @@ class GoogleOCRFormatter(BaseFormatter):
         '''
         for fn in sorted(list(input_path.iterdir())):
             try: 
-                yield json.load(fn.open())
+                yield json.load(fn.open()), fn.stem
             except:
                 yield None
 
@@ -55,13 +55,13 @@ class GoogleOCRFormatter(BaseFormatter):
         Pagination['id'] = self.get_unique_id()
         Pagination['annotation_type'] = 'pagination'
         Pagination['revision'] = f'{1:05}'
-        for i, (pg, pg_img_url) in enumerate(zip(layers['page'], layers['img_url'])):
+        for i, (pg, page_ref) in enumerate(zip(layers['page'], layers['page_ref'])):
             page = deepcopy(Page)
             page['id'] = self.get_unique_id()
             page['span']['start'] = pg[0]
             page['span']['end'] = pg[1]
             page['page_index'] = self._get_page_index(i+1)
-            page['reference'] = pg_img_url
+            page['reference'] = page_ref
             Pagination['annotations'].append(page)
 
         result = {
@@ -124,14 +124,14 @@ class GoogleOCRFormatter(BaseFormatter):
 
     def build_layers(self, responses, base_id=None):
         if base_id:
-            resource_vol_path = self.dirs['resources_path']/base_id
+            resource_vol_path = self.dirs['release_path']/base_id
             resource_vol_path.mkdir(exist_ok=True)
 
         pages = []
-        img_urls = []
+        page_ref = []
         img_char_coord = []
         last_pg_end_idx = 0
-        for n_pg, response in enumerate(responses):
+        for n_pg, (response, fn) in enumerate(responses):
             # extract annotation
             if not response:
                 print(f'[ERROR] Failed : {n_pg+1}')
@@ -140,7 +140,7 @@ class GoogleOCRFormatter(BaseFormatter):
             if not text: continue # skip empty page
             lines, last_pg_end_idx = self._get_lines(text, last_pg_end_idx, n_pg == 0)
             pages.append((lines[0][0], lines[-1][1], page_coord))
-            img_urls.append(response.get('image_link', ''))
+            page_ref.append(response.get('image_link', fn))
 
             # create base_text
             self.base_text.append(text)
@@ -151,7 +151,7 @@ class GoogleOCRFormatter(BaseFormatter):
 
         result = {
             'page': pages,
-            'img_url': img_urls,
+            'page_ref': page_ref,
         }
             
         return result
@@ -193,8 +193,8 @@ class GoogleOCRFormatter(BaseFormatter):
         input_path = Path(input_path)
         self._build_dirs(input_path, id=pecha_id)
 
-        self.dirs['resources_path'] = self.dirs['opf_path'].parent/'resources'
-        self.dirs['resources_path'].mkdir(exist_ok=True)
+        self.dirs['release_path'] = self.dirs['opf_path'].parent/'releases/bouding_poly'
+        self.dirs['release_path'].mkdir(exist_ok=True, parents=True)
 
         for i, vol_path in enumerate(sorted(input_path.iterdir())):
             print(f'[INFO] Processing Vol {i+1:03} : {vol_path.name} ...')
@@ -218,6 +218,8 @@ class GoogleOCRFormatter(BaseFormatter):
         # create meta.yml
         meta_fn = self.dirs['opf_path']/'meta.yml'
         self.dump(self.get_metadata(input_path.name), meta_fn)
+
+        return self.dirs['opf_path'].parent
 
 
 if __name__ == "__main__":
