@@ -35,7 +35,7 @@ class GoogleOCRFormatter(BaseFormatter):
         '''
         for fn in sorted(list(input_path.iterdir())):
             try: 
-                yield json.load(gzip.open(str(fn), 'rb')), fn.stem
+                yield json.load(gzip.open(str(fn), 'rb')), fn.name.split('.')[0]
             except:
                 yield None
 
@@ -56,12 +56,12 @@ class GoogleOCRFormatter(BaseFormatter):
         Pagination['id'] = self.get_unique_id()
         Pagination['annotation_type'] = 'pagination'
         Pagination['revision'] = f'{1:05}'
-        for i, (pg, page_ref) in enumerate(zip(layers['page'], layers['page_ref'])):
+        for pg, page_ref in zip(layers['pages'], layers['pages_ref']):
             page = deepcopy(Page)
             page['id'] = self.get_unique_id()
             page['span']['start'] = pg[0]
             page['span']['end'] = pg[1]
-            page['page_index'] = self._get_page_index(i+1)
+            page['page_index'] = self._get_page_index(pg[2])
             page['reference'] = page_ref
             Pagination['annotations'].append(page)
 
@@ -129,19 +129,18 @@ class GoogleOCRFormatter(BaseFormatter):
             resource_vol_path.mkdir(exist_ok=True)
 
         pages = []
-        page_ref = []
-        img_char_coord = []
+        pages_ref = []
         last_pg_end_idx = 0
-        for n_pg, (response, fn) in enumerate(responses):
+        for n_pg, (response, page_ref) in enumerate(responses):
             # extract annotation
             if not response:
                 print(f'[ERROR] Failed : {n_pg+1}')
                 continue
-            text, page_coord = self._get_page(response)
+            text, _ = self._get_page(response)
             if not text: continue # skip empty page
             lines, last_pg_end_idx = self._get_lines(text, last_pg_end_idx, n_pg == 0)
-            pages.append((lines[0][0], lines[-1][1], page_coord))
-            page_ref.append(response.get('image_link', fn))
+            pages.append((lines[0][0], lines[-1][1], n_pg+1))
+            pages_ref.append(response.get('image_link', page_ref))
 
             # create base_text
             self.base_text.append(text)
@@ -151,8 +150,8 @@ class GoogleOCRFormatter(BaseFormatter):
                 self.save_boundingPoly(response, resource_vol_path/f'{n_pg+1:04}.json.gz')
 
         result = {
-            'page': pages,
-            'page_ref': page_ref,
+            'pages': pages,
+            'pages_ref': pages_ref,
         }
             
         return result
