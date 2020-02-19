@@ -1,4 +1,5 @@
 from copy import deepcopy
+import gzip
 import json
 import math
 from pathlib import Path
@@ -34,7 +35,7 @@ class GoogleOCRFormatter(BaseFormatter):
         '''
         for fn in sorted(list(input_path.iterdir())):
             try: 
-                yield json.load(fn.open()), fn.stem
+                yield json.load(gzip.open(str(fn), 'rb')), fn.stem
             except:
                 yield None
 
