@@ -84,10 +84,10 @@ class TestGoogleOCRFormatter:
         result = formatter.build_layers(responses)
 
         expected = {
-            'page': [(0, 19), (24, 888), (893, 1607), (1612, 1809)],
+            'pages': [(0, 19), (24, 888), (893, 1607), (1612, 1809)],
         }
 
-        for result_page, expected_page in zip(result['page'], expected['page']):
+        for result_page, expected_page in zip(result['pages'], expected['pages']):
             assert result_page[:2] == expected_page
 
 class TestTsadraFormatter:
