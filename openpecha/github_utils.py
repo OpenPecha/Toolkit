@@ -11,24 +11,30 @@ org = g.get_organization('OpenPecha')
 def create_github_repo(path):
     repo = org.create_repo(path.name)
     return repo._html_url.value
-
+    
 
 def commit(repo, message, not_includes):
     has_changed = False
 
-    # add untrack files
-    for file in repo.untracked_files:
-        for not_inlcude_file in not_includes:
-            if not_includes in file:
-                continue
-        if file: repo.git.add(file)
+    # add untrack fns
+    for fn in repo.untracked_files:
+
+        ignored = False
+        for not_include_fn in not_includes:
+            if not_include_fn in fn:
+                ignored = True
+        
+        if ignored:
+            continue
+
+        if fn: repo.git.add(fn)
         if has_changed is False:
             has_changed = True
 
-    # add modified files
+    # add modified fns
     if repo.is_dirty() is True:
-        for file in repo.git.diff(None, name_only=True).split('\n'):
-            if file: repo.git.add(file)
+        for fn in repo.git.diff(None, name_only=True).split('\n'):
+            if fn: repo.git.add(fn)
             if has_changed is False:
                 has_changed = True
     
@@ -87,8 +93,17 @@ def create_release(repo_name, asset_paths=None):
         new_release.upload_asset(asset_path)
 
 
+def create_readme(metadata, path):
+    result = ''
+    # add title
+    result += f"## Title\n\t- {metadata['title']}\n\n"
+
+    # add author
+    result += f"## Author\n\t- {metadata['author']}\n\n"
+
+    readme_fn = path/'README.md'
+    readme_fn.write_text(result)
+
+
 if __name__ == "__main__":
-    create_release('P000002', asset_path='./output/P000300/release.zip')
-
-
-    
+    create_release('P000002', asset_paths='./output/P000300/release.zip')

@@ -182,6 +182,7 @@ class GoogleOCRFormatter(BaseFormatter):
             'source_metadata': {
                 'id': f'bdr:{work_id}',
                 'title': converter.toUnicode(title_tag.text),
+                'volume': '',
                 'author': converter.toUnicode(author_tag.text) if author_tag else '',
             }
         }

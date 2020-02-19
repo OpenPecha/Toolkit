@@ -23,10 +23,9 @@ def ocr_result_input(path):
 
 
 def create_release_with_assets(path):
-    zip_asset_paths = []
+    asset_paths = []
     for asset_path in (path/'releases').iterdir():
-        zip_asset_path = asset_path.parent/f'{asset_path.name}.zip'
-        shutil.make_archive(zip_asset_path, 'zip', asset_path)
-        zip_asset_paths.append(zip_asset_path)
+        shutil.make_archive(asset_path, 'zip', asset_path)
+        asset_paths.append(f'{str(asset_path)}.zip')
 
-    create_release(path.name, asset_paths=zip_asset_paths)
+    create_release(path.name, asset_paths=asset_paths)
