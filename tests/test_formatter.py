@@ -62,7 +62,7 @@ class TestGoogleOCRFormatter:
     @pytest.fixture(scope='class')
     def get_resources(self):
         data_path = Path('tests/data/formatter/google_ocr/W0001/v001')
-        responses = [json.load(fn.open()) for fn in sorted(list((data_path).iterdir()))]
+        responses = [(json.load(fn.open()), fn.stem) for fn in sorted(list((data_path).iterdir()))]
         formatter = GoogleOCRFormatter()
         return formatter, data_path, responses
 
