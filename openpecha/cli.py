@@ -8,12 +8,9 @@ from github import Github
 from git import Repo
 from tqdm import tqdm
 
-from openpecha.serializers import SerializeMd
-from openpecha.serializers import SerializeHFML
+from openpecha.serializers import *
 from openpecha.blupdate import Blupdate
-from openpecha.formatters import GoogleOCRFormatter
-from openpecha.formatters import HFMLFormatter
-from openpecha.formatters import TsadraFormatter
+from openpecha.formatters import *
 
 
 OP_PATH = Path('./.openpecha')
