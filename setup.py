@@ -9,7 +9,7 @@ def read(fname):
 
 setup(
     name="openpecha",
-    version="0.4.5",
+    version="0.4.6",
     author="Esukhia developers",
     author_email="esukhiadev@gmail.com",
     description="OpenPecha Toolkit allows state of the art for distributed standoff annotations on moving texts",
@@ -25,7 +25,7 @@ setup(
         'requests==2.22.0',
         'tqdm==4.35.0',
         'PyGithub==1.43.8',
-        'GitPython==3.0.2',
+        'GitPython==3.1.0',
         'bs4',
         'pyewts'
     ],
