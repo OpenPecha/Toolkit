@@ -1,3 +1,4 @@
+from copy import deepcopy
 from pathlib import Path
 import re
 
@@ -5,6 +6,8 @@ import yaml
 import diff_match_patch as dmp_module
 
 from openpecha.github_utils import github_publish
+from openpecha.formatters.format import Layer, Peydurma
+from openpecha.formatters import BaseFormatter
 
 
 def get_notes(fn):
@@ -16,15 +19,10 @@ def get_notes(fn):
         if '[^' in line:
             note_start = line.index('[^')
             note_end = line.index(']')
+            if 'a' in line:
+                line = line.replace('a', '\n')
             left_ct = line[:note_start]
             right_ct = line[note_end+1:]
-            
-            if 'a' in line:
-                a_idx = line.index('a')
-                if a_idx < note_start:
-                    left_ct = line[a_idx+1:note_start]
-                else:
-                    right_ct = line[note_end+1: a_idx]
             
             text_notes.append((
                 (left_ct, right_ct),
@@ -56,6 +54,13 @@ def save_layer_ann(layer_ann, path, vol, layer_name):
         allow_unicode=True
     )
 
+def create_layer(layer_name):
+    layer = deepcopy(Layer)
+    layer['id'] = BaseFormatter().get_unique_id()
+    layer['annotation_type'] = layer_name
+    layer['revision'] = f'{1:05}'
+    return layer
+
 
 def get_work_text(path, vol):
     span = vol['span']
@@ -64,10 +69,22 @@ def get_work_text(path, vol):
 
 def update_layer(note_idx, vol, layer_ann, note):
     vol_note_idx = note_idx + vol['span']['start']
+    is_found = False
     for ann in layer_ann['annotations']:
-        if abs(ann['span']['start']-vol_note_idx) <= 2:
+        if abs(ann['span']['start']-vol_note_idx) <= 3:
             ann['note'] = note
+            ann['span']['start'] = vol_note_idx
+            ann['span']['end'] = vol_note_idx
+            is_found = True
             break
+
+    if not is_found:
+        peydurma = deepcopy(Peydurma)
+        peydurma['id'] = BaseFormatter().get_unique_id()
+        peydurma['note'] = note
+        peydurma['span']['start'] = vol_note_idx
+        peydurma['span']['end'] = vol_note_idx
+        layer_ann['annotations'].append(peydurma)
 
 
 def reinsert(pecha_path, notes_path, layer_name):
@@ -91,11 +108,13 @@ def reinsert(pecha_path, notes_path, layer_name):
                     save_layer_ann(layer_ann, pecha_opf_path, prev_vol[5:], layer_name)
                 
                 # then load the layer of next volume
-                layer_ann = get_layer_ann(pecha_opf_path, vol['vol'][5:], layer_name)
+                if layer_name in ['peydurma']:
+                    layer_ann = get_layer_ann(pecha_opf_path, vol['vol'][5:], layer_name)
+                else:
+                    layer_ann = create_layer(layer_name)
 
             # insert each foot_note of current text into layer with note_idx.
             for text_note in text_notes:
-                print(text_note)
                 context = text_note[0]
                 is_right_ct_longer = len(context[1]) > len(context[0])
                 note_idx = None
@@ -116,4 +135,4 @@ if __name__ == "__main__":
     OPF_PECHA_PATH = DATA_PATH/'.openpecha/data/P000002'
     NOTES_PATH = DATA_PATH/'data'/'2-1-a_reinserted'
     
-    reinsert(OPF_PECHA_PATH, NOTES_PATH, 'peydurma')
+    reinsert(OPF_PECHA_PATH, NOTES_PATH, 'peydurma-note')
