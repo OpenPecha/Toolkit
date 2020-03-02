@@ -1,4 +1,5 @@
 from copy import deepcopy
+from collections import defaultdict
 from pathlib import Path
 import re
 
@@ -8,33 +9,38 @@ import diff_match_patch as dmp_module
 from openpecha.github_utils import github_publish
 from openpecha.formatters.format import Layer, Peydurma
 from openpecha.formatters import BaseFormatter
+from openpecha.blupdate import Blupdate
 
 
 def get_notes(fn):
     raw_text = fn.read_text()
     foot_note_idx = max(re.finditer(r'\[\^1K\]', raw_text), key=lambda x: x.start(0)).start(0)
 
+    # preprocess text
+    text = raw_text[:foot_note_idx-1].replace('\n', ' ')
+    text = text.replace('a', '\n')
+    text = text.replace('\ufeff', '')
+
+    is_note = False
+    base_text_len = 0
     text_notes = []
-    for line in raw_text[:foot_note_idx].split('\n'):
-        if '[^' in line:
-            note_start = line.index('[^')
-            note_end = line.index(']')
-            if 'a' in line:
-                line = line.replace('a', '\n')
-            left_ct = line[:note_start]
-            right_ct = line[note_end+1:]
-            
-            text_notes.append((
-                (left_ct, right_ct),
-                line[note_start:note_end+1]
-            ))
+    base_text = ''
+    for i, c in enumerate(text):
+        if c == '[' and text[i+1] == '^':
+            is_note = True
+        elif is_note and c == ']':
+            is_note = False
+            text_notes.append(base_text_len-1)
+        elif not is_note:
+            base_text_len += 1
+            base_text += c
 
-    foot_notes = {
-        foot_note.split(':')[0]: foot_note.split(':')[1].strip() \
-            for foot_note in raw_text[foot_note_idx:].split('\n')
-    }
+    foot_notes = [
+        foot_note.split(':')[1].strip()
+        for foot_note in raw_text[foot_note_idx:].split('\n')
+    ]
 
-    return foot_notes, text_notes
+    return zip(text_notes, foot_notes), base_text.strip()
 
 
 def get_index(path):
@@ -67,21 +73,19 @@ def get_work_text(path, vol):
     return (path/f"{vol['vol']}.txt").read_text()[span['start']: span['end']+1]
 
 
-def update_layer(note_idx, vol, layer_ann, note):
-    vol_note_idx = note_idx + vol['span']['start']
-    is_found = False
-    for ann in layer_ann['annotations']:
-        if abs(ann['span']['start']-vol_note_idx) <= 3:
-            ann['note'] = note
-            ann['span']['start'] = vol_note_idx
-            ann['span']['end'] = vol_note_idx
-            is_found = True
-            break
+def update_layer(note, bl, note_idx, vol, layer_ann):
+    dst_note_idx = bl.get_updated_coord(note[0])
+    vol_note_idx = dst_note_idx + vol['span']['start']
 
-    if not is_found:
+    if layer_ann['annotations'] and len(layer_ann['annotations']) > note_idx+1:
+        ann = layer_ann['annotations'][0]
+        ann['note'] = note[1]
+        ann['span'] = vol_note_idx
+        ann['span'] = vol_note_idx
+    else:
         peydurma = deepcopy(Peydurma)
         peydurma['id'] = BaseFormatter().get_unique_id()
-        peydurma['note'] = note
+        peydurma['note'] = note[1]
         peydurma['span']['start'] = vol_note_idx
         peydurma['span']['end'] = vol_note_idx
         layer_ann['annotations'].append(peydurma)
@@ -93,11 +97,14 @@ def reinsert(pecha_path, notes_path, layer_name):
 
     layer_ann = None
     prev_vol = None
+    note_idx = 0
     for text_ann in pecha_index['annotations']:
         notes_fn = notes_path/f'{text_ann["work"]}_a_reinserted.txt'
         if not notes_fn.is_file(): continue
         print(notes_fn)
-        foot_notes, text_notes = get_notes(notes_fn)
+        if text_ann['work'] == 'D1133':
+            print('Here')
+        notes, base_text = get_notes(notes_fn)
 
         # cross-vol text have mutlitple layer files in terms of volume
         for vol in text_ann['span']:
@@ -112,20 +119,14 @@ def reinsert(pecha_path, notes_path, layer_name):
                     layer_ann = get_layer_ann(pecha_opf_path, vol['vol'][5:], layer_name)
                 else:
                     layer_ann = create_layer(layer_name)
+                
+                note_idx = 0
 
             # insert each foot_note of current text into layer with note_idx.
-            for text_note in text_notes:
-                context = text_note[0]
-                is_right_ct_longer = len(context[1]) > len(context[0])
-                note_idx = None
-                if is_right_ct_longer:
-                    note_idx = work_text.find(context[1])
-                else:
-                    right_ct_idx = work_text.find(context[0])
-                    note_idx = right_ct_idx + len(context[0])
-                
-                if note_idx:
-                    update_layer(note_idx, vol, layer_ann, foot_notes[text_note[1]])
+            bl = Blupdate(base_text, work_text)
+            for note in notes:
+                update_layer(note, bl, note_idx, vol, layer_ann)
+                note_idx += 1
 
             prev_vol = vol['vol']
 
