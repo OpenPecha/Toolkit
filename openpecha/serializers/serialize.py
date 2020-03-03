@@ -15,9 +15,10 @@ class Serialize(object):
 
     To use it, instantiate a concrete class with the path of the opf file, and call apply_layers() then get_result()
     """
-    def __init__(self, opfpath, text_id=None, layers=None):
+    def __init__(self, opfpath, text_id=None, layers=None, index_layer=None):
         self.opfpath = Path(opfpath)
         self.text_id = text_id
+        self.index_layer = index_layer
         if self.text_id:
             self.text_spans = self.get_text_spans(text_id)
             self.base_layers = self.get_text_base_layer()
@@ -56,6 +57,26 @@ class Serialize(object):
         self.layers = layers
 
 
+    def _get_adapted_span(self, span, vol_id):
+        """Adapts the annotation span to base-text of the text
+
+        Adapts the annotation span, which is based on volume base-text
+        to text base-text.
+
+        Args:
+            span (dict): span of a annotation, eg: {start:, end:}
+            vol_id (str): id of vol, where part of the text exists.
+
+        Returns:
+            adapted_start (int): adapted start based on text base-text
+            adapted_end (int): adapted end based on text base-text
+
+        """
+        adapted_start = span['start'] - self.text_spans[vol_id]['start']
+        adapted_end = span['end'] - self.text_spans[vol_id]['start']
+        return adapted_start, adapted_end
+
+
     def load_layer(self, fn):
         return yaml.safe_load(fn.open())
 
@@ -64,8 +85,9 @@ class Serialize(object):
         """
         get spans of text
         """
-        index_layer = self.load_layer(self.opfpath/'index.yml')
-        for anno in index_layer['annotations']:
+        if not self.index_layer:
+            self.index_layer = self.load_layer(self.opfpath/'index.yml')
+        for anno in self.index_layer['annotations']:
             if anno['work'] == text_id:
                 text_span = {}
                 for span in anno['span']:
@@ -110,8 +132,9 @@ class Serialize(object):
         """
         layer = yaml.safe_load((self.opfpath/'layers'/vol_id/f'{layer_id}.yml').open())
         for a in layer['annotations']:
-            if a['span']['end'] >= self.text_spans[vol_id]['start']:
-                a['type'] = layer_id
+            if a['span']['end'] >= self.text_spans[vol_id]['start'] and \
+                a['span']['start'] <= self.text_spans[vol_id]['end']:
+                a['type'] = layer['annotation_type']
                 self.apply_annotation(vol_id, a)
 
 
@@ -146,8 +169,15 @@ class Serialize(object):
 
 
     def apply_annotation(self, vol_id, annotation):
-        """
-        This applies the annotation given as argument. The annotation must contain at least a type
+        """Applies annotation to specific volume base-text, where part of the text exists.
+
+        Args:
+            vol_id (str): id of vol, where part of the text exists.
+            ann (dict): annotation of any type.
+
+        Returns:
+            None
+
         """
         raise NotImplementedError("The Serialize class doesn't provide any serialization, please use a subclass such ass SerializeMd")
 
@@ -207,4 +237,4 @@ class Serialize(object):
         if 'pagination' in self.layers:
             return self.__assign_line_layer(result, vol_id)
         else:
-            return result
+            return result, self.text_id
