@@ -6,6 +6,44 @@ import yaml
 from openpecha.serializers import SerializeFootNote
 
 
+def to_bo_pagination(text):
+
+    def index_to_bo(index):
+        chars = list(index)
+        result = ''
+        for c in chars:
+            if c.isdigit():
+                result += bo_num[int(c)]
+            elif c == 'a':
+                result += sides[0]
+            else:
+                result += sides[1]
+        return result + '་'
+
+    bo_num = '༠༡༢༣༤༥༦༧༨༩'
+    sides = 'ནབ'
+
+    result = ''
+    is_first_fn_passed = False
+    for line in text.split('\n'):
+        if not line: continue
+        if line.startswith('[v'): continue
+        if line.startswith('[^'):
+            if is_first_fn_passed:
+                result += f'{line}\n'
+            else:
+                result += f'\n{line}\n'
+                is_first_fn_passed = True
+        elif line.startswith('['):
+            en_pg_index = line.strip()[1:-1]
+            bo_pg_index = index_to_bo(en_pg_index)
+            result += f'({bo_pg_index})\n'
+        else:
+            result += f'{line}\n'
+
+    return result
+
+
 def create_foot_notes(text_id, opf_path, metadata, index_layer):
     serializer = SerializeFootNote(
         opf_path, text_id=text_id, index_layer=index_layer,
@@ -13,6 +51,9 @@ def create_foot_notes(text_id, opf_path, metadata, index_layer):
     )
     serializer.apply_layers()
     annotated_text, text_id = serializer.get_result()
+    
+    bo_text = to_bo_pagination(annotated_text)
+    return f'{bo_text[0]}{metadata[text_id]["loc"]} {bo_text[1:]}'
 
 
 def get_text_metadata(path):
@@ -59,7 +100,7 @@ if __name__ == "__main__":
     text_metadata = get_text_metadata(text_metadata_path)
     index_layer = yaml.safe_load((opf_path/'index.yml').open())
 
-    for path in notes_path.iterdir():
+    for path in sorted(notes_path.iterdir())[1:]:
         text_id = path.name.split('_')[0]
         foot_noted_text = create_foot_notes(text_id, opf_path, text_metadata, index_layer)
         print(foot_noted_text)

@@ -20,6 +20,7 @@ class Serialize(object):
         self.text_id = text_id
         self.index_layer = index_layer
         self.n_char_shifted = 0
+        self.n_char_shifted_pos = None
         if self.text_id:
             self.text_spans = self.get_text_spans(text_id)
             self.base_layers = self.get_text_base_layer()
@@ -73,8 +74,11 @@ class Serialize(object):
             adapted_end (int): adapted end based on text base-text
 
         """
-        adapted_start = span['start'] - self.text_spans[vol_id]['start'] + self.n_char_shifted
-        adapted_end = span['end'] - self.text_spans[vol_id]['start'] + self.n_char_shifted
+        adapted_start = max(0, span['start'] - self.text_spans[vol_id]['start'])
+        adapted_end = span['end'] - self.text_spans[vol_id]['start']
+        if self.n_char_shifted and span['start'] > self.n_char_shifted_pos:
+            adapted_start += self.n_char_shifted
+            adapted_end += self.n_char_shifted
         return adapted_start, adapted_end
 
 
@@ -133,6 +137,7 @@ class Serialize(object):
         """
         layer = yaml.safe_load((self.opfpath/'layers'/vol_id/f'{layer_id}.yml').open())
         for a in layer['annotations']:
+            # text begins in middle of the page
             if a['span']['end'] >= self.text_spans[vol_id]['start'] and \
                 a['span']['start'] <= self.text_spans[vol_id]['end']:
                 a['type'] = layer['annotation_type']
