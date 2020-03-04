@@ -101,9 +101,6 @@ def reinsert(pecha_path, notes_path, layer_name):
     for text_ann in pecha_index['annotations']:
         notes_fn = notes_path/f'{text_ann["work"]}_a_reinserted.txt'
         if not notes_fn.is_file(): continue
-        print(notes_fn)
-        if text_ann['work'] == 'D1133':
-            print('Here')
         notes, base_text = get_notes(notes_fn)
 
         # cross-vol text have mutlitple layer files in terms of volume
