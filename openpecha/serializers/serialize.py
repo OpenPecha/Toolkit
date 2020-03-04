@@ -19,6 +19,7 @@ class Serialize(object):
         self.opfpath = Path(opfpath)
         self.text_id = text_id
         self.index_layer = index_layer
+        self.n_char_shifted = 0
         if self.text_id:
             self.text_spans = self.get_text_spans(text_id)
             self.base_layers = self.get_text_base_layer()
@@ -72,8 +73,8 @@ class Serialize(object):
             adapted_end (int): adapted end based on text base-text
 
         """
-        adapted_start = span['start'] - self.text_spans[vol_id]['start']
-        adapted_end = span['end'] - self.text_spans[vol_id]['start']
+        adapted_start = span['start'] - self.text_spans[vol_id]['start'] + self.n_char_shifted
+        adapted_end = span['end'] - self.text_spans[vol_id]['start'] + self.n_char_shifted
         return adapted_start, adapted_end
 
 
