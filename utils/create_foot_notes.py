@@ -1,5 +1,6 @@
 from collections import defaultdict
 from pathlib import Path
+import os
 
 import yaml
 
@@ -96,11 +97,27 @@ if __name__ == "__main__":
     opf_path = data_path/'.openpecha/data/P000002/P000002.opf'
     notes_path = data_path/'data'/'2-1-a_reinserted'
     text_metadata_path = data_path/'data'/'tanjurd.xml'
+    foot_notes_path = data_path/'data'/'foot-notes'
+    text_output_path = foot_notes_path/'txts'
+    docx_output_path = foot_notes_path/'docxs'
 
     text_metadata = get_text_metadata(text_metadata_path)
     index_layer = yaml.safe_load((opf_path/'index.yml').open())
 
-    for path in sorted(notes_path.iterdir())[1:]:
+    for path in sorted(notes_path.iterdir()):
         text_id = path.name.split('_')[0]
         foot_noted_text = create_foot_notes(text_id, opf_path, text_metadata, index_layer)
-        print(foot_noted_text)
+
+        text_author_path = text_output_path/text_metadata[text_id]['author']
+        text_author_path.mkdir(exist_ok=True)
+        text_fn = text_author_path/f'{text_id}-{text_metadata[text_id]["title"]}.txt'
+        if not text_fn.is_file():
+            text_fn.write_text(foot_noted_text)
+
+        docx_author_path = docx_output_path/text_metadata[text_id]['author']
+        docx_author_path.mkdir(exist_ok=True)
+        docx_fn = docx_author_path/f'{text_id}-{text_metadata[text_id]["title"]}.docx'
+        if not docx_fn.is_file():
+            cmd = f'pandoc -s -o {docx_fn} {text_fn}'
+            os.system(cmd)
+            print(f'[INFO] Generated {text_id} docx')
