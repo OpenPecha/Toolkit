@@ -19,11 +19,12 @@ class Serialize(object):
         self.opfpath = Path(opfpath)
         self.text_id = text_id
         self.index_layer = index_layer
-        self.n_char_shifted = 0
+        self.n_char_shifted = []
         self.n_char_shifted_pos = None
         if self.text_id:
             self.text_spans = self.get_text_spans(text_id)
-            self.base_layers = self.get_text_base_layer()
+            if self.text_spans:
+                self.base_layers = self.get_text_base_layer()
         else:
             self.text_spans = {'v001': {'start': 0}} 
             self.base_layers = {'v001': self.get_base_layer('v001')}
@@ -58,6 +59,12 @@ class Serialize(object):
         # by convention, when it is None, all layers are applied in alphabetical order (?)
         self.layers = layers
 
+    def get_n_char_shitted(self, end):
+        n_shifted = 0
+        for pos, n_chars in self.n_char_shifted:
+            if end >= pos:
+                n_shifted += n_chars
+        return n_shifted
 
     def _get_adapted_span(self, span, vol_id):
         """Adapts the annotation span to base-text of the text
@@ -76,9 +83,9 @@ class Serialize(object):
         """
         adapted_start = max(0, span['start'] - self.text_spans[vol_id]['start'])
         adapted_end = span['end'] - self.text_spans[vol_id]['start']
-        if self.n_char_shifted and span['start'] > self.n_char_shifted_pos:
-            adapted_start += self.n_char_shifted
-            adapted_end += self.n_char_shifted
+        n_char_shifted = self.get_n_char_shitted(span['start'])
+        adapted_start += n_char_shifted
+        adapted_end += n_char_shifted
         return adapted_start, adapted_end
 
 
@@ -135,7 +142,9 @@ class Serialize(object):
         This reads the file opfpath/layers/layer_id.yml and applies all the annotations it contains, in the order in which they appear.
         I think it can be implemented in this class by just calling self.apply_annotation on each annotation of the file.
         """
-        layer = yaml.safe_load((self.opfpath/'layers'/vol_id/f'{layer_id}.yml').open())
+        layer_fn = self.opfpath/'layers'/vol_id/f'{layer_id}.yml'
+        if not layer_fn.is_file(): return
+        layer = yaml.safe_load(layer_fn.open())
         for a in layer['annotations']:
             # text begins in middle of the page
             if a['span']['end'] >= self.text_spans[vol_id]['start'] and \

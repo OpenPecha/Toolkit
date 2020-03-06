@@ -6,6 +6,7 @@ import yaml
 
 from openpecha.serializers import SerializeFootNote
 
+error_logs_fn = Path('./error_logs')/Path(__file__).stem
 
 def to_bo_pagination(text):
 
@@ -29,13 +30,13 @@ def to_bo_pagination(text):
     for line in text.split('\n'):
         if not line: continue
         if line.startswith('[v'): continue
-        if line.startswith('[^'):
+        if ':' in line:
             if is_first_fn_passed:
                 result += f'{line}\n'
             else:
                 result += f'\n{line}\n'
                 is_first_fn_passed = True
-        elif line.startswith('['):
+        elif line.startswith('[') and line[1] != '^':
             en_pg_index = line.strip()[1:-1]
             bo_pg_index = index_to_bo(en_pg_index)
             result += f'({bo_pg_index})\n'
@@ -48,8 +49,13 @@ def to_bo_pagination(text):
 def create_foot_notes(text_id, opf_path, metadata, index_layer):
     serializer = SerializeFootNote(
         opf_path, text_id=text_id, index_layer=index_layer,
-        layers=['peydurma-note', 'correction', 'pagination']
+        layers=['correction', 'peydurma-note', 'pagination']
     )
+    if not serializer.text_spans:
+        error_msg = f'[not-found] {text_id} not found in derge-tengyur\n'
+        print(error_msg)
+        error_logs_fn.open('a').write(error_msg)
+        return ''
     serializer.apply_layers()
     annotated_text, text_id = serializer.get_result()
     
@@ -70,7 +76,7 @@ def get_text_metadata(path):
                 return 'no-author'
             else:
                 return ''
-        value = tag[0].firstChild.nodeValue
+        value = tag[0].firstChild.nodeValue.strip()
         if to_bo:
             return converter.toUnicode(value)
         if is_loc:
@@ -92,6 +98,13 @@ def get_text_metadata(path):
     return metadata
 
 
+def truncate_title(title):
+    if len(title) > 70:
+        return title[:35] + '_' + title[-35:]
+    else:
+        return title
+
+
 if __name__ == "__main__":
     data_path = Path('../openpecha-user')
     opf_path = data_path/'.openpecha/data/P000002/P000002.opf'
@@ -106,18 +119,32 @@ if __name__ == "__main__":
 
     for path in sorted(notes_path.iterdir()):
         text_id = path.name.split('_')[0]
-        foot_noted_text = create_foot_notes(text_id, opf_path, text_metadata, index_layer)
+        print(f'[INFO] Processing {text_id} ...')
 
+        if text_id not in text_metadata:
+            error_msg = f'[not-found] {text_id} not found in derge-tengyur\n'
+            print(error_msg)
+            error_logs_fn.open('a').write(error_msg)
+            continue
+    
+        # create output path for txt and docx file
         text_author_path = text_output_path/text_metadata[text_id]['author']
         text_author_path.mkdir(exist_ok=True)
-        text_fn = text_author_path/f'{text_id}-{text_metadata[text_id]["title"]}.txt'
-        if not text_fn.is_file():
-            text_fn.write_text(foot_noted_text)
-
+        text_title = truncate_title(text_metadata[text_id]["title"])
+        text_fn = text_author_path/f'{text_id}-{text_title}.txt'
+        
         docx_author_path = docx_output_path/text_metadata[text_id]['author']
         docx_author_path.mkdir(exist_ok=True)
-        docx_fn = docx_author_path/f'{text_id}-{text_metadata[text_id]["title"]}.docx'
-        if not docx_fn.is_file():
-            cmd = f'pandoc -s -o {docx_fn} {text_fn}'
-            os.system(cmd)
+        docx_fn = docx_author_path/f'{text_id}-{text_title}.docx'
+        if text_fn.is_file() and docx_fn.is_file(): continue
+
+        # create generate txt file
+        foot_noted_text = create_foot_notes(text_id, opf_path, text_metadata, index_layer)
+        if not foot_noted_text or '[^' not in foot_noted_text: continue
+        text_fn.write_text(foot_noted_text)
+
+        # convert txt file to docx with pandoc
+        cmd = f'pandoc +RTS -K100000000 -RTS -s -o {docx_fn} {text_fn}'
+        os.system(cmd)
+        if docx_fn.is_file():
             print(f'[INFO] Generated {text_id} docx')

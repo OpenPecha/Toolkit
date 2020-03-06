@@ -25,10 +25,10 @@ class SerializeFootNote(Serialize):
 
             payload = f'<{error} སྡེ་དགེ།>'
             n_diff = len(ann['correction']) - len(error)
-            self.n_char_shifted += n_diff
-            if not self.n_char_shifted_pos:
-                self.n_char_shifted_pos = ann['span']['start']
-            self.add_chars(vol_id, end_cc+n_diff, False, payload)
+            if not n_diff == 0:
+                self.n_char_shifted.append((ann['span']['start'], n_diff))
+                start_cc, end_cc = self._get_adapted_span(ann['span'], vol_id)
+            self.add_chars(vol_id, end_cc, False, payload)
             
 
 
@@ -60,7 +60,7 @@ class SerializeFootNote(Serialize):
 if __name__ == "__main__":
     OPF_PECHA_PATH = '../openpecha-user/.openpecha/data/P000002/P000002.opf'
 
-    serializer = SerializeFootNote(OPF_PECHA_PATH, text_id='D1118', layers=['peydurma-note', 'correction', 'pagination'])
+    serializer = SerializeFootNote(OPF_PECHA_PATH, text_id='D1794', layers=['correction', 'peydurma-note', 'pagination'])
     serializer.apply_layers()
     annotated_text, text_id = serializer.get_result()
     print(annotated_text)
