@@ -102,15 +102,21 @@ class Blupdate:
           get_cctv_for_coord(9) == (-1, true)
         """
         prev_cct = 0
+        result = None
         for cct in self.cctv:
             if srcblcoord > cct[0] and srcblcoord < cct[1]: # at inner of the range
-                return (cct[2], True)
+                result = (cct[2], True)
             elif srcblcoord == cct[0] or srcblcoord == cct[1] - 1: # at side of the range
-                return (cct[2], False)
+                result = (cct[2], False)
             elif srcblcoord < cct[0]: # falls between ccts (two range)
-                return (math.ceil((prev_cct + cct[2]) / 2), False)
+                result = (math.ceil((prev_cct + cct[2]) / 2), False)
             
             prev_cct = cct[2]
+
+        if result:
+            return result
+        else:
+            return (-1, False)
 
 
     def get_context(self, srcblcoord):
@@ -151,6 +157,7 @@ class Blupdate:
 
         By convention, the function returns -1 when it is unable to compute the new coordinate.
         """
+        if cct == -1: return cct
         context = self.get_context(srcblcoord)
         dstcoordestimate = srcblcoord + cct
         return self.dmp_find(context, dstcoordestimate)

@@ -11,6 +11,7 @@ usage/input/
 usage/layer_output/
 output/
 opfs/
+error_logs/
 
 # scripts
 usage/

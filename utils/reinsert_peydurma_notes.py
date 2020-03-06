@@ -6,15 +6,23 @@ import re
 import yaml
 import diff_match_patch as dmp_module
 
-from openpecha.github_utils import github_publish
 from openpecha.formatters.format import Layer, Peydurma
 from openpecha.formatters import BaseFormatter
 from openpecha.blupdate import Blupdate
 
 
+error_log_fn = Path('./error_logs')/Path(__file__).stem
+
+
 def get_notes(fn):
     raw_text = fn.read_text()
-    foot_note_idx = max(re.finditer(r'\[\^1K\]', raw_text), key=lambda x: x.start(0)).start(0)
+    if '[^' not in raw_text: return None, None
+    pattern = r''
+    if '[^1K]' in raw_text:
+        pattern = r'\[\^1K\]'
+    else:
+        pattern = r'\[\^2K\]'
+    foot_note_idx = max(re.finditer(pattern, raw_text), key=lambda x: x.start(0)).start(0)
 
     # preprocess text
     text = raw_text[:foot_note_idx-1].replace('\n', ' ')
@@ -37,7 +45,7 @@ def get_notes(fn):
 
     foot_notes = [
         foot_note.split(':')[1].strip()
-        for foot_note in raw_text[foot_note_idx:].split('\n')
+        for foot_note in raw_text[foot_note_idx:].split('\n') if foot_note
     ]
 
     return zip(text_notes, foot_notes), base_text.strip()
@@ -75,6 +83,7 @@ def get_work_text(path, vol):
 
 def update_layer(note, bl, note_idx, vol, layer_ann):
     dst_note_idx = bl.get_updated_coord(note[0])
+    if dst_note_idx == -1: return
     vol_note_idx = dst_note_idx + vol['span']['start']
 
     if layer_ann['annotations'] and len(layer_ann['annotations']) > note_idx+1:
@@ -101,7 +110,10 @@ def reinsert(pecha_path, notes_path, layer_name):
     for text_ann in pecha_index['annotations']:
         notes_fn = notes_path/f'{text_ann["work"]}_a_reinserted.txt'
         if not notes_fn.is_file(): continue
+        # if not text_ann['work'] == 'D1557': continue
+        print(f'[INFO] Processing {text_ann["work"]} ...')
         notes, base_text = get_notes(notes_fn)
+        if not notes: continue
 
         # cross-vol text have mutlitple layer files in terms of volume
         for vol in text_ann['span']:
@@ -121,6 +133,11 @@ def reinsert(pecha_path, notes_path, layer_name):
 
             # insert each foot_note of current text into layer with note_idx.
             bl = Blupdate(base_text, work_text)
+            if len(bl.cctv) <= 1:
+                error_msg = f'[diff-text] {text_ann["work"]} (derge-tengyur)\n'
+                print(error_msg)
+                error_log_fn.open('a').write(error_msg)
+                break
             for note in notes:
                 update_layer(note, bl, note_idx, vol, layer_ann)
                 note_idx += 1
