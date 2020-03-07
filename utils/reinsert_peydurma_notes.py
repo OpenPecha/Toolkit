@@ -110,7 +110,7 @@ def reinsert(pecha_path, notes_path, layer_name):
     for text_ann in pecha_index['annotations']:
         notes_fn = notes_path/f'{text_ann["work"]}_a_reinserted.txt'
         if not notes_fn.is_file(): continue
-        # if not text_ann['work'] == 'D1557': continue
+        # if not text_ann['work'] == 'D1794': continue
         print(f'[INFO] Processing {text_ann["work"]} ...')
         notes, base_text = get_notes(notes_fn)
         if not notes: continue
@@ -128,7 +128,7 @@ def reinsert(pecha_path, notes_path, layer_name):
                     layer_ann = get_layer_ann(pecha_opf_path, vol['vol'][5:], layer_name)
                 else:
                     layer_ann = create_layer(layer_name)
-                
+
                 note_idx = 0
 
             # insert each foot_note of current text into layer with note_idx.
