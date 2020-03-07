@@ -12,6 +12,7 @@ from openpecha.blupdate import Blupdate
 
 
 error_log_fn = Path('./error_logs')/Path(__file__).stem
+error_log_fn.unlink()
 
 
 def get_notes(fn):
