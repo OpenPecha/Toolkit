@@ -129,12 +129,12 @@ if __name__ == "__main__":
     
         # create output path for txt and docx file
         text_author_path = text_output_path/text_metadata[text_id]['author']
-        text_author_path.mkdir(exist_ok=True)
+        text_author_path.mkdir(exist_ok=True, parents=True)
         text_title = truncate_title(text_metadata[text_id]["title"])
         text_fn = text_author_path/f'{text_id}-{text_title}.txt'
         
         docx_author_path = docx_output_path/text_metadata[text_id]['author']
-        docx_author_path.mkdir(exist_ok=True)
+        docx_author_path.mkdir(exist_ok=True, parents=True)
         docx_fn = docx_author_path/f'{text_id}-{text_title}.docx'
         if text_fn.is_file() and docx_fn.is_file(): continue
 
