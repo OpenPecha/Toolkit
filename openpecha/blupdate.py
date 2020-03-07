@@ -111,13 +111,12 @@ class Blupdate:
             elif srcblcoord < cct[0]: # falls between ccts (two range)
                 result = (math.ceil((prev_cct + cct[2]) / 2), False)
             
-            if result:
-                return result
-            else:
-                return (-1, False)
-
+            if result: return result
+            
             prev_cct = cct[2]
 
+        if not result:
+            return (-1, False)
 
 
     def get_context(self, srcblcoord):

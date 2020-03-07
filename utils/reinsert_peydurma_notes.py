@@ -12,7 +12,7 @@ from openpecha.blupdate import Blupdate
 
 
 error_log_fn = Path('./error_logs')/Path(__file__).stem
-error_log_fn.unlink()
+if error_log_fn.is_file(): error_log_fn.unlink()
 
 
 def get_notes(fn):
@@ -80,7 +80,7 @@ def create_layer(layer_name):
 
 def get_work_text(path, vol):
     span = vol['span']
-    return (path/f"{vol['vol']}.txt").read_text()[span['start']: span['end']+1]
+    return (path/f"{vol['vol']}.txt").read_text()[span['start']: span['end']]
 
 
 def update_layer(note, bl, note_idx, vol, layer_ann):
@@ -112,7 +112,7 @@ def reinsert(pecha_path, notes_path, layer_name):
     for text_ann in pecha_index['annotations']:
         notes_fn = notes_path/f'{text_ann["work"]}_a_reinserted.txt'
         if not notes_fn.is_file(): continue
-        # if not text_ann['work'] == 'D1794': continue
+        # if not text_ann['work'] == 'D1115': continue
         print(f'[INFO] Processing {text_ann["work"]} ...')
         notes, base_text = get_notes(notes_fn)
         if not notes: continue
