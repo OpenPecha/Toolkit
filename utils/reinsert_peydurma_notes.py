@@ -25,9 +25,10 @@ def get_notes(fn):
     foot_note_idx = max(re.finditer(pattern, raw_text), key=lambda x: x.start(0)).start(0)
 
     # preprocess text
-    text = raw_text[:foot_note_idx-1].replace('\n', ' ')
+    text = raw_text[:foot_note_idx-1].replace('\ufeff', '')
+    text = text[1:] if text[0] == 'a' else text
+    text = text.replace('\n', ' ')
     text = text.replace('a', '\n')
-    text = text.replace('\ufeff', '')
 
     is_note = False
     base_text_len = 0
