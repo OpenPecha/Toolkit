@@ -20,7 +20,6 @@ class Serialize(object):
         self.text_id = text_id
         self.index_layer = index_layer
         self.n_char_shifted = []
-        self.n_char_shifted_pos = None
         if self.text_id:
             self.text_spans = self.get_text_spans(text_id)
             if self.text_spans:

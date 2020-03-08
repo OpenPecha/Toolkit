@@ -7,6 +7,7 @@ import yaml
 from openpecha.serializers import SerializeFootNote
 
 error_logs_fn = Path('./error_logs')/Path(__file__).stem
+if error_logs_fn.is_file(): error_logs_fn.unlink()
 
 def to_bo_pagination(text):
 
