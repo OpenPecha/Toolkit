@@ -1,8 +1,13 @@
+import os
+import yaml
+import requests
+
+import click
+
 from collections import namedtuple, defaultdict
 from pathlib import Path
 
-import yaml
-
+INFO = '[INFO] {}'
 
 class Serialize(object):
     """
@@ -17,6 +22,7 @@ class Serialize(object):
     """
     def __init__(self, opfpath, text_id=None, layers=None):
         self.opfpath = Path(opfpath)
+        self.meta = self.get_meta_data()
         self.text_id = text_id
         if self.text_id:
             self.text_spans = self.get_text_spans(text_id)
@@ -54,6 +60,12 @@ class Serialize(object):
         # layer lists the layers to be applied, in the order of which they should be applied
         # by convention, when it is None, all layers are applied in alphabetical order (?)
         self.layers = layers
+
+    
+    def get_meta_data(self):
+        opf_path = self.opfpath
+        meta = yaml.safe_load((opf_path/'meta.yml').open())
+        return meta
 
 
     def load_layer(self, fn):
@@ -208,3 +220,38 @@ class Serialize(object):
             return self.__assign_line_layer(result, vol_id)
         else:
             return result
+
+    def serilize(self, pecha_id):
+        """ This module serialize .opf file to other format such as .epub etc. In case of epub,
+        we are using calibre ebook-convert command to do the conversion by passing our custom css template
+        and embedding our custom font. The converted output will be then saved in current directory
+        as {pecha_id}.epub.
+
+        Args:
+        pecha_id (string): Pecha id that needs to be exported in other format
+
+        """
+        out_fn = f'{pecha_id}.html'
+        pecha_title = self.meta['ebook_metadata']['title']
+        result = self.get_result()
+        result_lines = result.splitlines() # Result is split where there is newline as we are going to consider newline as one para tag
+        results = f'<html>\n<head>\n\t<title>{pecha_title}</title>\n</head>\n<body>\n'
+        for result_line in result_lines:
+            results += f'<p class="tibetan-regular-indented">{result_line}</p>\n'
+        results += '</body>\n</html>'
+        click.echo(results, file=open(out_fn, 'w'))
+        # logging
+        msg = f'Output is save at: {out_fn}'
+        click.echo(INFO.format(msg))
+        # Downloading css template file from ebook template repo and saving it
+        template = requests.get('https://raw.githubusercontent.com/OpenPecha/ebook-template/master/tsadra_template.css')
+        click.echo(template.content, file=open('template.css', 'w'))
+        # Running ebook-convert command to convert html file to .epub (From calibre)
+        chapter_Xpath = "//*[@class='tibetan-chapter']" #XPath expression to detect chapter titles.
+        font_family = "Monlam Uni Ouchan2"
+        font_size = 16
+        chapter_mark ="pagebreak"
+        os.system(f'ebook-convert {out_fn} {pecha_id}.epub --extra-css=./template.css --chapter={chapter_Xpath} --chapter-mark="{chapter_mark}" --base-font-size={font_size} --embed-font-family="{font_family}"')
+        # Removing html file and template file
+        os.system(f'rm {out_fn}')
+        os.system('rm template.css')

@@ -9,6 +9,7 @@ from git import Repo
 from tqdm import tqdm
 
 from openpecha.serializers import *
+from openpecha.serializers import SerializeTsadra
 from openpecha.blupdate import Blupdate
 from openpecha.formatters import *
 
@@ -356,3 +357,16 @@ def edit(**kwargs):
     # logging
     msg = f'Output is save at: {out_fn}'
     click.echo(INFO.format(msg))
+
+
+@cli.command()
+@click.argument('pecha_num')
+def export(**kwargs):
+    '''
+    Command to export Pecha in epub
+    '''
+    pecha_id = get_pecha_id(kwargs['pecha_num'])
+    opf_path = f'{config["OP_DATA_PATH"]}/{pecha_id}/{pecha_id}.opf'
+    serializer = SerializeTsadra(opf_path)
+    serializer.apply_layers()
+    serializer.serilize(pecha_id)
