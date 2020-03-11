@@ -66,7 +66,7 @@ class CatalogManager:
         create_file(self.repo_name, self.last_id_path, content, "update last id of Pecha", update=True)
 
         # create batch.csv
-        content = '\n'.join([','.join(row) for row in map(self._add_id_url, self.batch)])
+        content = '\n'.join([','.join(row) for row in map(self._add_id_url, self.batch)]) + '\n'
         create_file(self.repo_name, self.batch_path, content, "create new batch")
         print('[INFO] Updated the OpenPecha catalog')
 
