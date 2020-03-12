@@ -123,7 +123,7 @@ class GoogleOCRFormatter(BaseFormatter):
         path.write_bytes(zipped_boundingPolies)
 
 
-    def build_layers(self, responses, base_id=None):
+    def build_layers(self, responses, vol_name, base_id=None):
         if base_id:
             resource_vol_path = self.dirs['release_path']/base_id
             resource_vol_path.mkdir(exist_ok=True)
@@ -131,15 +131,21 @@ class GoogleOCRFormatter(BaseFormatter):
         pages = []
         pages_ref = []
         last_pg_end_idx = 0
-        for n_pg, (response, page_ref) in enumerate(responses):
+        for response, page_ref in responses:
+            # extract page number, eg: I1PD901350083 -> 83
+            n_pg = int(page_ref[len(vol_name):])
             # extract annotation
             if not response:
-                print(f'[ERROR] Failed : {n_pg+1}')
+                print(f'[ERROR] Failed : {n_pg}')
                 continue
             text, _ = self._get_page(response)
-            if not text: continue # skip empty page
+
+            # skip empty page (can be bad image)
+            if not text:
+                print(f'[ERROR] empty page {n_pg}')
+                continue
             lines, last_pg_end_idx = self._get_lines(text, last_pg_end_idx, n_pg == 0)
-            pages.append((lines[0][0], lines[-1][1], n_pg+1))
+            pages.append((lines[0][0], lines[-1][1], n_pg))
             pages_ref.append(response.get('image_link', page_ref))
 
             # create base_text
@@ -147,7 +153,7 @@ class GoogleOCRFormatter(BaseFormatter):
 
             if base_id:
                 # save the boundingPoly to resources
-                self.save_boundingPoly(response, resource_vol_path/f'{n_pg+1:04}.json.gz')
+                self.save_boundingPoly(response, resource_vol_path/f'{n_pg:04}.json.gz')
 
         result = {
             'pages': pages,
@@ -156,7 +162,7 @@ class GoogleOCRFormatter(BaseFormatter):
             
         return result
 
-    
+
     def get_base_text(self):
         base_text = f'{self.page_break}'.join(self.base_text)
         self.base_text = []
@@ -202,7 +208,7 @@ class GoogleOCRFormatter(BaseFormatter):
             base_id = f'v{i+1:03}'
             if (self.dirs['opf_path']/'base'/f'{base_id}.txt').is_file(): continue
             responses = self.get_input(vol_path)
-            layers = self.build_layers(responses, base_id)
+            layers = self.build_layers(responses, vol_path.name, base_id)
             formatted_layers = self.format_layer(layers, base_id)
             base_text = self.get_base_text()
 
