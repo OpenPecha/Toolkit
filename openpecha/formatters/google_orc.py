@@ -160,7 +160,7 @@ class GoogleOCRFormatter(BaseFormatter):
             if not text:
                 print(f'[ERROR] empty page {n_pg}')
                 continue
-            lines, last_pg_end_idx = self._get_lines(text, last_pg_end_idx, n_pg == 0)
+            lines, last_pg_end_idx = self._get_lines(text, last_pg_end_idx, n_pg == 1)
             pages.append((lines[0][0], lines[-1][1], n_pg))
             pages_ref.append(response.get('image_link', page_ref))
 
