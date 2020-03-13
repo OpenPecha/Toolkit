@@ -122,11 +122,27 @@ class GoogleOCRFormatter(BaseFormatter):
         zipped_boundingPolies = gzip_str(json.dumps(boundingPolies))
         path.write_bytes(zipped_boundingPolies)
 
+    def save_low_conf_char(self, response, path):
+        char_idx = 0
+        low_conf_chars = ''
+        for page in response['fullTextAnnotation']['pages']:
+            for block in page['blocks']:
+                for paragraph in block['paragraphs']:
+                    for word in paragraph['words']:
+                        for symbol in word['symbols']:
+                            if symbol.get('confidence', 1) < 0.9:
+                                low_conf_chars += f'{symbol["text"]} {char_idx}\n'
+                            char_idx += 1
+        if low_conf_chars:
+            path.write_bytes(gzip_str(low_conf_chars))
+
 
     def build_layers(self, responses, vol_name, base_id=None):
         if base_id:
-            resource_vol_path = self.dirs['release_path']/base_id
-            resource_vol_path.mkdir(exist_ok=True)
+            bounding_poly_vol_path = self.dirs['release_path']/'bounding_poly'/base_id
+            low_conf_char_vol_path = self.dirs['release_path']/'low_confident_chars'/base_id
+            bounding_poly_vol_path.mkdir(parents=True, exist_ok=True)
+            low_conf_char_vol_path.mkdir(parents=True, exist_ok=True)
 
         pages = []
         pages_ref = []
@@ -153,7 +169,9 @@ class GoogleOCRFormatter(BaseFormatter):
 
             if base_id:
                 # save the boundingPoly to resources
-                self.save_boundingPoly(response, resource_vol_path/f'{n_pg:04}.json.gz')
+                self.save_boundingPoly(response, bounding_poly_vol_path/f'{n_pg:04}.json.gz')
+                # save low confident char and it's corresponding index
+                self.save_low_conf_char(response, low_conf_char_vol_path/f'{n_pg:04}.txt.gz')
 
         result = {
             'pages': pages,
@@ -200,7 +218,7 @@ class GoogleOCRFormatter(BaseFormatter):
         input_path = Path(input_path)
         self._build_dirs(input_path, id=pecha_id)
 
-        self.dirs['release_path'] = self.dirs['opf_path'].parent/'releases/bouding_poly'
+        self.dirs['release_path'] = self.dirs['opf_path'].parent/'releases'
         self.dirs['release_path'].mkdir(exist_ok=True, parents=True)
 
         for i, vol_path in enumerate(sorted(input_path.iterdir())):
