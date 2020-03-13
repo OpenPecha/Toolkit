@@ -69,7 +69,7 @@ class TestGoogleOCRFormatter:
     
     def test_get_base_text(self, get_resources):
         formatter, data_path, responses = get_resources
-        formatter.build_layers(responses)
+        formatter.build_layers(responses, '')
 
         result = formatter.get_base_text()
 
@@ -81,7 +81,7 @@ class TestGoogleOCRFormatter:
     def test_build_layers(self, get_resources):
         formatter, data_path, responses = get_resources
 
-        result = formatter.build_layers(responses)
+        result = formatter.build_layers(responses, '')
 
         expected = {
             'pages': [(0, 19), (24, 888), (893, 1607), (1612, 1809)],
