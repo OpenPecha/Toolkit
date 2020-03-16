@@ -62,13 +62,19 @@ class CatalogManager:
     def update_catalog(self):
         '''Updates the catalog csv to have new opf-pechas metadata'''
         # update last_id
-        content = self.batch[-1][0]
+        content = self.batch[-1][0].strip()
         create_file(self.repo_name, self.last_id_path, content, "update last id of Pecha", update=True)
+
+        # update last_id
+        self.last_id = int(content[1:])
 
         # create batch.csv
         content = '\n'.join([','.join(row) for row in map(self._add_id_url, self.batch)]) + '\n'
         create_file(self.repo_name, self.batch_path, content, "create new batch")
         print('[INFO] Updated the OpenPecha catalog')
+
+        # reset the batch
+        self.batch = []
 
 
     def _get_catalog_metadata(self, pecha_path):

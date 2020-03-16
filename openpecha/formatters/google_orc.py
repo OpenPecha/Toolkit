@@ -140,7 +140,7 @@ class GoogleOCRFormatter(BaseFormatter):
     def build_layers(self, responses, vol_name, base_id=None):
         if base_id:
             bounding_poly_vol_path = self.dirs['release_path']/'bounding_poly'/base_id
-            low_conf_char_vol_path = self.dirs['release_path']/'low_confident_chars'/base_id
+            low_conf_char_vol_path = self.dirs['release_path']/'low_confidence_chars'/base_id
             bounding_poly_vol_path.mkdir(parents=True, exist_ok=True)
             low_conf_char_vol_path.mkdir(parents=True, exist_ok=True)
 
