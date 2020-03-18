@@ -28,10 +28,10 @@ buildin_pipes = {
 class CatalogManager:
     '''Manages the catalog'''
 
-    def __init__(self, pipes=None, formatter_type=None, not_include_files=['releases']):
+    def __init__(self, pipes=None, formatter_type=None, not_include_files=['releases'], last_id_fn='last_id'):
         self.repo_name = "openpecha-catalog"
         self.batch_path = "data/batch.csv"
-        self.last_id_path = "data/last_id"
+        self.last_id_path = f"data/{last_id_fn}"
         self.batch = []
         self.last_id = self._get_last_id()
         self.FormatterClass = self._get_formatter_class(formatter_type)

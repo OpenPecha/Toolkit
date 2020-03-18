@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+import time
 
 from github import Github
 from git import Repo
@@ -10,6 +11,7 @@ org = g.get_organization('OpenPecha')
 
 def create_github_repo(path):
     repo = org.create_repo(path.name)
+    time.sleep(2)
     return repo._html_url.value
     
 
