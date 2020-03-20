@@ -107,5 +107,10 @@ def create_readme(metadata, path):
     readme_fn.write_text(result)
 
 
+def delete_repo(repo_name):
+    repo = org.get_repo(repo_name)
+    repo.delete()
+
+
 if __name__ == "__main__":
     create_release('P000002', asset_paths='./output/P000300/release.zip')
