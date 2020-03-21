@@ -48,7 +48,7 @@ class CatalogManager:
 
     def _get_last_id(self):
         '''returns the id assigin to last opf pecha'''
-        last_id_url = 'https://raw.githubusercontent.com/OpenPecha/openpecha-catalog/master/data/last_id'
+        last_id_url = f'https://raw.githubusercontent.com/OpenPecha/openpecha-catalog/master/{self.last_id_path}'
         r = requests.get(last_id_url)
         return int(r.content.decode('utf-8').strip()[1:])
 
@@ -119,6 +119,6 @@ class CatalogManager:
 
 
 if __name__ == "__main__":
-    catalog = CatalogManager(formatter_type='ocr')
+    catalog = CatalogManager(formatter_type='ocr', last_id_fn='ocr-machine-08_last_id')
     catalog.ocr_to_opf('./tests/data/formatter/google_ocr/W3CN472')
     catalog.update_catalog()
