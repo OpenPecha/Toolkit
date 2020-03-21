@@ -149,7 +149,12 @@ class GoogleOCRFormatter(BaseFormatter):
         last_pg_end_idx = 0
         for response, page_ref in responses:
             # extract page number, eg: I1PD901350083 -> 83
-            n_pg = int(page_ref[len(vol_name):])
+            try:
+                n_pg = int(page_ref[len(vol_name):])
+            except ValueError:
+                n_pg_str = page_ref[len(vol_name):]
+                if n_pg_str == 'a':
+                    n_pg = int(n_pg_str[:-1])
             # extract annotation
             if not response:
                 print(f'[ERROR] Failed : {n_pg}')
