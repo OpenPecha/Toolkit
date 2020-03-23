@@ -150,6 +150,9 @@ class GoogleOCRFormatter(BaseFormatter):
         for response, page_ref in responses:
             # extract page number, eg: I1PD901350083 -> 83
             n_pg_str = page_ref[len(vol_name):]
+            if '-' in page_ref:
+                n_pg_str = page_ref.split('-')[-1]
+
             if 'a' in n_pg_str or 'b' in n_pg_str:
                 n_pg_str = int(n_pg_str[:-1])
             n_pg = int(n_pg_str)
