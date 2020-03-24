@@ -154,7 +154,11 @@ class GoogleOCRFormatter(BaseFormatter):
                 n_pg_str = page_ref.split('-')[-1]
 
             if 'a' in n_pg_str or 'b' in n_pg_str:
-                n_pg_str = int(n_pg_str[:-1])
+                try:
+                    n_pg_str = int(n_pg_str[:-1])
+                except:
+                    #TODO: fix later, collection all the cases as of now
+                    n_pg_str = '0' #dummy value
             n_pg = int(n_pg_str)
 
             # extract annotation
