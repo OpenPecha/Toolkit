@@ -36,8 +36,10 @@ class GoogleOCRFormatter(BaseFormatter):
         for fn in sorted(list(input_path.iterdir())):
             try: 
                 yield json.load(gzip.open(str(fn), 'rb')), fn.name.split('.')[0]
+            except GeneratorExit:
+                return None, None
             except:
-                yield None
+                yield None, None
 
 
     def _get_page_index(self, n):
@@ -153,13 +155,14 @@ class GoogleOCRFormatter(BaseFormatter):
             if '-' in page_ref:
                 n_pg_str = page_ref.split('-')[-1]
 
-            if 'a' in n_pg_str or 'b' in n_pg_str:
-                try:
-                    n_pg_str = int(n_pg_str[:-1])
-                except:
-                    #TODO: fix later, collection all the cases as of now
-                    n_pg_str = '0' #dummy value
-            n_pg = int(n_pg_str)
+            if n_pg_str[-1].isalpha():
+                n_pg_str = n_pg_str[:-1]
+
+            try:
+                n_pg = int(n_pg_str)
+            except:
+                #TODO: fix later, collection all the cases as of now
+                n_pg = 0 # dummy value
 
             # extract annotation
             if not response:
@@ -233,7 +236,7 @@ class GoogleOCRFormatter(BaseFormatter):
         self.dirs['release_path'].mkdir(exist_ok=True, parents=True)
 
         for i, vol_path in enumerate(sorted(input_path.iterdir())):
-            print(f'[INFO] Processing Vol {i+1:03} : {vol_path.name} ...')
+            print(f'[INFO] Processing {input_path.name}-{vol_path.name} ...')
             base_id = f'v{i+1:03}'
             if (self.dirs['opf_path']/'base'/f'{base_id}.txt').is_file(): continue
             responses = self.get_input(vol_path)
