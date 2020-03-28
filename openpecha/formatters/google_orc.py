@@ -34,7 +34,8 @@ class GoogleOCRFormatter(BaseFormatter):
         load and return all jsons in the input_path.
         '''
         for fn in sorted(list(input_path.iterdir())):
-            try: 
+            if fn.name.split('.')[0] == 'info': continue
+            try:
                 yield json.load(gzip.open(str(fn), 'rb')), fn.name.split('.')[0]
             except GeneratorExit:
                 return None, None
@@ -155,7 +156,7 @@ class GoogleOCRFormatter(BaseFormatter):
             if '-' in page_ref:
                 n_pg_str = page_ref.split('-')[-1]
 
-            if n_pg_str[-1].isalpha():
+            if n_pg_str and n_pg_str[-1].isalpha():
                 n_pg_str = n_pg_str[:-1]
 
             try:
