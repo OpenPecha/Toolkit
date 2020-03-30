@@ -15,15 +15,15 @@ class Serialize(object):
 
     To use it, instantiate a concrete class with the path of the opf file, and call apply_layers() then get_result()
     """
-    def __init__(self, opfpath, text_id=None, layers=None):
+    def __init__(self, opfpath, text_id=None, vol_id='v001', layers=None):
         self.opfpath = Path(opfpath)
         self.text_id = text_id
         if self.text_id:
             self.text_spans = self.get_text_spans(text_id)
             self.base_layers = self.get_text_base_layer()
         else:
-            self.text_spans = {'v001': {'start': 0}} 
-            self.base_layers = {'v001': self.get_base_layer('v001')}
+            self.text_spans = {vol_id: {'start': 0}} 
+            self.base_layers = {vol_id: self.get_base_layer(vol_id)}
         """
         The chars_toapply is an important piece of the puzzle here. Basically applying the changes to the string directly is a
         bad idea for several reasons:
