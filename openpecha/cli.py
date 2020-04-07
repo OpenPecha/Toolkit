@@ -344,6 +344,7 @@ def format(**kwargs):
 
 
 @cli.command()
+@click.option('--text_id', '-ti', type=str, help='text id of text')
 @click.argument('pecha_num')
 def edit(**kwargs):
     '''
