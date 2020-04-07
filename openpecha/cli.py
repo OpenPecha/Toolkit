@@ -347,7 +347,7 @@ def edit(**kwargs):
     pecha_id = get_pecha_id(kwargs['pecha_num'])
     opf_path = f'{config["OP_DATA_PATH"]}/{pecha_id}/{pecha_id}.opf'
 
-    serializer = SerializeHFML(opf_path)
+    serializer = SerializeHFML(opf_path, text_id=kwargs['text_id'])
     serializer.apply_layers()
     
     out_fn = f'{pecha_id}.txt'

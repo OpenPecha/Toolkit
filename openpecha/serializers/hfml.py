@@ -95,7 +95,7 @@ class SerializeHFML(Serialize):
             end_payload = 'y)'
         
         start_cc, end_cc = self.__get_adapted_span(ann['span'], vol_id)
-        start_cc -= 4
+        #start_cc -= 4
         self.add_chars(vol_id, start_cc, True, start_payload)
         if not only_start_ann:
             self.add_chars(vol_id, end_cc, False, end_payload)
