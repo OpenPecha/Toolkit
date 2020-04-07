@@ -26,7 +26,7 @@ class Serialize(object):
                 self.base_layers = self.get_text_base_layer()
         else:
             self.text_spans = {vol_id: {'start': 0}} 
-            self.base_layers = {vol_id: self.get_base_layer(vol_id)}
+            self.base_layers = {vol_id: self.get_base_layer(vol_id=vol_id)}
         """
         The chars_toapply is an important piece of the puzzle here. Basically applying the changes to the string directly is a
         bad idea for several reasons:
@@ -106,7 +106,7 @@ class Serialize(object):
                 return text_span
 
 
-    def get_base_layer(self, vol_id):
+    def get_base_layer(self, vol_id=None):
         """
         return text for given span
         """
