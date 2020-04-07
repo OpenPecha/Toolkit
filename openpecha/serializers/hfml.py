@@ -6,37 +6,7 @@ class SerializeHFML(Serialize):
     HFML (Human Friendly Markup Language) serializer class for OpenPecha.
     """
 
-    def __get_adapted_span(self, span, vol_id):
-        """Adapts the annotation span to base-text of the text
-
-        Adapts the annotation span, which is based on volume base-text
-        to text base-text.
-
-        Args:
-            span (dict): span of a annotation, eg: {start:, end:}
-            vol_id (str): id of vol, where part of the text exists.
-
-        Returns:
-            adapted_start (int): adapted start based on text base-text
-            adapted_end (int): adapted end based on text base-text
-
-        """
-        adapted_start = span['start'] - self.text_spans[vol_id]['start']
-        adapted_end = span['end'] - self.text_spans[vol_id]['start']
-        return adapted_start, adapted_end
-
-
     def apply_annotation(self, vol_id, ann):
-        """Applies annotation to specific volume base-text, where part of the text exists.
-
-        Args:
-            vol_id (str): id of vol, where part of the text exists.
-            ann (dict): annotation of any type.
-
-        Returns:
-            None
-
-        """
         only_start_ann = False
         start_payload = '('
         end_payload = ')'
