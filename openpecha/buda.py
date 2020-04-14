@@ -5,6 +5,12 @@ import re
 from git import Repo
 from pathlib import Path
 from tqdm import tqdm
+import urllib.request
+from urllib.error import HTTPError
+import traceback
+from inspect import currentframe, getframeinfo
+
+from openpecha.errors import Error
 
 
 class OpenPecha:
@@ -20,9 +26,11 @@ class OpenPecha:
         Get the url for the README blob for the work collection
         """
         data = requests.get(url=self.catalog_url).json()  # getting the full repo
-        tree_entry = [t for t in data['tree'] if t['path'] == 'README.md'][0]  # find the README to get its URL
-
-        return tree_entry['url']
+        try:
+            tree_entry = [t for t in data['tree'] if t['path'] == 'README.md'][0]  # find the README to get its URL
+            return tree_entry['url']
+        except IndexError:
+            Error(0, f"The README.md file not found at the root of the openpecha git\n```{traceback.format_exc()}```")
 
     @staticmethod
     def get_blob_content(blob_url):
@@ -43,22 +51,22 @@ class OpenPecha:
         return decoded_list_data
 
     @staticmethod
-    def get_work_id_column(decoded_blob):
+    def get_op_lname_column(decoded_blob):
         """
-        Get the work_id from the decoded blob and return a list of work_id
+        Get the op_lname from the decoded blob and return a list of op_lname
         """
-        work_id = re.compile(r"\[P[0-9]{6}\]").findall(decoded_blob)
+        op_lname = re.compile(r"\[P[0-9]{6}\]").findall(decoded_blob)
 
-        return work_id
+        return op_lname
 
     @staticmethod
-    def cleanup_work_id_list(list):
+    def cleanup_op_lname_list(collection):
         """
-        Remove the brackets from [PXXXXXX] for every work_id
+        Remove the brackets from [PXXXXXX] for every op_lname
         """
-        work_ids = [s.replace("[", "").replace("]", "") for s in list]
+        op_lnames = [s.replace("[", "").replace("]", "") for s in collection]
 
-        return work_ids
+        return op_lnames
 
     def get_list_of_poti(self):
         """
@@ -68,41 +76,52 @@ class OpenPecha:
         hash or URL
         """
         collection_blob_url = self.get_collection_blob_url()
-        blob_content = self.get_blob_content(collection_blob_url)
-        decoded_blob = self.decode_bas64_blob(blob_content)
+        if collection_blob_url:
+            blob_content = self.get_blob_content(collection_blob_url)
+            decoded_blob = self.decode_bas64_blob(blob_content)
 
-        work_id_column = self.get_work_id_column(decoded_blob)
-        cleaned_list = self.cleanup_work_id_list(work_id_column)
+            op_lname_column = self.get_op_lname_column(decoded_blob)
+            cleaned_list = self.cleanup_op_lname_list(op_lname_column)
 
-        return cleaned_list
+            return cleaned_list
 
-    def pull_latest_master_commit(self, work_id):
+    def pull_latest_master_commit(self, op_lname):
         """
-        Takes a work_id as a parameter and pulls the latest commit on the master branch
+        Takes a op_lname as a parameter and pulls the latest commit on the master branch
         """
-        repo = Repo(str(Path(self.local_dir, work_id)))
+        repo = Repo(str(Path(self.local_dir, op_lname)))
         repo.heads['master'].checkout()
         repo.remotes.origin.pull()
 
-    def clone_poti(self, work_id):
+    def clone_poti(self, op_lname):
         """
-        Given a work_id, clones the repo from openpecha to self.local_dir
+        Given a op_lname, clones the repo from openpecha to self.local_dir
         """
-        Repo.clone_from(f"{self.openpecha_git}/{work_id}.git", str(Path(self.local_dir,work_id)))
+        Repo.clone_from(f"{self.openpecha_git}/{op_lname}.git", str(Path(self.local_dir,op_lname)))
 
-    def has_been_cloned(self, work_id):
+    def has_been_cloned(self, op_lname):
         """
-        Check if work_id has already been cloned by looking if there is
-        a folder with the work_id name in the local directory
+        Check if op_lname has already been cloned by looking if there is
+        a folder with the op_lname name in the local directory
         """
-        path = Path(self.local_dir,work_id)
+        path = Path(self.local_dir, op_lname)
         return path.is_dir()
 
-    def clone_or_pull_poti(self, work_id):
-        if self.has_been_cloned(work_id):
-            self.pull_latest_master_commit(work_id)
+    def clone_or_pull_poti(self, op_lname):
+        if self.has_been_cloned(op_lname):
+            self.pull_latest_master_commit(op_lname)
         else:
-            self.clone_poti(work_id)
+            self.clone_poti(op_lname)
+
+    def poti_git_exists(self, op_lname):
+        """
+        Test if the op_lname has a corresponding git in self.openpecha_git
+        """
+        url = f"{self.openpecha_git}/{op_lname}.git"
+        try:
+            return urllib.request.urlopen(url).getcode()
+        except HTTPError:
+            Error(0, f"Poti _{op_lname}_ is not present on the openpecha git: {url}")
 
     def get_all_poti(self):
         """
@@ -110,5 +129,7 @@ class OpenPecha:
         All the repo are going to be stored in a local directory set by self.local_dir
         """
         for poti in tqdm(self.get_list_of_poti()):
-            self.clone_or_pull_poti(poti)
+            if self.poti_git_exists(poti) == 200:
+                self.clone_or_pull_poti(poti)
+
 
