@@ -17,23 +17,42 @@ class OpenPecha:
 
         return tree_entry['url']
 
-    def get_decoded_list_data(self, collection_blob_url):
+    @staticmethod
+    def get_blob_content(blob_url):
         """
-         Get the full content of the README blob and decode it from base64 to utf-8
+        Get the blob content from the url provided in parameter
         """
-        
-        base64_content = requests.get(collection_blob_url).json()['content']
-        decoded_list_data = base64.b64decode(base64_content).decode("utf-8")  # decode the base64 in UTF-8
+        base64_content = requests.get(blob_url).json()['content']
+
+        return base64_content
+
+    @staticmethod
+    def decode_bas64_blob(base64_blob):
+        """
+         Decode the base64 encoded blob into UTF-8
+        """
+
+        decoded_list_data = base64.b64decode(base64_blob).decode("utf-8")
 
         return decoded_list_data
 
-    def cleanup_work_id_list(self, list):
+    @staticmethod
+    def get_work_id_column(decoded_blob):
+        """
+        Get the work_id from the decoded blob and return a list of work_id
+        """
+        work_id = re.compile(r"\[P[0-9]{6}\]").findall(decoded_blob)
+
+        return work_id
+
+    @staticmethod
+    def cleanup_work_id_list(list):
         """
         Remove the brackets from [PXXXXXX] for every work_id
         """
+        work_ids = [s.replace("[", "").replace("]", "") for s in list]
 
-        return [s.replace("[", "").replace("]", "") for s in list]
-
+        return work_ids
 
     def get_list_of_poti(self):
         """
@@ -44,9 +63,11 @@ class OpenPecha:
         """
 
         collection_blob_url = self.get_collection_blob_url()
-        decoded_list_data = self.get_decoded_list_data(collection_blob_url)
+        blob_content = self.get_blob_content(collection_blob_url)
+        decoded_blob = self.decode_bas64_blob(blob_content)
 
-        work_id = re.compile(r"\[P[0-9]{6}\]").findall(decoded_list_data)
-        cleaned_list = self.cleanup_work_id_list(work_id)
+        work_id_column = self.get_work_id_column(decoded_blob)
+        cleaned_list = self.cleanup_work_id_list(work_id_column)
 
         return cleaned_list
+
