@@ -11,6 +11,11 @@ class Error:
         self.spread_the_word()
 
     def send_to_slack(self):
+        """
+        This function posts to a private slack channel, make sure you have your webhook url in a file called config.py,
+        in the following format:
+        WEBHOOK_URL = 'your_webhook_url'
+        """
         post = {"text": "{0}".format(self.content)}
 
         try:
@@ -29,3 +34,4 @@ class Error:
     def spread_the_word(self):
         self.send_to_slack()
         self.print_error()
+        raise self.type
