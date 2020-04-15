@@ -81,13 +81,21 @@ class Openpecha:
 
         return commit_sha
 
-    def get_poti_commit(self, tag=None):
+    def checkout_to_commit(self, commit_sha):
+        """
+        Change the current poti to the commit_sha provided in parameters
+        """
+        repo = Repo(str(Path(self.local_dir, self.lname)))
+        repo.git.checkout(commit_sha)
+
+    def get_poti_latest_commit(self, tag=None):
         """
         If no tag is provided get the latest master commit, otherwise get the commit corresponding to a tag
         """
+        self.clone_or_pull_poti()
         if tag:
             commit_sha = self.get_tag_commit_sha(tag)
-            return commit_sha
-        else:
-            self.clone_or_pull_poti()
+            self.checkout_to_commit(commit_sha)
+
+
 
