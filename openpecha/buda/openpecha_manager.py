@@ -5,8 +5,8 @@ from pathlib import Path
 from tqdm import tqdm
 import traceback
 
-from openpecha.errors import Error
-from openpecha.openpecha_utils import Openpecha
+from openpecha.buda.errors import Error
+from openpecha.buda.openpecha_git import OpenpechaGit
 
 
 class OpenpechaManager:
@@ -88,7 +88,7 @@ class OpenpechaManager:
         All the repo are going to be stored in a local directory set by self.local_dir
         """
         for poti in tqdm(self.get_list_of_poti()):
-            op = Openpecha(poti)
+            op = OpenpechaGit(poti)
             if op.poti_git_exists() == 200:
                 op.clone_or_pull_poti()
 

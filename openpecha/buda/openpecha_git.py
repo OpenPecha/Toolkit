@@ -5,29 +5,39 @@ import requests
 from pathlib import Path
 from urllib.error import HTTPError
 
-from openpecha.errors import Error
+from openpecha.buda.errors import Error
 
 
-class Openpecha:
-    def __init__(self, op_lname, local_dir=str(Path.home()/'.openpecha/data'), openpecha_git="https://github.com/OpenPecha"):
+class OpenpechaGit:
+    """
+    The OpenpechaGit class is here to help manage and pull all the Openpecha objects and store them on a temporary local
+    repository
+    It is initiated with
+    - The Openpecha lname
+    - The local dir (by default stored in ~/.openpecha/data)
+    - The remote git of Openpecha
+    - If we want the bare repo or a working tree on the local branch (by default the bare repo to save some space)
+    """
+    def __init__(self, op_lname, local_dir=str(Path.home()/'.openpecha/data'),
+                 openpecha_git="https://github.com/OpenPecha", bare=True):
         self.lname = op_lname
         self.local_dir = local_dir
         self.openpecha_git = f"{openpecha_git}/{self.lname}.git"
         self.openpecha_api = f"https://api.github.com/repos/OpenPecha/{self.lname}"
+        self.bare = bare
 
-    def pull_latest_master_commit(self):
+    def fetch_latest_master_commit(self):
         """
         Takes a op_lname as a parameter and pulls the latest commit on the master branch
         """
         repo = Repo(str(Path(self.local_dir, self.lname)))
-        repo.heads['master'].checkout()
-        repo.remotes.origin.pull()
+        repo.git.fetch()
 
     def clone_poti(self):
         """
         Given a op_lname, clones the repo from openpecha to self.local_dir
         """
-        Repo.clone_from(self.openpecha_git, str(Path(self.local_dir, self.lname)))
+        Repo.clone_from(self.openpecha_git, str(Path(self.local_dir, self.lname)), bare=self.bare)
 
     def has_been_cloned(self):
         """
@@ -39,7 +49,7 @@ class Openpecha:
 
     def clone_or_pull_poti(self):
         if self.has_been_cloned():
-            self.pull_latest_master_commit()
+            self.fetch_latest_master_commit()
         else:
             self.clone_poti()
 
@@ -61,6 +71,15 @@ class Openpecha:
 
         return tags_json
 
+    def get_last_commit(self):
+        """
+        get a list of all the commits as a json
+        """
+        op_commits_url = f'{self.openpecha_api}/commits/master'
+        commit_json = requests.get(url=op_commits_url).json()
+
+        return commit_json['sha']
+
     def get_all_tags(self):
         """
         Get a json of all the tags in the repo of op_lname
@@ -74,10 +93,13 @@ class Openpecha:
 
     def get_tag_commit_sha(self, tag):
         """
-         Get the commit_sha corresponding to the tag frfom the op_lname
+         Get the commit_sha corresponding to the tag from the op_lname
         """
         all_tags_dic = self.get_all_tags()
-        commit_sha = all_tags_dic[tag]
+        try:
+            commit_sha = all_tags_dic[tag]
+        except KeyError:
+            Error(KeyError, f"Poti _{self.lname}_ doesn't have a tag {tag}\nThe tags are {all_tags_dic}")
 
         return commit_sha
 
@@ -95,7 +117,7 @@ class Openpecha:
         self.clone_or_pull_poti()
         if tag:
             commit_sha = self.get_tag_commit_sha(tag)
-            self.checkout_to_commit(commit_sha)
+        else:
+            commit_sha = self.get_last_commit()
 
-
-
+        return commit_sha
