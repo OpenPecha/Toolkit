@@ -9,45 +9,67 @@ class Layer:
     - The volume it is a layer of
     - The path to the bare repo
     """
-    def __init__(self, op_lname, layer_file, volume, bare_repo_path):
+    def __init__(self, op_lname, layer_file, volume, path, is_git):
         self.op_lname = op_lname
         self.layer_file = layer_file
         self.volume = volume
-        self.bare_repo_path = bare_repo_path
-        self.annotations = self.get_annotations()
-        self.annotation_type = self.get_type()
-        self.revision = self.get_revision()
-        self.id = self.get_id()
+        self.path = path
+        self.is_git = is_git
+        raw = self.get_raw()
+        self.annotations = self.get_annotations(raw)
+        self.annotation_type = self.get_type(raw)
+        self.revision = self.get_revision(raw)
+        self.id = self.get_id(raw)
 
-    def get_type(self):
+    @staticmethod
+    def get_type(raw):
         """
         Get the type of annotation from the YAML file
         """
-        return self.read_file()['annotation_type']
+        return raw['annotation_type']
 
-    def get_revision(self):
+    @staticmethod
+    def get_revision(raw):
         """
         Get the revision number from the YAML file
         """
-        return self.read_file()['revision']
+        return raw['revision']
 
-    def get_id(self):
+    @staticmethod
+    def get_id(raw):
         """
         Get the id of the layer file from the YAML file
         """
-        return self.read_file()['id']
+        return raw['id']
 
-    def get_annotations(self):
+    @staticmethod
+    def get_annotations(raw):
         """
         Get all the annotations from the YAML file
         """
-        return self.read_file()['annotations']
+        return raw['annotations']
 
-    def read_file(self):
+    def get_raw(self):
+        if self.is_git:
+            return self.read_git()
+        else:
+            return self.read_file()
+
+    def read_git(self):
         """
         Read all the content of the file stored in the local bare repo
         """
-        file = self.bare_repo_path.git.show(f'master:{self.op_lname}.opf/layers/{self.volume}/{self.layer_file}')
+        file = self.path.git.show(f'master:{self.op_lname}.opf/layers/{self.volume}/{self.layer_file}')
         meta_dic = yaml.safe_load(file)
+
+        return meta_dic
+
+    def read_file(self):
+        """
+        Read all the content of the file stored in the local .opf
+        """
+        f = open(f'{self.path}/layers/{self.volume}/{self.layer_file}', "r")
+
+        meta_dic = yaml.safe_load(f.read())
 
         return meta_dic
