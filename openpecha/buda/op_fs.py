@@ -1,5 +1,6 @@
 from openpecha.buda.op import Openpecha
 from openpecha.buda.layer import Layer
+from openpecha.buda.chunker import *
 from os import walk
 
 

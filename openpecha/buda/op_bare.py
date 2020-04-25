@@ -2,6 +2,7 @@ from openpecha.buda.op import Openpecha
 from git import Repo
 from pathlib import Path
 from openpecha.buda.layer import Layer
+from openpecha.buda.chunker import *
 
 
 class OpenpechaBare(Openpecha):
