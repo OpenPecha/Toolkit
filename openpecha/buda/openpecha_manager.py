@@ -7,6 +7,7 @@ import traceback
 
 from openpecha.buda.errors import Error
 from openpecha.buda.openpecha_git import OpenpechaGit
+from openpecha.serializers.rdf import Rdf
 
 
 class OpenpechaManager:
@@ -87,10 +88,21 @@ class OpenpechaManager:
         Getting all the poti from the list and either cloning them or pulling to the latest commit.
         All the repo are going to be stored in a local directory set by self.local_dir
         """
-        for poti in tqdm(self.get_list_of_poti()):
+        for poti in tqdm(self.get_list_of_poti(), ascii=True, desc='Cloning or pulling the poti'):
             op = OpenpechaGit(poti)
             if op.poti_git_exists() == 200:
                 op.clone_or_pull_poti()
+
+    def transform_all_in_rdf(self):
+        self.get_all_poti()
+        for local_poti in tqdm(self.get_list_of_poti(), ascii=True, desc='Converting into rdf'):
+            rdf_poti = Rdf(local_poti)
+            rdf_poti.set_instance()
+            """
+            Now you can access the rdf content with rdf_poti.print_rdf() or return the lod_g with rdf_poti.lod_g() to 
+            send it to your database
+            """
+
 
 
 

@@ -34,6 +34,10 @@ class OpenpechaBare(Openpecha):
 
         return files
 
+    def get_last_commit(self):
+        repo = self.path
+        return repo.git.rev_parse('HEAD')
+
     def split_files(self):
         """
         Sorting the files in .opf as either base or layers
