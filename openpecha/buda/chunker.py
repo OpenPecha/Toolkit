@@ -44,7 +44,7 @@ class StringChunker:
             return index
         else:
             double_chunk = self.get_n_char(string, n * 2)
-            index = self.find_first_match_pos(double_chunk)
+            index = self.find_last_match_pos(double_chunk)
             if index > -1:
                 return index
             else:

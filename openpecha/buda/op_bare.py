@@ -22,7 +22,7 @@ class OpenpechaBare(Openpecha):
 
         meta_dic = self.read_yaml(meta_content)
 
-        return meta_dic
+        self.meta = meta_dic
 
     def get_files(self):
         """

@@ -21,7 +21,7 @@ class OpenpechaFS(Openpecha):
 
         meta_dic = self.read_yaml(f.read())
 
-        return meta_dic
+        self.meta = meta_dic
 
     def get_files(self):
         """
