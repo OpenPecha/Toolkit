@@ -20,7 +20,11 @@ class OpenpechaManager:
 
     def get_collection_blob_url(self):
         """
-        Get the url for the README blob for the work collection
+        Get the url for the README blob for the work collection.
+
+        TODO: maybe a csv file should be fetched instead?
+
+        TODO: we should use a local repo that we pull instead of the github api directly (less urgent)
         """
         catalog_url = f'{self.openpecha_api}/openpecha-catalog/git/trees/master'
         data = requests.get(url=catalog_url).json()  # getting the full repo

@@ -110,9 +110,11 @@ class OpenpechaGit:
         repo = Repo(str(Path(self.local_dir, self.lname)))
         repo.git.checkout(commit_sha)
 
-    def get_poti_latest_commit(self, tag=None):
+    def get_poti_latest_commit(self, tag=None, branch=None):
         """
         If no tag is provided get the latest master commit, otherwise get the commit corresponding to a tag
+
+        TODO: handle the branch argument, getting the latest commit of the specified branch
         """
         self.clone_or_pull_poti()
         if tag:

@@ -7,7 +7,11 @@ from openpecha.buda.chunker import *
 
 class OpenpechaBare(Openpecha):
     """
-    A class inheriting from the Openpecha class that defines the path to the local bare git repo
+    A class inheriting from the Openpecha class that defines the path to the local bare git repo.
+
+    TODO: conceptually there's really a lot in common with op_fs.py as it's just reading an OPF folder
+          in a git repo, but the implementation is completely different because the way to access files
+          in a bare git repo is very specific. This could also be considered a serializer, like op_fs.py.
     """
     def __init__(self, lname, path_to_bare_git):
         Openpecha.__init__(self, lname)

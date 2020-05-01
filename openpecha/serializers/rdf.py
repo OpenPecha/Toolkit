@@ -7,6 +7,11 @@ from openpecha.buda.tibetan_easy_chunker import TibetanEasyChunker
 
 
 class Rdf:
+    """
+    TODO: 
+    - rename in RDFSerializer
+    - initialize with an OpenPecha instead of a path
+    """
     def __init__(self, lname, path=str(Path.home()/'.openpecha/data'), from_git=True):
         self.graphname = lname
         self.lod_ds = rdflib.Dataset()

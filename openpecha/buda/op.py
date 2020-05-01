@@ -5,6 +5,12 @@ from tqdm import tqdm
 class Openpecha:
     """
     The Openpecha class that correspond to the https://github.com/OpenPecha/openpecha-catalog catalog.
+
+    TODO: for this class and its implementations, function signatures should be changed a bit:
+       - get_layer_list(basefname): lists all the layers in the directory corresponding to basename (and cache it)
+       - get_layer(basefname, layerfname): get the content of the layer, put it in the object if not presen
+       - get_base_list(): get an array of all the layers fnames (and cache it)
+       - get_base(basefname): get the string of base layer (and cache it)
     """
     def __init__(self, lname, commit='master'):
         """
