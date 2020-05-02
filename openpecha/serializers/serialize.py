@@ -233,10 +233,10 @@ class Serialize(object):
 
         """
         out_fn = f'{pecha_id}.html'
-        if self.meta['source_metadata']:
-            pecha_title = self.meta['source_metadata']['title']
-        else:
-            pecha_title = self.meta['ebook_metadata']['title']
+        # if self.meta['source_metadata']:
+        #     pecha_title = self.meta['source_metadata']['title']
+        # else:
+        pecha_title = self.meta['ebook_metadata']['title']
         result = self.get_result()
         result_lines = result.splitlines() # Result is split where there is newline as we are going to consider newline as one para tag
         results = f'<html>\n<head>\n\t<title>{pecha_title}</title>\n</head>\n<body>\n'
