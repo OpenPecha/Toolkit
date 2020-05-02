@@ -25,7 +25,7 @@ class Serialize(object):
             if self.text_spans:
                 self.base_layers = self.get_text_base_layer()
         else:
-            self.text_spans = {vol_id: {'start': 0}} 
+            self.text_spans = {vol_id: {'start': 0, 'end': float('inf')}}
             self.base_layers = {vol_id: self.get_base_layer(vol_id=vol_id)}
         """
         The chars_toapply is an important piece of the puzzle here. Basically applying the changes to the string directly is a
@@ -196,7 +196,7 @@ class Serialize(object):
         raise NotImplementedError("The Serialize class doesn't provide any serialization, please use a subclass such ass SerializeMd")
 
 
-    def __assign_line_layer(self, result, vol_id):
+    def _assign_line_layer(self, result, vol_id):
 
         def _get_page_index(line):
             page_index = ''
@@ -249,6 +249,6 @@ class Serialize(object):
                 i += 1
 
         if 'pagination' in self.layers:
-            return self.__assign_line_layer(result, vol_id)
+            return self._assign_line_layer(result, vol_id)
         else:
             return result, self.text_id

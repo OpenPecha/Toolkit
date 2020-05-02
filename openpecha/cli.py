@@ -339,6 +339,7 @@ def format(**kwargs):
 
 @cli.command()
 @click.option('--text_id', '-ti', type=str, help='text id of text')
+@click.option('--vol_number', '-vn', type=int, help='vol number')
 @click.argument('pecha_num')
 def edit(**kwargs):
     '''
@@ -347,10 +348,19 @@ def edit(**kwargs):
     pecha_id = get_pecha_id(kwargs['pecha_num'])
     opf_path = f'{config["OP_DATA_PATH"]}/{pecha_id}/{pecha_id}.opf'
 
-    serializer = SerializeHFML(opf_path, text_id=kwargs['text_id'])
+    if kwargs['text_id']:
+        serializer = SerializeHFML(opf_path, text_id=kwargs['text_id'])
+        out_fn = f'{pecha_id}-{kwargs["text_id"]}.txt'
+    elif kwargs['vol_number']:
+        vol_id = f'v{kwargs["vol_number"]:03}'
+        serializer = SerializeHFML(opf_path, vol_id=vol_id)
+        out_fn = f'{pecha_id}-{vol_id}.txt'
+    else:
+        serializer = SerializeHFML(opf_path)
+        out_fn = f'{pecha_id}-v001.txt'
+
     serializer.apply_layers()
     
-    out_fn = f'{pecha_id}.txt'
     result = serializer.get_result()
     click.echo(result, file=open(out_fn, 'w'))
 

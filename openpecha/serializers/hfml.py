@@ -30,8 +30,10 @@ class SerializeHFML(Serialize):
             
             if ann["page_info"]:
                 start_payload += f' {ann["page_info"]}\n'
-            else:
+            elif ann["reference"]:
                 start_payload += f' {ann["reference"]}\n'
+            else:
+                start_payload += '\n'
             only_start_ann = True
         elif ann['type'] == 'correction':
             start_payload = '('
@@ -64,7 +66,7 @@ class SerializeHFML(Serialize):
             start_payload = '(y'
             end_payload = 'y)'
         
-        start_cc, end_cc = self.__get_adapted_span(ann['span'], vol_id)
+        start_cc, end_cc = self._get_adapted_span(ann['span'], vol_id)
         #start_cc -= 4
         self.add_chars(vol_id, start_cc, True, start_payload)
         if not only_start_ann:
