@@ -21,3 +21,8 @@ dist/
 
 # test
 .coverage
+
+# Config
+**/config/*
+.idea/*
+openpecha/config.py
