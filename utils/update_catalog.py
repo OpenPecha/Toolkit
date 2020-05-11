@@ -8,13 +8,10 @@ import requests
 import yaml
 from github import Github
 
-g = Github(os.environ.get("GITHUB_TOKEN"))
-org = g.get_organization("OpenPecha")
-
 
 def to_csv_format(rows, cols_name):
     """Return csv formated data."""
-    data = cols_name + rows
+    data = [cols_name] + rows
     lines = [",".join([o for o in line]) for line in data]
     return "\n".join(lines)
 
@@ -37,9 +34,7 @@ def sort_catalog(data):
 
 def get_catalog():
     """Return sorted openpecha catalog."""
-    catalog_csv_url = (
-        "https://github.com/OpenPecha/openpecha-catalog/raw/master/data/catalog.csv"
-    )
+    catalog_csv_url = "https://raw.githubusercontent.com/OpenPecha/openpecha-catalog/master/data/catalog.csv"
     lines = get_file_content(catalog_csv_url).split("\n")
     catalog_data = [line.split(",") for line in lines]
     cols_name = catalog_data.pop(0)
@@ -49,14 +44,12 @@ def get_catalog():
 
 def to_pecha_id_link(pecha_id):
     """Return pecha_id_link for `pecha_id`."""
-    return f"[{pecha_id}](https://github.com/OpenPecha/{pecha_id}"
+    return f"[{pecha_id}](https://github.com/OpenPecha/{pecha_id})"
 
 
-def get_metadata(pecha_id):
+def get_pecha_metadata(pecha_id):
     """Return metadata in tuple for given `pecha_id."""
-    metadata_url = (
-        f"https://github.com/OpenPecha/{pecha_id}/raw/master/{pecha_id}.opf/meta.yml"
-    )
+    metadata_url = f"https://raw.githubusercontent.com/OpenPecha/{pecha_id}/master/{pecha_id}.opf/meta.yml"
     content = get_file_content(metadata_url, in_bytes=True)
     if not content:
         return
@@ -71,26 +64,40 @@ def get_metadata(pecha_id):
     return csv_row
 
 
-def _pecha_id(link):
-    """Return pecha number from markup hyperlink id."""
-    pecha_id = link[1:8]
-    return pecha_id, int(pecha_id[1:])
+def get_pecha_num_list(pechas):
+    """Extract all the pecha numbers from `catalog_data.
+
+    Args:
+        pechas (list): list of pecha metatdata in list.
+
+    Returns:
+        list: list of pecha numbers.
+    """
+    return [int(pecha[0][2:8]) for pecha in pechas]
 
 
 def update_catalog(start):
-    """Update catalog with missing pecha."""
-    cols_name, catalog_data = get_catalog()
-    missing_row = []
-    for i, pecha_row in enumerate(catalog_data, start):
-        pecha_id, pecha_num = _pecha_id(pecha_row[0])
-        if pecha_num == i:
+    """Update the catalog with missing pecha.
+
+    Args:
+        start (int): starting pecha number.
+
+    Returns:
+        str: updated catalog data in csv format.
+    """
+    cols_name, pechas = get_catalog()
+    pecha_nums = get_pecha_num_list(pechas)
+    missing_pechas = []
+    for num in range(start, max(pecha_nums) + 1):
+        if num in pecha_nums:
             continue
-        pecha_metadata = get_metadata(pecha_id)
+        pecha_metadata = get_pecha_metadata(f"P{num:06}")
         if pecha_metadata:
-            missing_row.append(pecha_metadata)
-    updated_catalog = catalog_data + missing_row
-    updated_catalog = sort_catalog(update_catalog)
-    return to_csv_format(update_catalog, cols_name)
+            print(f"[INFO] adding {pecha_metadata[0][1:8]}")
+            missing_pechas.append(pecha_metadata)
+    updated_catalog = pechas + missing_pechas
+    updated_catalog = sort_catalog(updated_catalog)
+    return to_csv_format(updated_catalog, cols_name)
 
 
 if __name__ == "__main__":
@@ -98,7 +105,7 @@ if __name__ == "__main__":
     ap.add_argument("--start", "-s", type=int, help="start pecha number")
     ap.add_argument("--debug", action="store_true")
     args = ap.parse_args()
-    output_fn = Path("catalog.csv")
+    output_fn = Path("resources/works/catalog.csv")
     cols_name, catalog_data = get_catalog()
     if args.debug:
         print(to_csv_format(catalog_data, cols_name))
