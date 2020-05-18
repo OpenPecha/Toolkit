@@ -4,6 +4,7 @@ import importlib
 import importlib.util
 import xml.etree.ElementTree as ET
 from pathlib import Path
+from xml.dom import minidom
 
 import requests
 import yaml
@@ -14,9 +15,9 @@ class config:
     """Config class of the module."""
 
     resources_path = Path("resources/works")
-    paths = [resources_path / "kangyur-clusters.csv"]
-    instances_id_fn = resources_path / "kangyur_instances_id.txt"
+    bdrc_outlines_path = resources_path / "db" / "tbrc" / "tbrc-outlines"
     work_fn = resources_path / "W00000001.yml"
+    work_output = Path("../works/")
     converter = pyewts()
 
 
@@ -24,21 +25,25 @@ class Work:
     """Class for Work which contain all its the instances."""
 
     def __init__(self, work_fn=None):
-        self.work_fn = Path(work_fn)
+        self.work_fn = Path(work_fn) if work_fn else work_fn
         self.work = self._create_or_load()
+
+    def __repr__(self):
+        return f"Work(title={self.work['title']}, author={self.work['author']}, bdrc-work-id={self.work['bdrc-work-id']}, n_instances={len(self.work['instances'])})"
 
     def _create_or_load(self):
         if not self.work_fn:
             return {
-                "title": None,
-                "author": None,
-                "bdrc-work-id": None,
-                "wikidata-id": None,
+                "title": "",
+                "author": "",
+                "bdrc-work-id": "",
+                "wikidata-id": "",
                 "instances": [],
             }
         return yaml.safe_load(self.work_fn.read_text())
 
-    def save(self):
+    def save(self, fn):
+        self.work_fn = fn
         yaml.dump(
             self.work,
             self.work_fn.open("w"),
@@ -88,31 +93,59 @@ class Work:
             self.work["instances"].append(instance)
 
 
-def save_work_ids(fn):
-    """Extract rid work ids from given file and save.
+def clean_text_id(text_id):
+    if not text_id:
+        return ""
+    cats = "  abcd"
+    text_id = text_id.strip()
+    if text_id == "00":
+        return ""
+    elif "-" in text_id:
+        id_, cat = text_id.split("-")
+        if not cat or len(cat) > 1:
+            return ""
+        return f"{id_}{cats[int(cat.strip())]}"
+    elif ";" in text_id:
+        return text_id.split(";")[0].strip()
+    else:
+        return f"D{text_id}"
 
-    Args:
-        fn (Path): file containing all work ids
-    """
-    first_col, second_col = [], []
-    with fn.open() as f:
-        csv_reader = csv.reader(f)
-        for work_id, work_id_cat in csv_reader:
-            if work_id not in first_col:
-                first_col.append(work_id)
-            if work_id_cat not in second_col:
-                second_col.append(work_id_cat)
-    work_ids = map(to_rid, first_col + second_col)
-    output_fn = fn.parent / "kangyur_work_ids.txt"
-    output_fn.write_text("\n".join(work_ids))
-    print(f"[INFO] save at {output_fn}")
+
+def get_value(parent, child, attr, convert=False):
+    for node in parent.getElementsByTagName(f"outline:{child}"):
+        attrs = node.attributes
+        if "type" in attrs and attrs["type"].value == attr:
+            childnodes = node.childNodes
+            if not childnodes:
+                return ""
+            value = childnodes[0].data
+            if convert:
+                return config.converter.toUnicode(value)
+            return value
+    return ""
+
+
+def get_works_from_bdrc_outlines(fn):
+    dom = minidom.parse(str(fn))
+    for node in dom.getElementsByTagName("outline:node"):
+        if node.attributes["type"].value != "text":
+            continue
+        title = get_value(node, "title", "bibliographicalTitle", convert=True)
+        author = get_value(node, "creator", "hasMainAuthor", convert=True)
+        toh = get_value(node, "description", "toh")
+        bdrc_work_id = clean_text_id(toh)
+        if title or author or bdrc_work_id:
+            work = Work()
+            work.work["title"] = title
+            work.work["author"] = author
+            work.work["bdrc-work-id"] = bdrc_work_id
+            yield work
 
 
 if __name__ == "__main__":
-    if not config.instances_id_fn.is_file():
-        for fn in config.paths:
-            work_ids = save_work_ids(fn)
-
-    work = Work(config.work_fn)
-    work.add_instances(config.instances_id_fn)
-    work.save()
+    for i, work in enumerate(
+        get_works_from_bdrc_outlines(config.bdrc_outlines_path / "O2MS16391.xml"),
+        start=4,
+    ):
+        work_fn = config.work_output / f"W{i:08}.yml"
+        work.save(work_fn)
