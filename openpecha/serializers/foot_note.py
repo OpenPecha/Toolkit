@@ -16,7 +16,7 @@ class SerializeFootNote(Serialize):
         elif 'peydurma' in ann['type']:
             payload = f'<{ann["note"]}>'
             start_cc, end_cc = self._get_adapted_span(ann['span'], vol_id)
-            self.add_chars(vol_id, end_cc, False, payload)
+            self.add_chars(vol_id, end_cc, True, payload)
         elif ann['type'] == 'correction':
             start_cc, end_cc = self._get_adapted_span(ann['span'], vol_id)
             error = self.base_layers[vol_id][start_cc: end_cc+1]
