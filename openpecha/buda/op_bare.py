@@ -13,15 +13,15 @@ class OpenpechaBare(Openpecha):
           in a git repo, but the implementation is completely different because the way to access files
           in a bare git repo is very specific. This could also be considered a serializer, like op_fs.py.
     """
-    def __init__(self, lname, path_to_bare_git):
+    def __init__(self, lname, path):
         Openpecha.__init__(self, lname)
-        self.path = Repo(str(Path(path_to_bare_git, self.lname)))
+        self.repo = Repo(path)
 
     def get_meta(self):
         """
         Getting the meta data from the file in .opf
         """
-        repo = self.path
+        repo = self.repo
         meta_content = repo.git.show(f'{self.commit}:{self.lname}.opf/meta.yml')
 
         meta_dic = self.read_yaml(meta_content)
@@ -32,14 +32,14 @@ class OpenpechaBare(Openpecha):
         """
         Getting all the files in the bare repo
         """
-        files = self.path.git.ls_tree(r='HEAD').split("\n")
+        files = self.repo.git.ls_tree(r='HEAD').split("\n")
 
         files = [file.split("\t")[-1] for file in files]
 
         return files
 
     def get_last_commit(self):
-        repo = self.path
+        repo = self.repo
         return repo.git.rev_parse('HEAD')
 
     def split_files(self):
@@ -74,7 +74,7 @@ class OpenpechaBare(Openpecha):
         files = self.split_files()
 
         for file in files['base']:
-            self.base_layer[file] = self.path.git.show(f'{self.commit}:{self.lname}.opf/base/{file}')
+            self.base_layer[file] = self.repo.git.show(f'{self.commit}:{self.lname}.opf/base/{file}')
 
     def get_layer(self, volume, file):
         """
@@ -83,6 +83,6 @@ class OpenpechaBare(Openpecha):
         - layer file name
         - path to bare repo
         """
-        layer = Layer(self.lname, file, volume, self.path, True)
+        layer = Layer(self.lname, file, volume, self.repo, True)
 
         return layer

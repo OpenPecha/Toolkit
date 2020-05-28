@@ -12,6 +12,8 @@ from openpecha.serializers import *
 from openpecha.blupdate import Blupdate
 from openpecha.formatters import *
 
+from openpecha.buda.openpecha_manager import OpenpechaManager
+
 
 OP_PATH = Path('./.openpecha')
 config = {
@@ -367,3 +369,45 @@ def edit(**kwargs):
     # logging
     msg = f'Output is save at: {out_fn}'
     click.echo(INFO.format(msg))
+
+
+@cli.command()
+@click.option('--folder', '-f', help='path to the folder of the local cache')
+def pull_all_pecha(**kwargs):
+    """
+    Command to pull all the pechas in local cache
+    """
+    opm = None
+    if 'vol_number' in kwargs:
+        opm = OpenpechaManager(local_dir=kwargs['vol_number'])
+    else:
+        opm = OpenpechaManager()
+    opm.get_all_poti()
+
+@cli.command()
+@click.option('--folder', '-f', help='path to the folder of the local cache')
+@click.option('--store-uri', '-u', help='Fuseki URI')
+def pull_all_pecha(**kwargs):
+    """
+    Command to pull all the pechas of the local cache into Fuseki
+    """
+    opm = None
+    if 'vol_number' in kwargs:
+        opm = OpenpechaManager(local_dir=kwargs['vol_number'])
+    else:
+        opm = OpenpechaManager()
+    opm.get_all_poti()
+
+@cli.command()
+@click.option('--folder', '-f', help='path to the folder of the local cache')
+@click.option('--ldspdi-uri', '-u', help='lds-pdi URI')
+def update_synced_commits(**kwargs):
+    """
+    Update the cached version of synced commits
+    """
+    opm = None
+    if 'vol_number' in kwargs:
+        opm = OpenpechaManager(local_dir=kwargs['vol_number'])
+    else:
+        opm = OpenpechaManager()
+    opm.get_op_commits(force=True)

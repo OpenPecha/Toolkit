@@ -4,6 +4,8 @@ import re
 from pathlib import Path
 from tqdm import tqdm
 import traceback
+import csv
+import json
 
 from openpecha.buda.errors import Error
 from openpecha.buda.openpecha_git import OpenpechaGit
@@ -87,26 +89,78 @@ class OpenpechaManager:
 
             return cleaned_list
 
-    def get_all_poti(self):
+    def fetch_all_poti(self):
         """
         Getting all the poti from the list and either cloning them or pulling to the latest commit.
         All the repo are going to be stored in a local directory set by self.local_dir
         """
         for poti in tqdm(self.get_list_of_poti(), ascii=True, desc='Cloning or pulling the poti'):
-            op = OpenpechaGit(poti)
+            op = OpenpechaGit(poti, local_dir=self.local_dir)
             if op.poti_git_exists() == 200:
                 op.clone_or_pull_poti()
+            return
 
-    def transform_all_in_rdf(self):
-        self.get_all_poti()
-        for local_poti in tqdm(self.get_list_of_poti(), ascii=True, desc='Converting into rdf'):
-            rdf_poti = Rdf(local_poti)
-            rdf_poti.set_instance()
-            """
-            Now you can access the rdf content with rdf_poti.print_rdf() or return the lod_g with rdf_poti.lod_g() to 
-            send it to your database
-            """
+    def get_local_poti_info(self):
+        """
+        Getting all the poti from the list and either cloning them or pulling to the latest commit.
+        All the repo are going to be stored in a local directory set by self.local_dir
+        """
+        res = {}
+        for d in glob(self.local_dir+"/*"):
+            lname = os.path.basename(d)
+            if not lname.startswith("P"):
+                continue
+            op = OpenpechaGit(lname, local_dir=self.local_dir)
+            latest_local_commit = op.get_commit_to_sync()
+            res[lname] = {"commit": latest_local_commit}
+            return res
+        return res
+
+    @staticmethod
+    def fetch_op_commits(ldspdibaseurl="http://ldspdi.bdrc.io/"):
+        """
+        Fetches the list of all openpecha commits on BUDA
+        """
+        res = {}
+        headers = {'Accept': 'text/csv'}
+        params = {'format': "csv"}
+        with closing(requests.get(ldspdibaseurl+"/query/table/OP_allCommits", stream=True, headers=headers)) as r:
+            reader = csv.reader(codecs.iterdecode(r.iter_lines(), 'utf-8'))
+            for row in reader:
+                if not row[0].startswith("http://purl.bdrc.io/resource/IE0OP"):
+                    Error("store", "cannot interpret csv line starting with "+row[0])
+                    continue
+                res[row[0][34:]] = row[1]
+        return res
+
+    def get_buda_op_commits(force = False, ldspdibaseurl="http://ldspdi.bdrc.io/"):
+        path = Path(self.local_dir, "buda-commits.json")
+        if path.is_file() and not force:
+            with open(path) as json_file:
+                return json.load(json_file)
+        commits = fetch_op_commits(ldspdibaseurl)
+        with open(path, 'w') as outfile:
+            json.dump(commits, outfile)
+        return commits
+
+    @staticmethod
+    def send_model_to_store(model, graphname, storeurl):
+        ttlstr = model.serialize(format="turtle")
+        headers = {'Content-Type': 'text/turtle'}
+        params = {'graph': storeurl}
+        r = requests.put(storeurl, data=ttlstr, headers=headers, params=params)
+        if r.status_code != requests.codes.ok:
+            Error("store", "The request to Fuseki returned code "+str(r.status_code))
 
 
-
+    def sync_cache_to_store(self, storeurl, force=False):
+        self.get_local_poti_info()
+        buda_commits = get_buda_op_commits()
+        for oplname, info in tqdm(self.get_local_poti_info(), ascii=True, desc='Converting into rdf'):
+            if (oplname not in buda_commits) or buda_commits[oplname] != info[commit]:
+                # we need to sync this repo
+                rdf_poti = Rdf(str(Path(local_dir, oplname)), from_git=True)
+                rdf_poti.set_instance()
+                send_model_to_buda(rdf_poti.lod_g(), rdf_poti.graph_uri, storeurl)
+            
 

@@ -19,27 +19,44 @@ class OpenpechaGit:
     - If we want the bare repo or a working tree on the local branch (by default the bare repo to save some space)
     """
     def __init__(self, op_lname, local_dir=str(Path.home()/'.openpecha/data'),
-                 openpecha_git="https://github.com/OpenPecha", bare=True):
+                 openpecha_dstgit="https://github.com/OpenPecha", bare=True):
         self.lname = op_lname
         self.local_dir = local_dir
-        self.openpecha_git = f"{openpecha_git}/{self.lname}.git"
-        self.openpecha_api = f"https://api.github.com/repos/OpenPecha/{self.lname}"
+        self.openpecha_dstgit = f"{openpecha_dstgit}/{self.lname}.git"
         self.bare = bare
+        self.repo = None
+        self.synced = False
 
-    def fetch_latest_master_commit(self):
+    def get_repo(dst_sync=False):
         """
-        Takes a op_lname as a parameter and pulls the latest commit on the master branch
+        gets the repo, sync with dst (Github) if parameter is true, otherwise just return the local repo
         """
-        repo = Repo(str(Path(self.local_dir, self.lname)))
-        repo.git.fetch()
+        if self.repo is not None:
+            if dst_sync and not self.synced:
+                self.repo.git.fetch()
+                self.synced = True
+            return self.repo
+        if not self.has_been_cloned:
+            if dst_sync:
+                self.clone()
+                return self.repo
+            return None
+        self.repo = Repo(str(Path(self.local_dir, self.lname)))
+        if dst_sync and not self.synced:
+            self.repo.git.fetch()
+            self.synced = True
+        return self.repo
 
-    def clone_poti(self):
+    def clone(self):
         """
         Given a op_lname, clones the repo from openpecha to self.local_dir
         """
-        Repo.clone_from(self.openpecha_git, str(Path(self.local_dir, self.lname)), bare=self.bare)
+        if self.has_been_cloned:
+            return
+        self.repo = Repo.clone_from(self.openpecha_dstgit, str(Path(self.local_dir, self.lname)), bare=self.bare)
+        self.synced = True
 
-    def has_been_cloned(self):
+    def poti_localgit_exists(self):
         """
         Check if self.lname has already been cloned by looking if there is
         a folder with the self.lname name in the local directory
@@ -47,61 +64,24 @@ class OpenpechaGit:
         path = Path(self.local_dir, self.lname)
         return path.is_dir()
 
-    def clone_or_pull_poti(self):
-        if self.has_been_cloned():
-            self.fetch_latest_master_commit()
-        else:
-            self.clone_poti()
-
-    def poti_git_exists(self):
+    def poti_dstgit_exists(self):
         """
-        Test if the self.lname has a corresponding git in self.openpecha_git
+        Test if the self.lname has a corresponding git in self.openpecha_dstgit
         """
         try:
-            return urllib.request.urlopen(self.openpecha_git).getcode()
+            return urllib.request.urlopen(self.openpecha_dstgit).getcode()
         except HTTPError:
-            Error(HTTPError, f"Poti _{self.lname}_ is not present on the openpecha git: {self.openpecha_git}")
+            Error(HTTPError, f"Poti _{self.lname}_ is not present on the openpecha git: {self.openpecha_dstgit}")
 
-    def get_json_tags(self):
+    def get_commit_to_sync(self, dst_sync=False, branchname="master"):
         """
-        Get a list of all the tags as a json
+        get the commit to sync to BUDA: the latest tag, or the latest commit of the master branch
         """
-        op_tags_url = f'{self.openpecha_api}/git/refs/tags'
-        tags_json = requests.get(url=op_tags_url).json()
-
-        return tags_json
-
-    def get_last_commit(self):
-        """
-        get a list of all the commits as a json
-        """
-        op_commits_url = f'{self.openpecha_api}/commits/master'
-        commit_json = requests.get(url=op_commits_url).json()
-
-        return commit_json['sha']
-
-    def get_all_tags(self):
-        """
-        Get a json of all the tags in the repo of op_lname
-        Return a dictionary in the following format {tag_name: commit_sha, tag_name: commit_sha, ...}
-        """
-        dic = {}
-        tags_json = self.get_json_tags()
-        for tag in tags_json:
-            dic[tag['ref'].split("/")[-1]] = tag['object']['sha']
-        return dic
-
-    def get_tag_commit_sha(self, tag):
-        """
-         Get the commit_sha corresponding to the tag from the op_lname
-        """
-        all_tags_dic = self.get_all_tags()
-        try:
-            commit_sha = all_tags_dic[tag]
-        except KeyError:
-            Error(KeyError, f"Poti _{self.lname}_ doesn't have a tag {tag}\nThe tags are {all_tags_dic}")
-
-        return commit_sha
+        repo = self.get_repo(dst_sync)
+        tags = sorted(repo.tags, key=lambda t: t.commit.committed_datetime)
+        if tags:
+            return tags[-1].commit.hexsha
+        return repo.commit(branchname).hexsha
 
     def checkout_to_commit(self, commit_sha):
         """
@@ -109,17 +89,3 @@ class OpenpechaGit:
         """
         repo = Repo(str(Path(self.local_dir, self.lname)))
         repo.git.checkout(commit_sha)
-
-    def get_poti_latest_commit(self, tag=None, branch=None):
-        """
-        If no tag is provided get the latest master commit, otherwise get the commit corresponding to a tag
-
-        TODO: handle the branch argument, getting the latest commit of the specified branch
-        """
-        self.clone_or_pull_poti()
-        if tag:
-            commit_sha = self.get_tag_commit_sha(tag)
-        else:
-            commit_sha = self.get_last_commit()
-
-        return commit_sha
