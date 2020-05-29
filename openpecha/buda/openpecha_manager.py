@@ -6,6 +6,10 @@ from tqdm import tqdm
 import traceback
 import csv
 import json
+import os
+import glob
+from contextlib import closing
+import codecs
 
 from openpecha.buda.errors import Error
 from openpecha.buda.openpecha_git import OpenpechaGit
@@ -13,10 +17,11 @@ from openpecha.serializers.rdf import Rdf
 
 
 class OpenpechaManager:
-    def __init__(self, local_dir=str(Path.home()/'.openpecha/data')):
+    def __init__(self, local_dir=str(Path.home()/'.cache'/'openpecha')):
         self.openpecha_api = "https://api.github.com/repos/OpenPecha"
         self.openpecha_git = "https://github.com/OpenPecha"
         self.local_dir = local_dir
+        self.commits = None
         if not Path(local_dir).is_dir():
             Path(local_dir).mkdir(parents=True)
 
@@ -96,8 +101,8 @@ class OpenpechaManager:
         """
         for poti in tqdm(self.get_list_of_poti(), ascii=True, desc='Cloning or pulling the poti'):
             op = OpenpechaGit(poti, local_dir=self.local_dir)
-            if op.poti_git_exists() == 200:
-                op.clone_or_pull_poti()
+            if op.poti_dstgit_exists() == 200:
+                op.get_repo(dst_sync=True)
             return
 
     def get_local_poti_info(self):
@@ -106,7 +111,7 @@ class OpenpechaManager:
         All the repo are going to be stored in a local directory set by self.local_dir
         """
         res = {}
-        for d in glob(self.local_dir+"/*"):
+        for d in glob.glob(self.local_dir+"/*"):
             lname = os.path.basename(d)
             if not lname.startswith("P"):
                 continue
@@ -133,34 +138,44 @@ class OpenpechaManager:
                 res[row[0][34:]] = row[1]
         return res
 
-    def get_buda_op_commits(force = False, ldspdibaseurl="http://ldspdi.bdrc.io/"):
+    def get_buda_op_commits(self, ldspdibaseurl, force=False):
+        if self.commits is not None and not force:
+            return self.commits
         path = Path(self.local_dir, "buda-commits.json")
         if path.is_file() and not force:
             with open(path) as json_file:
                 return json.load(json_file)
-        commits = fetch_op_commits(ldspdibaseurl)
+        commits = self.fetch_op_commits(ldspdibaseurl)
         with open(path, 'w') as outfile:
             json.dump(commits, outfile)
+        self.commits = commits
         return commits
 
     @staticmethod
-    def send_model_to_store(model, graphname, storeurl):
+    def send_model_to_store(model, graphuri, storeurl):
         ttlstr = model.serialize(format="turtle")
         headers = {'Content-Type': 'text/turtle'}
-        params = {'graph': storeurl}
+        params = {'graph': graphuri}
         r = requests.put(storeurl, data=ttlstr, headers=headers, params=params)
         if r.status_code != requests.codes.ok:
             Error("store", "The request to Fuseki returned code "+str(r.status_code))
 
+    @staticmethod
+    def write_model_debug(model, graphuri):
+        lastslidx = graphuri.rfind("/")
+        graphlname = graphuri[lastslidx+1:]
+        fname = "/tmp/"+graphlname+".ttl"
+        g.serialize(destination=fname, format='turtle')
 
-    def sync_cache_to_store(self, storeurl, force=False):
+    def sync_cache_to_store(self, storeurl, ldspdibaseurl, force=False):
         self.get_local_poti_info()
-        buda_commits = get_buda_op_commits()
+        buda_commits = self.get_buda_op_commits(ldspdibaseurl, force)
         for oplname, info in tqdm(self.get_local_poti_info(), ascii=True, desc='Converting into rdf'):
             if (oplname not in buda_commits) or buda_commits[oplname] != info[commit]:
                 # we need to sync this repo
                 rdf_poti = Rdf(str(Path(local_dir, oplname)), from_git=True)
                 rdf_poti.set_instance()
-                send_model_to_buda(rdf_poti.lod_g(), rdf_poti.graph_uri, storeurl)
+                #send_model_to_store(rdf_poti.lod_g(), rdf_poti.graph_uri, storeurl)
+                write_model_debug(rdf_poti.lod_g(), rdf_poti.graph_uri)
             
 

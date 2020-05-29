@@ -18,16 +18,17 @@ class OpenpechaGit:
     - The remote git of Openpecha
     - If we want the bare repo or a working tree on the local branch (by default the bare repo to save some space)
     """
-    def __init__(self, op_lname, local_dir=str(Path.home()/'.openpecha/data'),
+    def __init__(self, op_lname, local_dir=str(Path.home()/'.cache'/'openpecha'),
                  openpecha_dstgit="https://github.com/OpenPecha", bare=True):
         self.lname = op_lname
         self.local_dir = local_dir
+        Path(local_dir).mkdir(parents=True, exist_ok=True)
         self.openpecha_dstgit = f"{openpecha_dstgit}/{self.lname}.git"
         self.bare = bare
         self.repo = None
         self.synced = False
 
-    def get_repo(dst_sync=False):
+    def get_repo(self, dst_sync=False):
         """
         gets the repo, sync with dst (Github) if parameter is true, otherwise just return the local repo
         """
@@ -36,7 +37,7 @@ class OpenpechaGit:
                 self.repo.git.fetch()
                 self.synced = True
             return self.repo
-        if not self.has_been_cloned:
+        if not self.poti_localgit_exists():
             if dst_sync:
                 self.clone()
                 return self.repo
@@ -51,7 +52,7 @@ class OpenpechaGit:
         """
         Given a op_lname, clones the repo from openpecha to self.local_dir
         """
-        if self.has_been_cloned:
+        if self.poti_localgit_exists():
             return
         self.repo = Repo.clone_from(self.openpecha_dstgit, str(Path(self.local_dir, self.lname)), bare=self.bare)
         self.synced = True

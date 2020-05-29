@@ -372,42 +372,30 @@ def edit(**kwargs):
 
 
 @cli.command()
-@click.option('--folder', '-f', help='path to the folder of the local cache')
-def pull_all_pecha(**kwargs):
+@click.option('--cache-folder', '-c', help='path to the folder of the local cache')
+def pull_all_pecha(cache_folder):
     """
     Command to pull all the pechas in local cache
     """
     opm = None
-    if 'vol_number' in kwargs:
-        opm = OpenpechaManager(local_dir=kwargs['vol_number'])
+    if cache_folder is not None:
+        opm = OpenpechaManager(local_dir=cache_folder)
     else:
         opm = OpenpechaManager()
-    opm.get_all_poti()
+    opm.fetch_all_poti()
 
 @cli.command()
-@click.option('--folder', '-f', help='path to the folder of the local cache')
-@click.option('--store-uri', '-u', help='Fuseki URI')
-def pull_all_pecha(**kwargs):
-    """
-    Command to pull all the pechas of the local cache into Fuseki
-    """
-    opm = None
-    if 'vol_number' in kwargs:
-        opm = OpenpechaManager(local_dir=kwargs['vol_number'])
-    else:
-        opm = OpenpechaManager()
-    opm.get_all_poti()
-
-@cli.command()
-@click.option('--folder', '-f', help='path to the folder of the local cache')
-@click.option('--ldspdi-uri', '-u', help='lds-pdi URI')
-def update_synced_commits(**kwargs):
+@click.option('--cache-folder', '-c', help='path to the folder of the local cache')
+@click.option('--store-uri', '-s', help='Fuseki URI', required=True)
+@click.option('--force', '-f', help='force upload even when commit match with triple store', is_flag=True)
+@click.option('--ldspdi-uri', '-l', help='lds-pdi URI', default="https://ldspdi.bdrc.io/")
+def cache_to_store(cache_folder, ldspdi_uri, store_uri, force):
     """
     Update the cached version of synced commits
     """
     opm = None
-    if 'vol_number' in kwargs:
-        opm = OpenpechaManager(local_dir=kwargs['vol_number'])
+    if cache_folder is not None:
+        opm = OpenpechaManager(local_dir=cache_folder)
     else:
         opm = OpenpechaManager()
-    opm.get_op_commits(force=True)
+    opm.sync_cache_to_store(store_uri, ldspdi_uri, force)
