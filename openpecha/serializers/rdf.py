@@ -12,14 +12,14 @@ class Rdf:
     - rename in BUDARDFSerializer
     - initialize with an OpenPecha instead of a path
     """
-    def __init__(self, lname, path, from_git=True):
-        self.oplname = lname
-        self.lname = f'IE0OP{self.lname}'
+    def __init__(self, oplname, openpecha):
+        self.oplname = oplname
+        self.lname = f'IE0OP{self.oplname}'
         self.graph_r = bdg[self.lname]
         self.lod_ds = rdflib.Dataset()
-        self.lod_g = self.lod_ds.graph(self.graph_uri)
+        self.lod_g = self.lod_ds.graph(self.graph_r)
         self.lod_g.namespace_manager = nsm
-        self.openpecha = self.create_openpecha(lname, path, from_git)
+        self.openpecha = openpecha
         self.setup_openpecha()
 
     def graph(self):
@@ -27,13 +27,6 @@ class Rdf:
 
     def add_triple(self, rdf_subject, rdf_predicate, rdf_object):
         self.lod_g.add((rdf_subject, rdf_predicate, rdf_object))
-
-    @staticmethod
-    def create_openpecha(lname, path, git):
-        if git:
-            return OpenpechaBare(lname, path)
-        else:
-            return OpenpechaFS(lname, path)
 
     """
     Setting up the openpecha, getting all the base_layers and extra layers
@@ -52,8 +45,12 @@ class Rdf:
     def get_op_meta(self):
         self.openpecha.get_meta()
 
+    def get_graph(self):
+        self.set_instance()
+        return self.lod_g
+
     """
-    Building the RDF graph
+    Entry point to build the RDF graph
     """
     def set_instance(self):
         self.add_triple(bdr[f'{self.lname}'], rdf.type, bdo["EtextInstance"])

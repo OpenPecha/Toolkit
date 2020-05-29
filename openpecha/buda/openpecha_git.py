@@ -6,7 +6,7 @@ from pathlib import Path
 from urllib.error import HTTPError
 
 from openpecha.buda.errors import Error
-
+from openpecha.buda.op_bare import OpenpechaBare
 
 class OpenpechaGit:
     """
@@ -18,15 +18,17 @@ class OpenpechaGit:
     - The remote git of Openpecha
     - If we want the bare repo or a working tree on the local branch (by default the bare repo to save some space)
     """
-    def __init__(self, op_lname, local_dir=str(Path.home()/'.cache'/'openpecha'),
+    def __init__(self, op_lname, cache_dir=str(Path.home()/'.cache'/'openpecha'),
                  openpecha_dstgit="https://github.com/OpenPecha", bare=True):
         self.lname = op_lname
-        self.local_dir = local_dir
-        Path(local_dir).mkdir(parents=True, exist_ok=True)
+        self.cache_dir = cache_dir
+        Path(cache_dir).mkdir(parents=True, exist_ok=True)
         self.openpecha_dstgit = f"{openpecha_dstgit}/{self.lname}.git"
         self.bare = bare
         self.repo = None
         self.synced = False
+        self.openpecha = None
+        self.openpecharev = None
 
     def get_repo(self, dst_sync=False):
         """
@@ -42,7 +44,7 @@ class OpenpechaGit:
                 self.clone()
                 return self.repo
             return None
-        self.repo = Repo(str(Path(self.local_dir, self.lname)))
+        self.repo = Repo(str(Path(self.cache_dir, self.lname)))
         if dst_sync and not self.synced:
             self.repo.git.fetch()
             self.synced = True
@@ -50,11 +52,11 @@ class OpenpechaGit:
 
     def clone(self):
         """
-        Given a op_lname, clones the repo from openpecha to self.local_dir
+        Given a op_lname, clones the repo from openpecha to self.cache_dir
         """
         if self.poti_localgit_exists():
             return
-        self.repo = Repo.clone_from(self.openpecha_dstgit, str(Path(self.local_dir, self.lname)), bare=self.bare)
+        self.repo = Repo.clone_from(self.openpecha_dstgit, str(Path(self.cache_dir, self.lname)), bare=self.bare)
         self.synced = True
 
     def poti_localgit_exists(self):
@@ -62,7 +64,7 @@ class OpenpechaGit:
         Check if self.lname has already been cloned by looking if there is
         a folder with the self.lname name in the local directory
         """
-        path = Path(self.local_dir, self.lname)
+        path = Path(self.cache_dir, self.lname)
         return path.is_dir()
 
     def poti_dstgit_exists(self):
@@ -74,7 +76,7 @@ class OpenpechaGit:
         except HTTPError:
             Error(HTTPError, f"Poti _{self.lname}_ is not present on the openpecha git: {self.openpecha_dstgit}")
 
-    def get_commit_to_sync(self, dst_sync=False, branchname="master"):
+    def get_local_latest_commit(self, dst_sync=False, branchname="master"):
         """
         get the commit to sync to BUDA: the latest tag, or the latest commit of the master branch
         """
@@ -84,9 +86,11 @@ class OpenpechaGit:
             return tags[-1].commit.hexsha
         return repo.commit(branchname).hexsha
 
-    def checkout_to_commit(self, commit_sha):
-        """
-        Change the current poti to the commit_sha provided in parameters
-        """
-        repo = Repo(str(Path(self.local_dir, self.lname)))
-        repo.git.checkout(commit_sha)
+    def get_openpecha(self, rev=None):
+        if rev is None:
+            rev = self.get_local_latest_commit()
+        if self.openpecha is not None and self.openpecharev == rev:
+            return self.openpecha
+        self.openpecha = OpenpechaBare(self.lname, repo=self.get_repo(), rev=rev)
+        self.openpecharev = rev
+        return self.openpecha

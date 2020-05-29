@@ -17,13 +17,13 @@ from openpecha.serializers.rdf import Rdf
 
 
 class OpenpechaManager:
-    def __init__(self, local_dir=str(Path.home()/'.cache'/'openpecha')):
+    def __init__(self, cache_dir=str(Path.home()/'.cache'/'openpecha')):
         self.openpecha_api = "https://api.github.com/repos/OpenPecha"
         self.openpecha_git = "https://github.com/OpenPecha"
-        self.local_dir = local_dir
+        self.cache_dir = cache_dir
         self.commits = None
-        if not Path(local_dir).is_dir():
-            Path(local_dir).mkdir(parents=True)
+        if not Path(cache_dir).is_dir():
+            Path(cache_dir).mkdir(parents=True)
 
     def get_collection_blob_url(self):
         """
@@ -97,27 +97,28 @@ class OpenpechaManager:
     def fetch_all_poti(self):
         """
         Getting all the poti from the list and either cloning them or pulling to the latest commit.
-        All the repo are going to be stored in a local directory set by self.local_dir
+        All the repo are going to be stored in a local directory set by self.cache_dir
         """
         for poti in tqdm(self.get_list_of_poti(), ascii=True, desc='Cloning or pulling the poti'):
-            op = OpenpechaGit(poti, local_dir=self.local_dir)
+            op = OpenpechaGit(poti, cache_dir=self.cache_dir)
             if op.poti_dstgit_exists() == 200:
                 op.get_repo(dst_sync=True)
             return
 
-    def get_local_poti_info(self):
+    def get_local_poti_info(self, get_commit=True):
         """
         Getting all the poti from the list and either cloning them or pulling to the latest commit.
-        All the repo are going to be stored in a local directory set by self.local_dir
+        All the repo are going to be stored in a local directory set by self.cache_dir
         """
         res = {}
-        for d in glob.glob(self.local_dir+"/*"):
+        for d in glob.glob(self.cache_dir+"/*"):
             lname = os.path.basename(d)
             if not lname.startswith("P"):
                 continue
-            op = OpenpechaGit(lname, local_dir=self.local_dir)
-            latest_local_commit = op.get_commit_to_sync()
-            res[lname] = {"commit": latest_local_commit}
+            res[lname] = {}
+            if get_commit:
+                op = OpenpechaGit(lname, cache_dir=self.cache_dir)
+                res[lname]["rev"] = op.get_local_latest_commit()
             return res
         return res
 
@@ -141,7 +142,7 @@ class OpenpechaManager:
     def get_buda_op_commits(self, ldspdibaseurl, force=False):
         if self.commits is not None and not force:
             return self.commits
-        path = Path(self.local_dir, "buda-commits.json")
+        path = Path(self.cache_dir, "buda-commits.json")
         if path.is_file() and not force:
             with open(path) as json_file:
                 return json.load(json_file)
@@ -169,13 +170,17 @@ class OpenpechaManager:
 
     def sync_cache_to_store(self, storeurl, ldspdibaseurl, force=False):
         self.get_local_poti_info()
-        buda_commits = self.get_buda_op_commits(ldspdibaseurl, force)
-        for oplname, info in tqdm(self.get_local_poti_info(), ascii=True, desc='Converting into rdf'):
-            if (oplname not in buda_commits) or buda_commits[oplname] != info[commit]:
+        buda_commits = {}
+        if not force:
+            buda_commits = self.get_buda_op_commits(ldspdibaseurl, force)
+        for oplname, info in tqdm(self.get_local_poti_info(get_commit=(not force)).items(), ascii=True, desc='Converting into rdf'):
+            if force or (oplname not in buda_commits) or buda_commits[oplname] != info[rev]:
                 # we need to sync this repo
-                rdf_poti = Rdf(str(Path(local_dir, oplname)), from_git=True)
-                rdf_poti.set_instance()
+                opgit = OpenpechaGit(oplname, cache_dir=self.cache_dir)
+                op = opgit.get_openpecha()
+                rdf_poti = Rdf(oplname, op)
+                rdfgraph = rdf_poti.get_graph()
                 #send_model_to_store(rdf_poti.lod_g(), rdf_poti.graph_uri, storeurl)
-                write_model_debug(rdf_poti.lod_g(), rdf_poti.graph_uri)
+                write_model_debug(rdfgraph, str(rdf_poti.graph_r))
             
 

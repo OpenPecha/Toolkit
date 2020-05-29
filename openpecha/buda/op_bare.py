@@ -13,76 +13,26 @@ class OpenpechaBare(Openpecha):
           in a git repo, but the implementation is completely different because the way to access files
           in a bare git repo is very specific. This could also be considered a serializer, like op_fs.py.
     """
-    def __init__(self, lname, path):
+    def __init__(self, lname, path=None, repo=None, rev="HEAD"):
         Openpecha.__init__(self, lname)
-        self.repo = Repo(path)
+        self.rev = rev
+        if repo is not None:
+            self.repo = repo
+        else:
+            self.repo = Repo(path)
 
-    def get_meta(self):
-        """
-        Getting the meta data from the file in .opf
-        """
-        repo = self.repo
-        meta_content = repo.git.show(f'{self.commit}:{self.lname}.opf/meta.yml')
+    def read_file_content(self, oppath):
+        return repo.git.show(f'{self.rev}:{self.lname}.opf/'+oppath)
 
-        meta_dic = self.read_yaml(meta_content)
+    def read_file_content_yml(self, oppath):
+        ymlstr = repo.git.show(f'{self.rev}:{self.lname}.opf/'+oppath)
+        return yaml.safe_load(file)
 
-        self.meta = meta_dic
-
-    def get_files(self):
+    def list_files(self):
         """
         Getting all the files in the bare repo
         """
-        files = self.repo.git.ls_tree(r='HEAD').split("\n")
-
+        files = self.repo.git.ls_tree(r=self.rev).split("\n")
         files = [file.split("\t")[-1] for file in files]
 
         return files
-
-    def get_last_commit(self):
-        repo = self.repo
-        return repo.git.rev_parse('HEAD')
-
-    def split_files(self):
-        """
-        Sorting the files in .opf as either base or layers
-        """
-        files = self.get_files()
-        dic = {}
-
-        for f in files:
-            path = f.split("/")
-
-            if len(path) > 2:
-                try:
-                    if path[-2] == 'base':
-                        dic[path[1]].append(path[-1])
-                    else:
-                        dic[path[1]][path[-2]].append(path[-1])
-                except KeyError:
-                    if path[-2] == 'base':
-                        dic[path[1]] = []
-                        dic[path[1]].append(path[-1])
-                    else:
-                        self.sort_layers(dic, path[-3:])
-
-        return dic
-
-    def get_base(self):
-        """
-        Getting the base of the .opf file from the local repo, it is located in lname.opf/base/version/
-        """
-        files = self.split_files()
-
-        for file in files['base']:
-            self.base_layer[file] = self.repo.git.show(f'{self.commit}:{self.lname}.opf/base/{file}')
-
-    def get_layer(self, volume, file):
-        """
-        Create a Layer object with the following params:
-        - Openpecha ref
-        - layer file name
-        - path to bare repo
-        """
-        layer = Layer(self.lname, file, volume, self.repo, True)
-
-        return layer

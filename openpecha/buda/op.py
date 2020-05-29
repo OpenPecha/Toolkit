@@ -1,6 +1,4 @@
 import yaml
-from tqdm import tqdm
-
 
 class Openpecha:
     """
@@ -12,31 +10,90 @@ class Openpecha:
        - get_base_list(): get an array of all the layers fnames (and cache it)
        - get_base(basefname): get the string of base layer (and cache it)
     """
-    def __init__(self, lname, commit='master'):
+    def __init__(self, lname):
         """
         Initializing the openpecha object with it's name from https://github.com/OpenPecha/openpecha-catalog
         Commit is the commit we want, by default the last commit on master
         """
         self.lname = lname
-        self.commit = commit
-        self.meta = {}
-        self.base_layer = {}
+        self.meta = None
+        self.bases = {}
         self.layers = {}
+        self.components = read_components()
 
-    @staticmethod
-    def read_yaml(yaml_content):
-        return yaml.safe_load(yaml_content)
+    def read_layer(self, basename, layername):
+        return self.read_file_content_yml("layers/"+basename+"/"+layername+".yml")
 
-    def get_layers(self):
+    def read_base(self, basename):
+        return self.read_file_content_yml("base/"+basename+".txt")
+
+    def read_meta(self):
         """
-        Getting all the layers and storing them in a Layer object, the layers are located in lname.opf/layers/volume/
+        Getting the meta.yml
         """
-        files_dic = self.split_files()
+        return self.read_file_content_yml("meta.yml")
 
-        for volume in files_dic['layers']:
-            self.layers[volume] = {}
-            for file in tqdm(files_dic['layers'][volume], ascii=True, desc=f'{self.lname} {volume}'):
-                self.layers[volume][file] = self.get_layer(volume, file)
+    def get_meta(self):
+        if self.meta is not None:
+            return self.meta
+        self.meta = self.read_meta()
+        return self.meta
+
+    def get_base(self, basename):
+        if basename in self.bases:
+            return self.bases[basename]
+        if basename not in components["base"]:
+            return None
+        self.bases[basename] = self.read_base(basename)
+        return self.bases[basename]
+
+    def get_layer(self, basename, layername):
+        if basename in self.layers and layername in self.layers[basename]:
+            return self.layers[basename][layername]
+        if basename not in self.components["base"]:
+            return None
+        if layername not in self.components["layers"][basename]:
+            return None
+        if basename not in self.layers:
+            self.layers[basename] = {}
+        self.layers[basename][layername] = self.read_layer(layername)
+        return self.layers[basename]
+
+    def has_layer(self, basename, layername):
+        return basename in self.components["base"]
+
+    def list_layers(self, basename):
+        if basename not in self.components:
+            return None
+        return self.components[basename]
+
+    def read_components(self):
+        """
+        get all bases and layers
+        """
+        paths = self.list_paths()
+        res = {}
+
+        for f in sorted(paths):
+            path = f.split("/")
+
+            if len(path) > 2:
+                try:
+                    if path[-2] == 'base':
+                        basename = pathlib.Path(path[-1]).stem
+                        res['base'].append(basename)
+                    else:
+                        basename = path[-2]
+                        layername = pathlib.Path(path[-1]).stem
+                        res['layers'][basename].append(layername)
+                except KeyError:
+                    if path[-2] == 'base':
+                        res['base'] = []
+                        res['base'].append(path[-1])
+                    else:
+                        self.sort_layers(res, path[-3:])
+
+        return res
 
     @staticmethod
     def sort_layers(dic, path):
