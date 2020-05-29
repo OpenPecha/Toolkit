@@ -47,8 +47,8 @@ class Rdf:
             self.set_etext_asset(volume_name)
             self.add_triple(bdr[self.lname], bdo['instanceHasVolume'],
                              bdr[f'VL{self.lname}_{volume_name}'])
-            self.set_etext_ref(volume)
-            self.set_etext(volume)
+            self.set_etext_ref(volume_name)
+            self.set_etext(volume_name)
 
     def set_etext_asset(self, volume_name):
         volume_basename = f'{self.lname}_{volume_name}'
@@ -70,7 +70,7 @@ class Rdf:
 
     def set_etext(self, volume_name):
         volume_basename = f'{self.lname}_{volume_name}'
-        volume_number = int(re.search(r'\d+', volume_name.group()))
+        volume_number = int(re.search(r'\d+', volume_name).group())
         subject = bdr[f'UT{volume_basename}']
 
         self.add_triple(subject, rdf.type, bdo['Etext'])
@@ -114,7 +114,7 @@ class Rdf:
 
     def set_etext_chunk(self, i, start_char, end_char, volume_name, volume_string):
         volume_basename = f'{self.lname}_{volume_name}'
-        etext = f'UT{volume_name}'
+        etext = f'UT{volume_basename}'
         subject = bdr[f'UT{volume_basename}_{int(i):05}']
 
         self.add_triple(subject, rdf.type, bdo['EtextChunk'])

@@ -23,6 +23,8 @@ class OpenpechaFS(Openpecha):
     def list_paths(self):
         """
         Getting all the files in the directory
+
+        TODO: this is probably wrong, there should be a unit test for it
         """
         files = []
         for (dirpath, dirnames, filenames) in walk(self.path):

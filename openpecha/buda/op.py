@@ -43,7 +43,7 @@ class Openpecha:
     def get_base(self, basename):
         if basename in self.bases:
             return self.bases[basename]
-        if basename not in components["base"]:
+        if basename not in self.components["base"]:
             return None
         self.bases[basename] = self.read_base(basename)
         return self.bases[basename]
@@ -69,19 +69,19 @@ class Openpecha:
         return self.components[basename]
 
     def list_base(self):
-        return self.bases.keys()
+        return self.components['base']
 
     def read_components(self):
         """
         get all bases and layers
         """
         paths = self.list_paths()
-        res = {}
+        res = {"base": [], "layers": {}}
 
         for f in sorted(paths):
             path = f.split("/")
 
-            if len(path) > 2:
+            if len(path) > 1:
                 try:
                     if path[-2] == 'base':
                         basename = pathlib.Path(path[-1]).stem
@@ -92,8 +92,7 @@ class Openpecha:
                         res['layers'][basename].append(layername)
                 except KeyError:
                     if path[-2] == 'base':
-                        res['base'] = []
-                        res['base'].append(path[-1])
+                        res['base'].append(pathlib.Path(path[-1]).stem)
                     else:
                         self.sort_layers(res, path[-3:])
 

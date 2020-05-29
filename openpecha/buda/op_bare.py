@@ -34,6 +34,7 @@ class OpenpechaBare(Openpecha):
         Getting all the files in the bare repo
         """
         files = self.repo.git.ls_tree(r=self.rev).split("\n")
+        # removing the xxx.opf at the beginning
         files = [file.split("\t")[-1] for file in files]
-
+        files = [file[len(self.lname)+5:] for file in files if file.startswith(self.lname+".") and (file.endswith(".txt") or file.endswith(".yml"))]
         return files
