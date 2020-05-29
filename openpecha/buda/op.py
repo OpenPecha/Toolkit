@@ -1,4 +1,5 @@
 import yaml
+import pathlib
 
 class Openpecha:
     """
@@ -19,7 +20,7 @@ class Openpecha:
         self.meta = None
         self.bases = {}
         self.layers = {}
-        self.components = read_components()
+        self.components = self.read_components()
 
     def read_layer(self, basename, layername):
         return self.read_file_content_yml("layers/"+basename+"/"+layername+".yml")
@@ -66,6 +67,9 @@ class Openpecha:
         if basename not in self.components:
             return None
         return self.components[basename]
+
+    def list_base(self):
+        return self.bases.keys()
 
     def read_components(self):
         """

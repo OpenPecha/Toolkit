@@ -166,7 +166,7 @@ class OpenpechaManager:
         lastslidx = graphuri.rfind("/")
         graphlname = graphuri[lastslidx+1:]
         fname = "/tmp/"+graphlname+".ttl"
-        g.serialize(destination=fname, format='turtle')
+        model.serialize(destination=fname, format='turtle')
 
     def sync_cache_to_store(self, storeurl, ldspdibaseurl, force=False):
         self.get_local_poti_info()
@@ -181,6 +181,6 @@ class OpenpechaManager:
                 rdf_poti = Rdf(oplname, op)
                 rdfgraph = rdf_poti.get_graph()
                 #send_model_to_store(rdf_poti.lod_g(), rdf_poti.graph_uri, storeurl)
-                write_model_debug(rdfgraph, str(rdf_poti.graph_r))
+                self.write_model_debug(rdfgraph, str(rdf_poti.graph_r))
             
 

@@ -20,30 +20,9 @@ class Rdf:
         self.lod_g = self.lod_ds.graph(self.graph_r)
         self.lod_g.namespace_manager = nsm
         self.openpecha = openpecha
-        self.setup_openpecha()
-
-    def graph(self):
-        return self.lod_g
 
     def add_triple(self, rdf_subject, rdf_predicate, rdf_object):
         self.lod_g.add((rdf_subject, rdf_predicate, rdf_object))
-
-    """
-    Setting up the openpecha, getting all the base_layers and extra layers
-    """
-    def setup_openpecha(self):
-        self.get_op_base_layers()
-        self.get_op_layers()
-        self.get_op_meta()
-
-    def get_op_base_layers(self):
-        self.openpecha.get_base()
-
-    def get_op_layers(self):
-        self.openpecha.get_layers()
-
-    def get_op_meta(self):
-        self.openpecha.get_meta()
 
     def get_graph(self):
         self.set_instance()
@@ -54,63 +33,62 @@ class Rdf:
     """
     def set_instance(self):
         self.add_triple(bdr[f'{self.lname}'], rdf.type, bdo["EtextInstance"])
-        if self.openpecha.meta.get('source_metadata'):
+        if self.openpecha.get_meta().get('source_metadata'):
             self.parse_meta()
         self.get_base_volumes()
         self.set_adm()
 
-
     def parse_meta(self):
-        sour = self.openpecha.meta['source_metadata']['id'].split(":")
+        sour = self.openpecha.get_meta()['source_metadata']['id'].split(":")
         self.add_triple(bdr[self.lname], bdo['instanceReproductionOf'], globals()[sour[0]][sour[-1]])
 
     def get_base_volumes(self):
-        for volume in self.openpecha.base_layer.items():
-            self.set_etext_asset(volume)
+        for volume_name in self.openpecha.list_base():
+            self.set_etext_asset(volume_name)
             self.add_triple(bdr[self.lname], bdo['instanceHasVolume'],
-                             bdr[f'VL{self.lname}_{volume[0].replace(".txt", "")}'])
+                             bdr[f'VL{self.lname}_{volume_name}'])
             self.set_etext_ref(volume)
             self.set_etext(volume)
 
-    def set_etext_asset(self, volume):
-        volume_name = f'{self.lname}_{volume[0].replace(".txt", "")}'
-        volume_number = int(re.search(r'\d+', volume[0].replace(".txt", "")).group())
-        subject = bdr[f'VL{volume_name}']
+    def set_etext_asset(self, volume_name):
+        volume_basename = f'{self.lname}_{volume_name}'
+        volume_number = int(re.search(r'\d+', volume_name).group())
+        subject = bdr[f'VL{volume_basename}']
 
         self.add_triple(subject, rdf.type, bdo['VolumeEtextAsset'])
-        self.add_triple(subject, bdo['volumeHasEtext'], bdr[f'ER{volume_name}'])
+        self.add_triple(subject, bdo['volumeHasEtext'], bdr[f'ER{volume_basename}'])
         self.add_triple(subject, bdo['volumeNumber'], Literal(volume_number, datatype=XSD.integer))
         self.add_triple(subject, bdo['volumeOf'], bdr[f'{self.lname}'])
 
-    def set_etext_ref(self, volume):
-        volume_name = f'{self.lname}_{volume[0].replace(".txt", "")}'
-        subject = bdr[f'ER{volume_name}']
+    def set_etext_ref(self, volume_name):
+        volume_basename = f'{self.lname}_{volume_name}'
+        subject = bdr[f'ER{volume_basename}']
 
         self.add_triple(subject, rdf.type, bdo['EtextRef'])
-        self.add_triple(subject, bdo['eTextResource'], bdr[f'UT{volume_name}'])
+        self.add_triple(subject, bdo['eTextResource'], bdr[f'UT{volume_basename}'])
         self.add_triple(subject, bdo['seqNum'], Literal(1, datatype=XSD.integer))
 
-    def set_etext(self, volume):
-        volume_name = f'{self.lname}_{volume[0].replace(".txt", "")}'
-        volume_number = int(re.search(r'\d+', volume[0].replace(".txt", "")).group())
-        subject = bdr[f'UT{volume_name}']
+    def set_etext(self, volume_name):
+        volume_basename = f'{self.lname}_{volume_name}'
+        volume_number = int(re.search(r'\d+', volume_name.group()))
+        subject = bdr[f'UT{volume_basename}']
 
         self.add_triple(subject, rdf.type, bdo['Etext'])
-        self.add_triple(subject, bdo['eTextInInstance'], bdr[volume_name])
+        self.add_triple(subject, bdo['eTextInInstance'], bdr[volume_basename])
         self.add_triple(subject, bdo['eTextIsVolume'], Literal(volume_number, datatype=XSD.integer))
         self.add_triple(subject, rdfs.seeAlso, Literal(f'https://github.com/OpenPecha/{self.lname}/', datatype=XSD.anyURI))
-        self.set_etext_pages(volume)
-        self.set_etext_chunks(volume)
+        self.set_etext_pages(volume_name)
+        self.set_etext_chunks(volume_name)
 
-    def set_etext_pages(self, volume):
-        volume_number = volume[0].replace(".txt", "")
-        annotations = self.openpecha.layers[volume_number]['pagination.yml'].annotations
-
-        for annotation in annotations:
-            self.set_etext_page(annotation, volume)
+    def set_etext_pages(self, volume_name):
+        player = self.openpecha.get_layer(volume_name, "pagination")
+        if player is None:
+            return
+        for annotation in player.annotations:
+            self.set_etext_page(annotation, volume_name)
 
     def set_etext_page(self, annotation, volume):
-        volume_name = f'{self.lname}_{volume[0].replace(".txt", "")}'
+        volume_basename = f'{self.lname}_{volume_name}'
         subject = bdr[f'EP{annotation["id"]}']
         sequence = self.get_sequence(annotation['page_index'])
         start = annotation['span']['start']
@@ -120,26 +98,24 @@ class Rdf:
         self.add_triple(subject, bdo['seqNum'], Literal(sequence, datatype=XSD.integer))
         self.add_triple(subject, bdo['sliceEndChar'], Literal(end, datatype=XSD.integer))
         self.add_triple(subject, bdo['sliceStartChar'], Literal(start, datatype=XSD.integer))
-
-        self.add_triple(bdr[f'UT{volume_name}'], bdo['eTextHasPage'], subject)
+        self.add_triple(bdr[f'UT{volume_basename}'], bdo['eTextHasPage'], subject)
 
     @staticmethod
     def get_sequence(page_index):
         number = int(re.search(r'\d+', page_index).group())
         return number * 2 if page_index[-1] == 'b' else (number * 2) - 1
 
-    def set_etext_chunks(self, volume):
-        volume_string = self.openpecha.base_layer[volume[0]]
+    def set_etext_chunks(self, volume_name):
+        volume_string = self.openpecha.get_base(volume_name)
         chunk_indexes = self.get_chunk_index(volume_string)
 
         for i in range(0, len(chunk_indexes) - 2):
-            self.set_etext_chunk(i, chunk_indexes[i], chunk_indexes[i + 1], volume)
+            self.set_etext_chunk(i, chunk_indexes[i], chunk_indexes[i + 1], volume_name, volume_string)
 
-    def set_etext_chunk(self, i, start_char, end_char, volume):
-        volume_name = f'{self.lname}_{volume[0].replace(".txt", "")}'
-        volume_string = self.openpecha.base_layer[volume[0]]
+    def set_etext_chunk(self, i, start_char, end_char, volume_name, volume_string):
+        volume_basename = f'{self.lname}_{volume_name}'
         etext = f'UT{volume_name}'
-        subject = bdr[f'UT{volume_name}_{int(i):05}']
+        subject = bdr[f'UT{volume_basename}_{int(i):05}']
 
         self.add_triple(subject, rdf.type, bdo['EtextChunk'])
         self.add_triple(subject, bdo['chunkContents'], Literal(volume_string[start_char:end_char], lang="bo"))
@@ -151,15 +127,15 @@ class Rdf:
     def set_adm(self):
         subject_r = bda[self.lname]
         graph_r = bdg[self.lname]
-        commit = self.openpecha.get_last_commit()
+        rev = self.openpecha.get_rev()
 
-        self.add_triple(subject, rdf.type, adm['AdminData'])
-        self.add_triple(subject, adm['adminAbout'], subject_r)
-        self.add_triple(subject, adm['graphId'], graph_r)
-        self.add_triple(subject, adm['syncAgent'], bdr['SAOPT'])
-        self.add_triple(subject, adm['metadataLegal'], bda['LD_BDRC_CC0'])
-        self.add_triple(subject, adm['gitRevision'], Literal(commit))
-        self.add_triple(subject, adm['status'], bda['StatusReleased'])
+        self.add_triple(subject_r, rdf.type, adm['AdminData'])
+        self.add_triple(subject_r, adm['adminAbout'], subject_r)
+        self.add_triple(subject_r, adm['graphId'], graph_r)
+        self.add_triple(subject_r, adm['syncAgent'], bdr['SAOPT'])
+        self.add_triple(subject_r, adm['metadataLegal'], bda['LD_BDRC_CC0'])
+        self.add_triple(subject_r, adm['gitRevision'], Literal(rev))
+        self.add_triple(subject_r, adm['status'], bda['StatusReleased'])
 
     @staticmethod
     def get_chunk_index(string):

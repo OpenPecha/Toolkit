@@ -1,8 +1,7 @@
 from openpecha.buda.op import Openpecha
-from openpecha.buda.layer import Layer
-from openpecha.buda.chunker import *
 from os import walk
 import pathlib
+import yaml
 
 class OpenpechaFS(Openpecha):
     """
@@ -17,6 +16,9 @@ class OpenpechaFS(Openpecha):
     def __init__(self, lname, path_to_opf):
         Openpecha.__init__(self, lname)
         self.path = path_to_opf
+
+    def get_rev(self):
+        return None
 
     def list_paths(self):
         """

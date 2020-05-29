@@ -1,9 +1,7 @@
 from openpecha.buda.op import Openpecha
 from git import Repo
 from pathlib import Path
-from openpecha.buda.layer import Layer
-from openpecha.buda.chunker import *
-
+import yaml
 
 class OpenpechaBare(Openpecha):
     """
@@ -14,21 +12,24 @@ class OpenpechaBare(Openpecha):
           in a bare git repo is very specific. This could also be considered a serializer, like op_fs.py.
     """
     def __init__(self, lname, path=None, repo=None, rev="HEAD"):
-        Openpecha.__init__(self, lname)
         self.rev = rev
         if repo is not None:
             self.repo = repo
         else:
             self.repo = Repo(path)
+        Openpecha.__init__(self, lname)
+
+    def get_rev(self):
+        return self.rev
 
     def read_file_content(self, oppath):
-        return repo.git.show(f'{self.rev}:{self.lname}.opf/'+oppath)
+        return self.repo.git.show(f'{self.rev}:{self.lname}.opf/'+oppath)
 
     def read_file_content_yml(self, oppath):
-        ymlstr = repo.git.show(f'{self.rev}:{self.lname}.opf/'+oppath)
-        return yaml.safe_load(file)
+        ymlstr = self.repo.git.show(f'{self.rev}:{self.lname}.opf/'+oppath)
+        return yaml.safe_load(ymlstr)
 
-    def list_files(self):
+    def list_paths(self):
         """
         Getting all the files in the bare repo
         """
