@@ -207,14 +207,22 @@ class GoogleOCRFormatter(BaseFormatter):
         query_url = "https://www.tbrc.org/xmldoc?rid={}"
         bdrc_metadata_url = query_url.format(work_id)
         r = requests.get(bdrc_metadata_url)
-        if r.status != 200:
+
+        try:
+            root = ET.fromstring(r.content.decode("utf-8"))
+        except:
             metadata = {
                 "id": f"opecha:{self.pecha_id}",
                 "initial_creation_type": "ocr",
-                "source_metadata": {},
+                "source_metadata": {
+                    "id": f"{work_id}",
+                    "title": "",
+                    "volume": "",
+                    "author": "",
+                },
             }
             return metadata
-        root = ET.fromstring(r.content.decode("utf-8"))
+
         title_tag = root[0]
         author_tag = root.find("{http://www.tbrc.org/models/work#}creator")
         metadata = {
