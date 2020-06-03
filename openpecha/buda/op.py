@@ -26,7 +26,7 @@ class Openpecha:
         return self.read_file_content_yml("layers/"+basename+"/"+layername+".yml")
 
     def read_base(self, basename):
-        return self.read_file_content_yml("base/"+basename+".txt")
+        return self.read_file_content("base/"+basename+".txt")
 
     def read_meta(self):
         """
@@ -39,6 +39,14 @@ class Openpecha:
             return self.meta
         self.meta = self.read_meta()
         return self.meta
+
+    def is_ocr(self):
+        meta = self.get_meta()
+        if 'source_metadata' in meta:
+            sour = meta['source_metadata']['id'].split(":")
+            if sour[0] == "bdr":
+                return True
+        return False
 
     def get_base(self, basename):
         if basename in self.bases:

@@ -33,14 +33,14 @@ class Rdf:
     """
     def set_instance(self):
         self.add_triple(bdr[f'{self.lname}'], rdf.type, bdo["EtextInstance"])
-        if self.openpecha.get_meta().get('source_metadata'):
-            self.parse_meta()
+        meta = self.openpecha.get_meta()
+        if 'source_metadata' in meta:
+            sour = meta['source_metadata']['id'].split(":")
+            if sour[0] == "bdr":
+                self.add_triple(bdr[self.lname], bdo['instanceReproductionOf'], bdr['M'+sour[-1]])
+                self.add_triple(bdr['M'+sour[-1]], bdo['instanceHasReproduction'], bdr[self.lname])
         self.get_base_volumes()
         self.set_adm()
-
-    def parse_meta(self):
-        sour = self.openpecha.get_meta()['source_metadata']['id'].split(":")
-        self.add_triple(bdr[self.lname], bdo['instanceReproductionOf'], globals()[sour[0]][sour[-1]])
 
     def get_base_volumes(self):
         for volume_name in self.openpecha.list_base():
@@ -76,7 +76,7 @@ class Rdf:
         self.add_triple(subject, rdf.type, bdo['Etext'])
         self.add_triple(subject, bdo['eTextInInstance'], bdr[volume_basename])
         self.add_triple(subject, bdo['eTextIsVolume'], Literal(volume_number, datatype=XSD.integer))
-        self.add_triple(subject, rdfs.seeAlso, Literal(f'https://github.com/OpenPecha/{self.lname}/', datatype=XSD.anyURI))
+        self.add_triple(subject, rdfs.seeAlso, Literal(f'https://github.com/OpenPecha/{self.oplname}/', datatype=XSD.anyURI))
         self.set_etext_pages(volume_name)
         self.set_etext_chunks(volume_name)
 

@@ -10,6 +10,7 @@ import os
 import glob
 from contextlib import closing
 import codecs
+import logging
 
 from openpecha.buda.errors import Error
 from openpecha.buda.openpecha_git import OpenpechaGit
@@ -77,7 +78,7 @@ class OpenpechaManager:
 
         return op_lnames
 
-    def get_list_of_poti(self):
+    def get_list_of_pecha(self):
         """
         Getting the full list of poti based on the openpecha-catalog
         The catalog is too big to get the whole content through normal github API.
@@ -88,22 +89,26 @@ class OpenpechaManager:
         if collection_blob_url:
             blob_content = self.get_blob_content(collection_blob_url)
             decoded_blob = self.decode_bas64_blob(blob_content)
-
             op_lname_column = self.get_op_lname_column(decoded_blob)
             cleaned_list = self.cleanup_op_lname_list(op_lname_column)
 
             return cleaned_list
 
-    def fetch_all_poti(self):
+    def fetch_all_pecha(self):
         """
         Getting all the poti from the list and either cloning them or pulling to the latest commit.
         All the repo are going to be stored in a local directory set by self.cache_dir
         """
-        for poti in tqdm(self.get_list_of_poti(), ascii=True, desc='Cloning or pulling the poti'):
-            op = OpenpechaGit(poti, cache_dir=self.cache_dir)
-            if op.poti_dstgit_exists() == 200:
-                op.get_repo(dst_sync=True)
-            return
+        for lname in tqdm(self.get_list_of_pecha(), ascii=True, desc='Cloning or pulling the pecha'):
+            self.fetch_pecha(lname)
+
+    def fetch_pecha(self, lname):
+        """
+        Getting one pecha from the list and either cloning them or pulling to the latest commit.
+        """
+        opg = OpenpechaGit(lname, cache_dir=self.cache_dir)
+        if opg.poti_dstgit_exists() == 200:
+            opg.get_repo(dst_sync=True)
 
     def get_local_poti_info(self, get_commit=True):
         """
@@ -117,9 +122,9 @@ class OpenpechaManager:
                 continue
             res[lname] = {}
             if get_commit:
-                op = OpenpechaGit(lname, cache_dir=self.cache_dir)
-                res[lname]["rev"] = op.get_local_latest_commit()
-            return res
+                opg = OpenpechaGit(lname, cache_dir=self.cache_dir)
+                rev = opg.get_local_latest_commit()
+                res[lname]["rev"] = rev
         return res
 
     @staticmethod
@@ -130,13 +135,15 @@ class OpenpechaManager:
         res = {}
         headers = {'Accept': 'text/csv'}
         params = {'format': "csv"}
-        with closing(requests.get(ldspdibaseurl+"/query/table/OP_allCommits", stream=True, headers=headers)) as r:
+        with closing(requests.get(ldspdibaseurl+"/query/table/OP_allCommits", stream=True, headers=headers, params=params)) as r:
             reader = csv.reader(codecs.iterdecode(r.iter_lines(), 'utf-8'))
             for row in reader:
                 if not row[0].startswith("http://purl.bdrc.io/resource/IE0OP"):
                     Error("store", "cannot interpret csv line starting with "+row[0])
                     continue
                 res[row[0][34:]] = row[1]
+        print("getting commits:")
+        print(res)
         return res
 
     def get_buda_op_commits(self, ldspdibaseurl, force=False):
@@ -145,15 +152,31 @@ class OpenpechaManager:
         path = Path(self.cache_dir, "buda-commits.json")
         if path.is_file() and not force:
             with open(path) as json_file:
-                return json.load(json_file)
+                self.commits = json.load(json_file)
+                return self.commits
         commits = self.fetch_op_commits(ldspdibaseurl)
         with open(path, 'w') as outfile:
             json.dump(commits, outfile)
         self.commits = commits
         return commits
 
+    def set_commit(self, oplname, rev):
+        if self.commits is None:
+            logging.warn("updating op_commits without fetching commits first")
+            return
+        self.commits[oplname] = rev
+
+    def write_commits(self):
+        if self.commits is None:
+            logging.warn("not writing None commits")
+            return
+        path = Path(self.cache_dir, "buda-commits.json")
+        with open(path, 'w') as outfile:
+            json.dump(self.commits, outfile)
+
     @staticmethod
     def send_model_to_store(model, graphuri, storeurl):
+        logging.info("sending %s to store", graphuri)
         ttlstr = model.serialize(format="turtle")
         headers = {'Content-Type': 'text/turtle'}
         params = {'graph': graphuri}
@@ -169,18 +192,25 @@ class OpenpechaManager:
         model.serialize(destination=fname, format='turtle')
 
     def sync_cache_to_store(self, storeurl, ldspdibaseurl, force=False):
-        self.get_local_poti_info()
         buda_commits = {}
         if not force:
             buda_commits = self.get_buda_op_commits(ldspdibaseurl, force)
         for oplname, info in tqdm(self.get_local_poti_info(get_commit=(not force)).items(), ascii=True, desc='Converting into rdf'):
-            if force or (oplname not in buda_commits) or buda_commits[oplname] != info[rev]:
+            if force or (oplname not in buda_commits) or buda_commits[oplname] != info["rev"]:
                 # we need to sync this repo
                 opgit = OpenpechaGit(oplname, cache_dir=self.cache_dir)
                 op = opgit.get_openpecha()
-                rdf_poti = Rdf(oplname, op)
-                rdfgraph = rdf_poti.get_graph()
-                #send_model_to_store(rdf_poti.lod_g(), rdf_poti.graph_uri, storeurl)
-                self.write_model_debug(rdfgraph, str(rdf_poti.graph_r))
+                if not op.is_ocr():
+                    logging.info("skipping %s, not ocr", oplname)
+                    continue
+                rdf = Rdf(oplname, op)
+                rdfgraph = rdf.get_graph()
+                self.send_model_to_store(rdfgraph, str(rdf.graph_r), storeurl)
+                #self.write_model_debug(rdfgraph, str(rdf.graph_r))
+                self.set_commit(oplname, opgit.openpecharev)
+                #break
+            else:
+                logging.info("skipping %s, already synced", oplname)
+        self.write_commits()
             
 

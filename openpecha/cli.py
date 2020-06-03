@@ -2,6 +2,7 @@ import csv
 import requests
 from pathlib import Path
 import shutil
+import logging
 
 import click
 from github import Github
@@ -373,7 +374,8 @@ def edit(**kwargs):
 
 @cli.command()
 @click.option('--cache-folder', '-c', help='path to the folder of the local cache')
-def pull_all_pecha(cache_folder):
+@click.option('--idlist', '-l', help='comma-separated list of Openpecha IDs')
+def pull_pechas(cache_folder, idlist):
     """
     Command to pull all the pechas in local cache
     """
@@ -382,17 +384,28 @@ def pull_all_pecha(cache_folder):
         opm = OpenpechaManager(local_dir=cache_folder)
     else:
         opm = OpenpechaManager()
-    opm.fetch_all_poti()
+    if idlist is None:
+        opm.fetch_all_pecha()
+    else:
+        opids = idlist.split(',')
+        for opid in tqdm(opids, ascii=True, desc='Cloning or pulling the pecha'):
+            opm.fetch_pecha(opid)
 
 @cli.command()
 @click.option('--cache-folder', '-c', help='path to the folder of the local cache')
 @click.option('--store-uri', '-s', help='Fuseki URI', required=True)
 @click.option('--force', '-f', help='force upload even when commit match with triple store', is_flag=True)
 @click.option('--ldspdi-uri', '-l', help='lds-pdi URI', default="https://ldspdi.bdrc.io/")
-def cache_to_store(cache_folder, ldspdi_uri, store_uri, force):
+@click.option('--verbose', '-v', help='verbose', is_flag=True)
+@click.option('--debug', '-d', help='debug', is_flag=True)
+def cache_to_store(cache_folder, ldspdi_uri, store_uri, force, verbose, debug):
     """
     Update the cached version of synced commits
     """
+    if debug:
+        logging.basicConfig(level=logging.DEBUG)
+    elif verbose:
+        logging.basicConfig(level=logging.INFO)
     opm = None
     if cache_folder is not None:
         opm = OpenpechaManager(local_dir=cache_folder)
