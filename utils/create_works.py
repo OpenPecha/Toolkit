@@ -1,7 +1,4 @@
 """Create works in OpenPecha."""
-import csv
-import importlib
-import importlib.util
 import xml.etree.ElementTree as ET
 from pathlib import Path
 from xml.dom import minidom
@@ -63,7 +60,7 @@ class Work:
         r = requests.get(bdrc_metadata_url)
         try:
             root = ET.fromstring(r.content.decode("utf-8"))
-        except:
+        except Exception:
             return ""
         title_tag = root[0]
         return config.converter.toUnicode(title_tag.text)
@@ -130,10 +127,11 @@ def get_works_from_bdrc_outlines(fn):
     for node in dom.getElementsByTagName("outline:node"):
         if node.attributes["type"].value != "text":
             continue
+        bdrc_work_id = node.attributes['RID'].value
         title = get_value(node, "title", "bibliographicalTitle", convert=True)
         author = get_value(node, "creator", "hasMainAuthor", convert=True)
-        toh = get_value(node, "description", "toh")
-        bdrc_work_id = clean_text_id(toh)
+        # toh = get_value(node, "description", "toh")
+        # bdrc_work_id = clean_text_id(toh)
         if title or author or bdrc_work_id:
             work = Work()
             work.work["title"] = title
@@ -148,4 +146,5 @@ if __name__ == "__main__":
         start=4,
     ):
         work_fn = config.work_output / f"W{i:08}.yml"
+        print(work)
         work.save(work_fn)

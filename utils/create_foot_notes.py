@@ -122,6 +122,7 @@ if __name__ == "__main__":
         text_id = path.name.split('_')[0]
         print(f'[INFO] Processing {text_id} ...')
 
+        text_id = 'D1943'
         if text_id not in text_metadata:
             error_msg = f'[not-found] {text_id} not found in derge-tengyur\n'
             print(error_msg)
