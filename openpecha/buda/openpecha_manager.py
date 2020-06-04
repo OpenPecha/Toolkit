@@ -142,8 +142,6 @@ class OpenpechaManager:
                     Error("store", "cannot interpret csv line starting with "+row[0])
                     continue
                 res[row[0][34:]] = row[1]
-        print("getting commits:")
-        print(res)
         return res
 
     def get_buda_op_commits(self, ldspdibaseurl, force=False):
@@ -191,11 +189,13 @@ class OpenpechaManager:
         fname = "/tmp/"+graphlname+".ttl"
         model.serialize(destination=fname, format='turtle')
 
-    def sync_cache_to_store(self, storeurl, ldspdibaseurl, force=False):
+    def sync_cache_to_store(self, storeurl, ldspdibaseurl, force=False, idlist=None):
         buda_commits = {}
         if not force:
             buda_commits = self.get_buda_op_commits(ldspdibaseurl, force)
         for oplname, info in tqdm(self.get_local_poti_info(get_commit=(not force)).items(), ascii=True, desc='Converting into rdf'):
+            if idlist is not None and oplname not in idlist:
+                continue
             if force or (oplname not in buda_commits) or buda_commits[oplname] != info["rev"]:
                 # we need to sync this repo
                 opgit = OpenpechaGit(oplname, cache_dir=self.cache_dir)
@@ -208,7 +208,6 @@ class OpenpechaManager:
                 self.send_model_to_store(rdfgraph, str(rdf.graph_r), storeurl)
                 #self.write_model_debug(rdfgraph, str(rdf.graph_r))
                 self.set_commit(oplname, opgit.openpecharev)
-                #break
             else:
                 logging.info("skipping %s, already synced", oplname)
         self.write_commits()

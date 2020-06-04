@@ -395,10 +395,11 @@ def pull_pechas(cache_folder, idlist):
 @click.option('--cache-folder', '-c', help='path to the folder of the local cache')
 @click.option('--store-uri', '-s', help='Fuseki URI', required=True)
 @click.option('--force', '-f', help='force upload even when commit match with triple store', is_flag=True)
-@click.option('--ldspdi-uri', '-l', help='lds-pdi URI', default="https://ldspdi.bdrc.io/")
+@click.option('--ldspdi-uri', '-u', help='lds-pdi URI', default="https://ldspdi.bdrc.io/")
+@click.option('--idlist', '-l', help='comma-separated list of Openpecha IDs')
 @click.option('--verbose', '-v', help='verbose', is_flag=True)
 @click.option('--debug', '-d', help='debug', is_flag=True)
-def cache_to_store(cache_folder, ldspdi_uri, store_uri, force, verbose, debug):
+def cache_to_store(cache_folder, ldspdi_uri, store_uri, force, verbose, debug, idlist):
     """
     Update the cached version of synced commits
     """
@@ -411,4 +412,7 @@ def cache_to_store(cache_folder, ldspdi_uri, store_uri, force, verbose, debug):
         opm = OpenpechaManager(local_dir=cache_folder)
     else:
         opm = OpenpechaManager()
-    opm.sync_cache_to_store(store_uri, ldspdi_uri, force)
+    opids = None
+    if idlist is not None:
+        opids = idlist.split(",")
+    opm.sync_cache_to_store(store_uri, ldspdi_uri, force, opids)

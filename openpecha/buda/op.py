@@ -65,7 +65,7 @@ class Openpecha:
             return None
         if basename not in self.layers:
             self.layers[basename] = {}
-        self.layers[basename][layername] = self.read_layer(layername)
+        self.layers[basename][layername] = self.read_layer(basename, layername)
         return self.layers[basename]
 
     def has_layer(self, basename, layername):
@@ -88,34 +88,14 @@ class Openpecha:
 
         for f in sorted(paths):
             path = f.split("/")
-
             if len(path) > 1:
-                try:
-                    if path[-2] == 'base':
-                        basename = pathlib.Path(path[-1]).stem
-                        res['base'].append(basename)
-                    else:
-                        basename = path[-2]
-                        layername = pathlib.Path(path[-1]).stem
-                        res['layers'][basename].append(layername)
-                except KeyError:
-                    if path[-2] == 'base':
-                        res['base'].append(pathlib.Path(path[-1]).stem)
-                    else:
-                        self.sort_layers(res, path[-3:])
-
+                if path[-2] == 'base':
+                    basename = pathlib.Path(path[-1]).stem
+                    res['base'].append(basename)
+                else:
+                    basename = path[-2]
+                    layername = pathlib.Path(path[-1]).stem
+                    if basename not in res['layers']:
+                        res['layers'][basename] = []
+                    res['layers'][basename].append(layername)
         return res
-
-    @staticmethod
-    def sort_layers(dic, path):
-        """
-        Sorting the layers by their volume number
-        """
-        if path[0] in dic:
-            dic[path[0]][path[1]] = []
-        else:
-            dic[path[0]] = {}
-            dic[path[0]][path[1]] = []
-        dic[path[0]][path[1]].append(path[2])
-
-

@@ -39,6 +39,8 @@ class Rdf:
             if sour[0] == "bdr":
                 self.add_triple(bdr[self.lname], bdo['instanceReproductionOf'], bdr['M'+sour[-1]])
                 self.add_triple(bdr['M'+sour[-1]], bdo['instanceHasReproduction'], bdr[self.lname])
+                self.add_triple(bdr[self.lname], bdo['instanceReproductionOf'], bdr[sour[-1]])
+                self.add_triple(bdr[sour[-1]], bdo['instanceHasReproduction'], bdr[self.lname])
         self.get_base_volumes()
         self.set_adm()
 
@@ -74,7 +76,7 @@ class Rdf:
         subject = bdr[f'UT{volume_basename}']
 
         self.add_triple(subject, rdf.type, bdo['Etext'])
-        self.add_triple(subject, bdo['eTextInInstance'], bdr[volume_basename])
+        self.add_triple(subject, bdo['eTextInInstance'], bdr[self.lname])
         self.add_triple(subject, bdo['eTextIsVolume'], Literal(volume_number, datatype=XSD.integer))
         self.add_triple(subject, rdfs.seeAlso, Literal(f'https://github.com/OpenPecha/{self.oplname}/', datatype=XSD.anyURI))
         self.set_etext_pages(volume_name)
@@ -84,16 +86,19 @@ class Rdf:
         player = self.openpecha.get_layer(volume_name, "pagination")
         if player is None:
             return
-        for annotation in player.annotations:
+        if "pagination" in player:
+            player = player["pagination"]
+        if "annotations" not in player:
+            return
+        for annotation in player["annotations"]:
             self.set_etext_page(annotation, volume_name)
 
-    def set_etext_page(self, annotation, volume):
+    def set_etext_page(self, annotation, volume_name):
         volume_basename = f'{self.lname}_{volume_name}'
         subject = bdr[f'EP{annotation["id"]}']
         sequence = self.get_sequence(annotation['page_index'])
         start = annotation['span']['start']
         end = annotation['span']['end']
-
         self.add_triple(subject, rdf.type, bdo['EtextPage'])
         self.add_triple(subject, bdo['seqNum'], Literal(sequence, datatype=XSD.integer))
         self.add_triple(subject, bdo['sliceEndChar'], Literal(end, datatype=XSD.integer))
