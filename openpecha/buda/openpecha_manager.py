@@ -110,7 +110,7 @@ class OpenpechaManager:
         try:
             opg.get_repo(dst_sync=True)
         except:
-            log.error("error fetching %s", lname)
+            logging.error("error fetching %s", lname)
 
     def get_local_poti_info(self, get_commit=True):
         """
