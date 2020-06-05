@@ -107,8 +107,10 @@ class OpenpechaManager:
         Getting one pecha from the list and either cloning them or pulling to the latest commit.
         """
         opg = OpenpechaGit(lname, cache_dir=self.cache_dir)
-        if opg.poti_dstgit_exists() == 200:
+        try:
             opg.get_repo(dst_sync=True)
+        except:
+            log.error("error fetching %s", lname)
 
     def get_local_poti_info(self, get_commit=True):
         """
