@@ -96,6 +96,8 @@ class OpenpechaGit:
     def get_openpecha(self, rev=None):
         if rev is None:
             rev = self.get_local_latest_commit()
+        if rev is None:
+            return None
         if self.openpecha is not None and self.openpecharev == rev:
             return self.openpecha
         self.openpecha = OpenpechaBare(self.lname, repo=self.get_repo(), rev=rev)

@@ -202,6 +202,9 @@ class OpenpechaManager:
                 # we need to sync this repo
                 opgit = OpenpechaGit(oplname, cache_dir=self.cache_dir)
                 op = opgit.get_openpecha()
+                if op is None:
+                    logging.error("skipping %s, can't get the openpecha object", oplname)
+                    continue
                 if not op.is_ocr():
                     logging.info("skipping %s, not ocr", oplname)
                     continue
