@@ -8,6 +8,8 @@ from urllib.error import HTTPError
 from openpecha.buda.errors import Error
 from openpecha.buda.op_bare import OpenpechaBare
 
+import logging
+
 ENV={"GIT_TERMINAL_PROMPT": "0"}
 
 class OpenpechaGit:
@@ -86,7 +88,10 @@ class OpenpechaGit:
         tags = sorted(repo.tags, key=lambda t: t.commit.committed_datetime)
         if tags:
             return tags[-1].commit.hexsha
-        return repo.commit(branchname).hexsha
+        try:
+            return repo.commit(branchname).hexsha
+        except:
+            logging.error('cannot find branch %s for %s', branchname, self.lname)
 
     def get_openpecha(self, rev=None):
         if rev is None:
