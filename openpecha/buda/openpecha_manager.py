@@ -181,7 +181,8 @@ class OpenpechaManager:
         headers = {'Content-Type': 'text/turtle'}
         params = {'graph': graphuri}
         r = requests.put(storeurl, data=ttlstr, headers=headers, params=params)
-        if r.status_code != requests.codes.ok:
+        sc = r.status_code
+        if sc != requests.codes.ok and sc != requests.codes.created and sc != requests.codes.accepted:
             Error("store", "The request to Fuseki returned code "+str(r.status_code))
 
     @staticmethod

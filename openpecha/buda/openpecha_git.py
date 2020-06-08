@@ -92,6 +92,7 @@ class OpenpechaGit:
             return repo.commit(branchname).hexsha
         except:
             logging.error('cannot find branch %s for %s', branchname, self.lname)
+            return None
 
     def get_openpecha(self, rev=None):
         if rev is None:
