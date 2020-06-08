@@ -8,6 +8,8 @@ from urllib.error import HTTPError
 from openpecha.buda.errors import Error
 from openpecha.buda.op_bare import OpenpechaBare
 
+ENV={"GIT_TERMINAL_PROMPT": "0"}
+
 class OpenpechaGit:
     """
     The OpenpechaGit class is here to help manage and pull all the Openpecha objects and store them on a temporary local
@@ -56,7 +58,7 @@ class OpenpechaGit:
         """
         if self.poti_localgit_exists():
             return
-        self.repo = Repo.clone_from(self.openpecha_dstgit, str(Path(self.cache_dir, self.lname)), bare=self.bare)
+        self.repo = Repo.clone_from(self.openpecha_dstgit, str(Path(self.cache_dir, self.lname)), env=ENV, bare=self.bare)
         self.synced = True
 
     def poti_localgit_exists(self):
