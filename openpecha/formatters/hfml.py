@@ -6,7 +6,7 @@ from openpecha.formatters.format import *
 from openpecha.formatters.formatter import BaseFormatter
 
 
-class TofuMaps:
+class LocalId2UUID:
     """Maintains tufo-id map for echa laye."""
 
     def __init__(self, layers):
@@ -87,29 +87,58 @@ class HFMLFormatter(BaseFormatter):
     def get_old_layers(self, layers):
         layers = {}
         for layer in layers:
-            layers[layer] = self.load(self.dirs["layers_path"] / f"{layer}.yml")
+            layer_fn = self.dirs["layers_path"] / f"{layer}.yml"
+            if layer_fn.is_file():
+                layers[layer] = self.load()
         return layers
 
     def _inc_layer_revision(self, layer):
         inc_rev_int = int(layer["revision"]) + 1
         layer["revision"] = f"{inc_rev_int:05}"
 
-    def create_or_update_layer(layer, name, start, end, **kwargs)
+    def create_new_layer(self, layer_name, AnnotationDict, anns, keys):
+        New_Layer = deepcopy(Layer)
+        New_Layer["id"] = self.get_unique_id()
+        New_Layer["annotation_type"] = layer_name
+        New_Layer["revision"] = f"{1:05}"
+        for i, ann in enumerate(anns):
+            ann= deepcopy(AnnotationDict)
+            uuid = self.get_unique_id()
+            for key, value in zip(keys, ann):
+                if key in ["start", "end"]:
+                    ann["span"][key] = value
+                else:
+                    ann[key] = value
+            New["annotations"][uuid] = ann
+            self.local_id2uuid.maps[[layer_name[tofu.start + i] = uuid
+        return New_Layer
+
+    def update_layer(self, Layer, anns, keys):
+        self._inc_layer_revision(Layer)
+        for i, (local_id, *ann) in enumerate(anns):
+            uuid = self.local_id2uuid.maps[Layer["annotation_type"]].get(local_id, None)
+            for key, value in zip(keys, ann):
+                if key in ["start", "end"]:
+                    Layer["annotations"][uuid]["span"][key] = value
+                else:
+                    Layer["annotations"][uuid][key] = value
+
+    def get_keys(self, ann):
+        return ("start", "end") + tuple(ann.keys())[:-1]
+
 
     def format_layer(self, layers):
         old_layers = self.get_old_layers(layers)
-        tofu = TofuMaps(old_layers)
+        self.local_id2uuid = LocalId2UUID(old_layers)
 
-        cross_vol_anns = [
-            ("topic", layers["topic"]),
-            ("sub_topic", layers["sub_topic"]),
-        ]
-        non_cross_vol_anns = [
-            ("pagination", layers["pagination"]),
-            ("correction", layers["correction"]),
-            ("peydurma", layers["peydurma"]),
-            ("error_candidate", layers["error_candidate"]),
-        ]
+        cross_vol_anns, non_cross_vol_anns = [], []
+        for layer_name, layer_anns in layers.items():
+            if layer_name in ["topic", "sub_topic"]:
+                cross_vol_anns.append((layer_name, layer_anns))
+            else:
+                non_cross_vol_anns.append((layer_name, layer_anns))
+
+        del layers
         anns = {"cross_vol": cross_vol_anns, "non_cross_vol": non_cross_vol_anns}
         for ann in anns:
             if ann == "non_cross_vol":
@@ -118,99 +147,50 @@ class HFMLFormatter(BaseFormatter):
                     (pecha_pg, pecha_correction, pecha_peydurma, pecha_error),
                 ) in enumerate(zip(*anns[ann])):
                     base_id = f"v{i+1:03}"
+
                     # Page annotation
-                    if pecha_pg[0] not in old_layers:
-                        Pagination = deepcopy(Layer)
-                        Pagination["id"] = self.get_unique_id()
-                        Pagination["annotation_type"] = "pagination"
-                        Pagination["revision"] = f"{1:05}"
-                        for i, (start, end, pg_info, index) in enumerate(
-                            1, pecha_pg[1]
-                        ):
-                            page = deepcopy(Page)
-                            uuid = self.get_unique_id()
-                            page["span"]["start"] = start
-                            page["span"]["end"] = end
-                            page["page_index"] = index
-                            page["page_info"] = pg_info
-                            Pagination["annotations"][uuid] = page
-                            tofu.maps[pecha_pg[0]][tofu.start + i] = uuid
+                    layer_name, layer_anns = pecha_pg
+                    if layer_name not in old_layers:
+                        Pagination = self.create_new_layer(
+                            layer_name, Page, layer_anns, self.get_keys(Page)
+                        )
                     else:
-                        Pagination = old_layers[pecha_pg[0]]
-                        self._inc_layer_revision(Pagination)
-                        for tofu_id, start, end, pg_info, index in pecha_pg[1]:
-                            uuid = tofu.maps[pecha_pg[0]].get(tofu_id, None)
-                            Pagination["annotations"][uuid]["span"]["start"] = start
-                            Pagination["annotations"][uuid]["span"]["end"] = end
-                            Pagination["annotations"][uuid]["page_index"] = index
-                            Pagination["annotations"][uuid]["page_info"] = pg_info
+                        Pagination = old_layers[layer_name]
+                        self.update_layer(Pagination, layer_anns, self.get_keys(Page))
 
                     # Correction annotation
-                    if pecha_correction[0] not in old_layers:
-                        Correction_layer = deepcopy(Layer)
-                        Correction_layer["id"] = self.get_unique_id()
-                        Correction_layer["annotation_type"] = "correction"
-                        Correction_layer["revision"] = f"{1:05}"
-                        for i, (start, end, sug) in enumerate(1, pecha_correction[1]):
-                            correction = deepcopy(Correction)
-                            uuid = self.get_unique_id()
-                            correction["span"]["start"] = start
-                            correction["span"]["end"] = end
-                            correction["correction"] = sug
-                            Correction_layer["annotations"][uuid] = correction
-                            tofu.maps[pecha_correction[0]][tofu.start + i] = uuid
+                    layer_name, layer_anns = pecha_correction
+                    if layer_name not in old_layers:
+                        Correction_layer = self.create_new_layer(
+                            layer_name, Correction, layer_anns, self.get_keys(Correction)
+                        )
                     else:
-                        Correction_layer = old_layers[pecha_correction[0]]
-                        self._inc_layer_revision(Correction_layer)
-                        for tofu_id, start, end, sug in pecha_correction[1]:
-                            uuid = tofu.maps[pecha_correction[0]].get(tofu_id, None)
-                            Correction_layer["annotations"][uuid]["span"][
-                                "start"
-                            ] = start
-                            Correction_layer["annotations"][uuid]["span"]["end"] = end
-                            Correction_layer["annotations"][uuid]["correction"] = sug
+                        Correction_layer = old_layers[layer_name]
+                        self.update_layer(
+                            Correction_layer, layer_anns, self.get_keys(Correction)
+                        )
 
                     # Error_candidate annotation
-                    if pecha_error[0] not in old_layers:
-                        Error_layer = deepcopy(Layer)
-                        Error_layer["id"] = self.get_unique_id()
-                        Error_layer["annotation_type"] = "error_candidate"
-                        Error_layer["revision"] = f"{1:05}"
-                        for i, (start, end) in enumerate(1, pecha_error[1]):
-                            error = deepcopy(ErrorCandidate)
-                            uuid = self.get_unique_id()
-                            error["span"]["start"] = start
-                            error["span"]["end"] = end
-                            Error_layer["annotations"][uuid] = error
-                            tofu.maps[pecha_error[0]][tofu.start + i] = uuid
+                    if layer_name not in old_layers:
+                        Error_layer = self.create_new_layer(
+                            layer_name, ErrorCandidate, layer_anns, self.get_keys(ErrorCandidate)
+                        )
                     else:
-                        Error_layer = old_layers[pecha_error[0]]
-                        self._inc_layer_revision(Error_layer)
-                        for tofu_id, start, end in pecha_error[1]:
-                            uuid = tofu.maps[pecha_error[0]].get(tofu_id, None)
-                            Error_layer["annotations"][uuid]["span"]["start"] = start
-                            Error_layer["annotations"][uuid]["span"]["end"] = end
+                        Error_layer = old_layers[layer_name]
+                        self.update_layer(
+                            Error_layer, layer_anns, self.get_keys(ErrorCandidate)
+                        )
 
                     # Peydurma annotation
-                    if pecha_peydurma[0] not in old_layers:
-                        Peydurma_layer = deepcopy(Layer)
-                        Peydurma_layer["id"] = self.get_unique_id()
-                        Peydurma_layer["annotation_type"] = "note_marker"
-                        Peydurma_layer["revision"] = f"{1:05}"
-                        for i, pey in enumerate(1, pecha_peydurma[0]):
-                            peydurma = deepcopy(Peydurma)
-                            uuid = self.get_unique_id()
-                            peydurma["span"]["start"] = pey
-                            peydurma["span"]["end"] = pey
-                            Peydurma_layer["annotations"][uuid] = peydurma
-                            tofu.maps[pecha_peydurma[0]][tofu.start + i] = uuid
+                    if layer_name not in old_layers:
+                        Peydurma_layer = self.create_new_layer(
+                            layer_name, Peydurma, layer_anns, self.get_keys(Peydurma)
+                        )
                     else:
-                        Peydurma_layer = old_layers[pecha_peydurma[0]]
-                        self._inc_layer_revision(Peydurma_layer)
-                        for tofu_id, start, end in pecha_peydurma[1]:
-                            uuid = tofu.maps[pecha_peydurma[0]].get(tofu_id, None)
-                            Peydurma_layer["annotations"][uuid]["span"]["start"] = start
-                            Peydurma_layer["annotations"][uuid]["span"]["end"] = end
+                        Peydurma_layer = old_layers[layer_name]
+                        self.update_layer(
+                            Peydurma_layer, layer_anns, self.get_keys(Peydurma)
+                        )
 
                     result = {
                         "pagination": Pagination,

@@ -38,10 +38,10 @@ Span = {
 
 # Page annotation
 Page = {
-    "span": Span,  # Span of particualr annotation, type: Span
     "page_index": None,  # Page number based on Volume specified in `part_of`. type: int
     "page_info": None,  # Page information. type: str
     "reference": None,  # Any reference of page, eg: img_url. type: str
+    "span": Span,  # Span of particualr annotation, type: Span
 }
 
 # Cross vol Span
