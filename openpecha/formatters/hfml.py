@@ -6,19 +6,39 @@ from openpecha.formatters.format import *
 from openpecha.formatters.formatter import BaseFormatter
 
 
-class LocalId2UUID:
-    """Maintains tufo-id map for echa laye."""
+class LId2UUID:
+    def __init__(self, local_id_hash):
+        self.lid2uuid = self._initialize(local_id_hash)
+        self.last_local_id = self.find_last()
+
+    def _initialize(self, local_id_hash):
+        lid2uuid = {}
+        for local_id, uuid in local_id_hash.items():
+            lid2uuid[key] = {
+                "uuid": uuid,
+                "is_found": False
+            }
+        return lid2uuid
+
+    def find_last(self):
+        return list(self.lid2uuid.keys()).pop()
+
+class LocalIdManager:
+    """Maintains local_id to uuid map for echa layer."""
 
     def __init__(self, layers):
         self.start = 200_000
-        self.map_name = "tofu-maps"
-        self.maps = self._get_tofumaps()
+        self.map_name = "local-id2uuid"
+        self.maps = self._get_local_id_maps(layers)
 
-    def _get_tofumaps(self, layers):
+    def _get_local_id_maps(self, layers):
         maps = {}
         for layer in layers:
-            maps[layer] = layers[layer].get(self.map_name, {})
+            maps[layer] = LId2UUID(layers[layer].get(self.map_name, {}))
         return maps
+
+    def insert_at_last(self, layer_name, uuid):
+
 
 
 class HFMLFormatter(BaseFormatter):
@@ -102,7 +122,7 @@ class HFMLFormatter(BaseFormatter):
         New_Layer["annotation_type"] = layer_name
         New_Layer["revision"] = f"{1:05}"
         for i, ann in enumerate(anns):
-            ann= deepcopy(AnnotationDict)
+            ann = deepcopy(AnnotationDict)
             uuid = self.get_unique_id()
             for key, value in zip(keys, ann):
                 if key in ["start", "end"]:
@@ -110,22 +130,31 @@ class HFMLFormatter(BaseFormatter):
                 else:
                     ann[key] = value
             New["annotations"][uuid] = ann
-            self.local_id2uuid.maps[[layer_name[tofu.start + i] = uuid
+            self.local_id2uuid.maps[layer_name][tofu.start + i] = uuid
         return New_Layer
 
     def update_layer(self, Layer, anns, keys):
         self._inc_layer_revision(Layer)
         for i, (local_id, *ann) in enumerate(anns):
-            uuid = self.local_id2uuid.maps[Layer["annotation_type"]].get(local_id, None)
-            for key, value in zip(keys, ann):
-                if key in ["start", "end"]:
-                    Layer["annotations"][uuid]["span"][key] = value
-                else:
-                    Layer["annotations"][uuid][key] = value
+            if local_id:
+                uuid = self.local_id2uuid.maps[Layer["annotation_type"]].get(
+                    local_id, None
+                )
+                if uuid:
+                    for key, value in zip(keys, ann):
+                        if key in ["start", "end"]:
+                            Layer["annotations"][uuid]["span"][key] = value
+                        else:
+                            Layer["annotations"][uuid][key] = value
+            # Local_id missing, possible cases
+            # 1. New Annotation created
+            # 2. Local_id gets deleted
+            else:
+                pass
+
 
     def get_keys(self, ann):
         return ("start", "end") + tuple(ann.keys())[:-1]
-
 
     def format_layer(self, layers):
         old_layers = self.get_old_layers(layers)
@@ -162,7 +191,10 @@ class HFMLFormatter(BaseFormatter):
                     layer_name, layer_anns = pecha_correction
                     if layer_name not in old_layers:
                         Correction_layer = self.create_new_layer(
-                            layer_name, Correction, layer_anns, self.get_keys(Correction)
+                            layer_name,
+                            Correction,
+                            layer_anns,
+                            self.get_keys(Correction),
                         )
                     else:
                         Correction_layer = old_layers[layer_name]
@@ -173,7 +205,10 @@ class HFMLFormatter(BaseFormatter):
                     # Error_candidate annotation
                     if layer_name not in old_layers:
                         Error_layer = self.create_new_layer(
-                            layer_name, ErrorCandidate, layer_anns, self.get_keys(ErrorCandidate)
+                            layer_name,
+                            ErrorCandidate,
+                            layer_anns,
+                            self.get_keys(ErrorCandidate),
                         )
                     else:
                         Error_layer = old_layers[layer_name]
