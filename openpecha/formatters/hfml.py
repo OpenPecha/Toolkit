@@ -1,3 +1,9 @@
+"""
+Formatter for HFML annotations in the text
+
+This module implements all classes necessary to format HFML annotation to OpenPecha format.
+HFML (Human Friendly Markup Language) contains tagset used for structuring and annotating the text.
+"""
 import re
 from copy import deepcopy
 from pathlib import Path
@@ -6,43 +12,68 @@ from openpecha.formatters.format import *
 from openpecha.formatters.formatter import BaseFormatter
 
 
-class LId2UUID:
-    def __init__(self, local_id_hash):
-        self.lid2uuid = self._initialize(local_id_hash)
+class Global2LocalId:
+    """Map global id of annotation in a layer to local id of a layer."""
+
+    def __init__(self, local_id_dict):
+        self.start_local_id = 200_000
+        self.global2local_id = self._initialize(local_id_hash)
+        self.local2global_id = {
+            l_id: g_id for l_id, g_id in self.global2local_id.items()
+        }
         self.last_local_id = self.find_last()
 
-    def _initialize(self, local_id_hash):
-        lid2uuid = {}
-        for local_id, uuid in local_id_hash.items():
-            lid2uuid[local_id] = {"uuid": uuid, "is_found": False}
-        return lid2uuid
+    def _initialize(self, local_id_dict):
+        g2lid = {}
+        for global_id, local_id in local_id_dict.items():
+            g2lid[global_id] = {"local_id": local_id, "is_found": False}
+        return g2lid
 
     def find_last(self):
-        if self.lid2uuid:
-            return list(self.lid2uuid.keys()).pop()
+        """Return last local id in a layer."""
+        if self.gobal2local_id:
+            return list(self.gobal2local_id.values()).pop()
+        return chr(self.start_local_id - 1)
 
-    def insert_at_last(self, uuid):
+    def add(self, global_id):
+        """Map given `global_id` to the last local id."""
         next_local_id = chr(ord(self.last_local_id) + 1)
-        self.lid2uuid[next_local_id] = uuid
+        self.global2local_id[global_id] = next_local_id
         self.last_local_id = next_local_id
+
+    def get_local_id(self, global_id):
+        """Return `local_id` associated to given `global_id`."""
+        return self.global2local_id.get(global_id, None)
+
+    def get_global_id(self, local_id):
+        """Return `global_id` associated to given `local_id`."""
+        return self.local2global_id.get(local_id, None)
+
+    def serialize(self):
+        """Return just the global and local id paris."""
+        return {
+            global_id: self.global2local_id[global_id]["local_id"]
+            for global_id in self.gobal2local_id
+            if self.gobal2local_id[global_id]["is_found"]
+        }
 
 
 class LocalIdManager:
     """Maintains local_id to uuid map for echa layer."""
 
     def __init__(self, layers):
-        self.start = 200_000
-        self.map_name = "local-id2uuid"
+        self.map_name = "uuid2local-id"
         self.maps = self._get_local_id_maps(layers)
 
     def _get_local_id_maps(self, layers):
         maps = {}
         for layer in layers:
-            maps[layer] = LId2UUID(layers[layer].get(self.map_name, {}))
+            maps[layer] = Global2LocalId(layers[layer].get(self.map_name, {}))
         return maps
 
-    def add(self, layer_name, uuid):
-        self.maps[layer_name].insert_at_last(uuid)
+    def add(self, layer_name, global_id):
+        """Add `global_id` to layer's global2local id map."""
+        self.maps[layer_name].add(global_id)
 
 
 class HFMLFormatter(BaseFormatter):
@@ -120,30 +151,33 @@ class HFMLFormatter(BaseFormatter):
         inc_rev_int = int(layer["revision"]) + 1
         layer["revision"] = f"{inc_rev_int:05}"
 
+    def add_new_ann(self, Layer, ann_obj, ann, keys):
+        uuid = self.get_unique_id()
+        for key, value in zip(keys, ann):
+            if key in ["start", "end"]:
+                ann_obj["span"][key] = value
+            else:
+                ann_obj[key] = value
+        Layer["annotations"][uuid] = ann
+        self.local_id_manager.add(Layer["annotation_type"], uuid)
+
     def create_new_layer(self, layer_name, AnnotationDict, anns, keys):
         New_Layer = deepcopy(Layer)
         New_Layer["id"] = self.get_unique_id()
         New_Layer["annotation_type"] = layer_name
         New_Layer["revision"] = f"{1:05}"
         for i, ann in enumerate(anns):
-            ann = deepcopy(AnnotationDict)
-            uuid = self.get_unique_id()
-            for key, value in zip(keys, ann):
-                if key in ["start", "end"]:
-                    ann["span"][key] = value
-                else:
-                    ann[key] = value
-            New["annotations"][uuid] = ann
-            self.local_id2uuid.maps[layer_name][tofu.start + i] = uuid
+            ann_obj = deepcopy(AnnotationDict)
+            self.add_new_ann(New_Layer, ann_obj, ann, keys)
         return New_Layer
 
     def update_layer(self, Layer, anns, keys):
         self._inc_layer_revision(Layer)
         for i, (local_id, *ann) in enumerate(anns):
             if local_id:
-                uuid = self.local_id2uuid.maps[Layer["annotation_type"]].get(
-                    local_id, None
-                )
+                uuid = self.local_id_manager.maps[
+                    Layer["annotation_type"]
+                ].get_global_id(local_id)
                 if uuid:
                     for key, value in zip(keys, ann):
                         if key in ["start", "end"]:
@@ -154,14 +188,15 @@ class HFMLFormatter(BaseFormatter):
             # 1. New Annotation created
             # 2. Local_id gets deleted
             else:
-                pass
+                ann_obj = None
+                self.add_new_ann(Layer, ann_obj, ann, keys)
 
     def get_keys(self, ann):
         return ("start", "end") + tuple(ann.keys())[:-1]
 
     def format_layer(self, layers):
         old_layers = self.get_old_layers(layers)
-        self.local_id2uuid = LocalId2UUID(old_layers)
+        self.local_id_manager = LocalIdManager(old_layers)
 
         cross_vol_anns, non_cross_vol_anns = [], []
         for layer_name, layer_anns in layers.items():
