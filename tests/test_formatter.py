@@ -82,7 +82,7 @@ class TestHFMLFormatter:
         layers = [layer.stem for layer in formatter.dirs["layers_path"].iterdir()]
         old_layers = formatter.get_old_layers(layers)
         local_id2uuid = LocalIdManager(old_layers)
-        print(loca_id2uuid)
+        local_id2uuid.add("tsawa", 123232)
 
 
 class TestGoogleOCRFormatter:

@@ -21,6 +21,11 @@ class LId2UUID:
         if self.lid2uuid:
             return list(self.lid2uuid.keys()).pop()
 
+    def insert_at_last(self, uuid):
+        next_local_id = chr(ord(self.last_local_id) + 1)
+        self.lid2uuid[next_local_id] = uuid
+        self.last_local_id = next_local_id
+
 
 class LocalIdManager:
     """Maintains local_id to uuid map for echa layer."""
@@ -36,8 +41,8 @@ class LocalIdManager:
             maps[layer] = LId2UUID(layers[layer].get(self.map_name, {}))
         return maps
 
-    def insert_at_last(self, layer_name, uuid):
-        pass
+    def add(self, layer_name, uuid):
+        self.maps[layer_name].insert_at_last(uuid)
 
 
 class HFMLFormatter(BaseFormatter):
