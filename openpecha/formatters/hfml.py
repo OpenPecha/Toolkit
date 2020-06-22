@@ -14,14 +14,13 @@ class LId2UUID:
     def _initialize(self, local_id_hash):
         lid2uuid = {}
         for local_id, uuid in local_id_hash.items():
-            lid2uuid[key] = {
-                "uuid": uuid,
-                "is_found": False
-            }
+            lid2uuid[local_id] = {"uuid": uuid, "is_found": False}
         return lid2uuid
 
     def find_last(self):
-        return list(self.lid2uuid.keys()).pop()
+        if self.lid2uuid:
+            return list(self.lid2uuid.keys()).pop()
+
 
 class LocalIdManager:
     """Maintains local_id to uuid map for echa layer."""
@@ -38,7 +37,7 @@ class LocalIdManager:
         return maps
 
     def insert_at_last(self, layer_name, uuid):
-
+        pass
 
 
 class HFMLFormatter(BaseFormatter):
@@ -104,12 +103,12 @@ class HFMLFormatter(BaseFormatter):
         for fn in sorted(fns):
             yield self.text_preprocess(fn.read_text()), fn.name, fns_len
 
-    def get_old_layers(self, layers):
+    def get_old_layers(self, new_layers):
         layers = {}
-        for layer in layers:
+        for layer in new_layers:
             layer_fn = self.dirs["layers_path"] / f"{layer}.yml"
             if layer_fn.is_file():
-                layers[layer] = self.load()
+                layers[layer] = self.load(layer_fn)
         return layers
 
     def _inc_layer_revision(self, layer):
@@ -151,7 +150,6 @@ class HFMLFormatter(BaseFormatter):
             # 2. Local_id gets deleted
             else:
                 pass
-
 
     def get_keys(self, ann):
         return ("start", "end") + tuple(ann.keys())[:-1]
