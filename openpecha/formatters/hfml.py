@@ -151,48 +151,36 @@ class HFMLFormatter(BaseFormatter):
         inc_rev_int = int(layer["revision"]) + 1
         layer["revision"] = f"{inc_rev_int:05}"
 
-    def add_new_ann(self, Layer, ann_obj, ann, keys):
+    def add_new_ann(self, Layer, ann):
         uuid = self.get_unique_id()
-        for key, value in zip(keys, ann):
-            if key in ["start", "end"]:
-                ann_obj["span"][key] = value
-            else:
-                ann_obj[key] = value
         Layer["annotations"][uuid] = ann
         self.local_id_manager.add(Layer["annotation_type"], uuid)
 
-    def create_new_layer(self, layer_name, AnnotationDict, anns, keys):
+    def create_new_layer(self, layer_name, anns):
         New_Layer = deepcopy(Layer)
         New_Layer["id"] = self.get_unique_id()
         New_Layer["annotation_type"] = layer_name
         New_Layer["revision"] = f"{1:05}"
-        for i, ann in enumerate(anns):
-            ann_obj = deepcopy(AnnotationDict)
-            self.add_new_ann(New_Layer, ann_obj, ann, keys)
+        for ann in anns:
+            self.add_new_ann(New_Layer, ann)
         return New_Layer
 
-    def update_layer(self, Layer, anns, keys):
+    def update_layer(self, Layer, anns):
         self._inc_layer_revision(Layer)
-        for i, (local_id, *ann) in enumerate(anns):
+        for i, (local_id, ann) in enumerate(anns):
             if local_id:
                 uuid = self.local_id_manager.maps[
                     Layer["annotation_type"]
                 ].get_global_id(local_id)
                 if uuid:
-                    for key, value in zip(keys, ann):
-                        if key in ["start", "end"]:
-                            Layer["annotations"][uuid]["span"][key] = value
-                        else:
-                            Layer["annotations"][uuid][key] = value
+                    for key, value in ann.items():
+                        Layer["annotations"][uuid][key] = value
             # Local_id missing, possible cases
             # 1. New Annotation created
             # 2. Local_id gets deleted
             else:
-                ann_obj = None
-                self.add_new_ann(Layer, ann_obj, ann, keys)
-
-    def get_keys(self, ann):
-        return ("start", "end") + tuple(ann.keys())[:-1]
+                self.add_new_ann(Layer, ann)
+                # TODO: implement case 2
 
     def format_layer(self, layers):
         old_layers = self.get_old_layers(layers)
@@ -206,111 +194,61 @@ class HFMLFormatter(BaseFormatter):
                 non_cross_vol_anns.append((layer_name, layer_anns))
 
         del layers
-        anns = {"cross_vol": cross_vol_anns, "non_cross_vol": non_cross_vol_anns}
-        for ann in anns:
-            if ann == "non_cross_vol":
-                for (
-                    i,
-                    (pecha_pg, pecha_correction, pecha_peydurma, pecha_error),
-                ) in enumerate(zip(*anns[ann])):
-                    base_id = f"v{i+1:03}"
 
-                    # Page annotation
-                    layer_name, layer_anns = pecha_pg
-                    if layer_name not in old_layers:
-                        Pagination = self.create_new_layer(
-                            layer_name, Page, layer_anns, self.get_keys(Page)
-                        )
-                    else:
-                        Pagination = old_layers[layer_name]
-                        self.update_layer(Pagination, layer_anns, self.get_keys(Page))
+        # Create Annotaion layers
+        for (i, vol_layers) in enumerate(zip(*non_cross_vol_anns)):
+            base_id = f"v{i+1:03}"
 
-                    # Correction annotation
-                    layer_name, layer_anns = pecha_correction
-                    if layer_name not in old_layers:
-                        Correction_layer = self.create_new_layer(
-                            layer_name,
-                            Correction,
-                            layer_anns,
-                            self.get_keys(Correction),
-                        )
-                    else:
-                        Correction_layer = old_layers[layer_name]
-                        self.update_layer(
-                            Correction_layer, layer_anns, self.get_keys(Correction)
-                        )
+            result = {}
 
-                    # Error_candidate annotation
-                    if layer_name not in old_layers:
-                        Error_layer = self.create_new_layer(
-                            layer_name,
-                            ErrorCandidate,
-                            layer_anns,
-                            self.get_keys(ErrorCandidate),
-                        )
-                    else:
-                        Error_layer = old_layers[layer_name]
-                        self.update_layer(
-                            Error_layer, layer_anns, self.get_keys(ErrorCandidate)
-                        )
-
-                    # Peydurma annotation
-                    if layer_name not in old_layers:
-                        Peydurma_layer = self.create_new_layer(
-                            layer_name, Peydurma, layer_anns, self.get_keys(Peydurma)
-                        )
-                    else:
-                        Peydurma_layer = old_layers[layer_name]
-                        self.update_layer(
-                            Peydurma_layer, layer_anns, self.get_keys(Peydurma)
-                        )
-
-                    result = {
-                        "pagination": Pagination,
-                        "correction": Correction_layer,
-                        "peydurma": Peydurma_layer,
-                        "error_candidate": Error_layer,
-                    }
-
-                    yield result, base_id
+            layer_name, layer_anns = vol_layers
+            if layer_name not in old_layers:
+                result[layer_name] = self.create_new_layer(layer_name, layer_anns)
             else:
-                Index_layer = deepcopy(Layer)
-                Index_layer["id"] = self.get_unique_id()
-                Index_layer["annotation_type"] = "index"
-                Index_layer["revision"] = f"{1:05}"
-                # loop over each topic
-                for topic, sub_topic in zip(*anns[ann]):
-                    Topic = deepcopy(Text)
-                    Topic["id"] = self.get_unique_id()
+                old_layer = old_layers[layer_name]
+                self.update_layer(old_layer, layer_anns)
+                result[layer_name] = old_layer
 
-                    # loop over each sub_topic
-                    for corss_sub_topic in sub_topic:
-                        sub_text = deepcopy(SubText)
-                        sub_text["id"] = self.get_unique_id()
-                        for start, end, vol_id, work in corss_sub_topic:
-                            sub_text["work"] = work
-                            cross_vol_span = deepcopy(CrossVolSpan)
-                            cross_vol_span["vol"] = f"base/v{vol_id:03}"
-                            cross_vol_span["span"]["start"] = start
-                            cross_vol_span["span"]["end"] = end
-                            sub_text["span"].append(cross_vol_span)
+            yield result, base_id
 
-                        if corss_sub_topic:
-                            Topic["parts"].append(sub_text)
+        # Create Index layer
+        Index_layer = deepcopy(Layer)
+        Index_layer["id"] = self.get_unique_id()
+        Index_layer["annotation_type"] = "index"
+        Index_layer["revision"] = f"{1:05}"
+        # loop over each topic
+        for topic, sub_topic in zip(*cross_vol_anns):
+            Topic = deepcopy(Text)
+            Topic["id"] = self.get_unique_id()
 
-                    for start, end, vol_id, work in topic:
-                        Topic["work"] = work
-                        cross_vol_span = deepcopy(CrossVolSpan)
-                        cross_vol_span["vol"] = f"base/v{vol_id:03}"
-                        cross_vol_span["span"]["start"] = start
-                        cross_vol_span["span"]["end"] = end
-                        Topic["span"].append(cross_vol_span)
+            # loop over each sub_topic
+            for corss_sub_topic in sub_topic:
+                sub_text = deepcopy(SubText)
+                sub_text["id"] = self.get_unique_id()
+                for start, end, vol_id, work in corss_sub_topic:
+                    sub_text["work"] = work
+                    cross_vol_span = deepcopy(CrossVolSpan)
+                    cross_vol_span["vol"] = f"base/v{vol_id:03}"
+                    cross_vol_span["span"]["start"] = start
+                    cross_vol_span["span"]["end"] = end
+                    sub_text["span"].append(cross_vol_span)
 
-                    Index_layer["annotations"].append(Topic)
+                if corss_sub_topic:
+                    Topic["parts"].append(sub_text)
 
-                result = {"index": Index_layer}
+            for start, end, vol_id, work in topic:
+                Topic["work"] = work
+                cross_vol_span = deepcopy(CrossVolSpan)
+                cross_vol_span["vol"] = f"base/v{vol_id:03}"
+                cross_vol_span["span"]["start"] = start
+                cross_vol_span["span"]["end"] = end
+                Topic["span"].append(cross_vol_span)
 
-                yield result, None
+            Index_layer["annotations"].append(Topic)
+
+        result = {"index": Index_layer}
+
+        yield result, None
 
     def total_pattern(self, pat_list, annotated_line):
         """ It calculates the length of all the annotation detected in a line.
