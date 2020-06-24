@@ -141,6 +141,7 @@ class Rdf:
         self.add_triple(subject_r, adm['metadataLegal'], bda['LD_BDRC_CC0'])
         self.add_triple(subject_r, adm['gitRevision'], Literal(rev))
         self.add_triple(subject_r, adm['status'], bda['StatusReleased'])
+        self.add_triple(subject_r, adm['access'], bda['AccessOpen'])
 
     @staticmethod
     def get_chunk_index(string):
