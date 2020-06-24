@@ -23,6 +23,7 @@ class HFMLFormatter(BaseFormatter):
         self.sub_topic = [] # made class variable as it needs to update cross poti
         self.page = []
         self.error_id = []
+        self.archaic_word_id = []
         self.abs_er_id = []
         self.notes_id = []
         self.sub_topic_Id = [] # made class variable as it needs to update cross poti
@@ -71,11 +72,11 @@ class HFMLFormatter(BaseFormatter):
 
     def format_layer(self, layers):
         cross_vol_anns = [layers['topic'], layers['sub_topic']]
-        non_cross_vol_anns = [layers['page'], layers['correction'], layers['peydurma'], layers['error_candidate']]
+        non_cross_vol_anns = [layers['page'], layers['correction'], layers['archaic_word'] layers['peydurma'], layers['error_candidate']]
         anns = {'cross_vol': cross_vol_anns, 'non_cross_vol': non_cross_vol_anns}
         for ann in anns:
             if ann == 'non_cross_vol':
-                for i, (pecha_pg, pecha_correction, pecha_peydurma, pecha_error) in enumerate(zip(*anns[ann])):
+                for i, (pecha_pg, pecha_correction, pecha_archaic_word, pecha_peydurma, pecha_error) in enumerate(zip(*anns[ann])):
                     base_id = f'v{i+1:03}'
                     # Page annotation
                     Pagination = deepcopy(Layer)
@@ -103,6 +104,19 @@ class HFMLFormatter(BaseFormatter):
                         correction['span']['end'] = end
                         correction['correction'] = sug
                         Correction_layer['annotations'].append(correction)
+
+                # Archaic word annotation
+                    Archaic_word_layer = deepcopy(Layer)
+                    Archaic_word_layer['id'] = self.get_unique_id()
+                    Archaic_word_layer['annotation_type'] = 'Archaic_word'
+                    Archaic_word_layer['revision'] = f'{1:05}'
+                    for start, end, modern in pecha_archaic_word:
+                        archaic_word = deepcopy(Archaic_word)
+                        archaic_word['id'] = self.get_unique_id()
+                        archaic_word['span']['start'] = start
+                        archaic_word['span']['end'] = end
+                        archaic_word['modern_word'] = modern
+                        Archaic_word_layer['annotations'].append(archaic_word)
 
                     # Error_candidate annotation
                     Error_layer = deepcopy(Layer)
@@ -132,6 +146,7 @@ class HFMLFormatter(BaseFormatter):
                     result = {
                         'pagination': Pagination,
                         'correction': Correction_layer,
+                        'archaic_word': Archaic_word_layer,
                         'peydurma': Peydurma_layer,
                         'error_candidate': Error_layer
                     }
@@ -201,7 +216,13 @@ class HFMLFormatter(BaseFormatter):
             for error in errors:
                 error_part = error[0].split(',')[0][1:]
                 total_length = total_length + (len(error[0])-len(error_part))
-            
+
+        if re.search(pat_list['archaic_word_pattern'], annotated_line):
+            archaic_words = re.finditer(pat_list['archaic_word_pattern'], annotated_line)  # list of match object of error pattern in line
+            for archaic_word in archaic_words:
+                archaic_part = archaic_word[0].split(',')[0][1:]
+                total_length = total_length + (len(archaic_word[0]) - len(archaic_part))
+
         if re.search(pat_list['abs_er_pattern'], annotated_line):
             abs_ers = re.findall(pat_list['abs_er_pattern'], annotated_line) # list of match of abs_er pattern in line
             total_length = total_length + 2 * len(abs_ers)
@@ -215,21 +236,13 @@ class HFMLFormatter(BaseFormatter):
             if title_pattern:
                 total_length += 4
         
-        for pattern in ['start_cit_pattern', 'end_cit_pattern']:
-            cit_patterns = re.findall(pat_list[pattern], annotated_line) # list of match of citation pattern in line
-            total_length = total_length + 2 * len(cit_patterns)
+        for pattern in ['start_cit_pattern', 'start_sabche_pattern', 'start_tsawa_pattern','start_yigchung_pattern']:
+            start_patterns = re.findall(pat_list[pattern], annotated_line) # list of match of citation pattern in line
+            total_length = total_length + 3 * len(start_patterns)
 
-        for pattern in ['start_sabche_pattern', 'end_sabche_pattern']:
-            sabche_patterns = re.findall(pat_list[pattern], annotated_line) # list of match of sabche pattern in line
-            total_length = total_length + 2 * len(sabche_patterns)
-        
-        for pattern in ['start_tsawa_pattern', 'end_tsawa_pattern']:
-            tsawa_patterns = re.findall(pat_list[pattern], annotated_line) # list of match of tsawa pattern in line
-            total_length = total_length + 2 * len(tsawa_patterns)
-        
-        for pattern in ['start_yigchung_pattern', 'end_yigchung_pattern']:
-            yigchung_patterns = re.findall(pat_list[pattern], annotated_line) # list of match of yigchung pattern in line
-            total_length = total_length + 2 * len(yigchung_patterns)
+        for pattern in ['end_cit_pattern', 'end_sabche_pattern', 'end_tsawa_pattern','end_yigchung_pattern']:
+            end_patterns = re.findall(pat_list[pattern], annotated_line) # list of match of citation pattern in line
+            total_length = total_length + 2 * len(end_patterns)
 
         return total_length
 
@@ -250,7 +263,7 @@ class HFMLFormatter(BaseFormatter):
         walker = 0
         result = []
         while walker < len(end_list) and walker < len(start_list):
-            result.append((start_list[walker], end_list[walker]))
+            result.append((start_list[walker][0],{'span': {'start': start_list[walker][1], 'end': end_list[walker]}}))
             walker += 1
         return result
 
@@ -281,7 +294,14 @@ class HFMLFormatter(BaseFormatter):
                 if ann.start() > error.start():
                     error_part = error[0].split(',')[0][1:]
                     length_before = length_before + (len(error[0]) - len(error_part))
-            
+
+        if re.search(pat_list['archaic_word_pattern'], line):
+            archaic_words = re.finditer(pat_list['archaic_word_pattern'], line)  # list of match object of error pattern in line
+            for archaic_word in archaic_words:
+                if ann.start() > archaic_word.start():
+                    archaic_part = archaic_word[0].split(',')[0][1:]
+                    length_before = length_before + (len(archaic_word[0]) - len(archaic_part))
+
         if re.search(pat_list['abs_er_pattern'], line):
             abs_ers = re.finditer(pat_list['abs_er_pattern'], line) # list of match object of abs_er pattern in line
             for abs_er in abs_ers:
@@ -300,28 +320,16 @@ class HFMLFormatter(BaseFormatter):
                 if ann.start() > title_pattern.start():
                     length_before += 4
         
-        for pp in ['start_cit_pattern', 'end_cit_pattern']:
-            cit_patterns = re.finditer(pat_list[pp], line) # list of match object of citation pattern in line
-            for cit_pattern in cit_patterns:
-                if ann.start() > cit_pattern.start():
-                    length_before = length_before+2
-
-        for pp in ['start_sabche_pattern', 'end_sabche_pattern']:
-            sabche_patterns = re.finditer(pat_list[pp], line) # list of match object of sabche pattern in line
-            for sabche_pattern in sabche_patterns:
-                if ann.start() > sabche_pattern.start():
-                    length_before = length_before+2
+        for pp in ['start_cit_pattern', 'start_sabche_pattern', 'start_tsawa_pattern','start_yigchung_pattern']:
+            start_patterns = re.finditer(pat_list[pp], line) # list of match object of citation pattern in line
+            for start_pattern in start_patterns:
+                if ann.start() > start_pattern.start():
+                    length_before = length_before+3
         
-        for pp in ['start_tsawa_pattern', 'end_tsawa_pattern']:
-            tsawa_patterns = re.finditer(pat_list[pp], line) # list of match object of tsawa pattern in line
-            for tsawa_pattern in tsawa_patterns:
-                if ann.start() > tsawa_pattern.start():
-                    length_before = length_before+2
-        
-        for pp in ['start_yigchung_pattern', 'end_yigchung_pattern']:
-            yigchung_patterns = re.finditer(pat_list[pp], line) # list of match object of yigchung pattern in line
-            for yigchung_pattern in yigchung_patterns:
-                if ann.start() > yigchung_pattern.start():
+        for pp in ['end_cit_pattern', 'end_sabche_pattern', 'end_tsawa_pattern','end_yigchung_pattern']:
+            start_patterns = re.finditer(pat_list[pp], line) # list of match object of citation pattern in line
+            for start_pattern in start_patterns:
+                if ann.start() > start_pattern.start():
                     length_before = length_before+2
         
         return length_before
@@ -356,7 +364,15 @@ class HFMLFormatter(BaseFormatter):
             for error in errors:
                 error_part = error[0].split(',')[0][1:]
                 base_line = re.sub(pat_list['error_pattern'], error_part, base_line, 1)
-            
+
+        if re.search(pat_list['archaic_word_pattern'], annotated_line):
+            archaic_words = re.finditer(
+                pat_list['archaic_word_pattern'], annotated_line
+            )  # list of match object of error pattern in line
+            for archaic_word in archaic_words:
+                archaic_part = archaic_word[0].split(',')[0][1:]
+                base_line = re.sub(pat_list['archaic_word_pattern'], archaic_part, base_line, 1)
+
         if re.search(pat_list['abs_er_pattern'], annotated_line):
             abs_ers = re.finditer(pat_list['abs_er_pattern'], annotated_line)# list of match object of abs_er pattern in line
             for abs_er in abs_ers:
@@ -372,9 +388,12 @@ class HFMLFormatter(BaseFormatter):
         cur_vol_pages = [] # list variable to store page annotation according to base string index eg : [(startPage,endPage)]
         cur_vol_error_id = [] # list variable to store error annotation according to base string index eg : [(es,ee,'suggestion')]
         cur_vol_abs_er_id = [] # list variable to store abs_er annotation 
+        cur_vol_archaic_words = []
         note_id = [] # list variable to store note annotation '#"
         pg_info = [] # lsit variable to store page info component
         pg_ann = [] # list variable to store page annotation content
+        pg_tid = []
+
         poti_titles = []
         chapter_titles = []
         start_cit_patterns = [] # list variable to store index of start citation pattern => (g
@@ -391,14 +410,15 @@ class HFMLFormatter(BaseFormatter):
             'pecha_title_pattern': r'\(k1.+?\)',
             'poti_title_pattern': r'\(k2.+?\)',
             'chapter_title_pattern': r'\(k3.+?\)',
-            'page_pattern': r'\[[0-9]+[a-z]{1}\]',
-            'line_pattern': r'\[\w+\.\d+\]','topic_pattern':r'\{\w+\}',
-            'start_cit_pattern': r'\(g','end_cit_pattern': r'g\)',
-            'start_sabche_pattern': r'\(q','end_sabche_pattern': r'q\)',
-            'start_tsawa_pattern': r'\(m','end_tsawa_pattern': r'm\)',
-            'start_yigchung_pattern': r'\(y','end_yigchung_pattern': r'y\)',
-            'sub_topic_pattern': r'\{\w+\-\w+\}',
-            'error_pattern': r'\(\S+\,\S+\)',
+            'page_pattern': r'([{chr(2000000)}-{chr(3000000)}])\[[0-9]+[a-z]{1}\]',
+            'line_pattern': r'\[\w+\.\d+\]','topic_pattern':r'\{([{chr(2000000)}-{chr(3000000)}])\w+\}',
+            'start_cit_pattern': r'\<([{chr(2000000)}-{chr(3000000)}])g','end_cit_pattern': r'g\>',
+            'start_sabche_pattern': r'\<([{chr(2000000)}-{chr(3000000)}])q','end_sabche_pattern': r'q\>',
+            'start_tsawa_pattern': r'\<([{chr(2000000)}-{chr(3000000)}])m','end_tsawa_pattern': r'm\>',
+            'start_yigchung_pattern': r'\<([{chr(2000000)}-{chr(3000000)}])y','end_yigchung_pattern': r'y\>',
+            'sub_topic_pattern': r'\{([{chr(2000000)}-{chr(3000000)}])\w+\-\w+\}',
+            'error_pattern': r'\<([{chr(2000000)}-{chr(3000000)}])\S+\,\S+\>',
+            'archaic_word_pattern': r'\{([{chr(2000000)}-{chr(3000000)}])\S+,\S+\}',
             'abs_er_pattern': r'\[[^0-9].*?\]',
             'note_pattern':r'#'
         }
@@ -428,11 +448,12 @@ class HFMLFormatter(BaseFormatter):
                 if re.search(pat_list['page_pattern'], line):  # checking current line contains page annotation or not
                     start_page = end_page
                     end_page = end_line
+                    pg_tid.append(re.search(pat_list['page_pattern'], line).group(1))
                     page_info = line[re.search(pat_list['page_pattern'], line).end():]
                     pg_ann.append(re.search(pat_list['page_pattern'], line)[0][1:-1])
                     pg_info.append(page_info)
                     if len(pg_info)>=2:
-                        cur_vol_pages.append((start_page, end_page, pg_info[-2], pg_ann[-2]))
+                        cur_vol_pages.append((pg_tid[-2], {'page_index':pg_ann[-2], 'page_info':pg_info[-2], 'span':{'start':start_page, 'end':end_page}}))
                         if start_page < end_page: # to ignore the empty pages
                             i = i+1  # To accumulate the \n character 
                             end_page = end_page+3
@@ -516,7 +537,14 @@ class HFMLFormatter(BaseFormatter):
 
                             end_error = start_error+len(error_part)-1
                             cur_vol_error_id.append((start_error, end_error, suggestion))
-                            
+
+                    if re.search(pat_list['archaic_word_pattern'], line):
+                        archaic_words = re.finditer(pat_list['archaic_word_pattern'], line)  # list of match object of error pattern in line
+                        for archaic_word in archaic_words:
+                            if ann.start() > archaic_word.start():
+                                archaic_part = archaic_word[0].split(',')[0][1:]
+                                length_before = length_before + (len(archaic_word[0]) - len(archaic_part))
+
                     if re.search(pat_list['abs_er_pattern'], line):
                         abs_ers = re.finditer(pat_list['abs_er_pattern'],line)
                         for abs_er in abs_ers:
