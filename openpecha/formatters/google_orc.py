@@ -8,7 +8,7 @@ from pathlib import Path
 import yaml
 
 from openpecha.formatters import BaseFormatter
-from openpecha.formatters.format import Layer, Page
+from openpecha.formatters.layers import Layer, Page
 from openpecha.utils import gzip_str
 
 
