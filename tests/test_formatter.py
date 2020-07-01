@@ -39,7 +39,7 @@ class TestHFMLFormatter:
             "poti_title": [[(0, 24)], [(0, 24)], [(0, 24)]],
             "chapter_title": [[(98, 125)], [], []],
             "citation": [[], [(164, 202), (204, 241)], [(97, 162)]],
-            "page": [
+            "pagination": [
                 [(0, 24, "kk", "1a"), (27, 676, "kl", "1b"), (679, 2173, "lm", "2a")],
                 [(0, 0, "kk", "1a"), (0, 266, "", "1b")],
                 [(0, 266, "ko", "1a")],
@@ -82,7 +82,9 @@ class TestHFMLFormatter:
         layers = [layer.stem for layer in formatter.dirs["layers_path"].iterdir()]
         old_layers = formatter.get_old_layers(layers)
         local_id2uuid = LocalIdManager(old_layers)
-        local_id2uuid.add("tsawa", 123232)
+        local_id2uuid.add("tsawa", 1231232)
+        d = local_id2uuid.serialize("tsawa")
+        print(d)
 
 
 class TestGoogleOCRFormatter:

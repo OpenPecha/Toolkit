@@ -16,7 +16,7 @@ class Global2LocalId:
 
     def __init__(self, local_id_dict):
         self.start_local_id = 200_000
-        self.global2local_id = self._initialize(local_id_hash)
+        self.global2local_id = self._initialize(local_id_dict)
         self.local2global_id = {
             l_id: g_id for l_id, g_id in self.global2local_id.items()
         }
@@ -30,8 +30,8 @@ class Global2LocalId:
 
     def find_last(self):
         """Return last local id in a layer."""
-        if self.gobal2local_id:
-            return list(self.gobal2local_id.values()).pop()
+        if self.global2local_id:
+            return list(self.global2local_id.values()).pop()["local_id"]
         return chr(self.start_local_id - 1)
 
     def add(self, global_id):
@@ -50,11 +50,13 @@ class Global2LocalId:
 
     def serialize(self):
         """Return just the global and local id paris."""
-        return {
-            global_id: self.global2local_id[global_id]["local_id"]
-            for global_id in self.gobal2local_id
-            if self.gobal2local_id[global_id]["is_found"]
-        }
+        result = {}
+        for global_id, id_obj in self.global2local_id.items():
+            if isinstance(id_obj, str):
+                result[global_id] = id_obj
+            elif id_obj["is_found"]:
+                result[global_id] = id_obj["is_found"]
+        return result
 
 
 class LocalIdManager:
@@ -73,6 +75,10 @@ class LocalIdManager:
     def add(self, layer_name, global_id):
         """Add `global_id` to layer's global2local id map."""
         self.maps[layer_name].add(global_id)
+
+    def serialize(self, layer_name):
+        """Convert map of given `layer_name` in global and local id pairs."""
+        return self.maps[layer_name].serialize()
 
 
 class HFMLFormatter(BaseFormatter):
