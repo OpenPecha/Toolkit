@@ -1,5 +1,7 @@
-import yaml
 import pathlib
+
+import yaml
+
 
 class Openpecha:
     """
@@ -11,6 +13,7 @@ class Openpecha:
        - get_base_list(): get an array of all the layers fnames (and cache it)
        - get_base(basefname): get the string of base layer (and cache it)
     """
+
     def __init__(self, lname):
         """
         Initializing the openpecha object with it's name from https://github.com/OpenPecha/openpecha-catalog
@@ -23,10 +26,12 @@ class Openpecha:
         self.components = self.read_components()
 
     def read_layer(self, basename, layername):
-        return self.read_file_content_yml("layers/"+basename+"/"+layername+".yml")
+        return self.read_file_content_yml(
+            "layers/" + basename + "/" + layername + ".yml"
+        )
 
     def read_base(self, basename):
-        return self.read_file_content("base/"+basename+".txt")
+        return self.read_file_content("base/" + basename + ".txt")
 
     def read_meta(self):
         """
@@ -42,8 +47,8 @@ class Openpecha:
 
     def is_ocr(self):
         meta = self.get_meta()
-        if 'source_metadata' in meta:
-            sour = meta['source_metadata']['id'].split(":")
+        if "source_metadata" in meta:
+            sour = meta["source_metadata"]["id"].split(":")
             if sour[0] == "bdr":
                 return True
         return False
@@ -69,15 +74,15 @@ class Openpecha:
         return self.layers[basename]
 
     def has_layer(self, basename, layername):
-        return basename in self.components["base"]
+        return layername in self.components["layers"][basename]
 
     def list_layers(self, basename):
-        if basename not in self.components:
+        if basename not in self.components["layers"]:
             return None
-        return self.components[basename]
+        return self.components["layers"][basename]
 
     def list_base(self):
-        return self.components['base']
+        return self.components["base"]
 
     def read_components(self):
         """
@@ -89,13 +94,13 @@ class Openpecha:
         for f in sorted(paths):
             path = f.split("/")
             if len(path) > 1:
-                if path[-2] == 'base':
+                if path[-2] == "base":
                     basename = pathlib.Path(path[-1]).stem
-                    res['base'].append(basename)
+                    res["base"].append(basename)
                 else:
                     basename = path[-2]
                     layername = pathlib.Path(path[-1]).stem
-                    if basename not in res['layers']:
-                        res['layers'][basename] = []
-                    res['layers'][basename].append(layername)
+                    if basename not in res["layers"]:
+                        res["layers"][basename] = []
+                    res["layers"][basename].append(layername)
         return res

@@ -1,9 +1,87 @@
+<<<<<<< HEAD
+=======
+"""
+Formatter for HFML annotations in the text
+
+This module implements all classes necessary to format HFML annotation to OpenPecha format.
+HFML (Human Friendly Markup Language) contains tagset used for structuring and annotating the text.
+"""
+>>>>>>> hfml-tofu-ids
 import re
 from copy import deepcopy
 from pathlib import Path
 
+from openpecha.formatters.format import *
 from openpecha.formatters.formatter import BaseFormatter
 from openpecha.formatters.layers import *
+
+<<<<<<< HEAD
+=======
+
+
+class Global2LocalId:
+    """Map global id of annotation in a layer to local id of a layer."""
+
+    def __init__(self, local_id_dict):
+        self.start_local_id = 200_000
+        self.global2local_id = self._initialize(local_id_hash)
+        self.local2global_id = {
+            l_id: g_id for l_id, g_id in self.global2local_id.items()
+        }
+        self.last_local_id = self.find_last()
+
+    def _initialize(self, local_id_dict):
+        g2lid = {}
+        for global_id, local_id in local_id_dict.items():
+            g2lid[global_id] = {"local_id": local_id, "is_found": False}
+        return g2lid
+
+    def find_last(self):
+        """Return last local id in a layer."""
+        if self.gobal2local_id:
+            return list(self.gobal2local_id.values()).pop()
+        return chr(self.start_local_id - 1)
+
+    def add(self, global_id):
+        """Map given `global_id` to the last local id."""
+        next_local_id = chr(ord(self.last_local_id) + 1)
+        self.global2local_id[global_id] = next_local_id
+        self.last_local_id = next_local_id
+
+    def get_local_id(self, global_id):
+        """Return `local_id` associated to given `global_id`."""
+        return self.global2local_id.get(global_id, None)
+
+    def get_global_id(self, local_id):
+        """Return `global_id` associated to given `local_id`."""
+        return self.local2global_id.get(local_id, None)
+
+    def serialize(self):
+        """Return just the global and local id paris."""
+        return {
+            global_id: self.global2local_id[global_id]["local_id"]
+            for global_id in self.gobal2local_id
+            if self.gobal2local_id[global_id]["is_found"]
+        }
+
+
+class LocalIdManager:
+    """Maintains local_id to uuid map for echa layer."""
+
+    def __init__(self, layers):
+        self.map_name = "uuid2local-id"
+        self.maps = self._get_local_id_maps(layers)
+
+    def _get_local_id_maps(self, layers):
+        maps = {}
+        for layer in layers:
+            maps[layer] = Global2LocalId(layers[layer].get(self.map_name, {}))
+        return maps
+
+    def add(self, layer_name, global_id):
+        """Add `global_id` to layer's global2local id map."""
+        self.maps[layer_name].add(global_id)
+>>>>>>> hfml-tofu-ids
 
 
 class HFMLFormatter(BaseFormatter):
@@ -69,119 +147,116 @@ class HFMLFormatter(BaseFormatter):
         for fn in sorted(fns):
             yield self.text_preprocess(fn.read_text()), fn.name, fns_len
 
-    def format_layer(self, layers):
-        cross_vol_anns = [layers["topic"], layers["sub_topic"]]
-        non_cross_vol_anns = [
-            layers["page"],
-            layers["correction"],
-            layers["peydurma"],
-            layers["error_candidate"],
-        ]
-        anns = {"cross_vol": cross_vol_anns, "non_cross_vol": non_cross_vol_anns}
+    def get_old_layers(self, new_layers):
+        layers = {}
+        for layer in new_layers:
+            layer_fn = self.dirs["layers_path"] / f"{layer}.yml"
+            if layer_fn.is_file():
+                layers[layer] = self.load(layer_fn)
+        return layers
+
+    def _inc_layer_revision(self, layer):
+        inc_rev_int = int(layer["revision"]) + 1
+        layer["revision"] = f"{inc_rev_int:05}"
+
+    def add_new_ann(self, Layer, ann):
+        uuid = self.get_unique_id()
+        Layer["annotations"][uuid] = ann
+        self.local_id_manager.add(Layer["annotation_type"], uuid)
+
+    def create_new_layer(self, layer_name, anns):
+        New_Layer = deepcopy(Layer)
+        New_Layer["id"] = self.get_unique_id()
+        New_Layer["annotation_type"] = layer_name
+        New_Layer["revision"] = f"{1:05}"
         for ann in anns:
-            if ann == "non_cross_vol":
-                for (
-                    i,
-                    (pecha_pg, pecha_correction, pecha_peydurma, pecha_error),
-                ) in enumerate(zip(*anns[ann])):
-                    base_id = f"v{i+1:03}"
-                    # Page annotation
-                    Pagination = deepcopy(Layer)
-                    Pagination["id"] = self.get_unique_id()
-                    Pagination["annotation_type"] = "pagination"
-                    Pagination["revision"] = f"{1:05}"
-                    for start, end, pg_info, index in pecha_pg:
-                        page = deepcopy(Page)
-                        page["id"] = self.get_unique_id()
-                        page["span"]["start"] = start
-                        page["span"]["end"] = end
-                        page["page_index"] = index
-                        page["page_info"] = pg_info
-                        Pagination["annotations"].append(page)
+            self.add_new_ann(New_Layer, ann)
+        return New_Layer
 
-                    # Correction annotation
-                    Correction_layer = deepcopy(Layer)
-                    Correction_layer["id"] = self.get_unique_id()
-                    Correction_layer["annotation_type"] = "correction"
-                    Correction_layer["revision"] = f"{1:05}"
-                    for start, end, sug in pecha_correction:
-                        correction = deepcopy(Correction)
-                        correction["id"] = self.get_unique_id()
-                        correction["span"]["start"] = start
-                        correction["span"]["end"] = end
-                        correction["correction"] = sug
-                        Correction_layer["annotations"].append(correction)
-
-                    # Error_candidate annotation
-                    Error_layer = deepcopy(Layer)
-                    Error_layer["id"] = self.get_unique_id()
-                    Error_layer["annotation_type"] = "error_candidate"
-                    Error_layer["revision"] = f"{1:05}"
-                    for start, end in pecha_error:
-                        error = deepcopy(ErrorCandidate)
-                        error["id"] = self.get_unique_id()
-                        error["span"]["start"] = start
-                        error["span"]["end"] = end
-                        Error_layer["annotations"].append(error)
-
-                    # Peydurma annotation
-                    Peydurma_layer = deepcopy(Layer)
-                    Peydurma_layer["id"] = self.get_unique_id()
-                    Peydurma_layer["annotation_type"] = "note_marker"
-                    Peydurma_layer["revision"] = f"{1:05}"
-                    for pey in pecha_peydurma:
-                        peydurma = deepcopy(Peydurma)
-                        peydurma["id"] = self.get_unique_id()
-                        peydurma["span"]["start"] = pey
-                        peydurma["span"]["end"] = pey
-                        Peydurma_layer["annotations"].append(peydurma)
-
-                    result = {
-                        "pagination": Pagination,
-                        "correction": Correction_layer,
-                        "peydurma": Peydurma_layer,
-                        "error_candidate": Error_layer,
-                    }
-
-                    yield result, base_id
+    def update_layer(self, Layer, anns):
+        self._inc_layer_revision(Layer)
+        for i, (local_id, ann) in enumerate(anns):
+            if local_id:
+                uuid = self.local_id_manager.maps[
+                    Layer["annotation_type"]
+                ].get_global_id(local_id)
+                if uuid:
+                    for key, value in ann.items():
+                        Layer["annotations"][uuid][key] = value
+            # Local_id missing, possible cases
+            # 1. New Annotation created
+            # 2. Local_id gets deleted
             else:
-                Index_layer = deepcopy(Layer)
-                Index_layer["id"] = self.get_unique_id()
-                Index_layer["annotation_type"] = "index"
-                Index_layer["revision"] = f"{1:05}"
-                # loop over each topic
-                for topic, sub_topic in zip(*anns[ann]):
-                    Topic = deepcopy(Text)
-                    Topic["id"] = self.get_unique_id()
+                self.add_new_ann(Layer, ann)
+                # TODO: implement case 2
 
-                    # loop over each sub_topic
-                    for corss_sub_topic in sub_topic:
-                        sub_text = deepcopy(SubText)
-                        sub_text["id"] = self.get_unique_id()
-                        for start, end, vol_id, work in corss_sub_topic:
-                            sub_text["work"] = work
-                            cross_vol_span = deepcopy(CrossVolSpan)
-                            cross_vol_span["vol"] = f"base/v{vol_id:03}"
-                            cross_vol_span["span"]["start"] = start
-                            cross_vol_span["span"]["end"] = end
-                            sub_text["span"].append(cross_vol_span)
+    def format_layer(self, layers):
+        old_layers = self.get_old_layers(layers)
+        self.local_id_manager = LocalIdManager(old_layers)
 
-                        if corss_sub_topic:
-                            Topic["parts"].append(sub_text)
+        cross_vol_anns, non_cross_vol_anns = [], []
+        for layer_name, layer_anns in layers.items():
+            if layer_name in ["topic", "sub_topic"]:
+                cross_vol_anns.append((layer_name, layer_anns))
+            else:
+                non_cross_vol_anns.append((layer_name, layer_anns))
 
-                    for start, end, vol_id, work in topic:
-                        Topic["work"] = work
-                        cross_vol_span = deepcopy(CrossVolSpan)
-                        cross_vol_span["vol"] = f"base/v{vol_id:03}"
-                        cross_vol_span["span"]["start"] = start
-                        cross_vol_span["span"]["end"] = end
-                        Topic["span"].append(cross_vol_span)
+        del layers
 
-                    Index_layer["annotations"].append(Topic)
+        # Create Annotaion layers
+        for (i, vol_layers) in enumerate(zip(*non_cross_vol_anns)):
+            base_id = f"v{i+1:03}"
 
-                result = {"index": Index_layer}
+            result = {}
 
-                yield result, None
+            layer_name, layer_anns = vol_layers
+            if layer_name not in old_layers:
+                result[layer_name] = self.create_new_layer(layer_name, layer_anns)
+            else:
+                old_layer = old_layers[layer_name]
+                self.update_layer(old_layer, layer_anns)
+                result[layer_name] = old_layer
+
+            yield result, base_id
+
+        # Create Index layer
+        Index_layer = deepcopy(Layer)
+        Index_layer["id"] = self.get_unique_id()
+        Index_layer["annotation_type"] = "index"
+        Index_layer["revision"] = f"{1:05}"
+        # loop over each topic
+        for topic, sub_topic in zip(*cross_vol_anns):
+            Topic = deepcopy(Text)
+            Topic["id"] = self.get_unique_id()
+
+            # loop over each sub_topic
+            for corss_sub_topic in sub_topic:
+                sub_text = deepcopy(SubText)
+                sub_text["id"] = self.get_unique_id()
+                for start, end, vol_id, work in corss_sub_topic:
+                    sub_text["work"] = work
+                    cross_vol_span = deepcopy(CrossVolSpan)
+                    cross_vol_span["vol"] = f"base/v{vol_id:03}"
+                    cross_vol_span["span"]["start"] = start
+                    cross_vol_span["span"]["end"] = end
+                    sub_text["span"].append(cross_vol_span)
+
+                if corss_sub_topic:
+                    Topic["parts"].append(sub_text)
+
+            for start, end, vol_id, work in topic:
+                Topic["work"] = work
+                cross_vol_span = deepcopy(CrossVolSpan)
+                cross_vol_span["vol"] = f"base/v{vol_id:03}"
+                cross_vol_span["span"]["start"] = start
+                cross_vol_span["span"]["end"] = end
+                Topic["span"].append(cross_vol_span)
+
+            Index_layer["annotations"].append(Topic)
+
+        result = {"index": Index_layer}
+
+        yield result, None
 
     def total_pattern(self, pat_list, annotated_line):
         """ It calculates the length of all the annotation detected in a line.
@@ -838,7 +913,11 @@ class HFMLFormatter(BaseFormatter):
             "poti_title": self.poti_title,
             "chapter_title": self.chapter_title,
             "citation": self.citation_pattern,
+<<<<<<< HEAD
             "page": self.page,  # page variable format (start_index,end_index,pg_Info,pg_ann)
+=======
+            "pagination": self.page,  # page variable format (start_index,end_index,pg_Info,pg_ann)
+>>>>>>> hfml-tofu-ids
             "topic": self.topic_id,
             "sub_topic": self.sub_topic,
             "sabche": self.sabche_pattern,
@@ -1084,7 +1163,11 @@ class HFMLTextFromatter(HFMLFormatter):
             "poti_title": self.poti_title,
             "chapter_title": self.chapter_title,
             "citation": self.citation_pattern,
+<<<<<<< HEAD
             "page": self.page,  # page variable format (start_index,end_index,pg_Info,pg_ann)
+=======
+            "pagination": self.page,  # page variable format (start_index,end_index,pg_Info,pg_ann)
+>>>>>>> hfml-tofu-ids
             "topic": self.topic_id,
             "sub_topic": self.sub_topic,
             "sabche": self.sabche_pattern,
@@ -1096,6 +1179,7 @@ class HFMLTextFromatter(HFMLFormatter):
         }
 
         return result
+<<<<<<< HEAD
 
 
 if __name__ == "__main__":
@@ -1105,3 +1189,13 @@ if __name__ == "__main__":
     formatter = HFMLTextFromatter()
     formatter.new_poti("./tests/data/formatter/hfml/vol_sep_test")
 
+=======
+
+
+# if __name__ == "__main__":
+#     formatter = HFMLFormatter()
+#     formatter.create_opf('./tests/data/formatter/hfml/P000002/')
+
+#     formatter = HFMLTextFromatter()
+#     formatter.new_poti('./tests/data/formatter/hfml/vol_sep_test')
+>>>>>>> hfml-tofu-ids
