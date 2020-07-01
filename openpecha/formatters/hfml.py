@@ -5,10 +5,8 @@ This module implements all classes necessary to format HFML annotation to OpenPe
 HFML (Human Friendly Markup Language) contains tagset used for structuring and annotating the text.
 """
 import re
-from copy import deepcopy
 from pathlib import Path
 
-from openpecha.formatters.format import *
 from openpecha.formatters.formatter import BaseFormatter
 from openpecha.formatters.layers import *
 
