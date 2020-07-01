@@ -52,18 +52,14 @@ class GoogleOCRFormatter(BaseFormatter):
 
     def format_layer(self, layers, base_id):
         # Format page annotation
-        Pagination = deepcopy(Layer)
-        Pagination["id"] = self.get_unique_id()
-        Pagination["annotation_type"] = "pagination"
-        Pagination["revision"] = f"{1:05}"
+        Pagination = Layer(self.get_unique_id(), "pagination")
         for pg, page_ref in zip(layers["pages"], layers["pages_ref"]):
-            page = deepcopy(Page)
-            page["id"] = self.get_unique_id()
-            page["span"]["start"] = pg[0]
-            page["span"]["end"] = pg[1]
-            page["page_index"] = self._get_page_index(pg[2])
-            page["reference"] = page_ref
-            Pagination["annotations"].append(page)
+            uuid = self.get_unique_id()
+            span = Span(pg[0], pg[1])
+            page = Page(
+                span, page_index=self._get_page_index(pg[2]), page_ref=page - ref
+            )
+            Pagination["annotations"][uuid] = page
 
         result = {"pagination": Pagination}
 

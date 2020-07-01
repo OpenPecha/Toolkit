@@ -1,12 +1,9 @@
-<<<<<<< HEAD
-=======
 """
 Formatter for HFML annotations in the text
 
 This module implements all classes necessary to format HFML annotation to OpenPecha format.
 HFML (Human Friendly Markup Language) contains tagset used for structuring and annotating the text.
 """
->>>>>>> hfml-tofu-ids
 import re
 from copy import deepcopy
 from pathlib import Path
@@ -14,9 +11,6 @@ from pathlib import Path
 from openpecha.formatters.format import *
 from openpecha.formatters.formatter import BaseFormatter
 from openpecha.formatters.layers import *
-
-<<<<<<< HEAD
-=======
 
 
 class Global2LocalId:
@@ -81,7 +75,6 @@ class LocalIdManager:
     def add(self, layer_name, global_id):
         """Add `global_id` to layer's global2local id map."""
         self.maps[layer_name].add(global_id)
->>>>>>> hfml-tofu-ids
 
 
 class HFMLFormatter(BaseFormatter):
@@ -159,35 +152,32 @@ class HFMLFormatter(BaseFormatter):
         inc_rev_int = int(layer["revision"]) + 1
         layer["revision"] = f"{inc_rev_int:05}"
 
-    def add_new_ann(self, Layer, ann):
+    def add_new_ann(self, layer, ann):
         uuid = self.get_unique_id()
-        Layer["annotations"][uuid] = ann
-        self.local_id_manager.add(Layer["annotation_type"], uuid)
+        layer["annotations"][uuid] = ann
+        self.local_id_manager.add(layer["annotation_type"], uuid)
 
     def create_new_layer(self, layer_name, anns):
-        New_Layer = deepcopy(Layer)
-        New_Layer["id"] = self.get_unique_id()
-        New_Layer["annotation_type"] = layer_name
-        New_Layer["revision"] = f"{1:05}"
+        new_layer = Layer(self.get_unique_id(), layer_name)
         for ann in anns:
-            self.add_new_ann(New_Layer, ann)
-        return New_Layer
+            self.add_new_ann(new_layer, ann)
+        return new_layer
 
-    def update_layer(self, Layer, anns):
-        self._inc_layer_revision(Layer)
-        for i, (local_id, ann) in enumerate(anns):
+    def update_layer(self, layer, anns):
+        self._inc_layer_revision(layer)
+        for local_id, ann in anns:
             if local_id:
                 uuid = self.local_id_manager.maps[
-                    Layer["annotation_type"]
+                    layer["annotation_type"]
                 ].get_global_id(local_id)
                 if uuid:
                     for key, value in ann.items():
-                        Layer["annotations"][uuid][key] = value
+                        layer["annotations"][uuid][key] = value
             # Local_id missing, possible cases
             # 1. New Annotation created
             # 2. Local_id gets deleted
             else:
-                self.add_new_ann(Layer, ann)
+                self.add_new_ann(layer, ann)
                 # TODO: implement case 2
 
     def format_layer(self, layers):
@@ -220,10 +210,7 @@ class HFMLFormatter(BaseFormatter):
             yield result, base_id
 
         # Create Index layer
-        Index_layer = deepcopy(Layer)
-        Index_layer["id"] = self.get_unique_id()
-        Index_layer["annotation_type"] = "index"
-        Index_layer["revision"] = f"{1:05}"
+        Index_layer = Layer(self.get_unique_id(), "index")
         # loop over each topic
         for topic, sub_topic in zip(*cross_vol_anns):
             Topic = deepcopy(Text)
@@ -913,11 +900,7 @@ class HFMLFormatter(BaseFormatter):
             "poti_title": self.poti_title,
             "chapter_title": self.chapter_title,
             "citation": self.citation_pattern,
-<<<<<<< HEAD
-            "page": self.page,  # page variable format (start_index,end_index,pg_Info,pg_ann)
-=======
             "pagination": self.page,  # page variable format (start_index,end_index,pg_Info,pg_ann)
->>>>>>> hfml-tofu-ids
             "topic": self.topic_id,
             "sub_topic": self.sub_topic,
             "sabche": self.sabche_pattern,
@@ -1160,14 +1143,10 @@ class HFMLTextFromatter(HFMLFormatter):
             self.__adapt_span_to_vol(extra, i)
 
         result = {
-            "poti_title": self.poti_title,
+            "pecha_title": self.poti_title,
             "chapter_title": self.chapter_title,
             "citation": self.citation_pattern,
-<<<<<<< HEAD
-            "page": self.page,  # page variable format (start_index,end_index,pg_Info,pg_ann)
-=======
             "pagination": self.page,  # page variable format (start_index,end_index,pg_Info,pg_ann)
->>>>>>> hfml-tofu-ids
             "topic": self.topic_id,
             "sub_topic": self.sub_topic,
             "sabche": self.sabche_pattern,
@@ -1179,7 +1158,6 @@ class HFMLTextFromatter(HFMLFormatter):
         }
 
         return result
-<<<<<<< HEAD
 
 
 if __name__ == "__main__":
@@ -1188,14 +1166,3 @@ if __name__ == "__main__":
 
     formatter = HFMLTextFromatter()
     formatter.new_poti("./tests/data/formatter/hfml/vol_sep_test")
-
-=======
-
-
-# if __name__ == "__main__":
-#     formatter = HFMLFormatter()
-#     formatter.create_opf('./tests/data/formatter/hfml/P000002/')
-
-#     formatter = HFMLTextFromatter()
-#     formatter.new_poti('./tests/data/formatter/hfml/vol_sep_test')
->>>>>>> hfml-tofu-ids
