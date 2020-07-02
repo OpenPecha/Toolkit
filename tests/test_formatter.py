@@ -76,9 +76,7 @@ class TestHFMLFormatter:
     def test_tofu_id(self):
         formatter = HFMLFormatter()
         formatter.dirs = {}
-        formatter.dirs["layers_path"] = Path(
-            "../openpecha-user/P000780/P000780.opf/layers/v001"
-        )
+        formatter.dirs["layers_path"] = Path("tests/data/formatter/hfml/tofu-id")
         layers = [layer.stem for layer in formatter.dirs["layers_path"].iterdir()]
         old_layers = formatter.get_old_layers(layers)
         local_id2uuid = LocalIdManager(old_layers)
