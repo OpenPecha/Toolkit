@@ -4,6 +4,7 @@ import math
 import diff_match_patch as dmp_module
 import yaml
 
+
 class Blupdate:
     """
     This class represents an update in the base layer. It is used to recompute the existing layers into the new base layer.
@@ -23,7 +24,7 @@ class Blupdate:
     def compute_cctv(self):
         """
         Computes a cctv from self.srcbl to self.dstbl. This will take some effort but should be reasonable with DMP.
-        
+
         The cctv should the a list of triples, each triple being:
           - char start in srcbl (int)
           - char end in srcbl (int)
@@ -58,25 +59,29 @@ class Blupdate:
         # src_chunk is the chunk from source text, represented by mode 0 and -1.
         src_chunk_first_idx = 0
         src_chunk_last_idx = 0
-        
+
         # dst_chunk is the chunk from destination text, represented by mode 0 and 1.
         dst_chunk_first_idx = 0
         dst_chunk_last_idx = 0
 
         for mode, chunk in diffs:
-            if mode == 0: # says the chunk is common, update the src_chunk and dst_chunk first and last indices.
+            if (
+                mode == 0
+            ):  # says the chunk is common, update the src_chunk and dst_chunk first and last indices.
                 src_chunk_first_idx = src_chunk_last_idx
                 dst_chunk_first_idx = dst_chunk_last_idx
                 src_chunk_last_idx += len(chunk)
                 dst_chunk_last_idx += len(chunk)
-            elif mode == -1: # says the chunk is from source text, update src_chunk first and last indices.
+            elif (
+                mode == -1
+            ):  # says the chunk is from source text, update src_chunk first and last indices.
                 src_chunk_first_idx = src_chunk_last_idx
                 src_chunk_last_idx += len(chunk)
-            else: # mode == 1, says the chunks is from destination text, update dst_chunk first and last indices.
+            else:  # mode == 1, says the chunks is from destination text, update dst_chunk first and last indices.
                 dst_chunk_first_idx = dst_chunk_last_idx
                 dst_chunk_last_idx += len(chunk)
 
-            # get char coordinatte (cc) of the common chunk based on source and destination text.    
+            # get char coordinatte (cc) of the common chunk based on source and destination text.
             if mode == 0:
                 src_cc = (src_chunk_first_idx, src_chunk_last_idx)
                 dst_cc = (dst_chunk_first_idx, dst_chunk_last_idx)
@@ -102,16 +107,24 @@ class Blupdate:
           get_cctv_for_coord(9) == (-1, true)
         """
         prev_cct = 0
+        result = None
         for cct in self.cctv:
-            if srcblcoord > cct[0] and srcblcoord < cct[1]: # at inner of the range
-                return (cct[2], True)
-            elif srcblcoord == cct[0] or srcblcoord == cct[1] - 1: # at side of the range
-                return (cct[2], False)
-            elif srcblcoord < cct[0]: # falls between ccts (two range)
-                return (math.ceil((prev_cct + cct[2]) / 2), False)
-            
+            if srcblcoord > cct[0] and srcblcoord < cct[1]:  # at inner of the range
+                result = (cct[2], True)
+            elif (
+                srcblcoord == cct[0] or srcblcoord == cct[1] - 1
+            ):  # at side of the range
+                result = (cct[2], False)
+            elif srcblcoord < cct[0]:  # falls between ccts (two range)
+                result = (math.ceil((prev_cct + cct[2]) / 2), False)
+
+            if result:
+                return result
+
             prev_cct = cct[2]
 
+        if not result:
+            return (-1, False)
 
     def get_context(self, srcblcoord):
         """
@@ -126,11 +139,11 @@ class Blupdate:
 
         # check for left context size less than context_len
         if srcblcoord >= self.context_len:
-            left_context = self.srcbl[srcblcoord-self.context_len:srcblcoord]
+            left_context = self.srcbl[srcblcoord - self.context_len : srcblcoord]
         else:
             left_context = self.srcbl[:srcblcoord]
 
-        right_context = self.srcbl[srcblcoord:srcblcoord+self.context_len]
+        right_context = self.srcbl[srcblcoord : srcblcoord + self.context_len]
         return left_context, right_context
 
     def dmp_find(self, context, dstcoordestimate):
@@ -151,6 +164,8 @@ class Blupdate:
 
         By convention, the function returns -1 when it is unable to compute the new coordinate.
         """
+        if cct == -1:
+            return cct
         context = self.get_context(srcblcoord)
         dstcoordestimate = srcblcoord + cct
         return self.dmp_find(context, dstcoordestimate)
@@ -177,11 +192,11 @@ class Blupdate:
             start_cc = ann[0]
             end_cc = ann[1]
             anns[i] = [self.get_updated_coord(start_cc), self.get_updated_coord(end_cc)]
-        yaml.dump(anns, layer_fn.open('w'), default_flow_style=False)
-    
+        yaml.dump(anns, layer_fn.open("w"), default_flow_style=False)
+
     def update_annotations(self, opfpath):
         """
         Update all the layer annotations
         """
-        for layer_fn in (opfpath/'layers').iterdir():
+        for layer_fn in (opfpath / "layers").iterdir():
             self.update_layer(layer_fn)
