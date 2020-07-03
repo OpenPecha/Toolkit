@@ -4,6 +4,7 @@ from pathlib import Path
 import pytest
 
 from openpecha.formatters import GoogleOCRFormatter, HFMLFormatter, TsadraFormatter
+from openpecha.formatters.hfml import LocalIdManager
 from openpecha.formatters.new_hfml import ann_patterns, parse_annotations
 
 
@@ -39,7 +40,7 @@ class TestHFMLFormatter:
             "poti_title": [[(0, 24)], [(0, 24)], [(0, 24)]],
             "chapter_title": [[(98, 125)], [], []],
             "citation": [[], [(164, 202), (204, 241)], [(97, 162)]],
-            "page": [
+            "pagination": [
                 [(0, 24, "kk", "1a"), (27, 676, "kl", "1b"), (679, 2173, "lm", "2a")],
                 [(0, 0, "kk", "1a"), (0, 266, "", "1b")],
                 [(0, 266, "ko", "1a")],
@@ -73,18 +74,32 @@ class TestHFMLFormatter:
         for layer in result:
             assert result[layer] == expected_result[layer]
 
+    def test_tofu_id(self):
+        formatter = HFMLFormatter()
+        formatter.dirs = {}
+        formatter.dirs["layers_path"] = Path("tests/data/formatter/hfml/tofu-id")
+        layers = [layer.stem for layer in formatter.dirs["layers_path"].iterdir()]
+        old_layers = formatter.get_old_layers(layers)
+        local_id2uuid = LocalIdManager(old_layers)
+        local_id2uuid.add("tsawa", 1231232)
+        d = local_id2uuid.serialize("tsawa")
+        print(d)
+
 
 class TestGoogleOCRFormatter:
     @pytest.fixture(scope="class")
     def get_resources(self):
         data_path = Path("tests/data/formatter/google_ocr/W0001/v001")
-        responses = [json.load(fn.open()) for fn in sorted(list((data_path).iterdir()))]
+        responses = [
+            (json.load(fn.open()), fn.stem)
+            for fn in sorted(list((data_path).iterdir()))
+        ]
         formatter = GoogleOCRFormatter()
         return formatter, data_path, responses
 
     def test_get_base_text(self, get_resources):
         formatter, data_path, responses = get_resources
-        formatter.build_layers(responses)
+        formatter.build_layers(responses, "")
 
         result = formatter.get_base_text()
 
@@ -95,13 +110,13 @@ class TestGoogleOCRFormatter:
     def test_build_layers(self, get_resources):
         formatter, data_path, responses = get_resources
 
-        result = formatter.build_layers(responses)
+        result = formatter.build_layers(responses, "")
 
         expected = {
-            "page": [(0, 19), (24, 888), (893, 1607), (1612, 1809)],
+            "pages": [(0, 19), (24, 888), (893, 1607), (1612, 1809)],
         }
 
-        for result_page, expected_page in zip(result["page"], expected["page"]):
+        for result_page, expected_page in zip(result["pages"], expected["pages"]):
             assert result_page[:2] == expected_page
 
 
@@ -150,3 +165,7 @@ def test_new_hfml_parser():
     anns = parse_annotations(input_hfml, ann_patterns)
 
     expected = {}
+
+
+if __name__ == "__main__":
+    TestHFMLFormatter().test_tofu_id()

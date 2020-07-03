@@ -2,19 +2,18 @@ import csv
 import requests
 from pathlib import Path
 import shutil
+import logging
 
 import click
 from github import Github
 from git import Repo
 from tqdm import tqdm
 
-from openpecha.serializers import SerializeMd
-from openpecha.serializers import SerializeHFML
+from openpecha.serializers import *
 from openpecha.blupdate import Blupdate
-from openpecha.formatters import GoogleOCRFormatter
-from openpecha.formatters import HFMLFormatter
-from openpecha.formatters import TsadraFormatter
-from openpecha.github import github_publish
+from openpecha.formatters import *
+
+from openpecha.buda.openpecha_manager import OpenpechaManager
 
 
 OP_PATH = Path('./.openpecha')
@@ -320,7 +319,7 @@ def update(**kwargs):
 
 
 # OpenPecha Formatter
-formatter_types = ['ocr', 'hfml', 'tsadra']
+formatter_types = ['ocr', 'hfml(default)', 'tsadra']
 
 @cli.command()
 @click.option('--name', '-n', type=click.Choice(formatter_types),
@@ -332,18 +331,18 @@ def format(**kwargs):
     '''
     Command to format pecha into opf
     '''
+    formatter = HFMLFormatter()
     if kwargs['name'] == 'ocr':
         formatter = GoogleOCRFormatter()
-        formatter.new_pecha(kwargs['input_path'])
-    elif kwargs['name'] == 'hfml':
-        formatter = HFMLFormatter()
-        formatter.new_pecha(kwargs['input_path'])
     elif kwargs['name'] == 'tsadra':
-        formatter = TsadraFormatter()
-        formatter.new_pecha(kwargs['input_path'], kwargs['id'])
+        formatter = HFMLFormatter()
+
+    formatter.create_opf(kwargs['input_path'], kwargs['id'])
 
 
 @cli.command()
+@click.option('--text_id', '-ti', type=str, help='text id of text')
+@click.option('--vol_number', '-vn', type=int, help='vol number')
 @click.argument('pecha_num')
 def edit(**kwargs):
     '''
@@ -352,13 +351,68 @@ def edit(**kwargs):
     pecha_id = get_pecha_id(kwargs['pecha_num'])
     opf_path = f'{config["OP_DATA_PATH"]}/{pecha_id}/{pecha_id}.opf'
 
-    serializer = SerializeHFML(opf_path)
+    if kwargs['text_id']:
+        serializer = SerializeHFML(opf_path, text_id=kwargs['text_id'])
+        out_fn = f'{pecha_id}-{kwargs["text_id"]}.txt'
+    elif kwargs['vol_number']:
+        vol_id = f'v{kwargs["vol_number"]:03}'
+        serializer = SerializeHFML(opf_path, vol_id=vol_id)
+        out_fn = f'{pecha_id}-{vol_id}.txt'
+    else:
+        serializer = SerializeHFML(opf_path)
+        out_fn = f'{pecha_id}-v001.txt'
+
     serializer.apply_layers()
     
-    out_fn = f'{pecha_id}.txt'
     result = serializer.get_result()
     click.echo(result, file=open(out_fn, 'w'))
 
     # logging
     msg = f'Output is save at: {out_fn}'
     click.echo(INFO.format(msg))
+
+
+@cli.command()
+@click.option('--cache-folder', '-c', help='path to the folder of the local cache')
+@click.option('--idlist', '-l', help='comma-separated list of Openpecha IDs')
+def pull_pechas(cache_folder, idlist):
+    """
+    Command to pull all the pechas in local cache
+    """
+    opm = None
+    if cache_folder is not None:
+        opm = OpenpechaManager(local_dir=cache_folder)
+    else:
+        opm = OpenpechaManager()
+    if idlist is None:
+        opm.fetch_all_pecha()
+    else:
+        opids = idlist.split(',')
+        for opid in tqdm(opids, ascii=True, desc='Cloning or pulling the pecha'):
+            opm.fetch_pecha(opid)
+
+@cli.command()
+@click.option('--cache-folder', '-c', help='path to the folder of the local cache')
+@click.option('--store-uri', '-s', help='Fuseki URI', required=True)
+@click.option('--force', '-f', help='force upload even when commit match with triple store', is_flag=True)
+@click.option('--ldspdi-uri', '-u', help='lds-pdi URI', default="https://ldspdi.bdrc.io/")
+@click.option('--idlist', '-l', help='comma-separated list of Openpecha IDs')
+@click.option('--verbose', '-v', help='verbose', is_flag=True)
+@click.option('--debug', '-d', help='debug', is_flag=True)
+def cache_to_store(cache_folder, ldspdi_uri, store_uri, force, verbose, debug, idlist):
+    """
+    Update the cached version of synced commits
+    """
+    if debug:
+        logging.basicConfig(level=logging.DEBUG)
+    elif verbose:
+        logging.basicConfig(level=logging.INFO)
+    opm = None
+    if cache_folder is not None:
+        opm = OpenpechaManager(local_dir=cache_folder)
+    else:
+        opm = OpenpechaManager()
+    opids = None
+    if idlist is not None:
+        opids = idlist.split(",")
+    opm.sync_cache_to_store(store_uri, ldspdi_uri, force, opids)

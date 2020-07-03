@@ -12,31 +12,44 @@ For NLP this toolkit will provide a way to have annoated corpra with minimal err
   - Python3, you can download from [here](https://www.python.org) 
 
 ## Installation
-  - [Mac OS installer](https://github.com/OpenPecha/openpecha-toolkit/blob/master/installers/openpecha_mac_installer.zip?raw=true)
+  - [MacOS installer](https://github.com/OpenPecha/openpecha-toolkit/blob/master/installers/openpecha_mac_installer.zip?raw=true)
+  - [Windows installer](https://github.com/OpenPecha/openpecha-toolkit/blob/master/installers/openpecha_windows_installer.zip?raw=true)
 
 ## Usage
-Frist we need to download all the poti which are in openpecha format.
+First we need to download all the poti which are in openpecha format.
+
 ```
 $ openpecha download --help
 Usage: openpecha download [OPTIONS]
 
-  Command to download poti. If id and batch options are not provided then it
+  Command to download poti. You need to give a work-id of a poti to download it.
+
+Options:
+  -n, --number WORK_ID      Work-id of the poti, for single poti download
+  --help                    Show this message
+```
+
+<!-- Not everything is implemented yet so shouldn't be in the README
+```
+$ openpecha download --help
+Usage: openpecha download [OPTIONS]
+
+  Command to download poti. If number and batch options are not provided then it
   will download all the poti.
 
 Options:
-  -n, --number TEXT  Work number of poti, for single poti download
-  -b, --batch TEXT   path to text file containg list of names of
-                     poti in separate line. Poti batch download
-  -f, --filter TEXT  filter poti by layer availability, specify
-                     layer names in comma separated, eg: title,yigchung,..
-  -o, --out TEXT     directory to store all the poti
-  --help             Show this message and exit.
+  -n, --number WORK_ID      Work-id of the poti, for single poti download
+  -b, --batch FILE          Path to a text file containg list of names of poti in separate line. Poti batch download, for multiple poti download
+  -f, --filter FILTER       Filter poti by layer availability, specify layer names in comma separated, eg: title,yigchung,..
+  -o, --out PATH            Directory to store all the poti (default .openpecha)
+  --help                    Show this message
 ```
+--->
 
 Automatic updating annotations from source base-text (original) and destination base-text (edited)
 ```
 $ openpecha update --help
-Usage: openpecha update [OPTIONS] WORK_NUMBER
+Usage: openpecha update [OPTIONS] WORK_ID
 
   Command to update the base text with your edits.
 
@@ -47,14 +60,14 @@ Options:
 Exporting and Extracting layer
 ```
 $ openpecha layer --help 
-Usage: openpecha layer [OPTIONS] WORK_NUMBER OUT
+Usage: openpecha layer [OPTIONS] WORK_ID OUT
 
   Command to apply a single layer, multiple layers or all available layers
   (by default) and then export to markdown.
 
   Args:
 
-      - ID is the work-id of the poti, from which given layer will be
+      - WORK_ID is the work-id of the poti, from which given layer will be
       applied
 
       - OUT is the filename to the write the result. Currently support only

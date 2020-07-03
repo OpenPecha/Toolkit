@@ -1,0 +1,9 @@
+- rename poti into pecha in function names, etc. in Lou's code
+- the modules in buda/ should be in the main directory
+- rename github_utils.py into git_utils.py and integrate some of the function from op_bare.py
+- integrate the functions from serialize.py into op.py
+- glossary of variable name conventions:
+  * lname = local name = P0001
+  * qname = qualified name = op:P0001 where op: is a namespace
+  * fname = file name
+- merge rdf_setup.py into rdf.py in serializers/
