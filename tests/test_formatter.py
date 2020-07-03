@@ -5,7 +5,6 @@ import pytest
 
 from openpecha.formatters import GoogleOCRFormatter, HFMLFormatter, TsadraFormatter
 from openpecha.formatters.hfml import LocalIdManager
-from openpecha.formatters.new_hfml import ann_patterns, parse_annotations
 
 
 class TestHFMLFormatter:
@@ -158,13 +157,6 @@ class TestTsadraFormatter:
         result = formatter.get_base_text()
         expected1 = Path("tests/data/formatter/tsadra/tsadra_base1.txt").read_text()
         assert result == expected1
-
-
-def test_new_hfml_parser():
-    input_hfml = Path("tests/data/formatter/hfml/new/input.txt").read_text()
-    anns = parse_annotations(input_hfml, ann_patterns)
-
-    expected = {}
 
 
 if __name__ == "__main__":

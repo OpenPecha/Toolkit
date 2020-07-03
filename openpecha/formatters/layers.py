@@ -20,6 +20,7 @@ __all__ = [
     "Yigchung",
     "BookTitle",
     "Author",
+    "AnnType",
 ]
 
 
@@ -31,7 +32,7 @@ class AnnType:
     pagination = "Pagination"
     correction = "Correction"
     error_candidate = "Error Candidate"
-    peudurma = "Peydurma"
+    peydurma = "Peydurma"
     tsawa = "Tsawa"
     quotation = "Qoutation"
     yigchung = "Yigchung"
