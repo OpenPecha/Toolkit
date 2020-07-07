@@ -106,8 +106,9 @@ class HFMLFormatter(BaseFormatter):
     OpenPecha Formatter for digitized wooden-printed Pecha based on annotation scheme from Esukhia.
     """
 
-    def __init__(self, output_path="./output", is_book=False):
+    def __init__(self, output_path="./output", is_book=False, config=None):
         super().__init__(output_path=output_path)
+        self.config = config
         self.is_book = is_book
         self.base_text = ""
         self.layers = defaultdict(defaultdict(list))
@@ -280,9 +281,9 @@ class HFMLFormatter(BaseFormatter):
         # Find start and end of annotation separately
         # TODO: apply multiprocessing on patterns
         start_markers, end_markers = [], []
-        for ann_name, ann_value in ANN_PATTERN.items():
-            start_markers.extend(self.get_markers(ann_name, ann_value["start"], text))
-            end_markers.extend(self.get_markers(ann_name, ann_value["end"], text))
+        for ann_name, ann_value in self.config["ann_patterns"].items():
+            start_markers.extend(self.get_markers(ann_name, ann_value["start"], m_text))
+            end_markers.extend(self.get_markers(ann_name, ann_value["end"], m_text))
 
         # Sort all_starts and all_ends sperately
         start_markers = sort_by_pos(start_markers)
@@ -299,12 +300,13 @@ class HFMLFormatter(BaseFormatter):
             base_start, offset = get_base_idx(start_match, offset)
 
             # ann which includes text
-            if ANN_PATTERN[ann_name]["has_text"]:
+            if self.config["ann_patterns"][ann_name]["has_text"]:
                 # ann with payload
-                if ANN_PATTERN[ann_name]["has_payload"]:
-                    payload = get_payload(ann_name, start_match, end_match, text)
+                if self.config["ann_patterns"][ann_name]["has_payload"]:
+                    payload = get_payload(ann_name, start_match, end_match, m_text)
                     payload_len = (
-                        len(payload) + ANN_PATTERN[ann_name]["payload_sep_len"]
+                        len(payload)
+                        + self.config["ann_patterns"][ann_name]["payload_sep_len"]
                     )
                 base_end, offset = get_base_idx(
                     end_match, offset, is_end=True, payload_len=payload_len
@@ -314,8 +316,8 @@ class HFMLFormatter(BaseFormatter):
             # ann which doesn't includes text
             else:
                 # ann with payload
-                if ANN_PATTERN[ann_name]["has_payload"]:
-                    payload = get_payload(ann_name, start_match, end_match, text)
+                if self.config["ann_patterns"][ann_name]["has_payload"]:
+                    payload = get_payload(ann_name, start_match, end_match, m_text)
                 _, offset = get_base_idx(
                     end_match, offset, is_end=True, payload_len=len(payload)
                 )
