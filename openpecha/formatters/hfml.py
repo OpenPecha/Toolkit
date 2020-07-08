@@ -111,7 +111,7 @@ class HFMLFormatter(BaseFormatter):
         self.config = config
         self.is_book = is_book
         self.base_text = ""
-        self.layers = defaultdict(defaultdict(list))
+        self.layers = defaultdict(lambda: defaultdict(list))
 
     def text_preprocess(self, text):
         if text[0] == "\ufeff":
