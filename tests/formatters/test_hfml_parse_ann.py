@@ -1,33 +1,11 @@
+from collections import defaultdict
 from pathlib import Path
 
 import pytest
 
 from openpecha.formatters import HFMLFormatter
 from openpecha.formatters.hfml import ANN_PATTERN
-from openpecha.formatters.layers import AnnType, _attr_names
-
-
-@pytest.fixture()
-def get_expected_one_vol():
-    anns = {
-        AnnType.peydurma: {
-            "v001": [
-                (
-                    None,
-                    {
-                        _attr_names.NOTE: "kk",
-                        _attr_names.SPAN: {_attr_names.START: 5, _attr_names.END: 8},
-                    },
-                ),
-                (
-                    None,
-                    {
-                        _attr_names.NOTE: "dd",
-                        _attr_names.SPAN: {_attr_names.START: 10, _attr_names.END: 13},
-                    },
-                ),
-            ]
-        }
+from openpecha.formatters.layers import *
 
 
 @pytest.fixture()
@@ -39,10 +17,18 @@ def formatter():
     return HFMLFormatter(config=config)
 
 
-def test_parse_ann_one_vol(formatter):
-    m_text = Path("tests/data/formatter/hfml/kangyur_01.txt").read_text()
+@pytest.fixture()
+def one_vol_test_data():
+    m_text = Path("tests/data/formatter/hfml/v001.txt").read_text()
     base_id = "v001"
+    expected = defaultdict(lambda: defaultdict(list))
+    expected[AnnType.pecha_title][base_id].append((":", PechaTitle(Span(0, 4))))
+    return m_text, base_id, expected
 
-    expected = {}
 
-    result = formatter.parse_ann(m_text, base_id)
+def test_parse_ann_one_vol(formatter, one_vol_test_data):
+    m_text, base_id, expected = one_vol_test_data
+
+    formatter.parse_ann(m_text, base_id)
+
+    assert formatter.layers == expected

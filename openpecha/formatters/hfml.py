@@ -6,6 +6,7 @@ HFML (Human Friendly Markup Language) contains tagset used for structuring and a
 """
 import re
 from collections import defaultdict
+from copy import deepcopy
 from pathlib import Path
 
 from openpecha.formatters.formatter import BaseFormatter
@@ -82,22 +83,21 @@ class LocalIdManager:
         return self.maps[layer_name].serialize()
 
 
+def _create_pat(start, end, has_text=False, pl_pat=None, pl_sep_len=0):
+    return {
+        "start": start + ".",  # dot for tofu-id
+        "end": end,
+        "has_text": has_text,
+        "payload_pattern": pl_pat,
+        "payload_sep_len": pl_sep_len,
+    }
+
+
 ANN_PATTERN = {
-    AnnType.peydurma: {
-        "start": "<p",
-        "end": ">",
-        "has_text": False,
-        "has_payload": True,
-        "payload_pattern": "(.*?)",
-    },
-    AnnType.correction: {
-        "start": "\(",
-        "end": "\)",
-        "has_text": True,
-        "has_payload": True,
-        "payload_pattern": ".*?,(.*?)",
-        "payload_sep_len": 1,
-    },
+    AnnType.pecha_title: _create_pat("<k1", ">", has_text=True),
+    # AnnType.correction: _create_pat(
+    #     "\(", "\)", has_text=True, pl_pat=".*?,(.*?)", pl_sep_len=1
+    # ),
 }
 
 
@@ -249,11 +249,11 @@ class HFMLFormatter(BaseFormatter):
 
         yield result, None
 
-    def sort_by_pos(matches):
-        """Sort `matches` by start char position"""
+    def _sort_by_pos(self, matches):
+        """Sort `matches` by start char position."""
         return sorted(matches, key=lambda x: x[1].span(0)[0])
 
-    def get_base_idx(ann, offset, is_end=False, payload_len=0):
+    def _get_base_idx(self, ann, offset, is_end=False, payload_len=0):
         start, end = ann.span(0)
         marker_len = end - start
         if is_end:
@@ -265,14 +265,14 @@ class HFMLFormatter(BaseFormatter):
         offset += marker_len
         return base_idx, offset
 
-    def get_markers(name, pattern, text):
+    def _get_markers(self, name, pattern, text):
         return [(name, m) for m in re.finditer(pattern, text)]
 
-    def get_payload(name, start_match, end_match, text):
+    def _get_payload(self, name, start_match, end_match, text):
         start = start_match.span(0)[0]
         end = end_match.span(0)[1]
         search_text = text[start:end]
-        ann = ann_patterns[name]
+        ann = self.config["ann_patterns"][name]
         payload_pattern = f'{ann["start"]}{ann["payload_pattern"]}{ann["end"]}'
         payload = re.findall(payload_pattern, search_text)[0]
         return payload
@@ -282,33 +282,36 @@ class HFMLFormatter(BaseFormatter):
         # TODO: apply multiprocessing on patterns
         start_markers, end_markers = [], []
         for ann_name, ann_value in self.config["ann_patterns"].items():
-            start_markers.extend(self.get_markers(ann_name, ann_value["start"], m_text))
-            end_markers.extend(self.get_markers(ann_name, ann_value["end"], m_text))
+            start_markers.extend(
+                self._get_markers(ann_name, ann_value["start"], m_text)
+            )
+            end_markers.extend(self._get_markers(ann_name, ann_value["end"], m_text))
 
         # Sort all_starts and all_ends sperately
-        start_markers = sort_by_pos(start_markers)
-        ends_markers = sort_by_pos(end_markers)
+        start_markers = self._sort_by_pos(start_markers)
+        ends_markers = self._sort_by_pos(end_markers)
 
         # Find ann_start and ann_end pair
         s_idx, e_idx = 0, 0
         offset = 0
         while s_idx < len(start_markers) or e_idx < len(end_markers):
-            #         import pdb; pdb.set_trace()
-            payload = 0
             ann_name, start_match = start_markers[s_idx]
             _, end_match = end_markers[e_idx]
-            base_start, offset = get_base_idx(start_match, offset)
+            base_start, offset = self._get_base_idx(start_match, offset)
 
             # ann which includes text
             if self.config["ann_patterns"][ann_name]["has_text"]:
                 # ann with payload
-                if self.config["ann_patterns"][ann_name]["has_payload"]:
-                    payload = get_payload(ann_name, start_match, end_match, m_text)
+                payload_len = 0
+                if self.config["ann_patterns"][ann_name]["payload_pattern"]:
+                    payload = self._get_payload(
+                        ann_name, start_match, end_match, m_text
+                    )
                     payload_len = (
                         len(payload)
                         + self.config["ann_patterns"][ann_name]["payload_sep_len"]
                     )
-                base_end, offset = get_base_idx(
+                base_end, offset = self._get_base_idx(
                     end_match, offset, is_end=True, payload_len=payload_len
                 )
 
@@ -316,9 +319,11 @@ class HFMLFormatter(BaseFormatter):
             # ann which doesn't includes text
             else:
                 # ann with payload
-                if self.config["ann_patterns"][ann_name]["has_payload"]:
-                    payload = get_payload(ann_name, start_match, end_match, m_text)
-                _, offset = get_base_idx(
+                if self.config["ann_patterns"][ann_name]["payload_pattern"]:
+                    payload = self._get_payload(
+                        ann_name, start_match, end_match, m_text
+                    )
+                _, offset = self._get_base_idx(
                     end_match, offset, is_end=True, payload_len=len(payload)
                 )
                 self.layers[ann_name][base_id].append((base_start, None, payload))

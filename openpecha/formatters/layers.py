@@ -1,41 +1,56 @@
-"""
-This module contains format variable for all the annotations
-"""
+"""This module contains format variable for all the annotations."""
 
 from collections import namedtuple
 
 __all__ = [
     "Layer",
     "Page",
+    "Span",
     "Text",
     "Correction",
     "ErrorCandidate",
     "CrossVolSpan",
     "SubText",
     "Peydurma",
-    "Chapter",
     "Tsawa",
     "Quotation",
     "Sabche",
     "Yigchung",
-    "BookTitle",
+    "PechaTitle",
+    "PotiTitle",
+    "ChapterTitle",
     "Author",
     "AnnType",
 ]
 
 
 class AnnType:
-    boot_title = "Book Title"
+    # Layout tags
+    pecha_title = "Pecha Title"
+    poti_title = "Poti Title"
+    chapter_title = "Chapter Title"
     author = "Author"
-    chapter = "chapter"
-
+    yigchung = "Yigchung"
     pagination = "Pagination"
     correction = "Correction"
     error_candidate = "Error Candidate"
     peydurma = "Peydurma"
     tsawa = "Tsawa"
     quotation = "Qoutation"
-    yigchung = "Yigchung"
+
+    objects = {
+        pecha_title: PechaTitle,
+        poti_title: PotiTitle,
+        chapter_title: ChapterTitle,
+        author: Author,
+        yigchung: Yigchung,
+        pagination: Page,
+        correction: Correction,
+        error_candidate: ErrorCandidate,
+        peydurma: Peydurma,
+        tsawa: Tsawa,
+        quotation: Quotation,
+    }
 
 
 class _attr_names:
@@ -116,7 +131,11 @@ def Peydurma(span, note=None):
     return {_attr_names.NOTE: note, _attr_names.SPAN: span}
 
 
-def BookTitle(span):
+def PechaTitle(span):
+    return {_attr_names.SPAN: span}
+
+
+def PotiTitle(span):
     return {_attr_names.SPAN: span}
 
 
@@ -124,7 +143,7 @@ def Author(span):
     return {_attr_names.SPAN: span}
 
 
-def Chapter(span):
+def ChapterTitle(span):
     return {_attr_names.SPAN: span}
 
 
