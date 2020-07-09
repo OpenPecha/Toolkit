@@ -295,6 +295,7 @@ class HFMLFormatter(BaseFormatter):
         s_idx, e_idx = 0, 0
         offset = 0
         while s_idx < len(start_markers) or e_idx < len(end_markers):
+            payload = None
             ann_name, start_match = start_markers[s_idx]
             _, end_match = end_markers[e_idx]
             base_start, offset = self._get_base_idx(start_match, offset)

@@ -38,19 +38,21 @@ class AnnType:
     tsawa = "Tsawa"
     quotation = "Qoutation"
 
-    objects = {
-        pecha_title: PechaTitle,
-        poti_title: PotiTitle,
-        chapter_title: ChapterTitle,
-        author: Author,
-        yigchung: Yigchung,
-        pagination: Page,
-        correction: Correction,
-        error_candidate: ErrorCandidate,
-        peydurma: Peydurma,
-        tsawa: Tsawa,
-        quotation: Quotation,
-    }
+    not_only_span = [pagination, correction, peydurma]
+
+
+def create_ann(ann_name, start, end, **kwargs):
+    span = Span(start, end)
+    if ann_name not in AnnType.not_only_span:
+        return OnlySpan(span)
+    elif ann_name == AnnType.pagination:
+        return Page(span, **kwargs)
+    elif ann_name == AnnType.correction:
+        return Correction(span, **kwargs)
+    elif ann_name == AnnType.peydurma:
+        return Peydurma(span, **kwargs)
+    else:
+        raise NameError(f"{ann_name} annotation not support yet.")
 
 
 class _attr_names:
@@ -123,41 +125,22 @@ def Correction(span, correction=None, certainty=None):
     }
 
 
-def ErrorCandidate(span):
-    return {_attr_names.SPAN: span}
-
-
 def Peydurma(span, note=None):
     return {_attr_names.NOTE: note, _attr_names.SPAN: span}
 
 
-def PechaTitle(span):
-    return {_attr_names.SPAN: span}
+def OnlySpan(span):
+    """function to create annotation only has a span.
 
+    Annotations inclues:
+        - error candidate
+        - pecha title
+        - poti title
+        - author
+        - chapter title
+        - taswa
+        - qoutation
+        - yigchung
+    """
 
-def PotiTitle(span):
-    return {_attr_names.SPAN: span}
-
-
-def Author(span):
-    return {_attr_names.SPAN: span}
-
-
-def ChapterTitle(span):
-    return {_attr_names.SPAN: span}
-
-
-def Tsawa(span):
-    return {_attr_names.SPAN: span}
-
-
-def Quotation(span):
-    return {_attr_names.SPAN: span}
-
-
-def Sabche(span):
-    return {_attr_names.SPAN: span}
-
-
-def Yigchung(span):
     return {_attr_names.SPAN: span}
