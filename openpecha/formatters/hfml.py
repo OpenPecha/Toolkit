@@ -436,7 +436,7 @@ class HFMLFormatter(BaseFormatter):
                 pat_list["error_pattern"], annotated_line
             )  # list of match object of error pattern in line
             for error in errors:
-                error_part = error[0].split(",")[0][1:]
+                error_part = error[0].split(",")[0][2:]
                 base_line = re.sub(pat_list["error_pattern"], error_part, base_line, 1)
 
         if re.search(pat_list["archaic_word_pattern"], annotated_line):
@@ -444,7 +444,7 @@ class HFMLFormatter(BaseFormatter):
                 pat_list["archaic_word_pattern"], annotated_line
             )  # list of match object of error pattern in line
             for archaic_word in archaic_words:
-                archaic_part = archaic_word[0].split(",")[0][1:]
+                archaic_part = archaic_word[0].split(",")[0][2:]
                 base_line = re.sub(pat_list["archaic_word_pattern"], archaic_part, base_line, 1)
 
         if re.search(pat_list["abs_er_pattern"], annotated_line):
@@ -534,10 +534,9 @@ class HFMLFormatter(BaseFormatter):
             ):  # checking current line contains page annotation or not
                 start_page = end_page
                 end_page = end_line
-                pg_tid.append(re.search(pat_list["page_pattern"], line).group(1))
+                pg_tid.append(ord(re.search(pat_list["page_pattern"], line).group(1)))
                 page_info = line[re.search(pat_list["page_pattern"], line).end() :]
                 pg_ann.append(re.search(pat_list["page_pattern"], line)[0][2:-1])
-                print(pg_ann)
                 pg_info.append(page_info)
                 if len(pg_info) >= 2:
                     cur_vol_pages.append(
@@ -587,7 +586,7 @@ class HFMLFormatter(BaseFormatter):
                 ):  # checking current line contain sub_topicID annotation or not
                     sub_topic_match = re.search(pat_list["sub_topic_pattern"], line)
                     self.sub_topic_info.append(sub_topic_match[0][2:-1])
-                    self.sub_topic_tofu.append(sub_topic_match.group(1))
+                    self.sub_topic_tofu.append(ord(sub_topic_match.group(1)))
                     pat_len_before_ann = self.search_before(sub_topic_match, pat_list, line)
                     if start_sub_topic == 0:
                         start_sub_topic = end_sub_topic
@@ -650,7 +649,7 @@ class HFMLFormatter(BaseFormatter):
                     topic = re.search(pat_list["topic_pattern"], line)
                     pat_len_before_ann = self.search_before(topic, pat_list, line)
                     self.topic_info.append(topic[0][2:-1])
-                    self.topic_tofu.append(topic.group(1))
+                    self.topic_tofu.append(ord(topic.group(1)))
                     start_topic = end_topic
                     end_topic = topic.start() + i - pat_len_before_ann
 
@@ -689,13 +688,13 @@ class HFMLFormatter(BaseFormatter):
                         if self.sub_topic_Id and end_sub_topic < end_topic:
                             self.sub_topic_Id.append(
                                 (
-                                    self.sub_topic_tofu[-2],
+                                    self.sub_topic_tofu[-1],
                                     {
                                         "work_id": self.sub_topic_info[-1],
                                         "span": {
                                             "vol": self.vol_walker + 1,
-                                            "start": start_sub_topic,
-                                            "end": end_sub_topic,
+                                            "start": end_sub_topic,
+                                            "end": end_topic,
                                         },
                                     },
                                 )
@@ -716,7 +715,7 @@ class HFMLFormatter(BaseFormatter):
                             :-1
                         ]  # extracting the suggestion component
                         error_part = error[0].split(",")[0][2:]  # extracting the error component
-                        tofu_id = error.group(1)
+                        tofu_id = ord(error.group(1))
                         pat_len_before_ann = self.search_before(error, pat_list, line)
                         start_error = error.start() + i - pat_len_before_ann
 
@@ -740,7 +739,7 @@ class HFMLFormatter(BaseFormatter):
                         archaic_word = archaic[0].split(",")[0][
                             2:
                         ]  # extracting the error component
-                        tofu_id = archaic.group(1)
+                        tofu_id = ord(archaic.group(1))
                         pat_len_before_ann = self.search_before(archaic, pat_list, line)
                         start_archaic = archaic.start() + i - pat_len_before_ann
 
@@ -761,7 +760,7 @@ class HFMLFormatter(BaseFormatter):
                     abs_ers = re.finditer(pat_list["abs_er_pattern"], line)
                     for abs_er in abs_ers:
                         pat_len_before_ann = self.search_before(abs_er, pat_list, line)
-                        tofu_id = abs_er.group(1)
+                        tofu_id = ord(abs_er.group(1))
                         start_abs_er = abs_er.start() + i - pat_len_before_ann
                         end_abs_er = start_abs_er + len(
                             abs_er[0][2:-1]
@@ -774,7 +773,7 @@ class HFMLFormatter(BaseFormatter):
                     notes_in_line = re.finditer(pat_list["note_pattern"], line)
                     for notes in notes_in_line:
                         pat_len_before_ann = self.search_before(notes, pat_list, line)
-                        tofu_id = notes.group(1)
+                        tofu_id = ord(notes.group(1))
                         note = notes.start() + i - pat_len_before_ann
                         note_id.append((tofu_id, {"span": {"start": note, "end": note}}))
 
@@ -782,7 +781,7 @@ class HFMLFormatter(BaseFormatter):
                     start_cits = re.finditer(pat_list["start_cit_pattern"], line)
                     for start_cit in start_cits:
                         pat_len_before_ann = self.search_before(start_cit, pat_list, line)
-                        tofu_id = start_cit.group(1)
+                        tofu_id = ord(start_cit.group(1))
                         cit_start = start_cit.start() + i - pat_len_before_ann
                         start_cit_patterns.append((tofu_id, cit_start))
 
@@ -797,7 +796,7 @@ class HFMLFormatter(BaseFormatter):
                     start_sabches = re.finditer(pat_list["start_sabche_pattern"], line)
                     for start_sabche in start_sabches:
                         pat_len_before_ann = self.search_before(start_sabche, pat_list, line)
-                        tofu_id = start_sabche.group(1)
+                        tofu_id = ord(start_sabche.group(1))
                         sabche_start = start_sabche.start() + i - pat_len_before_ann
                         start_sabche_pattern.append((tofu_id, sabche_start))
 
@@ -812,7 +811,7 @@ class HFMLFormatter(BaseFormatter):
                     start_tsawas = re.finditer(pat_list["start_tsawa_pattern"], line)
                     for start_tsawa in start_tsawas:
                         pat_len_before_ann = self.search_before(start_tsawa, pat_list, line)
-                        tofu_id = start_tsawa.group(1)
+                        tofu_id = ord(start_tsawa.group(1))
                         tsawa_start = start_tsawa.start() + i - pat_len_before_ann
                         start_tsawa_pattern.append((tofu_id, tsawa_start))
 
@@ -827,7 +826,7 @@ class HFMLFormatter(BaseFormatter):
                     start_yigchungs = re.finditer(pat_list["start_yigchung_pattern"], line)
                     for start_yigchung in start_yigchungs:
                         pat_len_before_ann = self.search_before(start_yigchung, pat_list, line)
-                        tofu_id = start_yigchung.group(1)
+                        tofu_id = ord(start_yigchung.group(1))
                         yigchung_start = start_yigchung.start() + i - pat_len_before_ann
                         start_yigchung_pattern.append((tofu_id, yigchung_start))
 
@@ -851,7 +850,7 @@ class HFMLFormatter(BaseFormatter):
                     if self.sub_topic_Id:
                         self.sub_topic_Id.append(
                             (
-                                self.sub_topic_tofu[-2] if self.sub_topic_tofu else None,
+                                self.sub_topic_tofu[-1] if self.sub_topic_tofu else None,
                                 {
                                     "work_id": self.sub_topic_info[-1]
                                     if self.sub_topic_info
@@ -1004,8 +1003,8 @@ class HFMLFormatter(BaseFormatter):
 
         # save pecha layers
         layers = self.get_result()
-        list_yaml = yaml.safe_dump(layers, allow_unicode=True)
-        Path("./layers_result.txt").write_text(str(list_yaml))
+        # list_yaml = yaml.safe_dump(layers, allow_unicode=True)
+        Path("./layers_result.txt").write_text(str())
         print("done")
         # for vol_layers, base_id in self.format_layer(layers):
         #     if base_id:
