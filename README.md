@@ -1,4 +1,5 @@
 # OpenPecha Toolkit
+[![PyPI version](https://badge.fury.io/py/openpecha.svg)](https://badge.fury.io/py/openpecha)
 ![](https://github.com/OpenPecha/openpecha-toolkit/workflows/Test/badge.svg)
 ![](https://github.com/OpenPecha/openpecha-toolkit/workflows/Pypi%20Publish/badge.svg)
 
