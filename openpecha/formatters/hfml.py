@@ -8,7 +8,7 @@ import re
 import yaml
 from pathlib import Path
 
-from layers import AnnType
+from openpecha.formatters.layers import AnnType
 from openpecha.formatters.formatter import BaseFormatter
 from openpecha.formatters.layers import *
 
@@ -275,6 +275,7 @@ class HFMLFormatter(BaseFormatter):
                 error_part = error[0].split(",")[0][2:]
                 total_length = total_length + (len(error[0]) - len(error_part))
 
+        if re.search(pat_list["archaic_word_pattern"], annotated_line):
             archaic_words = re.finditer(
                 pat_list["archaic_word_pattern"], annotated_line
             )  # list of match object of error pattern in line
@@ -282,6 +283,10 @@ class HFMLFormatter(BaseFormatter):
                 archaic_part = archaic_word[0].split(",")[0][2:]
                 total_length = total_length + (len(archaic_word[0]) - len(archaic_part))
 
+        if re.search(pat_list["abs_er_pattern"], annotated_line):
+            abs_ers = re.findall(
+                pat_list["abs_er_pattern"], annotated_line
+            )  # list of match of abs_er pattern in line
             total_length = total_length + 3 * len(abs_ers)
         for pattern in [
             "author_pattern",
@@ -319,15 +324,13 @@ class HFMLFormatter(BaseFormatter):
 
     def merge(self, start_list, end_list):
         """ It merges two list.
-
         The starting  and ending of annotation(citaion,yigchung,sabche and tsawa) are stored in two list.
         Merging these two list will generate a list in which both starting and ending of an annotation together in a tuple.
         It is applicable only if the annotaions are not cross volume.
-
         Args:
             start_list (list): It contains index of where starting annotations(citaion,yigchung,sabche and tsawa) are detected.
             end_list (list): It contains index of where ending annotations(citaion,yigchung,sabche and tsawa) are detected.
-
+        
         Return:
             result (list): It contains tuples where starting and ending of an annotation(citaion,yigchung,sabche and tsawa) is combined.
         """
@@ -345,13 +348,11 @@ class HFMLFormatter(BaseFormatter):
 
     def search_before(self, ann, pat_list, line):
         """ It calculates the length of annotation detected in a given line before a given annotation.
-
         Args:
             ann (match object): It is a match object of the annotation of which we want to calculate
                                 the length of any annotation detected before it.
             pat_list (dict): It contains all the annotation's regex pattern as value and name of annotation as key.
             line (str): It contains the line in which we wants to calculate the legth of annotation found before the given annotation.
-
         Return:
             length_before (int): It accumalates as we detect annotation which is before the given annotation and
                                 finally gives the total length of annotation caught before the given annotation in the given line.
@@ -433,11 +434,10 @@ class HFMLFormatter(BaseFormatter):
 
     def base_extract(self, pat_list, annotated_line):
         """ It extract the base text from annotated text.
-
         Args:
             pat_list (dict): It contains all the annotation's regex pattern as value and name of annotation as key.
             annotated_line (str): It contains the annotated line from which we want to extract the base text.
-
+        
         Return:
             base_line (str): It contains the base text which is being extracted from the given annotated line.
         """
@@ -490,7 +490,7 @@ class HFMLFormatter(BaseFormatter):
                 pat_list["abs_er_pattern"], annotated_line
             )  # list of match object of abs_er pattern in line
             for abs_er in abs_ers:
-                base_line = re.sub(pat_list["abs_er_pattern"], abs_er[0][1:-1], base_line, 1)
+                base_line = re.sub(pat_list["abs_er_pattern"], abs_er[0][2:-1], base_line, 1)
 
         return base_line
 

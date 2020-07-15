@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pytest
 
-from layers import AnnType
+from openpecha.formatters.layers import AnnType
 from openpecha.formatters import GoogleOCRFormatter, HFMLFormatter, TsadraFormatter
 from openpecha.formatters.hfml import LocalIdManager
 
