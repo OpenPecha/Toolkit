@@ -24,16 +24,21 @@ __all__ = [
 
 
 class AnnType:
-    boot_title = "Book Title"
+    book_title = "Book Title"
+    poti_title = "Poti Title"
     author = "Author"
     chapter = "chapter"
 
+    topic = "Text"
+    sub_topic = "Sub_Text"
+
     pagination = "Pagination"
+    citation = "Citation"
     correction = "Correction"
     error_candidate = "Error Candidate"
-    peudurma = "Peydurma"
+    peydurma = "Peydurma"
+    sabche = "Sabche"
     tsawa = "Tsawa"
-    quotation = "Qoutation"
     yigchung = "Yigchung"
 
 

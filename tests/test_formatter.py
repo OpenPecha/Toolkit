@@ -3,6 +3,7 @@ from pathlib import Path
 
 import pytest
 
+from openpecha.formatters.layers import AnnType
 from openpecha.formatters import GoogleOCRFormatter, HFMLFormatter, TsadraFormatter
 from openpecha.formatters.hfml import LocalIdManager
 
@@ -34,40 +35,109 @@ class TestHFMLFormatter:
             result = formatter.build_layers(text, len(texts))
 
         result = formatter.get_result()
-
         expected_result = {
-            "poti_title": [[(0, 24)], [(0, 24)], [(0, 24)]],
-            "chapter_title": [[(98, 125)], [], []],
-            "citation": [[], [(164, 202), (204, 241)], [(97, 162)]],
-            "pagination": [
-                [(0, 24, "kk", "1a"), (27, 676, "kl", "1b"), (679, 2173, "lm", "2a")],
-                [(0, 0, "kk", "1a"), (0, 266, "", "1b")],
-                [(0, 266, "ko", "1a")],
-            ],
-            "topic": [
-                [(27, 2046, 1, "T1")],
-                [(2046, 2173, 1, "t2")],
-                [(26, 266, 2, "T2")],
-                [(26, 243, 3, "T3")],
-                [(243, 266, 3, "t4")],
-            ],
-            "sub_topic": [
+            AnnType.poti_title: [[(0, 24)], [(0, 24)], [(0, 24)]],
+            AnnType.chapter: [[(98, 125)], [], []],
+            AnnType.citation: [
+                [],
                 [
-                    [(27, 1352, 1, "T1-1")],
-                    [(1352, 1496, 1, "T1-2")],
-                    [(1496, 2046, 1, "T1-6")],
+                    (1000020, {"span": {"start": 164, "end": 202}}),
+                    (1000021, {"span": {"start": 204, "end": 241}}),
+                ],
+                [(1000024, {"span": {"start": 97, "end": 162}})],
+            ],
+            AnnType.pagination: [
+                [
+                    (
+                        1000000,
+                        {"page_index": "1a", "page_info": "kk", "span": {"start": 0, "end": 24}},
+                    ),
+                    (
+                        1000001,
+                        {"page_index": "1b", "page_info": "kl", "span": {"start": 27, "end": 676}},
+                    ),
+                    (
+                        1000027,
+                        {
+                            "page_index": "2a",
+                            "page_info": "lm",
+                            "span": {"start": 679, "end": 2173},
+                        },
+                    ),
+                ],
+                [
+                    (
+                        1000015,
+                        {"page_index": "1a", "page_info": "kk", "span": {"start": 0, "end": 0}},
+                    ),
+                    (
+                        1000016,
+                        {"page_index": "1b", "page_info": "", "span": {"start": 0, "end": 266}},
+                    ),
+                ],
+                [
+                    (
+                        1000022,
+                        {"page_index": "1a", "page_info": "ko", "span": {"start": 0, "end": 266}},
+                    )
+                ],
+            ],
+            AnnType.topic: [
+                [(1000002, {"work_id": "T1", "span": {"vol": 1, "start": 27, "end": 2046}})],
+                [(1000014, {"work_id": "t2", "span": {"vol": 1, "start": 2046, "end": 2173}})],
+                [(1000017, {"work_id": "T2", "span": {"vol": 2, "start": 26, "end": 266}})],
+                [(1000023, {"work_id": "T3", "span": {"vol": 3, "start": 26, "end": 243}})],
+                [(1000026, {"work_id": "t4", "span": {"vol": 3, "start": 243, "end": 266}})],
+            ],
+            AnnType.sub_topic: [
+                [
+                    [(1000003, {"work_id": "T1-1", "span": {"vol": 1, "start": 27, "end": 1352}})],
+                    [
+                        (
+                            1000005,
+                            {"work_id": "T1-2", "span": {"vol": 1, "start": 1352, "end": 1496}},
+                        )
+                    ],
+                    [
+                        (
+                            1000006,
+                            {"work_id": "T1-6", "span": {"vol": 1, "start": 1496, "end": 2046}},
+                        )
+                    ],
                 ],
                 [[]],
-                [[(26, 140, 2, "T1-8")], [(140, 266, 2, "T1-9")]],
+                [
+                    [(1000018, {"work_id": "T1-8", "span": {"vol": 2, "start": 26, "end": 140}})],
+                    [(1000019, {"work_id": "T1-9", "span": {"vol": 2, "start": 140, "end": 266}})],
+                ],
                 [[]],
                 [[]],
             ],
-            "sabche": [[(1548, 1936)], [], []],
-            "tsawa": [[(420, 739)], [], []],
-            "yigchung": [[], [], [(164, 241)]],
-            "correction": [[(1838, 1843, "མཆིའོ་")], [], []],
-            "error_candidate": [[(2040, 2042), (2044, 2045)], [], []],
-            "peydurma": [[1518, 1624, 1938], [], []],
+            AnnType.sabche: [[(1000008, {"span": {"start": 1548, "end": 1936}})], [], []],
+            AnnType.tsawa: [[(1000004, {"span": {"start": 420, "end": 739}})], [], []],
+            AnnType.yigchung: [[], [], [(1000025, {"span": {"start": 164, "end": 241}})]],
+            AnnType.correction: [
+                [(1000010, {"correction": "མཆིའོ་", "span": {"start": 1838, "end": 1844}})],
+                [],
+                [],
+            ],
+            AnnType.error_candidate: [
+                [
+                    (1000012, {"span": {"start": 2040, "end": 2043}}),
+                    (1000013, {"span": {"start": 2044, "end": 2046}}),
+                ],
+                [],
+                [],
+            ],
+            AnnType.peydurma: [
+                [
+                    (1000007, {"span": {"start": 1518, "end": 1518}}),
+                    (1000009, {"span": {"start": 1624, "end": 1624}}),
+                    (1000011, {"span": {"start": 1938, "end": 1938}}),
+                ],
+                [],
+                [],
+            ],
         }
 
         for layer in result:
@@ -89,10 +159,7 @@ class TestGoogleOCRFormatter:
     @pytest.fixture(scope="class")
     def get_resources(self):
         data_path = Path("tests/data/formatter/google_ocr/W0001/v001")
-        responses = [
-            (json.load(fn.open()), fn.stem)
-            for fn in sorted(list((data_path).iterdir()))
-        ]
+        responses = [(json.load(fn.open()), fn.stem) for fn in sorted(list((data_path).iterdir()))]
         formatter = GoogleOCRFormatter()
         return formatter, data_path, responses
 
@@ -122,9 +189,7 @@ class TestGoogleOCRFormatter:
 class TestTsadraFormatter:
     def test_tsadra_formatter(self):
         m_text_01 = Path("tests/data/formatter/tsadra/htmls/cover.xhtml").read_text()
-        m_text_02 = Path(
-            "tests/data/formatter/tsadra/htmls/tsadra_02.xhtml"
-        ).read_text()
+        m_text_02 = Path("tests/data/formatter/tsadra/htmls/tsadra_02.xhtml").read_text()
         m_texts = [m_text_01, m_text_02]
         formatter = TsadraFormatter()
         for m_text in m_texts:
