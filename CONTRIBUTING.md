@@ -21,6 +21,7 @@ overview of how things are organised and most importantly, how to get involved.
 
 ## Contributing to the code base
 
+* Follow the [Angular commit convention](https://github.com/angular/angular.js/blob/master/DEVELOPERS.md#-git-commit-guidelines) when creating patch.
 * Open a new GitHub pull request with the patch.
 * Ensure that your PR includes a test that fails without your patch, and pass with it.
 * Ensure the PR description clearly describes the problem and solution. Include the relevant issue number if applicable.
