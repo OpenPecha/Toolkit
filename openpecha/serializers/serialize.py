@@ -1,7 +1,11 @@
-from collections import namedtuple, defaultdict
+import os
+from collections import defaultdict, namedtuple
 from pathlib import Path
 
+import requests
 import yaml
+
+INFO = "[INFO] {}"
 
 
 class Serialize(object):
@@ -15,8 +19,12 @@ class Serialize(object):
 
     To use it, instantiate a concrete class with the path of the opf file, and call apply_layers() then get_result()
     """
-    def __init__(self, opfpath, text_id=None, vol_id='v001', layers=None, index_layer=None):
+
+    def __init__(
+        self, opfpath, text_id=None, vol_id="v001", layers=None, index_layer=None
+    ):
         self.opfpath = Path(opfpath)
+        self.meta = self.get_meta_data()
         self.text_id = text_id
         self.index_layer = index_layer
         self.n_char_shifted = []
@@ -25,7 +33,7 @@ class Serialize(object):
             if self.text_spans:
                 self.base_layers = self.get_text_base_layer()
         else:
-            self.text_spans = {vol_id: {'start': 0, 'end': float('inf')}}
+            self.text_spans = {vol_id: {"start": 0, "end": float("inf")}}
             self.base_layers = {vol_id: self.get_base_layer(vol_id=vol_id)}
         """
         The chars_toapply is an important piece of the puzzle here. Basically applying the changes to the string directly is a
@@ -80,45 +88,46 @@ class Serialize(object):
             adapted_end (int): adapted end based on text base-text
 
         """
-        adapted_start = max(0, span['start'] - self.text_spans[vol_id]['start'])
-        adapted_end = span['end'] - self.text_spans[vol_id]['start']
-        n_char_shifted = self.get_n_char_shitted(span['start'])
+        adapted_start = max(0, span["start"] - self.text_spans[vol_id]["start"])
+        adapted_end = span["end"] - self.text_spans[vol_id]["start"]
+        n_char_shifted = self.get_n_char_shitted(span["start"])
         adapted_start += n_char_shifted
         adapted_end += n_char_shifted
         return adapted_start, adapted_end
 
+    def get_meta_data(self):
+        opf_path = self.opfpath
+        meta = yaml.safe_load((opf_path / "meta.yml").open())
+        return meta
 
     def load_layer(self, fn):
         return yaml.safe_load(fn.open())
-
 
     def get_text_spans(self, text_id):
         """
         get spans of text
         """
         if not self.index_layer:
-            self.index_layer = self.load_layer(self.opfpath/'index.yml')
-        for anno in self.index_layer['annotations']:
-            if anno['work'] == text_id:
+            self.index_layer = self.load_layer(self.opfpath / "index.yml")
+        for anno in self.index_layer["annotations"]:
+            if anno["work"] == text_id:
                 text_span = {}
-                for span in anno['span']:
-                    text_span[span['vol'].split('/')[-1]] = span['span']
+                for span in anno["span"]:
+                    text_span[span["vol"].split("/")[-1]] = span["span"]
                 return text_span
-
 
     def get_base_layer(self, vol_id=None):
         """
         return text for given span
         """
         if self.text_id:
-            vol_base = (self.opfpath/f"base/{vol_id}.txt").read_text()
-            start = self.text_spans[vol_id]['start']
-            end = self.text_spans[vol_id]['end']
-            return vol_base[start: end]
+            vol_base = (self.opfpath / f"base/{vol_id}.txt").read_text()
+            start = self.text_spans[vol_id]["start"]
+            end = self.text_spans[vol_id]["end"]
+            return vol_base[start:end]
         else:
-           vol_base = (self.opfpath/f"base/{vol_id}.txt").read_text()
-           return vol_base
-
+            vol_base = (self.opfpath / f"base/{vol_id}.txt").read_text()
+            return vol_base
 
     def get_text_base_layer(self):
         """
@@ -135,28 +144,33 @@ class Serialize(object):
             base_layers[vol_id] = self.get_base_layer(vol_id)
         return base_layers
 
-
     def apply_layer(self, vol_id, layer_id):
         """
         This reads the file opfpath/layers/layer_id.yml and applies all the annotations it contains, in the order in which they appear.
         I think it can be implemented in this class by just calling self.apply_annotation on each annotation of the file.
         """
-        layer_fn = self.opfpath/'layers'/vol_id/f'{layer_id}.yml'
-        if not layer_fn.is_file(): return
+        layer_fn = self.opfpath / "layers" / vol_id / f"{layer_id}.yml"
+        if not layer_fn.is_file():
+            return
         layer = yaml.safe_load(layer_fn.open())
-        for a in layer['annotations']:
+        for a in layer["annotations"]:
             # text begins in middle of the page
-            if a['span']['end'] >= self.text_spans[vol_id]['start'] and \
-                a['span']['start'] <= self.text_spans[vol_id]['end']:
-                a['type'] = layer['annotation_type']
+            if (
+                a["span"]["end"] >= self.text_spans[vol_id]["start"]
+                and a["span"]["start"] <= self.text_spans[vol_id]["end"]
+            ):
+                a["type"] = layer["annotation_type"]
                 self.apply_annotation(vol_id, a)
-
 
     def get_all_layer(self, vol_id):
         """
         Returns all the layerid of layer from the layer directory
         """
-        return [layer.stem for layer in (self.opfpath/'layers'/vol_id).iterdir() if layer.suffix == '.yml']
+        return [
+            layer.stem
+            for layer in (self.opfpath / "layers" / vol_id).iterdir()
+            if layer.suffix == ".yml"
+        ]
 
     def apply_layers(self):
         """
@@ -169,18 +183,16 @@ class Serialize(object):
             for layer_id in self.layers:
                 self.apply_layer(vol_id, layer_id)
 
-
     def add_chars(self, vol_id, cc, frombefore, charstoadd):
         """
         This records some characters to add at a character coordinate (cc), either frombefore (from the left) or after. before is a boolean.
         """
         if cc not in self.chars_toapply[vol_id]:
-            self.chars_toapply[vol_id][cc] = ([],[])
-        if frombefore: # if from the left, layers should be applied in reverse order
+            self.chars_toapply[vol_id][cc] = ([], [])
+        if frombefore:  # if from the left, layers should be applied in reverse order
             self.chars_toapply[vol_id][cc][0].insert(0, charstoadd)
         else:
             self.chars_toapply[vol_id][cc][1].append(charstoadd)
-
 
     def apply_annotation(self, vol_id, annotation):
         """Applies annotation to specific volume base-text, where part of the text exists.
@@ -193,37 +205,37 @@ class Serialize(object):
             None
 
         """
-        raise NotImplementedError("The Serialize class doesn't provide any serialization, please use a subclass such ass SerializeMd")
-
+        raise NotImplementedError(
+            "The Serialize class doesn't provide any serialization, please use a subclass such ass SerializeMd"
+        )
 
     def _assign_line_layer(self, result, vol_id):
-
         def _get_page_index(line):
-            page_index = ''
+            page_index = ""
             i = 1
-            while line[i] != ']':
+            while line[i] != "]":
                 page_index += line[i]
                 i += 1
             return page_index
 
-        result_with_line = ''
-        page_index = ''
+        result_with_line = ""
+        page_index = ""
         n_line = 1
-        for line in result.split('\n'):
-            if not line: continue
-            if line[0] == '[' and line[1] != vol_id[0]:
+        for line in result.split("\n"):
+            if not line:
+                continue
+            if line[0] == "[" and line[1] != vol_id[0]:
                 page_index = _get_page_index(line)
                 n_line = 1
-            elif line[0] != '[':
-                line = f'[{page_index}.{n_line}]' + line
+            elif line[0] != "[":
+                line = f"[{page_index}.{n_line}]" + line
                 n_line += 1
-            result_with_line += line + '\n'
+            result_with_line += line + "\n"
         return result_with_line
-
 
     def get_result(self):
         """
-        returns a string which is the base layer where the changes recorded in self.chars_toapply have been applied. 
+        returns a string which is the base layer where the changes recorded in self.chars_toapply have been applied.
 
         The algorithm should be something like:
         """
@@ -232,11 +244,12 @@ class Serialize(object):
         # see https://waymoot.org/home/python_string/ where method 5 is good
         for vol_id, base_layer in self.base_layers.items():
             if self.text_id:
-                result += f'\n[{vol_id}]\n'
+                result += f"\n[{vol_id}]\n"
             i = 0
             for c in base_layer:
                 # UTF bom \ufeff takes the 0th index
-                if c == '\ufeff': continue
+                if c == "\ufeff":
+                    continue
                 if i in self.chars_toapply[vol_id]:
                     apply = self.chars_toapply[vol_id][i]
                     for s in apply[0]:
@@ -248,7 +261,7 @@ class Serialize(object):
                     result += c
                 i += 1
 
-        if 'pagination' in self.layers:
+        if "pagination" in self.layers:
             return self._assign_line_layer(result, vol_id)
         else:
             return result, self.text_id
