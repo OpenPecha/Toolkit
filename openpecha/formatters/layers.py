@@ -1,6 +1,7 @@
 """This module contains format variable for all the annotations."""
 
 from collections import namedtuple
+from copy import deepcopy
 
 __all__ = [
     "Layer",
@@ -13,6 +14,7 @@ __all__ = [
     "Peydurma",
     "OnlySpan",
     "AnnType",
+    "create_ann",
 ]
 
 
@@ -33,7 +35,7 @@ class AnnType:
     not_only_span = [pagination, correction, peydurma]
 
 
-def create_ann(ann_name, start, end, payloads):
+def create_ann(ann_name, start, end, payloads={}):
     span = Span(start, end)
     if ann_name not in AnnType.not_only_span:
         return OnlySpan(span)
@@ -100,7 +102,7 @@ Text = {
 }
 
 #### ANNOTATIONS Layers #####
-def Page(span, page_index=None, page_info=None, page_ref=None):
+def Page(span, *, page_index=None, page_info=None, page_ref=None):
     return {
         _attr_names.PAGE_INDEX: page_index,
         _attr_names.PAGE_INFO: page_info,
@@ -109,7 +111,7 @@ def Page(span, page_index=None, page_info=None, page_ref=None):
     }
 
 
-def Correction(span, correction=None, certainty=None):
+def Correction(span, *, correction=None, certainty=None):
     return {
         _attr_names.CORRECTION: correction,
         _attr_names.CERTAINTY: certainty,
@@ -117,12 +119,12 @@ def Correction(span, correction=None, certainty=None):
     }
 
 
-def Peydurma(span, note=None):
+def Peydurma(span, *, note=None):
     return {_attr_names.NOTE: note, _attr_names.SPAN: span}
 
 
 def OnlySpan(span):
-    """function to create annotation only has a span.
+    """Create to create annotation only has a span.
 
     Annotations inclues:
         - error candidate
@@ -136,3 +138,26 @@ def OnlySpan(span):
     """
 
     return {_attr_names.SPAN: span}
+
+
+### HFML ####
+
+
+def _pat(ann_func, start_marker, end_marker, has_text=False, pl_pat=None, pl_sep_len=0):
+    return {
+        "start": start_marker + ".",  # dot for tofu-id
+        "start_len": len(start_marker),
+        "end": end_marker,
+        "has_text": has_text,
+        "payload_pattern": pl_pat,
+        "payload_sep_len": pl_sep_len,
+        "payload_dict": deepcopy(ann_func.__kwdefaults__),
+    }
+
+
+HFML_ANN_PATTERN = {
+    AnnType.pecha_title: _pat(OnlySpan, "<k1", ">", has_text=True)
+    # AnnType.correction: _create_pat(
+    #     "\(", "\)", has_text=True, pl_pat=".*?,(.*?)", pl_sep_len=1
+    # ),
+}

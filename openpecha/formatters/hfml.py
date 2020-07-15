@@ -93,14 +93,6 @@ def _create_pat(start, end, has_text=False, pl_pat=None, pl_sep_len=0):
     }
 
 
-ANN_PATTERN = {
-    AnnType.pecha_title: _create_pat("<k1", ">", has_text=True),
-    # AnnType.correction: _create_pat(
-    #     "\(", "\)", has_text=True, pl_pat=".*?,(.*?)", pl_sep_len=1
-    # ),
-}
-
-
 class HFMLFormatter(BaseFormatter):
     """
     OpenPecha Formatter for digitized wooden-printed Pecha based on annotation scheme from Esukhia.
@@ -249,12 +241,8 @@ class HFMLFormatter(BaseFormatter):
 
         yield result, None
 
-    def _sort_by_pos(self, matches):
-        """Sort `matches` by start char position."""
-        return sorted(matches, key=lambda x: x[1].span(0)[0])
-
-    def _get_base_idx(self, ann, offset, is_end=False, payload_len=0):
-        start, end = ann.span(0)
+    def _get_base_idx(self, matched_span, offset, is_end=False, payload_len=0):
+        start, end = matched_span
         marker_len = end - start
         if is_end:
             offset += marker_len + payload_len
@@ -265,8 +253,17 @@ class HFMLFormatter(BaseFormatter):
         offset += marker_len
         return base_idx, offset
 
-    def _get_markers(self, name, pattern, text):
-        return [(name, m) for m in re.finditer(pattern, text)]
+    def _get_markers(self, name, ann_pattern, text):
+        start_markers = []
+        for m in re.finditer(ann_pattern["start"], text):
+            local_id = m[0][ann_pattern["start_len"] :]
+            start_markers.append((name, m.span(0), local_id))
+
+        end_markers = []
+        for m in re.finditer(ann_pattern["end"], text):
+            end_markers.append((name, m.span(0)))
+
+        return start_markers, end_markers
 
     def _get_payload(self, name, start_match, end_match, text):
         start = start_match.span(0)[0]
@@ -280,24 +277,25 @@ class HFMLFormatter(BaseFormatter):
     def parse_ann(self, m_text, base_id):
         # Find start and end of annotation separately
         # TODO: apply multiprocessing on patterns
-        start_markers, end_markers = [], []
+        all_start_markers, all_end_markers = [], []
         for ann_name, ann_value in self.config["ann_patterns"].items():
-            start_markers.extend(
-                self._get_markers(ann_name, ann_value["start"], m_text)
+            ann_start_markers, ann_end_markers = self._get_markers(
+                ann_name, ann_value, m_text
             )
-            end_markers.extend(self._get_markers(ann_name, ann_value["end"], m_text))
+            all_start_markers += ann_start_markers
+            all_end_markers += ann_end_markers
 
         # Sort all_starts and all_ends sperately
-        start_markers = self._sort_by_pos(start_markers)
-        ends_markers = self._sort_by_pos(end_markers)
+        all_start_markers.sort(key=lambda x: x[0])
+        all_end_markers.sort(key=lambda x: x[0])
 
         # Find ann_start and ann_end pair
         s_idx, e_idx = 0, 0
         offset = 0
-        while s_idx < len(start_markers) or e_idx < len(end_markers):
+        while s_idx < len(all_start_markers) or e_idx < len(all_end_markers):
             payload = None
-            ann_name, start_match = start_markers[s_idx]
-            _, end_match = end_markers[e_idx]
+            ann_name, start_match, local_id = all_start_markers[s_idx]
+            _, end_match = all_end_markers[e_idx]
             base_start, offset = self._get_base_idx(start_match, offset)
 
             # ann which includes text
@@ -316,7 +314,9 @@ class HFMLFormatter(BaseFormatter):
                     end_match, offset, is_end=True, payload_len=payload_len
                 )
 
-                self.layers[ann_name][base_id].append((base_start, base_end, payload))
+                self.layers[ann_name][base_id].append(
+                    (local_id, create_ann(ann_name, base_start, base_end))
+                )
             # ann which doesn't includes text
             else:
                 # ann with payload
