@@ -3,9 +3,9 @@ from pathlib import Path
 
 import pytest
 
-from openpecha.formatters import TsadraFormatter
-from openpecha.formatters import HFMLFormatter
-from openpecha.formatters import GoogleOCRFormatter
+from layers import AnnType
+from openpecha.formatters import GoogleOCRFormatter, HFMLFormatter, TsadraFormatter
+from openpecha.formatters.hfml import LocalIdManager
 
 
 class TestHFMLFormatter:
@@ -36,9 +36,9 @@ class TestHFMLFormatter:
 
         result = formatter.get_result()
         expected_result = {
-            "poti_title": [[(0, 24)], [(0, 24)], [(0, 24)]],
-            "chapter_title": [[(98, 125)], [], []],
-            "citation": [
+            AnnType.poti_title: [[(0, 24)], [(0, 24)], [(0, 24)]],
+            AnnType.chapter: [[(98, 125)], [], []],
+            AnnType.citation: [
                 [],
                 [
                     (1000020, {"span": {"start": 164, "end": 202}}),
@@ -46,7 +46,7 @@ class TestHFMLFormatter:
                 ],
                 [(1000024, {"span": {"start": 97, "end": 162}})],
             ],
-            "page": [
+            AnnType.pagination: [
                 [
                     (
                         1000000,
@@ -82,14 +82,14 @@ class TestHFMLFormatter:
                     )
                 ],
             ],
-            "topic": [
+            AnnType.topic: [
                 [(1000002, {"work_id": "T1", "span": {"vol": 1, "start": 27, "end": 2046}})],
                 [(1000014, {"work_id": "t2", "span": {"vol": 1, "start": 2046, "end": 2173}})],
                 [(1000017, {"work_id": "T2", "span": {"vol": 2, "start": 26, "end": 266}})],
                 [(1000023, {"work_id": "T3", "span": {"vol": 3, "start": 26, "end": 243}})],
                 [(1000026, {"work_id": "t4", "span": {"vol": 3, "start": 243, "end": 266}})],
             ],
-            "sub_topic": [
+            AnnType.sub_topic: [
                 [
                     [(1000003, {"work_id": "T1-1", "span": {"vol": 1, "start": 27, "end": 1352}})],
                     [
@@ -113,15 +113,15 @@ class TestHFMLFormatter:
                 [[]],
                 [[]],
             ],
-            "sabche": [[(1000008, {"span": {"start": 1548, "end": 1936}})], [], []],
-            "tsawa": [[(1000004, {"span": {"start": 420, "end": 739}})], [], []],
-            "yigchung": [[], [], [(1000025, {"span": {"start": 164, "end": 241}})]],
-            "correction": [
+            AnnType.sabche: [[(1000008, {"span": {"start": 1548, "end": 1936}})], [], []],
+            AnnType.tsawa: [[(1000004, {"span": {"start": 420, "end": 739}})], [], []],
+            AnnType.yigchung: [[], [], [(1000025, {"span": {"start": 164, "end": 241}})]],
+            AnnType.correction: [
                 [(1000010, {"correction": "མཆིའོ་", "span": {"start": 1838, "end": 1844}})],
                 [],
                 [],
             ],
-            "error_candidate": [
+            AnnType.error_candidate: [
                 [
                     (1000012, {"span": {"start": 2040, "end": 2043}}),
                     (1000013, {"span": {"start": 2044, "end": 2046}}),
@@ -129,7 +129,7 @@ class TestHFMLFormatter:
                 [],
                 [],
             ],
-            "peydurma": [
+            AnnType.peydurma: [
                 [
                     (1000007, {"span": {"start": 1518, "end": 1518}}),
                     (1000009, {"span": {"start": 1624, "end": 1624}}),
@@ -142,6 +142,17 @@ class TestHFMLFormatter:
 
         for layer in result:
             assert result[layer] == expected_result[layer]
+
+    def test_tofu_id(self):
+        formatter = HFMLFormatter()
+        formatter.dirs = {}
+        formatter.dirs["layers_path"] = Path("tests/data/formatter/hfml/tofu-id")
+        layers = [layer.stem for layer in formatter.dirs["layers_path"].iterdir()]
+        old_layers = formatter.get_old_layers(layers)
+        local_id2uuid = LocalIdManager(old_layers)
+        local_id2uuid.add("tsawa", 1231232)
+        d = local_id2uuid.serialize("tsawa")
+        print(d)
 
 
 class TestGoogleOCRFormatter:
@@ -211,3 +222,7 @@ class TestTsadraFormatter:
         result = formatter.get_base_text()
         expected1 = Path("tests/data/formatter/tsadra/tsadra_base1.txt").read_text()
         assert result == expected1
+
+
+if __name__ == "__main__":
+    TestHFMLFormatter().test_tofu_id()

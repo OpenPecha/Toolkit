@@ -131,11 +131,12 @@ class Rdf:
 
     def set_adm(self):
         subject_r = bda[self.lname]
+        einst_r = bdr[self.lname]
         graph_r = bdg[self.lname]
         rev = self.openpecha.get_rev()
 
         self.add_triple(subject_r, rdf.type, adm['AdminData'])
-        self.add_triple(subject_r, adm['adminAbout'], subject_r)
+        self.add_triple(subject_r, adm['adminAbout'], einst_r)
         self.add_triple(subject_r, adm['graphId'], graph_r)
         self.add_triple(subject_r, adm['syncAgent'], bdr['SAOPT'])
         self.add_triple(subject_r, adm['metadataLegal'], bda['LD_BDRC_CC0'])
