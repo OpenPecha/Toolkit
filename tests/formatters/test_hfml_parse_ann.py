@@ -22,7 +22,7 @@ def one_vol_test_data():
     m_text = Path("tests/data/formatter/hfml/v001.txt").read_text()
     base_id = "v001"
     expected = defaultdict(lambda: defaultdict(list))
-    expected[AnnType.pecha_title][base_id].append((":", PechaTitle(Span(0, 4))))
+    expected[AnnType.pecha_title][base_id].append((":", OnlySpan(Span(0, 4))))
     return m_text, base_id, expected
 
 

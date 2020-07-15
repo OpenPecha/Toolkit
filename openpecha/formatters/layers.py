@@ -8,18 +8,10 @@ __all__ = [
     "Span",
     "Text",
     "Correction",
-    "ErrorCandidate",
     "CrossVolSpan",
     "SubText",
     "Peydurma",
-    "Tsawa",
-    "Quotation",
-    "Sabche",
-    "Yigchung",
-    "PechaTitle",
-    "PotiTitle",
-    "ChapterTitle",
-    "Author",
+    "OnlySpan",
     "AnnType",
 ]
 
@@ -41,16 +33,16 @@ class AnnType:
     not_only_span = [pagination, correction, peydurma]
 
 
-def create_ann(ann_name, start, end, **kwargs):
+def create_ann(ann_name, start, end, payloads):
     span = Span(start, end)
     if ann_name not in AnnType.not_only_span:
         return OnlySpan(span)
     elif ann_name == AnnType.pagination:
-        return Page(span, **kwargs)
+        return Page(span, **payloads)
     elif ann_name == AnnType.correction:
-        return Correction(span, **kwargs)
+        return Correction(span, **payloads)
     elif ann_name == AnnType.peydurma:
-        return Peydurma(span, **kwargs)
+        return Peydurma(span, **payloads)
     else:
         raise NameError(f"{ann_name} annotation not support yet.")
 
