@@ -30,6 +30,7 @@ setup(
         "GitPython==3.1.0",
         "bs4",
         "pyewts",
+        "rdflib==5.0.0",
     ],
     python_requires=">=3.6",
     tests_require=["pytest"],

@@ -6,9 +6,9 @@ from pathlib import Path
 
 import yaml
 
-from openpecha.formatters import BaseFormatter
-from openpecha.formatters.layers import Layer, Page
-from openpecha.utils import gzip_str
+from ..utils import gzip_str
+from .formatter import BaseFormatter
+from .layers import Layer, Page
 
 
 class GoogleOCRFormatter(BaseFormatter):

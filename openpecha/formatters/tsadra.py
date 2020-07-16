@@ -4,8 +4,8 @@ from pathlib import Path
 
 from bs4 import BeautifulSoup
 
-from openpecha.formatters import BaseFormatter
-from openpecha.formatters.layers import *
+from .formatter import BaseFormatter
+from .layers import *
 
 
 class TsadraFormatter(BaseFormatter):
