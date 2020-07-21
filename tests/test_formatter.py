@@ -225,4 +225,7 @@ class TestTsadraFormatter:
 
 
 if __name__ == "__main__":
-    TestHFMLFormatter().test_tofu_id()
+    # TestHFMLFormatter().test_tofu_id()
+    path = "./P000100/OEBPS/"
+    formatter = TsadraFormatter(output_path="./test_opf")
+    formatter.create_opf(path, 1)

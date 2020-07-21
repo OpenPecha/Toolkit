@@ -69,22 +69,24 @@ class TsadraFormatter(BaseFormatter):
                     tsawa["id"] = self.get_unique_id()
                     tsawa["span"]["start"] = a[0]
                     tsawa["span"]["end"] = a[1]
+                    tsawa["isVerse"] = a[2]
                     Tsawa_layer["annotations"].append(tsawa)
             elif layer == "quotation":
                 Quotation_layer = deepcopy(Layer)
                 Quotation_layer["id"] = self.get_unique_id()
-                Quotation_layer["annotation_type"] = "tsawa"
+                Quotation_layer["annotation_type"] = "quotation"
                 Quotation_layer["revision"] = f"{1:05}"
                 for a in layers[layer]:
                     quote = deepcopy(Quotation)
                     quote["id"] = self.get_unique_id()
                     quote["span"]["start"] = a[0]
                     quote["span"]["end"] = a[1]
+                    quote["isVerse"] = a[2]
                     Quotation_layer["annotations"].append(quote)
             elif layer == "sabche":
                 Sabche_layer = deepcopy(Layer)
                 Sabche_layer["id"] = self.get_unique_id()
-                Sabche_layer["annotation_type"] = "tsawa"
+                Sabche_layer["annotation_type"] = "sabche"
                 Sabche_layer["revision"] = f"{1:05}"
                 for a in layers[layer]:
                     sabche = deepcopy(Sabche)
@@ -95,7 +97,7 @@ class TsadraFormatter(BaseFormatter):
             elif layer == "yigchung":
                 Yigchung_layer = deepcopy(Layer)
                 Yigchung_layer["id"] = self.get_unique_id()
-                Yigchung_layer["annotation_type"] = "tsawa"
+                Yigchung_layer["annotation_type"] = "yigchung"
                 Yigchung_layer["revision"] = f"{1:05}"
                 for a in layers[layer]:
                     yigchung = deepcopy(Yigchung)
@@ -151,13 +153,9 @@ class TsadraFormatter(BaseFormatter):
         # p_with_citations = []
         ps = soup.find_all("p")
         for p in ps:
-            if (
-                "credits-page_front-title" in p["class"][0]
-            ):  # to get the book title index
+            if "credits-page_front-title" in p["class"][0]:  # to get the book title index
                 book_title_tmp = self.text_preprocess(p.text) + "\n"
-                self.book_title.append(
-                    (self.walker, len(book_title_tmp) - 2 + self.walker)
-                )
+                self.book_title.append((self.walker, len(book_title_tmp) - 2 + self.walker))
                 self.base_text += book_title_tmp
                 self.walker += len(book_title_tmp)
 
@@ -182,7 +180,7 @@ class TsadraFormatter(BaseFormatter):
                         if "root" in s["class"][0]:
                             root_text_tmp += self.text_preprocess(s.text)
                             self.root_text.append(
-                                (self.walker, len(root_text_tmp) - 1 + self.walker)
+                                (self.walker, len(root_text_tmp) - 1 + self.walker, True)
                             )
                             self.walker += len(root_text_tmp) + 1
                             root_text_tmp = ""
@@ -192,22 +190,14 @@ class TsadraFormatter(BaseFormatter):
 
             elif "tibetan-chapter" in p["class"][0]:  # to get chapter title index
                 chapter_title_tmp = self.text_preprocess(p.text) + "\n"
-                self.chapter.append(
-                    (self.walker, len(chapter_title_tmp) - 2 + self.walker)
-                )
+                self.chapter.append((self.walker, len(chapter_title_tmp) - 2 + self.walker))
                 self.walker += len(chapter_title_tmp)
                 self.base_text += chapter_title_tmp
 
-            elif (
-                "commentary" in p["class"][0]
-                or "tibetan-regular-indented" in p["class"][0]
-            ):
+            elif "commentary" in p["class"][0] or "tibetan-regular-indented" in p["class"][0]:
 
                 # travesing through commetary which are in verse form
-                if (
-                    p["class"][0] == com_classes["first"]
-                    or p["class"][0] == com_classes["middle"]
-                ):
+                if p["class"][0] == com_classes["first"] or p["class"][0] == com_classes["middle"]:
                     commentary_tmp += self.text_preprocess(p.text) + "\n"
                     self.base_text += self.text_preprocess(p.text) + "\n"
                 elif p["class"][0] == com_classes["last"]:
@@ -235,15 +225,12 @@ class TsadraFormatter(BaseFormatter):
                             if citation_tmp:
                                 # citation_tmp += citation_tmp
                                 self.citation.append(
-                                    (p_walker, len(citation_tmp) - 2 + p_walker)
+                                    (p_walker, len(citation_tmp) + p_walker, False)
                                 )
                                 p_walker += len(citation_tmp)
                                 citation_tmp = ""
                             self.yigchung.append(
-                                (
-                                    p_walker,
-                                    len(self.text_preprocess(s.text)) - 1 + p_walker,
-                                )
+                                (p_walker, len(self.text_preprocess(s.text)) - 1 + p_walker,)
                             )
                             p_walker += len(self.text_preprocess(s.text))
 
@@ -255,7 +242,7 @@ class TsadraFormatter(BaseFormatter):
                         elif "front-title" in s["class"][0]:
                             if citation_tmp:
                                 self.citation.append(
-                                    (p_walker, len(citation_tmp) - 2 + p_walker)
+                                    (p_walker, len(citation_tmp) + p_walker, False)
                                 )
                                 p_walker += len(citation_tmp)
                                 citation_tmp = ""
@@ -263,7 +250,7 @@ class TsadraFormatter(BaseFormatter):
                         else:
                             if citation_tmp:
                                 self.citation.append(
-                                    (p_walker, len(citation_tmp) - 2 + p_walker)
+                                    (p_walker, len(citation_tmp) + p_walker, False)
                                 )
                                 p_walker += len(citation_tmp)
                                 citation_tmp = ""
@@ -271,9 +258,7 @@ class TsadraFormatter(BaseFormatter):
 
                     # when citation ends the para
                     if citation_tmp:
-                        self.citation.append(
-                            (p_walker, len(citation_tmp) - 2 + p_walker)
-                        )
+                        self.citation.append((p_walker, len(citation_tmp) + p_walker, False))
                         p_walker += len(citation_tmp)
                         citation_tmp = ""
 
@@ -310,26 +295,19 @@ class TsadraFormatter(BaseFormatter):
             elif (
                 cit_base in p["class"][0]
             ):  # checking for citation annotation first two if for verse form and last for non verse
-                if (
-                    p["class"][0] == cit_classes["first"]
-                    or p["class"][0] == cit_classes["middle"]
-                ):
+                if p["class"][0] == cit_classes["first"] or p["class"][0] == cit_classes["middle"]:
                     citation_tmp += self.text_preprocess(p.text) + "\n"
                     self.base_text += self.text_preprocess(p.text) + "\n"
                 elif p["class"][0] == cit_classes["last"]:
                     citation_tmp += self.text_preprocess(p.text) + "\n"
-                    self.citation.append(
-                        (self.walker, len(citation_tmp) - 2 + self.walker)
-                    )
+                    self.citation.append((self.walker, len(citation_tmp) - 2 + self.walker, True))
                     self.base_text += self.text_preprocess(p.text) + "\n"
                     self.walker += len(citation_tmp)
                     citation_tmp = ""
                 elif p["class"][0] == cit_classes["indent"]:
                     citation_tmp += self.text_preprocess(p.text) + "\n"
                     self.base_text += self.text_preprocess(p.text) + "\n"
-                    self.citation.append(
-                        self.walker, len(citation_tmp) - 2 + self.walker
-                    )
+                    self.citation.append(self.walker, len(citation_tmp) - 2 + self.walker, True)
                     self.walker += len(citation_tmp)
                     citation_tmp = ""
 
@@ -371,9 +349,7 @@ class TsadraFormatter(BaseFormatter):
                 return 0
 
         html_paths = [
-            o
-            for o in input_path.iterdir()
-            if o.suffix == ".xhtml" and o.stem != "cover"
+            o for o in input_path.iterdir() if o.suffix == ".xhtml" and o.stem != "cover"
         ]
         sku_sementic_order = partial(semantic_order, get_prefix(html_paths))
         html_paths = sorted(html_paths, key=sku_sementic_order)
@@ -421,6 +397,6 @@ class TsadraFormatter(BaseFormatter):
 
 
 if __name__ == "__main__":
-    path = "bo_crawler/bo_crawler/data/tsadra/data/ebooks/IBA-LG-04-1/OEBPS/"
+    path = "./P000100/OEBPS/"
     formatter = TsadraFormatter(output_path="./test_opf")
     formatter.create_opf(path, 1)
