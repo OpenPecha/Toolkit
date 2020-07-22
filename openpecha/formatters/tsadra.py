@@ -6,6 +6,7 @@ from bs4 import BeautifulSoup
 
 from .formatter import BaseFormatter
 from .layers import *
+from .layers import AnnType
 
 
 class TsadraFormatter(BaseFormatter):
@@ -28,95 +29,71 @@ class TsadraFormatter(BaseFormatter):
     def text_preprocess(self, text):
         return text
 
+    def add_new_ann(self, layer, ann):
+        uuid = self.get_unique_id()
+        layer["annotations"][uuid] = ann
+
+    def create_new_layer(self, layer_name, anns):
+        new_layer = Layer(self.get_unique_id(), layer_name)
+        for ann in anns:
+            self.add_new_ann(new_layer, ann)
+        return new_layer
+
     def format_layer(self, layers):
-        for layer in layers:
-            if layer == "book_title":
-                Book_title_layer = deepcopy(Layer)
-                Book_title_layer["id"] = self.get_unique_id()
-                Book_title_layer["annotation_type"] = "book_title"
-                Book_title_layer["revision"] = f"{1:05}"
-                Book_title["span"]["start"] = layers[layer][0][0]
-                Book_title["span"]["end"] = layers[layer][0][1]
-                Book_title_layer["annotations"].append(Book_title)
-            elif layer == "author":
-                Author_layer = deepcopy(Layer)
-                Author_layer["id"] = self.get_unique_id()
-                Author_layer["annotation_type"] = "author"
-                Author_layer["revision"] = f"{1:05}"
-                for a in layers[layer]:
-                    author = deepcopy(Author)
-                    author["span"]["start"] = a[0]
-                    author["span"]["end"] = a[1]
-                    Author_layer["annotations"].append(author)
-            elif layer == "chapter_title":
-                Chapter_layer = deepcopy(Layer)
-                Chapter_layer["id"] = self.get_unique_id()
-                Chapter_layer["annotation_type"] = "chapter_title"
-                Chapter_layer["revision"] = f"{1:05}"
-                for a in layers[layer]:
-                    chapter = deepcopy(Chapter)
-                    chapter["id"] = self.get_unique_id()
-                    chapter["span"]["start"] = a[0]
-                    chapter["span"]["end"] = a[1]
-                    Chapter_layer["annotations"].append(chapter)
-            elif layer == "tsawa":
-                Tsawa_layer = deepcopy(Layer)
-                Tsawa_layer["id"] = self.get_unique_id()
-                Tsawa_layer["annotation_type"] = "tsawa"
-                Tsawa_layer["revision"] = f"{1:05}"
-                for a in layers[layer]:
-                    tsawa = deepcopy(Tsawa)
-                    tsawa["id"] = self.get_unique_id()
-                    tsawa["span"]["start"] = a[0]
-                    tsawa["span"]["end"] = a[1]
-                    tsawa["isVerse"] = a[2]
-                    Tsawa_layer["annotations"].append(tsawa)
-            elif layer == "quotation":
-                Quotation_layer = deepcopy(Layer)
-                Quotation_layer["id"] = self.get_unique_id()
-                Quotation_layer["annotation_type"] = "quotation"
-                Quotation_layer["revision"] = f"{1:05}"
-                for a in layers[layer]:
-                    quote = deepcopy(Quotation)
-                    quote["id"] = self.get_unique_id()
-                    quote["span"]["start"] = a[0]
-                    quote["span"]["end"] = a[1]
-                    quote["isVerse"] = a[2]
-                    Quotation_layer["annotations"].append(quote)
-            elif layer == "sabche":
-                Sabche_layer = deepcopy(Layer)
-                Sabche_layer["id"] = self.get_unique_id()
-                Sabche_layer["annotation_type"] = "sabche"
-                Sabche_layer["revision"] = f"{1:05}"
-                for a in layers[layer]:
-                    sabche = deepcopy(Sabche)
-                    sabche["id"] = self.get_unique_id()
-                    sabche["span"]["start"] = a[0]
-                    sabche["span"]["end"] = a[1]
-                    Sabche_layer["annotations"].append(sabche)
-            elif layer == "yigchung":
-                Yigchung_layer = deepcopy(Layer)
-                Yigchung_layer["id"] = self.get_unique_id()
-                Yigchung_layer["annotation_type"] = "yigchung"
-                Yigchung_layer["revision"] = f"{1:05}"
-                for a in layers[layer]:
-                    yigchung = deepcopy(Yigchung)
-                    yigchung["id"] = self.get_unique_id()
-                    yigchung["span"]["start"] = a[0]
-                    yigchung["span"]["end"] = a[1]
-                    Yigchung_layer["annotations"].append(yigchung)
 
-        result = {
-            "book_title": Book_title_layer,
-            "author": Author_layer,
-            "chapter_title": Chapter_layer,
-            "tsawa": Tsawa_layer,
-            "quotation": Quotation_layer,
-            "sabche": Sabche_layer,
-            "yigchung": Yigchung_layer,
-        }
+        cross_vol_anns, non_cross_vol_anns = [], []
+        for layer_name, layer_anns in layers.items():
+            if layer_name in ["topic", "sub_topic"]:
+                cross_vol_anns.append((layer_name, layer_anns))
+            else:
+                non_cross_vol_anns.append((layer_name, layer_anns))
 
-        return result
+        del layers
+
+        # Create Annotaion layers
+        for (i, vol_layers) in enumerate(non_cross_vol_anns):
+            base_id = f"v{i+1:03}"
+
+            result = {}
+            layer_name, layer_anns = vol_layers
+            result[layer_name] = self.create_new_layer(layer_name, layer_anns)
+            yield result, base_id
+
+        # Create Index layer
+        Index_layer = Layer(self.get_unique_id(), "index")
+        # loop over each topic
+        for topic, sub_topic in zip(*cross_vol_anns):
+            Topic = deepcopy(Text)
+            Topic["id"] = self.get_unique_id()
+
+            # loop over each sub_topic
+            for cross_sub_topic in sub_topic:
+                sub_text = deepcopy(SubText)
+                sub_text["id"] = self.get_unique_id()
+                for start, end, vol_id, work in cross_sub_topic:
+                    sub_text["work"] = work
+                    cross_vol_span = deepcopy(CrossVolSpan)
+                    cross_vol_span["vol"] = f"base/v{vol_id:03}"
+                    cross_vol_span["span"]["start"] = start
+                    cross_vol_span["span"]["end"] = end
+                    sub_text["span"].append(cross_vol_span)
+
+                if corss_sub_topic:
+                    Topic["parts"].append(sub_text)
+
+            for start, end, vol_id, work in topic:
+                Topic["work"] = work
+                cross_vol_span = deepcopy(CrossVolSpan)
+                cross_vol_span["vol"] = f"base/v{vol_id:03}"
+                cross_vol_span["span"]["start"] = start
+                cross_vol_span["span"]["end"] = end
+                Topic["span"].append(cross_vol_span)
+
+            Index_layer["annotations"].append(Topic)
+
+        result = {"index": Index_layer}
+
+        yield result, None
 
     def build_layers(self, html):
         """
@@ -155,13 +132,17 @@ class TsadraFormatter(BaseFormatter):
         for p in ps:
             if "credits-page_front-title" in p["class"][0]:  # to get the book title index
                 book_title_tmp = self.text_preprocess(p.text) + "\n"
-                self.book_title.append((self.walker, len(book_title_tmp) - 2 + self.walker))
+                self.book_title.append(
+                    {"span": {"start": self.walker, "end": len(book_title_tmp) - 1 + self.walker}}
+                )
                 self.base_text += book_title_tmp
                 self.walker += len(book_title_tmp)
 
             if "text-author" in p["class"][0]:  # to get the author annotation index
                 author_tmp = self.text_preprocess(p.text) + "\n"
-                self.author.append((self.walker, len(author_tmp) - 2 + self.walker))
+                self.author.append(
+                    {"span": {"start": self.walker, "end": len(author_tmp) - 1 + self.walker}}
+                )
                 self.base_text += author_tmp
                 self.walker += len(author_tmp)
 
@@ -180,7 +161,13 @@ class TsadraFormatter(BaseFormatter):
                         if "root" in s["class"][0]:
                             root_text_tmp += self.text_preprocess(s.text)
                             self.root_text.append(
-                                (self.walker, len(root_text_tmp) - 1 + self.walker, True)
+                                {
+                                    "span": {
+                                        "start": self.walker,
+                                        "end": len(root_text_tmp) - 1 + self.walker,
+                                    },
+                                    "isverse": True,
+                                }
                             )
                             self.walker += len(root_text_tmp) + 1
                             root_text_tmp = ""
@@ -190,7 +177,14 @@ class TsadraFormatter(BaseFormatter):
 
             elif "tibetan-chapter" in p["class"][0]:  # to get chapter title index
                 chapter_title_tmp = self.text_preprocess(p.text) + "\n"
-                self.chapter.append((self.walker, len(chapter_title_tmp) - 2 + self.walker))
+                self.chapter.append(
+                    {
+                        "span": {
+                            "start": self.walker,
+                            "end": len(chapter_title_tmp) - 2 + self.walker,
+                        }
+                    }
+                )
                 self.walker += len(chapter_title_tmp)
                 self.base_text += chapter_title_tmp
 
@@ -225,12 +219,23 @@ class TsadraFormatter(BaseFormatter):
                             if citation_tmp:
                                 # citation_tmp += citation_tmp
                                 self.citation.append(
-                                    (p_walker, len(citation_tmp) + p_walker, False)
+                                    {
+                                        "span": {
+                                            "start": p_walker,
+                                            "end": len(citation_tmp) + p_walker - 1,
+                                        },
+                                        "isverse": False,
+                                    }
                                 )
                                 p_walker += len(citation_tmp)
                                 citation_tmp = ""
                             self.yigchung.append(
-                                (p_walker, len(self.text_preprocess(s.text)) - 1 + p_walker,)
+                                {
+                                    "span": {
+                                        "start": p_walker,
+                                        "end": len(self.text_preprocess(s.text)) - 1 + p_walker,
+                                    }
+                                }
                             )
                             p_walker += len(self.text_preprocess(s.text))
 
@@ -242,7 +247,13 @@ class TsadraFormatter(BaseFormatter):
                         elif "front-title" in s["class"][0]:
                             if citation_tmp:
                                 self.citation.append(
-                                    (p_walker, len(citation_tmp) + p_walker, False)
+                                    {
+                                        "span": {
+                                            "start": p_walker,
+                                            "end": len(citation_tmp) + p_walker - 1,
+                                        },
+                                        "isverse": False,
+                                    }
                                 )
                                 p_walker += len(citation_tmp)
                                 citation_tmp = ""
@@ -250,7 +261,13 @@ class TsadraFormatter(BaseFormatter):
                         else:
                             if citation_tmp:
                                 self.citation.append(
-                                    (p_walker, len(citation_tmp) + p_walker, False)
+                                    {
+                                        "span": {
+                                            "start": p_walker,
+                                            "end": len(citation_tmp) + p_walker - 1,
+                                        },
+                                        "isverse": False,
+                                    }
                                 )
                                 p_walker += len(citation_tmp)
                                 citation_tmp = ""
@@ -258,7 +275,15 @@ class TsadraFormatter(BaseFormatter):
 
                     # when citation ends the para
                     if citation_tmp:
-                        self.citation.append((p_walker, len(citation_tmp) + p_walker, False))
+                        self.citation.append(
+                            {
+                                "span": {
+                                    "start": p_walker,
+                                    "end": len(citation_tmp) + p_walker - 1,
+                                },
+                                "isverse": False,
+                            }
+                        )
                         p_walker += len(citation_tmp)
                         citation_tmp = ""
 
@@ -271,7 +296,7 @@ class TsadraFormatter(BaseFormatter):
             elif "sabche" in p["class"][0]:  # checking for sabche annotation
                 sabche_tmp = ""
                 p_with_sabche_tmp = ""
-                k = self.walker
+                sabche_walker = self.walker
                 for s in p.contents:
                     try:
                         s["class"][0]
@@ -283,15 +308,17 @@ class TsadraFormatter(BaseFormatter):
                         sabche_tmp += self.text_preprocess(s.text)
 
                     elif "front-tile" in s["class"][0]:
-                        k += len(self.text_preprocess(s.text))
+                        sabche_walker += len(self.text_preprocess(s.text))
 
                 # when sabche ends the para
                 if sabche_tmp:
-                    self.sabche.append((k, len(sabche_tmp) - 1 + k))
+                    self.sabche.append(
+                        {"span": {"start": sabche_walker, "end": len(sabche_tmp) + sabche_walker,}}
+                    )
                     sabche_tmp = ""
                 self.walker += len(self.text_preprocess(p.text)) + 1
                 self.base_text += self.text_preprocess(p.text) + "\n"
-                k = 0
+                sabche_walker = 0
             elif (
                 cit_base in p["class"][0]
             ):  # checking for citation annotation first two if for verse form and last for non verse
@@ -300,14 +327,30 @@ class TsadraFormatter(BaseFormatter):
                     self.base_text += self.text_preprocess(p.text) + "\n"
                 elif p["class"][0] == cit_classes["last"]:
                     citation_tmp += self.text_preprocess(p.text) + "\n"
-                    self.citation.append((self.walker, len(citation_tmp) - 2 + self.walker, True))
+                    self.citation.append(
+                        {
+                            "span": {
+                                "start": self.walker,
+                                "end": len(citation_tmp) - 2 + self.walker,
+                            },
+                            "isverse": True,
+                        }
+                    )
                     self.base_text += self.text_preprocess(p.text) + "\n"
                     self.walker += len(citation_tmp)
                     citation_tmp = ""
                 elif p["class"][0] == cit_classes["indent"]:
                     citation_tmp += self.text_preprocess(p.text) + "\n"
                     self.base_text += self.text_preprocess(p.text) + "\n"
-                    self.citation.append(self.walker, len(citation_tmp) - 2 + self.walker, True)
+                    self.citation.append(
+                        {
+                            "span": {
+                                "start": self.walker,
+                                "end": len(citation_tmp) - 2 + self.walker,
+                            },
+                            "isverse": True,
+                        }
+                    )
                     self.walker += len(citation_tmp)
                     citation_tmp = ""
 
@@ -316,13 +359,13 @@ class TsadraFormatter(BaseFormatter):
         To return all the result
         """
         result = {
-            "book_title": self.book_title,
-            "author": self.author,
-            "chapter_title": self.chapter,
-            "tsawa": self.root_text,
-            "quotation": self.citation,
-            "sabche": self.sabche,
-            "yigchung": self.yigchung,
+            AnnType.book_title: self.book_title,
+            AnnType.author: self.author,
+            AnnType.chapter: self.chapter,
+            AnnType.tsawa: self.root_text,
+            AnnType.citation: self.citation,
+            AnnType.sabche: self.sabche,
+            AnnType.yigchung: self.yigchung,
         }
         return result
 
@@ -360,11 +403,11 @@ class TsadraFormatter(BaseFormatter):
 
     def create_metadata(self, layers):
         def get_text(span):
-            return self.base_text[span[0] : span[1] + 1].replace("\n", "")
+            return self.base_text[span["start"] : span["end"] + 1].replace("\n", "")
 
         meta_data = {}
-        meta_data["title"] = get_text(layers["book_title"][0])
-        meta_data["authors"] = [get_text(span) for span in layers["author"]]
+        meta_data["title"] = get_text(layers["Book Title"][0]["span"])
+        meta_data["authors"] = [get_text(span["span"]) for span in layers["Author"]]
         meta_data["sku"] = self.sku
         meta_data["layers"] = [l for l in layers if layers[l]]
         return {"ebook_metadata": meta_data}
@@ -385,10 +428,11 @@ class TsadraFormatter(BaseFormatter):
         vol_layer_path = self.dirs["layers_path"] / "v001"
         vol_layer_path.mkdir(exist_ok=True)
         layers = self.get_result()
-        for layer, ann in self.format_layer(layers).items():
-            if ann["annotations"]:
-                layer_fn = vol_layer_path / f"{layer}.yml"
-                self.dump(ann, layer_fn)
+        for vol_layer, base_id in self.format_layer(layers):
+            for layer, ann in vol_layer.items():
+                if ann["annotations"]:
+                    layer_fn = vol_layer_path / f"{layer}.yml"
+                    self.dump(ann, layer_fn)
 
         # save metatdata
         meta_data = self.create_metadata(layers)

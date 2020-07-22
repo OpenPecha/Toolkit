@@ -20,9 +20,7 @@ class Serialize(object):
     To use it, instantiate a concrete class with the path of the opf file, and call apply_layers() then get_result()
     """
 
-    def __init__(
-        self, opfpath, text_id=None, vol_id="v001", layers=None, index_layer=None
-    ):
+    def __init__(self, opfpath, text_id=None, vol_id="v001", layers=None, index_layer=None):
         self.opfpath = Path(opfpath)
         self.meta = self.get_meta_data()
         self.text_id = text_id
@@ -153,7 +151,7 @@ class Serialize(object):
         if not layer_fn.is_file():
             return
         layer = yaml.safe_load(layer_fn.open())
-        for a in layer["annotations"]:
+        for _, a in layer["annotations"].items():
             # text begins in middle of the page
             if (
                 a["span"]["end"] >= self.text_spans[vol_id]["start"]

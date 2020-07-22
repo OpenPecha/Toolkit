@@ -3,6 +3,7 @@ import requests
 
 from .serialize import Serialize
 from pathlib import Path
+from openpecha.formatters.layers import AnnType
 
 
 class Tsadra_template:
@@ -17,7 +18,7 @@ class Tsadra_template:
     quatation__verse_SP = (
         '<span class="tibetan-citations-in-verse_tibetan-citations-middle-lines">'
     )
-    quatation__SP = '<span class="tibetan-extranal-citations">'
+    quatation__SP = '<span class="tibetan-external-citations">'
     sabche_SP = '<span class="tibetan-sabche">'
     yigchung_SP = '<span class="tibetan-commentary-small">'
 
@@ -58,40 +59,40 @@ class EpubSerializer(Serialize):
         only_start_ann = False
         start_payload = "("
         end_payload = ")"
-        if ann["type"] == "pagination":
+        if ann["type"] == AnnType.pagination:
             start_payload = f'[{ann["page_index"]}] {ann["page_info"]}\n'
             only_start_ann = True
-        elif ann["type"] == "correction":
+        elif ann["type"] == AnnType.correction:
             start_payload = "("
             end_payload = f',{ann["correction"]})'
-        elif ann["type"] == "peydurma":
+        elif ann["type"] == AnnType.peydurma:
             start_payload = "#"
             only_start_ann = True
-        elif ann["type"] == "error_candidate":
+        elif ann["type"] == AnnType.error_candidate:
             start_payload = "["
             end_payload = "]"
-        elif ann["type"] == "book_title":
+        elif ann["type"] == AnnType.book_title:
             start_payload = Tsadra_template.book_title_SP
             end_payload = Tsadra_template.end_payload
-        elif ann["type"] == "author":
+        elif ann["type"] == AnnType.author:
             start_payload = Tsadra_template.author_SP
             end_payload = Tsadra_template.end_payload
-        elif ann["type"] == "chapter_title":
+        elif ann["type"] == AnnType.chapter:
             start_payload = Tsadra_template.chapter_SP
             end_payload = Tsadra_template.end_payload
-        elif ann["type"] == "tsawa":
+        elif ann["type"] == AnnType.tsawa:
             start_payload = Tsadra_template.tsawa_SP
             end_payload = Tsadra_template.end_payload
-        elif ann["type"] == "quotation":
-            if ann["isVerse"]:
+        elif ann["type"] == AnnType.citation:
+            if ann["isverse"]:
                 start_payload = Tsadra_template.quatation_verse_SP
             else:
                 start_payload = Tsadra_template.quatation__SP
             end_payload = Tsadra_template.end_payload
-        elif ann["type"] == "sabche":
+        elif ann["type"] == AnnType.sabche:
             start_payload = Tsadra_template.sabche_SP
             end_payload = Tsadra_template.end_payload
-        elif ann["type"] == "yigchung":
+        elif ann["type"] == AnnType.yigchung:
             start_payload = Tsadra_template.yigchung_SP
             end_payload = Tsadra_template.end_payload
 
