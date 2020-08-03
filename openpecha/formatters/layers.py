@@ -27,10 +27,10 @@ class AnnType:
     book_title = "Book Title"
     poti_title = "Poti Title"
     author = "Author"
-    chapter = "chapter"
+    chapter = "Chapter"
 
-    topic = "Text"
-    sub_topic = "Sub_Text"
+    topic = "topic"
+    sub_topic = "sub_topic"
 
     pagination = "Pagination"
     citation = "Citation"
