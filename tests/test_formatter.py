@@ -198,11 +198,11 @@ class TestTsadraFormatter:
         result = formatter.get_result()
 
         expected_result = {
-            AnnType.book_title: [{"span": {"start": 0, "end": 84}}],
+            AnnType.book_title: [{"span": {"start": 0, "end": 85}}],
             AnnType.author: [
-                {"span": {"start": 86, "end": 109}},
-                {"span": {"start": 111, "end": 134}},
-                {"span": {"start": 136, "end": 181}},
+                {"span": {"start": 86, "end": 110}},
+                {"span": {"start": 111, "end": 135}},
+                {"span": {"start": 136, "end": 182}},
             ],
             AnnType.chapter: [{"span": {"start": 183, "end": 200}}],
             AnnType.tsawa: [
