@@ -139,7 +139,7 @@ class EpubSerializer(Serialize):
         font_size = 16
         chapter_mark = "pagebreak"
         os.system(
-            f'ebook-convert {out_fn} {pecha_id}.epub --extra-css=./template.css --chapter={chapter_Xpath} --chapter-mark="{chapter_mark}" --base-font-size={font_size} --embed-font-family="{font_family}"'
+            f'ebook-convert {out_fn} ./output/epub_output/{pecha_id}.epub --extra-css=./template.css --chapter={chapter_Xpath} --chapter-mark="{chapter_mark}" --base-font-size={font_size} --embed-font-family="{font_family}"'
         )
         # Removing html file and template file
         os.system(f"rm {out_fn}")

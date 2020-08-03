@@ -204,14 +204,14 @@ class TestTsadraFormatter:
                 {"span": {"start": 111, "end": 135}},
                 {"span": {"start": 136, "end": 182}},
             ],
-            AnnType.chapter: [{"span": {"start": 183, "end": 200}}],
+            AnnType.chapter: [{"span": {"start": 183, "end": 201}}],
             AnnType.tsawa: [
                 {"span": {"start": 4150, "end": 4300}, "isverse": True},
                 {"span": {"start": 5122, "end": 5298}, "isverse": True},
             ],
             AnnType.citation: [
                 {"span": {"start": 3993, "end": 4132}, "isverse": False},
-                {"span": {"start": 4302, "end": 4417}, "isverse": True},
+                {"span": {"start": 4302, "end": 4418}, "isverse": True},
             ],
             AnnType.sabche: [
                 {"span": {"start": 5091, "end": 5121}},
