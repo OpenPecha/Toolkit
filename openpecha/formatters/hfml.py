@@ -123,7 +123,7 @@ class HFMLFormatter(BaseFormatter):
                     result_text += "\n"
                 else:
                     para = True
-            elif re.search(p, line) == None:
+            elif re.search(p, line) is None:
                 if para:
                     result_text += line
                 else:

@@ -226,7 +226,7 @@ class TsadraFormatter(BaseFormatter):
                         # some child are not <span> rather like <a> and some <span> has no 'class' attr
                         try:
                             s["class"][0]
-                        except:
+                        except Exception:
                             p_tmp += self.text_preprocess(s.text)
                             continue
 
@@ -290,7 +290,7 @@ class TsadraFormatter(BaseFormatter):
                 for s in p.contents:
                     try:
                         s["class"][0]
-                    except:
+                    except Exception:
                         p_with_sabche_tmp += self.text_preprocess(s.text)
                         continue
 
@@ -390,7 +390,7 @@ class TsadraFormatter(BaseFormatter):
         meta_data["title"] = get_text(layers["book_title"][0])
         meta_data["authors"] = [get_text(span) for span in layers["author"]]
         meta_data["sku"] = self.sku
-        meta_data["layers"] = [l for l in layers if layers[l]]
+        meta_data["layers"] = [layer for layer in layers if layers[layer]]
         return {"ebook_metadata": meta_data}
 
     def create_opf(self, input_path, id):
@@ -403,7 +403,7 @@ class TsadraFormatter(BaseFormatter):
             self.build_layers(html)
 
         # save base-text
-        (self.dirs["opf_path"] / "base" / f"v001.txt").write_text(self.get_base_text())
+        (self.dirs["opf_path"] / "base" / "v001.txt").write_text(self.get_base_text())
 
         # format and save layer
         vol_layer_path = self.dirs["layers_path"] / "v001"

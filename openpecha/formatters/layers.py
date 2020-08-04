@@ -87,7 +87,7 @@ def Span(start, end):
     return {_attr_names.START: start, _attr_names.END: end}
 
 
-##### INDEX Layer #####
+# ~~~~~INDEX Layer~~~~~~
 # Cross vol Span
 CrossVolSpan = {"vol": None, "span": None}
 
@@ -101,7 +101,8 @@ Text = {
     "span": [],  # list of CrossVolSpan
 }
 
-#### ANNOTATIONS Layers #####
+
+# ~~~~~~ ANNOTATIONS Layers ~~~~~~
 def Page(span, *, page_index=None, page_info=None, page_ref=None):
     return {
         _attr_names.PAGE_INDEX: page_index,
@@ -140,7 +141,7 @@ def OnlySpan(span):
     return {_attr_names.SPAN: span}
 
 
-### HFML ####
+# ~~~HFML~~~~
 
 
 def _pat(ann_func, start_marker, end_marker, has_text=False, pl_pat=None, pl_sep_len=0):
