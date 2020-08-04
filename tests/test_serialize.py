@@ -2,20 +2,18 @@ from pathlib import Path
 
 import pytest
 
-from openpecha.serializers import Serialize
-from openpecha.serializers import SerializeMd
-from openpecha.serializers import SerializeHFML
+from openpecha.serializers import Serialize, SerializeHFML, SerializeMd
 
 
 # For testing read_base_layer, add_chars and apply_layer
-@pytest.fixture(scope='module')
+@pytest.fixture(scope="module")
 def opf_path():
-    opf_path = 'tests/data/W1OP000001/W1OP000001.opf'
+    opf_path = "tests/data/W1OP000001/W1OP000001.opf"
     return opf_path
 
 
 # Test HFML Serializer
-hfml_opf_path = Path('tests/data/serialize_test/hfml/hfml.opf')
+hfml_opf_path = Path("tests/data/serialize_test/hfml/hfml.opf")
 
 # def test_hfml_serializer():
 #     opf_path = 'tests/data/serialize/hfml/P000001/P000001.opf'

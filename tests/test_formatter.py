@@ -36,6 +36,7 @@ class TestGoogleOCRFormatter:
         formatter.build_layers(responses, "")
 
         result = formatter.get_base_text()
+        print(result)
 
         # TODO: create base-text
         # expected = (data_path/'v001.txt').read_text()
@@ -46,9 +47,7 @@ class TestGoogleOCRFormatter:
 
         result = formatter.build_layers(responses, "")
 
-        expected = {
-            "pages": [(0, 19), (24, 888), (893, 1607), (1612, 1809)],
-        }
+        expected = {"pages": [(0, 19), (24, 888), (893, 1607), (1612, 1809)]}
 
         for result_page, expected_page in zip(result["pages"], expected["pages"]):
             assert result_page[:2] == expected_page

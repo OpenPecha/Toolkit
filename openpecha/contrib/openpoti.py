@@ -1,36 +1,41 @@
-from pathlib import Path
-from .formatted_dmp import FormattedDMP
-import re
 import copy
+import re
+from pathlib import Path
+
+from .formatted_dmp import FormattedDMP
 
 
 class Patches:
     def __init__(self):
-        self.modes = ['dergepage', 'cm']
+        self.modes = ["dergepage", "cm"]
 
     def clean(self, patches, mode):
-        assert mode in self.modes, 'The given mode is not valid. Options are: ' + str(self.modes)
+        assert mode in self.modes, "The given mode is not valid. Options are: " + str(
+            self.modes
+        )
 
-        if mode == 'dergepage':
-            return self.clean_patches(patches, self.is_dergepage_diff, self.find_dergepage_str)
-        elif mode == 'cm':
+        if mode == "dergepage":
+            return self.clean_patches(
+                patches, self.is_dergepage_diff, self.find_dergepage_str
+            )
+        elif mode == "cm":
             return self.clean_patches(patches, self.is_cm_diff, self.find_cm_str)
 
     @staticmethod
     def is_dergepage_diff(diff):
         op, text = diff
-        return op == 1 and '[' in text and ']' in text
+        return op == 1 and "[" in text and "]" in text
 
     @staticmethod
     def find_dergepage_str(text):
-        regex = r'(\\\[.*?\\\])'
+        regex = r"(\\\[.*?\\\])"
         match = re.findall(regex, text)
         return match[0] if match else None
 
     @staticmethod
     def is_cm_diff(diff):
         op, text = diff
-        return op == 1 and ('{' in text or '}' in text)
+        return op == 1 and ("{" in text or "}" in text)
 
     @staticmethod
     def find_cm_str(text):
@@ -85,7 +90,7 @@ class Patches:
         state = -1
         for diff in patch.diffs:
             string = diff[1]
-            if '{' in string:
+            if "{" in string:
                 state = 0
 
             if state == -1:
@@ -95,9 +100,9 @@ class Patches:
             elif state == 1:
                 after.append(diff)
             else:
-                raise ValueError('this should not happen.')
+                raise ValueError("this should not happen.")
 
-            if '}' in string:
+            if "}" in string:
                 state = 1
         return before, cm, after
 
@@ -106,23 +111,25 @@ class Patches:
             before, cm, after = self._deconstruct_cm_patch(patch)
             if cm:
                 # process diffs
-                string = ''.join([c[1] for c in cm])
+                string = "".join([c[1] for c in cm])
                 op = string[1]
-                string = string.replace('{', '')\
-                               .replace('}', '')\
-                               .replace('~', '')\
-                               .replace('+', '')\
-                               .replace('-', '')
+                string = (
+                    string.replace("{", "")
+                    .replace("}", "")
+                    .replace("~", "")
+                    .replace("+", "")
+                    .replace("-", "")
+                )
 
-                if op == '+':
+                if op == "+":
                     cm = [(1, string)]
-                elif op == '-':
+                elif op == "-":
                     cm = [(-1, string)]
-                elif op == '~':
-                    to_del, to_add = string.split('>')
+                elif op == "~":
+                    to_del, to_add = string.split(">")
                     cm = [(-1, to_del), (1, to_add)]
                 else:
-                    raise ValueError('this should not happen')
+                    raise ValueError("this should not happen")
 
                 # replace old diffs with new diffs
                 patch.diffs = before + cm + after
@@ -135,7 +142,7 @@ class OpenPoti:
         self.dmp = FormattedDMP()
         self.cp = Patches()
         self.dirs = self.set_dirs(dirs_conf)
-        self.current = {'name': '', 'base': None, 'layers': {}}
+        self.current = {"name": "", "base": None, "layers": {}}
 
     @staticmethod
     def set_dirs(dir_paths):
@@ -144,35 +151,42 @@ class OpenPoti:
         :param dir_paths: paths as strings
         :return: content of self.dirs
         """
-        dirs = {'bases': Path(dir_paths['bases']),
-                'layers': Path(dir_paths['layers']),
-                'input': Path(dir_paths['input']),
-                'output': Path(dir_paths['output'])}
-        dirs['layers'].mkdir(parents=True, exist_ok=True)
+        dirs = {
+            "bases": Path(dir_paths["bases"]),
+            "layers": Path(dir_paths["layers"]),
+            "input": Path(dir_paths["input"]),
+            "output": Path(dir_paths["output"]),
+        }
+        dirs["layers"].mkdir(parents=True, exist_ok=True)
         return dirs
 
     def reset_current(self):
-        self.current = {'base': None, 'layers': {}}
+        self.current = {"base": None, "layers": {}}
 
     def load_poti(self, pch_path):
         """
         loads in self.current all the files pertaining to the current layered text
         :param pch_path: the base-name of the layered text to load
         """
-        assert pch_path in [b.stem for b in self.dirs['bases'].glob('*.txt')], f'base file missing for {pch_path}'
-        assert pch_path in [b.name for b in self.dirs['layers'].glob('*') if b.is_dir()], \
-            f'folder of layers missing for {pch_path}'
+        assert pch_path in [
+            b.stem for b in self.dirs["bases"].glob("*.txt")
+        ], f"base file missing for {pch_path}"
+        assert pch_path in [
+            b.name for b in self.dirs["layers"].glob("*") if b.is_dir()
+        ], f"folder of layers missing for {pch_path}"
 
-        base = self.dirs['bases'] / f'{pch_path}.txt'
-        self.current['name'] = pch_path
-        self.current['base'] = base.read_text(encoding='utf-8-sig')
+        base = self.dirs["bases"] / f"{pch_path}.txt"
+        self.current["name"] = pch_path
+        self.current["base"] = base.read_text(encoding="utf-8-sig")
 
-        lyrs = self.dirs['layers'] / pch_path
-        for lyr in lyrs.glob('*.*'):
+        lyrs = self.dirs["layers"] / pch_path
+        for lyr in lyrs.glob("*.*"):
             lyr_type, lyr_name = lyr.suffix[1:], lyr.stem
-            if lyr_name not in self.current['layers']:
-                self.current['layers'][lyr_name] = {}
-            self.current['layers'][lyr_name][lyr_type] = lyr.read_text(encoding='utf-8-sig')
+            if lyr_name not in self.current["layers"]:
+                self.current["layers"][lyr_name] = {}
+            self.current["layers"][lyr_name][lyr_type] = lyr.read_text(
+                encoding="utf-8-sig"
+            )
 
     @staticmethod
     def build_md_layers(text):
@@ -182,46 +196,50 @@ class OpenPoti:
         :return: the base string and a list of name/layer tuples.
         :rtype: str, [(str, str), ...]
         """
-        chunks = re.split(r'{([+\-~]{2}(?:.|\n)+?)[+\-~]{2}}', text)
+        chunks = re.split(r"{([+\-~]{2}(?:.|\n)+?)[+\-~]{2}}", text)
         base = [chunks[i] for i in range(0, len(chunks), 2)]
-        base = ''.join(base)
+        base = "".join(base)
 
-        lyrs = {'book_title': [],
-                'book_sub_title': [],
-                'chapter_title': [],
-                'sapche': [],
-                'tsawa': [],
-                'quotes': [],
-                'yigchung': []}
+        lyrs = {
+            "book_title": [],
+            "book_sub_title": [],
+            "chapter_title": [],
+            "sapche": [],
+            "tsawa": [],
+            "quotes": [],
+            "yigchung": [],
+        }
 
         mod_idx = list(range(1, len(chunks), 2))
         for num, c in enumerate(chunks):
             if num in mod_idx:
-                if c.startswith('++'):
+                if c.startswith("++"):
                     c = c[2:]
-                    if c == '*':  # test for yigchung
-                        lyrs['yigchung'].append(c)
-                    elif c == '**':
-                        lyrs['tsawa'].append(c)
-                    elif c == '~~':
-                        lyrs['quotes'].append(c)
-                    elif c == '[' or c == ']':
-                        lyrs['sapche'].append(c)
-                    elif c == '###':
-                        lyrs['chapter_title'].append(c)
-                    elif c == '##':
-                        lyrs['book_sub_title'].append(c)
-                    elif c == '#':
-                        lyrs['book_title'].append(c)
-                    elif c.startswith('='):  # test for titles (to be improved)
-                        lyrs['book_title'].append(c)
+                    if c == "*":  # test for yigchung
+                        lyrs["yigchung"].append(c)
+                    elif c == "**":
+                        lyrs["tsawa"].append(c)
+                    elif c == "~~":
+                        lyrs["quotes"].append(c)
+                    elif c == "[" or c == "]":
+                        lyrs["sapche"].append(c)
+                    elif c == "###":
+                        lyrs["chapter_title"].append(c)
+                    elif c == "##":
+                        lyrs["book_sub_title"].append(c)
+                    elif c == "#":
+                        lyrs["book_title"].append(c)
+                    elif c.startswith("="):  # test for titles (to be improved)
+                        lyrs["book_title"].append(c)
                 else:
-                    raise ValueError('This should not happen: the file used to create an openpecha is')
+                    raise ValueError(
+                        "This should not happen: the file used to create an openpecha is"
+                    )
             else:
                 for k in lyrs.keys():
                     lyrs[k].append(c)
 
-        return base, [(k, ''.join(v)) for k, v in lyrs.items()]
+        return base, [(k, "".join(v)) for k, v in lyrs.items()]
 
     def new_poti(self, basename):
         """
@@ -229,28 +247,32 @@ class OpenPoti:
             - <basename>.txt        the base layer
             - layers/<basename>/    the layer's folder
         """
-        basename = self.dirs['input'] / basename
-        assert basename.is_file() and basename.suffix == '.txt', f'{basename} is not found in {self.dirs["input"]}.'
-        dump = basename.read_text(encoding='utf-8-sig')
+        basename = self.dirs["input"] / basename
+        assert (
+            basename.is_file() and basename.suffix == ".txt"
+        ), f'{basename} is not found in {self.dirs["input"]}.'
+        dump = basename.read_text(encoding="utf-8-sig")
 
         # separate base from title and yigchung
         base, md_lyrs = self.build_md_layers(dump)
 
         # write base
-        Path(self.dirs['bases'] / f'base.txt').write_text(base, encoding='utf-8-sig')
+        Path(self.dirs["bases"] / "base.txt").write_text(base, encoding="utf-8-sig")
 
         # write layers
         # lyr_dir = Path(self.dirs['layers'] / basename.stem)
         # lyr_dir.mkdir(exist_ok=True)
 
-        #self.load_poti(basename.stem)
+        # self.load_poti(basename.stem)
         for name, lyr in md_lyrs:
             self.create_layer(base, lyr, name, clean_patch=False)
 
-        #layers info
-        ((self.dirs['layers'].parent)/'layers.yml').write_text('layers:\n  - book_sub_title:\n  - book_title:\n  - chapter_title:\n  - quotes:\n  - sapche:\n  - tsawa:')
+        # layers info
+        ((self.dirs["layers"].parent) / "layers.yml").write_text(
+            "layers:\n  - book_sub_title:\n  - book_title:\n  - chapter_title:\n  - quotes:\n  - sapche:\n  - tsawa:"
+        )
 
-    def create_layer(self, orig, mod, name, deps='', clean_patch=True):
+    def create_layer(self, orig, mod, name, deps="", clean_patch=True):
         """
         TODO: should not need orig argument. should build against the base in self.current
         creates and writes to file a new layer
@@ -265,96 +287,106 @@ class OpenPoti:
         :param clean_patch:
         """
         lyr = self.dmp.patch_make(orig, mod)
-        lyr = self.cp.clean(lyr, 'cm') if clean_patch else lyr
+        lyr = self.cp.clean(lyr, "cm") if clean_patch else lyr
         lyr = self.cp.format_cm_operations(lyr)
-        lyr = '\n'.join([self.dmp.decode_patch(str(p)) for p in lyr])
+        lyr = "\n".join([self.dmp.decode_patch(str(p)) for p in lyr])
 
         if lyr:
-            lyr_file = self.dirs['layers'] / self.current['name'] / f'{name}.layer'
-            lyr_file.write_text(lyr, encoding='utf-8-sig')
+            lyr_file = self.dirs["layers"] / self.current["name"] / f"{name}.layer"
+            lyr_file.write_text(lyr, encoding="utf-8-sig")
 
             if deps:
-                dep_file = self.dirs['layers'] / self.current['name'] / f'{name}.deps'
-                dep_file.write_text(deps, encoding='utf-8-sig')
+                dep_file = self.dirs["layers"] / self.current["name"] / f"{name}.deps"
+                dep_file.write_text(deps, encoding="utf-8-sig")
 
     @staticmethod
     def _format_notes(patches):
-        footnotes = ''
+        footnotes = ""
         for num, patch in enumerate(patches):
             diffs = patch.diffs
-            assert len(diffs) == 3 or len(diffs) == 4, 'unexpected diff'
+            assert len(diffs) == 3 or len(diffs) == 4, "unexpected diff"
             mod = diffs[1:-1]
             p_type = [d[0] for d in mod]
             strings = [d[1] for d in mod]
             if p_type == [-1, 1]:
-                note = '>>'.join(strings)
+                note = ">>".join(strings)
             elif p_type == [1]:
-                note = '+' + ''.join(strings)
+                note = "+" + "".join(strings)
 
             elif p_type == [-1]:
-                note = '-' + ''.join(strings)
+                note = "-" + "".join(strings)
             else:
-                raise ValueError('this should not happen')
+                raise ValueError("this should not happen")
             if note:
-                diffs.insert(-1, (1, f'[^{num+1}]'))
-                footnotes += f'\n[^{num+1}]: ' + note
+                diffs.insert(-1, (1, f"[^{num+1}]"))
+                footnotes += f"\n[^{num+1}]: " + note
 
         return footnotes, patches
 
     def create_view(self, layers, mode=None, cor_as_note=True):
-        view = copy.deepcopy(self.current['base'])
+        view = copy.deepcopy(self.current["base"])
         fails = {}
-        footnotes = ''
+        footnotes = ""
 
         for lyr_name in layers:
-            lyr_str = self.current['layers'][lyr_name]['layer']
+            lyr_str = self.current["layers"][lyr_name]["layer"]
             lyr = self.dmp.patch_fromText(lyr_str)
-            if cor_as_note and lyr_name == 'correction':
+            if cor_as_note and lyr_name == "correction":
                 footnotes, lyr = self._format_notes(lyr)
 
             view, res = self.dmp.patch_apply(lyr, view, mode)
             mstk = {}
             for num, r in enumerate(res):
                 if not r:
-                    mstk[str(num+1)] = self.dmp.format_patch(lyr[num])
+                    mstk[str(num + 1)] = self.dmp.format_patch(lyr[num])
             if mstk:
                 fails[lyr_name] = mstk
 
-        footnotes = '\n\n' + footnotes if footnotes else footnotes
+        footnotes = "\n\n" + footnotes if footnotes else footnotes
         return view + footnotes, fails
 
     def write_views(self, layers, view_type):
         self.load_poti(self.current["name"])
-        if view_type == 'export':
+        if view_type == "export":
             view, fails = self.create_view(layers)
-        elif view_type == 'edit':
-            view, fails = self.create_view(layers, mode='CM')
+        elif view_type == "edit":
+            view, fails = self.create_view(layers, mode="CM")
         else:
-            raise ValueError('this should not happen.')
+            raise ValueError("this should not happen.")
 
-        out = self.dirs['output'] / f'{self.current["name"]}_{view_type}_{"+".join(layers)}.txt'
-        out.write_text(view, encoding='utf-8-sig')
+        out = (
+            self.dirs["output"]
+            / f'{self.current["name"]}_{view_type}_{"+".join(layers)}.txt'
+        )
+        out.write_text(view, encoding="utf-8-sig")
         if fails:
-            out = self.dirs['output'] / f'{self.current["name"]}_export_{"+".join(layers)}_mistakes.txt'
-            out.write_text(str(fails), encoding='utf-8-sig')
+            out = (
+                self.dirs["output"]
+                / f'{self.current["name"]}_export_{"+".join(layers)}_mistakes.txt'
+            )
+            out.write_text(str(fails), encoding="utf-8-sig")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # basic usecase
     conf = {
-        'bases': 'plaintext',
-        'layers': 'admin/layers',
-        'input': 'user/edited',
-        'output': 'user/output'
+        "bases": "plaintext",
+        "layers": "admin/layers",
+        "input": "user/edited",
+        "output": "user/output",
     }
 
     existing = OpenPoti(conf)
-    existing.new_poti('test_base+md.txt') 
+    existing.new_poti("test_base+md.txt")
 
-    existing.create_layer(existing.current['base'],
-                          Path(existing.dirs['input'] / 'text_base+md_correction.txt').read_text(encoding='utf-8-sig'),
-                          'correction')
+    existing.create_layer(
+        existing.current["base"],
+        Path(existing.dirs["input"] / "text_base+md_correction.txt").read_text(
+            encoding="utf-8-sig"
+        ),
+        "correction",
+    )
 
-    to_apply = ['yigchung', 'title1', 'correction']
-    existing.write_views(to_apply, 'edit')
-    existing.write_views(to_apply, 'export')
+    to_apply = ["yigchung", "title1", "correction"]
+    existing.write_views(to_apply, "edit")
+    existing.write_views(to_apply, "export")

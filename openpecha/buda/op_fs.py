@@ -1,7 +1,10 @@
-from openpecha.buda.op import Openpecha
-from os import walk
 import pathlib
+from os import walk
+
 import yaml
+
+from openpecha.buda.op import Openpecha
+
 
 class OpenpechaFS(Openpecha):
     """
@@ -13,6 +16,7 @@ class OpenpechaFS(Openpecha):
        - readFromPath(path): would more or less replace the current __init__
        - writeToPath(path): would write the content to a path (removing all files that used to be there)
     """
+
     def __init__(self, lname, path_to_opf):
         Openpecha.__init__(self, lname)
         self.path = path_to_opf
@@ -29,14 +33,14 @@ class OpenpechaFS(Openpecha):
         files = []
         for (dirpath, dirnames, filenames) in walk(self.path):
             for file in filenames:
-                files.append(f'{dirpath}/{file}'.replace(self.path, ""))
+                files.append(f"{dirpath}/{file}".replace(self.path, ""))
 
         return files
 
     def read_file_content(self, oppath):
-        with open(f'{opf}/'+oppath) as f:
+        with open(f"{self.path}/" + oppath) as f:
             return f.read()
 
     def read_file_content_yml(self, oppath):
-        with open(f'{opf}/'+oppath) as f:
-            return yaml.safe_load(file)
+        with open(f"{self.path}/" + oppath) as f:
+            return yaml.safe_load(f)
