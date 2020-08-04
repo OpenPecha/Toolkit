@@ -162,15 +162,15 @@ class HFMLFormatter(BaseFormatter):
         inc_rev_int = int(layer["revision"]) + 1
         layer["revision"] = f"{inc_rev_int:05}"
 
-    def add_new_ann(self, layer, ann):
+    def add_ann(self, layer, ann):
         uuid = self.get_unique_id()
         layer["annotations"][uuid] = ann
         self.local_id_manager.add(layer["annotation_type"], uuid)
 
-    def create_new_layer(self, layer_name, anns):
+    def create_layer(self, layer_name, anns):
         new_layer = Layer(self.get_unique_id(), layer_name)
         for ann in anns:
-            self.add_new_ann(new_layer, ann)
+            self.add_ann(new_layer, ann)
         return new_layer
 
     def update_layer(self, layer, anns):
@@ -211,7 +211,7 @@ class HFMLFormatter(BaseFormatter):
 
             layer_name, layer_anns = vol_layers
             if layer_name not in old_layers:
-                result[layer_name] = self.create_new_layer(layer_name, layer_anns)
+                result[layer_name] = self.create_layer(layer_name, layer_anns)
             else:
                 old_layer = old_layers[layer_name]
                 self.update_layer(old_layer, layer_anns)
@@ -1033,7 +1033,7 @@ class HFMLFormatter(BaseFormatter):
 
     def get_result(self):
 
-        if self.topic_id[0]:
+        if self.topic_id and self.topic_id[0]:
             if self.topic_id[0][0][1]["work_id"] == self.topic_id[1][0][1]["work_id"]:
                 self.topic_id = self.topic_id[1:]
                 self.sub_topic = self.sub_topic[1:]
@@ -1098,8 +1098,8 @@ class HFMLFormatter(BaseFormatter):
 
         return base_text
 
-    def create_opf(self, input_path, **kwargs):
-        input_path = Path(input_path)
+    def create_opf(self, input_path, id=None, **kwargs):
+        input_path = Path(input_path, id=id)
         self._build_dirs(input_path)
         (self.dirs["opf_path"] / "base").mkdir(exist_ok=True)
 
