@@ -11,7 +11,6 @@ from pathlib import Path
 
 from openpecha.formatters.formatter import BaseFormatter
 from openpecha.formatters.layers import *
-from openpecha.formatters.layers import payload_extractor
 
 
 class Global2LocalId:
@@ -82,16 +81,6 @@ class LocalIdManager:
     def serialize(self, layer_name):
         """Convert map of given `layer_name` in global and local id pairs."""
         return self.maps[layer_name].serialize()
-
-
-def _create_pat(start, end, has_text=False, pl_pat=None, pl_sep_len=0):
-    return {
-        "start": start + ".",  # dot for tofu-id
-        "end": end,
-        "has_text": has_text,
-        "payload_pattern": pl_pat,
-        "payload_sep_len": pl_sep_len,
-    }
 
 
 class HFMLFormatter(BaseFormatter):
@@ -267,12 +256,12 @@ class HFMLFormatter(BaseFormatter):
         return start_markers, end_markers
 
     def _get_payloads_chunk(self, start_match, end_match, text):
-        start = start_match[0]
-        end = end_match[1]
-        return text[start:end]
+        start_match_end = start_match[1]
+        end_match_start = end_match[0]
+        return text[start_match_end:end_match_start]
 
     def _get_payloads(self, payloads_chunk, delimiter, payload_dict):
-        payloads = re.findall(f"{delimiter}(.*?)", payloads_chunk)
+        payloads = re.split(delimiter, payloads_chunk)[1:]
         for pl_name, pl_data in zip(payload_dict.keys(), payloads):
             payload_dict[pl_name] = pl_data
 
@@ -298,7 +287,7 @@ class HFMLFormatter(BaseFormatter):
         s_idx, e_idx = 0, 0
         offset = 0
         while s_idx < len(all_start_markers) or e_idx < len(all_end_markers):
-            payload = None
+            payloads = {}
             ann_name, start_match, local_id = all_start_markers[s_idx]
             _, end_match = all_end_markers[e_idx]
             base_start, offset = self._get_base_idx(start_match, offset)
@@ -308,7 +297,7 @@ class HFMLFormatter(BaseFormatter):
                 # ann with payload
                 payload_len = 0
                 payload_delimiter = self.config["ann_patterns"][ann_name].get(
-                    "payload_delimeter"
+                    "payload_delimiter"
                 )
                 if payload_delimiter:
                     payloads_chunk = self._get_payloads_chunk(
@@ -318,7 +307,7 @@ class HFMLFormatter(BaseFormatter):
                         "payload_dict"
                     )
                     payloads, payload_len = self._get_payloads(
-                        payloads_chunk, delimiter, payload_dict
+                        payloads_chunk, payload_delimiter, payload_dict
                     )
 
                 base_end, offset = self._get_base_idx(
@@ -328,7 +317,7 @@ class HFMLFormatter(BaseFormatter):
                 self.layers[ann_name][base_id].append(
                     (
                         local_id,
-                        create_ann(ann_name, base_start, base_end, payloads=payload),
+                        create_ann(ann_name, base_start, base_end, payloads=payloads),
                     )
                 )
             # ann which doesn't includes text
