@@ -1,4 +1,4 @@
-from openpecha.serializers import Serialize
+from .serialize import Serialize
 
 
 class SerializeHFML(Serialize):

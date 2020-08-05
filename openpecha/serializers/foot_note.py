@@ -1,6 +1,6 @@
 import re
 
-from openpecha.serializers import Serialize
+from .serialize import Serialize
 
 
 class SerializeFootNote(Serialize):
