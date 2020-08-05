@@ -22,7 +22,30 @@ def one_vol_test_data():
     base_id = "v001"
     expected = defaultdict(lambda: defaultdict(list))
     expected[AnnType.pecha_title][base_id].append((":", OnlySpan(Span(0, 3))))
+    expected[AnnType.correction][base_id].append(
+        (":", Correction(Span(8, 9), correction="ཁ"))
+    )
     return m_text, base_id, expected
+
+
+def evaluate_layers(result, expected):
+    for layer_name in expected:
+        result_layer = result[layer_name]
+        expected_layer = expected[layer_name]
+        for base_id in expected_layer:
+            for (r_id, r_ann), (e_id, e_ann) in zip(
+                result_layer[base_id], expected_layer[base_id]
+            ):
+                assert r_id == e_id
+                for attr_name in e_ann:
+                    if attr_name == "span":
+                        for span_attr_name in e_ann[attr_name]:
+                            assert (
+                                r_ann[attr_name][span_attr_name]
+                                == e_ann[attr_name][span_attr_name]
+                            )
+                    else:
+                        assert r_ann[attr_name] == e_ann[attr_name]
 
 
 def test_parse_ann_one_vol(formatter, one_vol_test_data):
@@ -30,4 +53,4 @@ def test_parse_ann_one_vol(formatter, one_vol_test_data):
 
     formatter.parse_ann(m_text, base_id)
 
-    assert formatter.layers == expected
+    evaluate_layers(formatter.layers, expected)

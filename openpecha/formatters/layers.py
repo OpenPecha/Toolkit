@@ -145,10 +145,16 @@ def OnlySpan(span):
 # ~~~HFML~~~~
 
 
+def get_start_len(start_marker):
+    # unescape
+    unescaped_start_marker = start_marker.replace("\\", "")
+    return len(unescaped_start_marker)
+
+
 def _pat(ann_func, start_marker, end_marker, has_text=False, payload_delimiter=None):
     return {
         "start": start_marker + ".",  # dot for tofu-id
-        "start_len": len(start_marker),
+        "start_len": get_start_len(start_marker),
         "end": end_marker,
         "has_text": has_text,
         "payload_delimiter": payload_delimiter,
