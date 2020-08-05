@@ -1,7 +1,8 @@
 """This module contains format variable for all the annotations."""
 
+import copy
+import re
 from collections import namedtuple
-from copy import deepcopy
 
 __all__ = [
     "Layer",
@@ -144,21 +145,20 @@ def OnlySpan(span):
 # ~~~HFML~~~~
 
 
-def _pat(ann_func, start_marker, end_marker, has_text=False, pl_pat=None, pl_sep_len=0):
+def _pat(ann_func, start_marker, end_marker, has_text=False, payload_delimiter=None):
     return {
         "start": start_marker + ".",  # dot for tofu-id
         "start_len": len(start_marker),
         "end": end_marker,
         "has_text": has_text,
-        "payload_pattern": pl_pat,
-        "payload_sep_len": pl_sep_len,
-        "payload_dict": deepcopy(ann_func.__kwdefaults__),
+        "payload_delimiter": payload_delimiter,
+        "payload_dict": copy.copy(ann_func.__kwdefaults__),
     }
 
 
 HFML_ANN_PATTERN = {
-    AnnType.pecha_title: _pat(OnlySpan, "<k1", ">", has_text=True)
-    # AnnType.correction: _create_pat(
-    #     "\(", "\)", has_text=True, pl_pat=".*?,(.*?)", pl_sep_len=1
-    # ),
+    AnnType.pecha_title: _pat(OnlySpan, "<k1", ">", has_text=True),
+    AnnType.correction: _pat(
+        Correction, r"\(", r"\)", has_text=True, payload_delimiter=","
+    ),
 }

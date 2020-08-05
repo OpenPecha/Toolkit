@@ -11,6 +11,7 @@ from pathlib import Path
 
 from openpecha.formatters.formatter import BaseFormatter
 from openpecha.formatters.layers import *
+from openpecha.formatters.layers import payload_extractor
 
 
 class Global2LocalId:
@@ -265,14 +266,18 @@ class HFMLFormatter(BaseFormatter):
 
         return start_markers, end_markers
 
-    def _get_payload(self, name, start_match, end_match, text):
-        start = start_match.span(0)[0]
-        end = end_match.span(0)[1]
-        search_text = text[start:end]
-        ann = self.config["ann_patterns"][name]
-        payload_pattern = f'{ann["start"]}{ann["payload_pattern"]}{ann["end"]}'
-        payload = re.findall(payload_pattern, search_text)[0]
-        return payload
+    def _get_payloads_chunk(self, start_match, end_match, text):
+        start = start_match[0]
+        end = end_match[1]
+        return text[start:end]
+
+    def _get_payloads(self, payloads_chunk, delimiter, payload_dict):
+        payloads = re.findall(f"{delimiter}(.*?)", payloads_chunk)
+        for pl_name, pl_data in zip(payload_dict.keys(), payloads):
+            payload_dict[pl_name] = pl_data
+
+        payload_len = sum(map(len, payloads)) + len(payloads) * len(delimiter)
+        return payload_dict, payload_len
 
     def parse_ann(self, m_text, base_id):
         # Find start and end of annotation separately
@@ -286,8 +291,8 @@ class HFMLFormatter(BaseFormatter):
             all_end_markers += ann_end_markers
 
         # Sort all_starts and all_ends sperately
-        all_start_markers.sort(key=lambda x: x[0])
-        all_end_markers.sort(key=lambda x: x[0])
+        all_start_markers.sort(key=lambda x: x[1][0])
+        all_end_markers.sort(key=lambda x: x[1][0])
 
         # Find ann_start and ann_end pair
         s_idx, e_idx = 0, 0
@@ -302,20 +307,29 @@ class HFMLFormatter(BaseFormatter):
             if self.config["ann_patterns"][ann_name]["has_text"]:
                 # ann with payload
                 payload_len = 0
-                if self.config["ann_patterns"][ann_name]["payload_pattern"]:
-                    payload = self._get_payload(
-                        ann_name, start_match, end_match, m_text
+                payload_delimiter = self.config["ann_patterns"][ann_name].get(
+                    "payload_delimeter"
+                )
+                if payload_delimiter:
+                    payloads_chunk = self._get_payloads_chunk(
+                        start_match, end_match, m_text
                     )
-                    payload_len = (
-                        len(payload)
-                        + self.config["ann_patterns"][ann_name]["payload_sep_len"]
+                    payload_dict = self.config["ann_patterns"][ann_name].get(
+                        "payload_dict"
                     )
+                    payloads, payload_len = self._get_payloads(
+                        payloads_chunk, delimiter, payload_dict
+                    )
+
                 base_end, offset = self._get_base_idx(
                     end_match, offset, is_end=True, payload_len=payload_len
                 )
 
                 self.layers[ann_name][base_id].append(
-                    (local_id, create_ann(ann_name, base_start, base_end))
+                    (
+                        local_id,
+                        create_ann(ann_name, base_start, base_end, payloads=payload),
+                    )
                 )
             # ann which doesn't includes text
             else:
