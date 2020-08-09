@@ -297,13 +297,26 @@ class TestTsadraFormatter:
         result = formatter.get_result()
 
         expected_result = {
-            "book_title": [(0, 84)],
-            "author": [(86, 109), (111, 134), (136, 181)],
-            "chapter_title": [(183, 200)],
-            "tsawa": [(4150, 4300), (5122, 5298)],
-            "quotation": [(3993, 4131), (4302, 4417)],
-            "sabche": [(5091, 5120), (7313, 7375)],
-            "yigchung": [(7273, 7311)],
+            AnnType.book_title: [{"span": {"start": 0, "end": 85}}],
+            AnnType.author: [
+                {"span": {"start": 86, "end": 110}},
+                {"span": {"start": 111, "end": 135}},
+                {"span": {"start": 136, "end": 182}},
+            ],
+            AnnType.chapter: [{"span": {"start": 183, "end": 200}}],
+            AnnType.tsawa: [
+                {"span": {"start": 4150, "end": 4300}, "isverse": True},
+                {"span": {"start": 5122, "end": 5298}, "isverse": True},
+            ],
+            AnnType.citation: [
+                {"span": {"start": 3993, "end": 4132}, "isverse": False},
+                {"span": {"start": 4302, "end": 4417}, "isverse": True},
+            ],
+            AnnType.sabche: [
+                {"span": {"start": 5091, "end": 5121}},
+                {"span": {"start": 7313, "end": 7376}},
+            ],
+            AnnType.yigchung: [{"span": {"start": 7273, "end": 7311}}],
         }
 
         for layer in result:

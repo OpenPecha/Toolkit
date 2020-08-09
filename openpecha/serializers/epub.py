@@ -3,12 +3,28 @@ import requests
 
 from .serialize import Serialize
 from pathlib import Path
+from openpecha.formatters.layers import AnnType
 
 
-class SerializeTsadra(Serialize):
-    """
-    Tsadra serializer class for OpenPecha.
-    """
+class Tsadra_template:
+    """Variables are important components of tsadra epub template."""
+
+    # SP = Start_Payload
+    end_payload = "</span>"
+    book_title_SP = '<span class="credits-page_front-title ">'
+    author_SP = '<span class="credits-page_front-page---text-author">'
+    chapter_SP = '<span class="tibetan-chapter">'
+    tsawa_SP = '<span class="tibetan-root-text_tibetan-root-text-middle-lines">'
+    quatation__verse_SP = (
+        '<span class="tibetan-citations-in-verse_tibetan-citations-middle-lines">'
+    )
+    quatation__SP = '<span class="tibetan-external-citations">'
+    sabche_SP = '<span class="tibetan-sabche">'
+    yigchung_SP = '<span class="tibetan-commentary-small">'
+
+
+class EpubSerializer(Serialize):
+    """Epub serializer class for OpenPecha."""
 
     def __get_adapted_span(self, span, vol_id):
         """Adapts the annotation span to base-text of the text
@@ -43,41 +59,42 @@ class SerializeTsadra(Serialize):
         only_start_ann = False
         start_payload = "("
         end_payload = ")"
-        if ann["type"] == "pagination":
+        if ann["type"] == AnnType.pagination:
             start_payload = f'[{ann["page_index"]}] {ann["page_info"]}\n'
             only_start_ann = True
-        elif ann["type"] == "correction":
+        elif ann["type"] == AnnType.correction:
             start_payload = "("
             end_payload = f',{ann["correction"]})'
-        elif ann["type"] == "peydurma":
+        elif ann["type"] == AnnType.peydurma:
             start_payload = "#"
             only_start_ann = True
-        elif ann["type"] == "error_candidate":
+        elif ann["type"] == AnnType.error_candidate:
             start_payload = "["
             end_payload = "]"
-        elif ann["type"] == "book_title":
-            start_payload = '<span class="credits-page_front-title "'
-            end_payload = "</span>"
-        elif ann["type"] == "author":
-            start_payload = '<span class="credits-page_front-page---text-author">'
-            end_payload = "</span>"
-        elif ann["type"] == "chapter_title":
-            start_payload = '<span class="tibetan-chapter">'
-            end_payload = "</span>"
-        elif ann["type"] == "tsawa":
-            start_payload = '<span class="tibetan-root-text_tibetan-root-text-middle-lines">'
-            end_payload = "</span>"
-        elif ann["type"] == "quotation":
-            start_payload = (
-                '<span class="tibetan-citations-in-verse_tibetan-citations-middle-lines">'
-            )
-            end_payload = "</span>"
-        elif ann["type"] == "sabche":
-            start_payload = '<span class="tibetan-sabche">'
-            end_payload = "</span>"
-        elif ann["type"] == "yigchung":
-            start_payload = '<span class="tibetan-commentary-small">'
-            end_payload = "</span>"
+        elif ann["type"] == AnnType.book_title:
+            start_payload = Tsadra_template.book_title_SP
+            end_payload = Tsadra_template.end_payload
+        elif ann["type"] == AnnType.author:
+            start_payload = Tsadra_template.author_SP
+            end_payload = Tsadra_template.end_payload
+        elif ann["type"] == AnnType.chapter:
+            start_payload = Tsadra_template.chapter_SP
+            end_payload = Tsadra_template.end_payload
+        elif ann["type"] == AnnType.tsawa:
+            start_payload = Tsadra_template.tsawa_SP
+            end_payload = Tsadra_template.end_payload
+        elif ann["type"] == AnnType.citation:
+            if ann["isverse"]:
+                start_payload = Tsadra_template.quatation_verse_SP
+            else:
+                start_payload = Tsadra_template.quatation__SP
+            end_payload = Tsadra_template.end_payload
+        elif ann["type"] == AnnType.sabche:
+            start_payload = Tsadra_template.sabche_SP
+            end_payload = Tsadra_template.end_payload
+        elif ann["type"] == AnnType.yigchung:
+            start_payload = Tsadra_template.yigchung_SP
+            end_payload = Tsadra_template.end_payload
 
         start_cc, end_cc = self.__get_adapted_span(ann["span"], vol_id)
         self.add_chars(vol_id, start_cc, True, start_payload)
@@ -99,7 +116,7 @@ class SerializeTsadra(Serialize):
         #     pecha_title = self.meta['source_metadata']['title']
         # else:
         pecha_title = self.meta["ebook_metadata"]["title"]
-        result = self.get_result()
+        result, _ = self.get_result()
         result_lines = (
             result.splitlines()
         )  # Result is split where there is newline as we are going to consider newline as one para tag
@@ -107,12 +124,12 @@ class SerializeTsadra(Serialize):
         for result_line in result_lines:
             results += f'<p class="tibetan-regular-indented">{result_line}</p>\n'
         results += "</body>\n</html>"
-        Path(out_fn).write_text(result)
+        Path(out_fn).write_text(results)
         # Downloading css template file from ebook template repo and saving it
         template = requests.get(
             "https://raw.githubusercontent.com/OpenPecha/ebook-template/master/tsadra_template.css"
         )
-        Path("template.css").write_text(template.content)
+        Path("template.css").write_bytes(template.content)
         # click.echo(template.content, file=open('template.css', 'w'))
         # Running ebook-convert command to convert html file to .epub (From calibre)
         chapter_Xpath = (

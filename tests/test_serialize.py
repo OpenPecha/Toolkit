@@ -1,21 +1,22 @@
 from pathlib import Path
 
-import pytest
+# import pytest
 
-from openpecha.serializers import Serialize
+from openpecha.serializers.serialize import Serialize
 from openpecha.serializers import SerializeMd
 from openpecha.serializers import SerializeHFML
+from openpecha.serializers import EpubSerializer
 
 
 # For testing read_base_layer, add_chars and apply_layer
-@pytest.fixture(scope='module')
+# @pytest.fixture(scope="module")
 def opf_path():
-    opf_path = 'tests/data/W1OP000001/W1OP000001.opf'
+    opf_path = "tests/data/W1OP000001/W1OP000001.opf"
     return opf_path
 
 
 # Test HFML Serializer
-hfml_opf_path = Path('tests/data/serialize_test/hfml/hfml.opf')
+hfml_opf_path = Path("tests/data/serialize_test/hfml/hfml.opf")
 
 # def test_hfml_serializer():
 #     opf_path = 'tests/data/serialize/hfml/P000001/P000001.opf'
@@ -32,5 +33,10 @@ hfml_opf_path = Path('tests/data/serialize_test/hfml/hfml.opf')
 #     serializer.apply_layers()
 #     result = serializer.get_result()
 
-# if __name__ == "__main__":
-#     test_hfml_serializer()
+if __name__ == "__main__":
+    # test_hfml_serializer()
+    opf_path = Path("./test_opf/P000001/P000001.opf")
+    pecha_id = "P000001"
+    serializer = EpubSerializer(opf_path)
+    serializer.apply_layers()
+    serializer.serilize(pecha_id)

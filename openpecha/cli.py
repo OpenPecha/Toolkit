@@ -13,7 +13,7 @@ from openpecha.blupdate import Blupdate
 from openpecha.buda.openpecha_manager import OpenpechaManager
 from openpecha.formatters import *
 from openpecha.serializers import *
-from openpecha.serializers import SerializeTsadra
+from openpecha.serializers import EpubSerializer
 
 OP_PATH = Path("./.openpecha")
 config = {
@@ -79,14 +79,10 @@ def get_pecha(id, batch_path, layers):
                 if not batch_ids:
                     batch_ids = _get_batch(batch_path)
                 for b_id in batch_ids:
-                    _check_pecha(
-                        id=b_id, pechas=pechas, layer=layer, pecha_list=pecha_list
-                    )
+                    _check_pecha(id=b_id, pechas=pechas, layer=layer, pecha_list=pecha_list)
             else:
                 for p_id in pechas:
-                    _check_pecha(
-                        id=p_id, pechas=pechas, layer=layer, pecha_list=pecha_list
-                    )
+                    _check_pecha(id=p_id, pechas=pechas, layer=layer, pecha_list=pecha_list)
     else:
         if id:
             _check_pecha(id=id, pechas=pechas, pecha_list=pecha_list)
@@ -165,9 +161,7 @@ layers_name = ["title", "tsawa", "yigchung", "quotes", "sapche"]
 
 
 @cli.command()
-@click.option(
-    "--name", "-n", type=click.Choice(layers_name), help="name of a layer to be applied"
-)
+@click.option("--name", "-n", type=click.Choice(layers_name), help="name of a layer to be applied")
 @click.option(
     "--list",
     "-l",
@@ -336,9 +330,7 @@ formatter_types = ["ocr", "hfml(default)", "tsadra"]
 
 
 @cli.command()
-@click.option(
-    "--name", "-n", type=click.Choice(formatter_types), help="Type of formatter"
-)
+@click.option("--name", "-n", type=click.Choice(formatter_types), help="Type of formatter")
 @click.option("--id", "-i", type=int, help="Id of the pecha")
 @click.argument("input_path")
 def format(**kwargs):
@@ -410,14 +402,9 @@ def pull_pechas(cache_folder, idlist):
 @click.option("--cache-folder", "-c", help="path to the folder of the local cache")
 @click.option("--store-uri", "-s", help="Fuseki URI", required=True)
 @click.option(
-    "--force",
-    "-f",
-    help="force upload even when commit match with triple store",
-    is_flag=True,
+    "--force", "-f", help="force upload even when commit match with triple store", is_flag=True,
 )
-@click.option(
-    "--ldspdi-uri", "-u", help="lds-pdi URI", default="https://ldspdi.bdrc.io/"
-)
+@click.option("--ldspdi-uri", "-u", help="lds-pdi URI", default="https://ldspdi.bdrc.io/")
 @click.option("--idlist", "-l", help="comma-separated list of Openpecha IDs")
 @click.option("--verbose", "-v", help="verbose", is_flag=True)
 @click.option("--debug", "-d", help="debug", is_flag=True)
@@ -440,6 +427,7 @@ def cache_to_store(cache_folder, ldspdi_uri, store_uri, force, verbose, debug, i
     opm.sync_cache_to_store(store_uri, ldspdi_uri, force, opids)
 
 
+@cli.command()
 @click.argument("pecha_num")
 def export(**kwargs):
     """
@@ -447,6 +435,6 @@ def export(**kwargs):
     """
     pecha_id = get_pecha_id(kwargs["pecha_num"])
     opf_path = f'{config["OP_DATA_PATH"]}/{pecha_id}/{pecha_id}.opf'
-    serializer = SerializeTsadra(opf_path)
+    serializer = EpubSerializer(opf_path)
     serializer.apply_layers()
     serializer.serilize(pecha_id)

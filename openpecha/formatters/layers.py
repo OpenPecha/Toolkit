@@ -27,7 +27,7 @@ class AnnType:
     book_title = "BookTitle"
     poti_title = "PotiTitle"
     author = "Author"
-    chapter = "chapter"
+    chapter = "Chapter"
 
     topic = "Text"
     sub_topic = "SubText"
