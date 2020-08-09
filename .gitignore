@@ -28,3 +28,4 @@ dist/
 **/config/*
 .idea/*
 openpecha/config.py
+**/.openpecha

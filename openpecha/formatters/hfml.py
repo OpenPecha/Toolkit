@@ -10,9 +10,9 @@ from pathlib import Path
 
 import yaml
 
-from openpecha.formatters.formatter import BaseFormatter
-from openpecha.formatters.layers import *
-from openpecha.formatters.layers import AnnType, _attr_names
+from .formatter import BaseFormatter
+from .layers import *
+from .layers import AnnType, _attr_names
 
 
 class Global2LocalId:
@@ -1062,7 +1062,7 @@ class HFMLFormatter(BaseFormatter):
 
     def get_result(self):
 
-        if self.topic_id[0]:
+        if self.topic_id and self.topic_id[0]:
             if self.topic_id[0][0][1]["work_id"] == self.topic_id[1][0][1]["work_id"]:
                 self.topic_id = self.topic_id[1:]
                 self.sub_topic = self.sub_topic[1:]
@@ -1129,8 +1129,8 @@ class HFMLFormatter(BaseFormatter):
 
         return base_text
 
-    def create_opf(self, input_path, **kwargs):
-        input_path = Path(input_path)
+    def create_opf(self, input_path, id=None, **kwargs):
+        input_path = Path(input_path, id=id)
         self._build_dirs(input_path)
         (self.dirs["opf_path"] / "base").mkdir(exist_ok=True)
 
