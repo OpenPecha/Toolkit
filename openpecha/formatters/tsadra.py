@@ -181,7 +181,7 @@ class TsadraFormatter(BaseFormatter):
                     {
                         "span": {
                             "start": self.walker,
-                            "end": len(chapter_title_tmp) - 2 + self.walker,
+                            "end": len(chapter_title_tmp) - 1 + self.walker,
                         }
                     }
                 )
@@ -331,7 +331,7 @@ class TsadraFormatter(BaseFormatter):
                         {
                             "span": {
                                 "start": self.walker,
-                                "end": len(citation_tmp) - 2 + self.walker,
+                                "end": len(citation_tmp) - 1 + self.walker,
                             },
                             "isverse": True,
                         }
@@ -346,7 +346,7 @@ class TsadraFormatter(BaseFormatter):
                         {
                             "span": {
                                 "start": self.walker,
-                                "end": len(citation_tmp) - 2 + self.walker,
+                                "end": len(citation_tmp) - 1 + self.walker,
                             },
                             "isverse": True,
                         }
