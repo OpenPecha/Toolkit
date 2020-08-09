@@ -247,7 +247,7 @@ class TestHFMLFormatter:
         old_layers = formatter.get_old_layers(layers)
         local_id2uuid = LocalIdManager(old_layers)
         local_id2uuid.add("tsawa", 1231232)
-        d = local_id2uuid.serialize("tsawa")
+        d = local_id2uuid.get_serialized_global2local_id("tsawa")
         print(d)
 
 
