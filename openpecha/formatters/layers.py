@@ -24,18 +24,18 @@ __all__ = [
 
 
 class AnnType:
-    book_title = "Book Title"
-    poti_title = "Poti Title"
+    book_title = "BookTitle"
+    poti_title = "PotiTitle"
     author = "Author"
     chapter = "Chapter"
 
-    topic = "topic"
-    sub_topic = "sub_topic"
+    topic = "Text"
+    sub_topic = "SubText"
 
     pagination = "Pagination"
     citation = "Citation"
     correction = "Correction"
-    error_candidate = "Error Candidate"
+    error_candidate = "ErrorCandidate"
     peydurma = "Peydurma"
     sabche = "Sabche"
     tsawa = "Tsawa"
@@ -48,6 +48,7 @@ class _attr_names:
     ANNOTATION_TYPE = "annotation_type"  # Name of annotation, type: str
     REVISION = "revision"  # Revision number. type: int
     ANNOTATION = "annotations"  # Annotations are stored in list . type: dict
+    LOCAL_ID = "local_ids"
 
     # Spans
     SPAN = "span"
@@ -80,7 +81,7 @@ def Span(start, end):
     return {_attr_names.START: start, _attr_names.END: end}
 
 
-##### INDEX Layer #####
+# ~~~ INDEX Layer ~~~~~
 # Cross vol Span
 CrossVolSpan = {"vol": None, "span": None}
 
@@ -88,13 +89,11 @@ CrossVolSpan = {"vol": None, "span": None}
 SubText = {"work": None, "span": []}  # index of the sub_text  # span of the sub_text
 
 # Text annotation
-Text = {
-    "work": None,  # id of the `text`. type: int
-    "parts": [],  # list of SubText
-    "span": [],  # list of CrossVolSpan
-}
+Text = {"parts": [], "span": []}  # list of SubText  # list of CrossVolSpan
 
-#### ANNOTATIONS Layers #####
+# ~~~~~ ANNOTATIONS Layers ~~~~~~
+
+
 def Page(span, page_index=None, page_info=None, page_ref=None):
     return {
         _attr_names.PAGE_INDEX: page_index,

@@ -1,0 +1,124 @@
+id: f416398558ef45b5be04be79d643f3c8
+annotation_type: Citation
+revision: '00001'
+annotations:
+  5a43ad0de55243b7a8dddaa846345e83:
+    span:
+      start: 5291
+      end: 5719
+    isverse: false
+  240db5d39ca048ea8749ed367d6ac400:
+    span:
+      start: 8211
+      end: 8493
+    isverse: false
+  fb44690e3c764bce91333d2ee4fa5644:
+    span:
+      start: 22391
+      end: 22423
+    isverse: false
+  b93e6f5746624e0cba33330e8e52c484:
+    span:
+      start: 32331
+      end: 32591
+    isverse: false
+  50b8bcb26dd84f418cecad8e4e99ed50:
+    span:
+      start: 32953
+      end: 33076
+    isverse: false
+  1cce63c4cb6641259e30957ed9b13678:
+    span:
+      start: 33481
+      end: 33547
+    isverse: false
+  e4647d6654c445d095e4bad5b6637cee:
+    span:
+      start: 37947
+      end: 38434
+    isverse: false
+  5a2e788d507e4f67868f9f202c17e05d:
+    span:
+      start: 48199
+      end: 48257
+    isverse: false
+  97177c884e174526ae0cefa1760ac165:
+    span:
+      start: 53232
+      end: 53364
+    isverse: false
+  89c15a292f95418ba6e6faa9fc8d5ef2:
+    span:
+      start: 53714
+      end: 53915
+    isverse: false
+  f9fa8ba145f3431bb9f62ff60e4a78ee:
+    span:
+      start: 63124
+      end: 63315
+    isverse: false
+  512cc5f5b493491d9647a352ca6b5a53:
+    span:
+      start: 63325
+      end: 63739
+    isverse: false
+  952811ec0f0a400485d6359c91a69a4a:
+    span:
+      start: 78780
+      end: 79326
+    isverse: false
+  b2094fa8343e493aa30d9b953b0cb3a0:
+    span:
+      start: 79336
+      end: 79663
+    isverse: false
+  213868663d9345ab81e7990d711a27bd:
+    span:
+      start: 79679
+      end: 80030
+    isverse: false
+  1b4f752be9a347e38cb406bbac7ad993:
+    span:
+      start: 80866
+      end: 81625
+    isverse: false
+  2bee556b5ecf4a3393987a4a8e63a159:
+    span:
+      start: 82060
+      end: 82335
+    isverse: false
+  97858dbec4cd4fea8c83a15f85c24546:
+    span:
+      start: 86127
+      end: 86792
+    isverse: false
+  967e355dac61476da2c8c07096e0e412:
+    span:
+      start: 100085
+      end: 100379
+    isverse: false
+  1c851f147fc740e2a47bf5dac4102215:
+    span:
+      start: 100420
+      end: 100444
+    isverse: false
+  0d2c31e3c990413e84c42eed5f48eb85:
+    span:
+      start: 101863
+      end: 101889
+    isverse: false
+  6dec56e291d14acd9563698a9092117b:
+    span:
+      start: 102623
+      end: 103033
+    isverse: false
+  3b648f2ec3324a749b4f2a7b0664e2e5:
+    span:
+      start: 104357
+      end: 104557
+    isverse: false
+  4d24ae89010d478987aa7fc7b63cbec5:
+    span:
+      start: 105837
+      end: 105890
+    isverse: false
