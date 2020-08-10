@@ -1,3 +1,4 @@
+import os
 from copy import deepcopy
 from functools import partial
 from pathlib import Path
@@ -17,6 +18,7 @@ class TsadraFormatter(BaseFormatter):
     def __init__(self, output_path="./opfs"):
         super().__init__(output_path=output_path)
         self.base_text = ""
+        self.cover_image = ""
         self.walker = 0  # The walker to traverse every character in the pecha
         self.book_title = []  # list variable to store book title index
         self.author = []  # list variable to store author annotion index
@@ -95,6 +97,12 @@ class TsadraFormatter(BaseFormatter):
 
         yield result, None
 
+    def get_cover_image(self, soup):
+        divs = soup.find_all("div", {"epub:type": "cover"})
+        if divs:
+            return divs[0].img["src"].split("/")[1]
+        return ""
+
     def build_layers(self, html):
         """
         To Build the layer
@@ -128,12 +136,15 @@ class TsadraFormatter(BaseFormatter):
             "last": f"{rt_base}-last-line",
         }
         # p_with_citations = []
+        cover = self.get_cover_image(soup)
+        if cover:
+            self.cover_image = cover
         ps = soup.find_all("p")
         for p in ps:
             if "credits-page_front-title" in p["class"][0]:  # to get the book title index
                 book_title_tmp = self.text_preprocess(p.text) + "\n"
                 self.book_title.append(
-                    {"span": {"start": self.walker, "end": len(book_title_tmp) - 1 + self.walker}}
+                    {"span": {"start": self.walker, "end": len(book_title_tmp) - 2 + self.walker}}
                 )
                 self.base_text += book_title_tmp
                 self.walker += len(book_title_tmp)
@@ -141,7 +152,7 @@ class TsadraFormatter(BaseFormatter):
             if "text-author" in p["class"][0]:  # to get the author annotation index
                 author_tmp = self.text_preprocess(p.text) + "\n"
                 self.author.append(
-                    {"span": {"start": self.walker, "end": len(author_tmp) - 1 + self.walker}}
+                    {"span": {"start": self.walker, "end": len(author_tmp) - 2 + self.walker}}
                 )
                 self.base_text += author_tmp
                 self.walker += len(author_tmp)
@@ -157,7 +168,7 @@ class TsadraFormatter(BaseFormatter):
                     root_text_tmp += self.text_preprocess(p.text) + "\n"
                     self.base_text += self.text_preprocess(p.text) + "\n"
                 elif p["class"][0] == root_text_classes["last"]:
-                    for s in p.contents:
+                    for s in p.find_all("span"):
                         if "root" in s["class"][0]:
                             root_text_tmp += self.text_preprocess(s.text)
                             self.root_text.append(
@@ -181,7 +192,7 @@ class TsadraFormatter(BaseFormatter):
                     {
                         "span": {
                             "start": self.walker,
-                            "end": len(chapter_title_tmp) - 1 + self.walker,
+                            "end": len(chapter_title_tmp) - 2 + self.walker,
                         }
                     }
                 )
@@ -203,10 +214,11 @@ class TsadraFormatter(BaseFormatter):
                 else:
                     p_tmp = ""
                     p_walker = self.walker
-                    for s in p.contents:
+                    for s in p.find_all("span"):
                         # check for page with no content and skip the page
-                        if isinstance(s, str):
-                            return ""
+                        # if isinstance(s, str):
+                        #     break
+                        #     return ""
                         # some child are not <span> rather like <a> and some <span> has no 'class' attr
                         try:
                             s["class"][0]
@@ -229,6 +241,20 @@ class TsadraFormatter(BaseFormatter):
                                 )
                                 p_walker += len(citation_tmp)
                                 citation_tmp = ""
+
+                            if sabche_tmp:
+                                self.sabche.append(
+                                    {
+                                        "span": {
+                                            "start": p_walker,
+                                            "end": len(sabche_tmp) + p_walker - 1,
+                                        },
+                                        "isinline": True,
+                                    }
+                                )
+                                p_walker += len(sabche_tmp)
+                                sabche_tmp = ""
+
                             self.yigchung.append(
                                 {
                                     "span": {
@@ -244,6 +270,9 @@ class TsadraFormatter(BaseFormatter):
                         ):  # checking for citation annotation
                             citation_tmp += self.text_preprocess(s.text)
 
+                        elif "sabche" in s["class"][0]:  # checking for citation annotation
+                            sabche_tmp += self.text_preprocess(s.text)
+
                         elif "front-title" in s["class"][0]:
                             if citation_tmp:
                                 self.citation.append(
@@ -257,6 +286,18 @@ class TsadraFormatter(BaseFormatter):
                                 )
                                 p_walker += len(citation_tmp)
                                 citation_tmp = ""
+                            if sabche_tmp:
+                                self.sabche.append(
+                                    {
+                                        "span": {
+                                            "start": p_walker,
+                                            "end": len(sabche_tmp) + p_walker - 1,
+                                        },
+                                        "isinline": True,
+                                    }
+                                )
+                                p_walker += len(sabche_tmp)
+                                sabche_tmp = ""
                             p_walker += len(self.text_preprocess(s.text))
                         else:
                             if citation_tmp:
@@ -271,6 +312,20 @@ class TsadraFormatter(BaseFormatter):
                                 )
                                 p_walker += len(citation_tmp)
                                 citation_tmp = ""
+
+                            if sabche_tmp:
+                                self.sabche.append(
+                                    {
+                                        "span": {
+                                            "start": p_walker,
+                                            "end": len(sabche_tmp) + p_walker - 1,
+                                        },
+                                        "isinline": True,
+                                    }
+                                )
+                                p_walker += len(sabche_tmp)
+                                sabche_tmp = ""
+
                             p_walker += len(self.text_preprocess(s.text))
 
                     # when citation ends the para
@@ -287,6 +342,19 @@ class TsadraFormatter(BaseFormatter):
                         p_walker += len(citation_tmp)
                         citation_tmp = ""
 
+                    if sabche_tmp:
+                        self.sabche.append(
+                            {
+                                "span": {
+                                    "start": p_walker,
+                                    "end": len(sabche_tmp) + p_walker - 1,
+                                },
+                                "isinline": True,
+                            }
+                        )
+                        p_walker += len(sabche_tmp)
+                        sabche_tmp = ""
+
                     commentary_tmp = self.text_preprocess(p.text) + "\n"
                     self.base_text += self.text_preprocess(commentary_tmp)
                     self.walker += len(commentary_tmp)
@@ -297,7 +365,7 @@ class TsadraFormatter(BaseFormatter):
                 sabche_tmp = ""
                 p_with_sabche_tmp = ""
                 sabche_walker = self.walker
-                for s in p.contents:
+                for s in p.find_all("span"):
                     try:
                         s["class"][0]
                     except:
@@ -313,7 +381,13 @@ class TsadraFormatter(BaseFormatter):
                 # when sabche ends the para
                 if sabche_tmp:
                     self.sabche.append(
-                        {"span": {"start": sabche_walker, "end": len(sabche_tmp) + sabche_walker,}}
+                        {
+                            "span": {
+                                "start": sabche_walker,
+                                "end": len(sabche_tmp) + sabche_walker - 1,
+                            },
+                            "isinline": False,
+                        }
                     )
                     sabche_tmp = ""
                 self.walker += len(self.text_preprocess(p.text)) + 1
@@ -409,6 +483,7 @@ class TsadraFormatter(BaseFormatter):
         meta_data["title"] = get_text(layers["Book Title"][0]["span"])
         meta_data["authors"] = [get_text(span["span"]) for span in layers["Author"]]
         meta_data["sku"] = self.sku
+        meta_data["cover"] = self.cover_image
         meta_data["layers"] = [l for l in layers if layers[l]]
         return {"ebook_metadata": meta_data}
 
@@ -416,6 +491,12 @@ class TsadraFormatter(BaseFormatter):
         input_path = Path(input_path)
         self._build_dirs(input_path, id=id)
         (self.dirs["opf_path"] / "base").mkdir(exist_ok=True)
+
+        # cover image path
+        image_path = input_path / "image"
+        self._build_dirs(input_path, id=id)
+        (self.dirs["opf_path"] / "asset").mkdir(exist_ok=True)
+        os.system(f"cp -R {image_path} {self.dirs['opf_path']}/asset")
 
         # parse layers
         for html in self.get_input(input_path):

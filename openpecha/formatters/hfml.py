@@ -21,9 +21,7 @@ class Global2LocalId:
     def __init__(self, local_id_dict=None):
         self.start_local_id = 200_000
         self.global2local_id = self._initialize(local_id_dict)
-        self.local2global_id = {
-            l_id: g_id for l_id, g_id in self.global2local_id.items()
-        }
+        self.local2global_id = {l_id: g_id for l_id, g_id in self.global2local_id.items()}
         self.last_local_id = self.find_last()
 
     def _initialize(self, local_id_dict):
@@ -109,9 +107,7 @@ class HFMLFormatter(BaseFormatter):
         self.poti_title = []
         self.chapter_title = []
         self.topic_id = []  # made class variable as it needs to update cross poti
-        self.current_topic_id = (
-            []
-        )  # made class variable as it needs to update cross poti
+        self.current_topic_id = []  # made class variable as it needs to update cross poti
         self.sub_topic = []  # made class variable as it needs to update cross poti
         self.page = []
         self.error_id = []
@@ -182,18 +178,16 @@ class HFMLFormatter(BaseFormatter):
         new_layer = Layer(self.get_unique_id(), layer_name)
         for _, ann in anns:
             self.add_new_ann(new_layer, ann)
-        new_layer[
-            _attr_names.LOCAL_ID
-        ] = self.local_id_manager.get_serialized_global2local_id(layer_name)
+        new_layer[_attr_names.LOCAL_ID] = self.local_id_manager.get_serialized_global2local_id(
+            layer_name
+        )
         return new_layer
 
     def update_layer(self, layer, anns):
         self._inc_layer_revision(layer)
         for local_id, ann in anns:
             if local_id:
-                uuid = self.local_id_manager.maps[
-                    layer["annotation_type"]
-                ].get_global_id(local_id)
+                uuid = self.local_id_manager.maps[layer["annotation_type"]].get_global_id(local_id)
                 if uuid:
                     for key, value in ann.items():
                         layer["annotations"][uuid][key] = value
@@ -246,9 +240,7 @@ class HFMLFormatter(BaseFormatter):
             ):
 
                 Topic = deepcopy(Text)
-                Topic["parts"] += [
-                    [ann for none_local_id, ann in anns] for anns in sub_topics
-                ]
+                Topic["parts"] += [[ann for none_local_id, ann in anns] for anns in sub_topics]
                 Topic["span"] += [ann for none_local_id, ann in topics]
                 uuid = self.get_unique_id()
                 Index_layer["annotations"][uuid] = Topic
@@ -419,9 +411,7 @@ class HFMLFormatter(BaseFormatter):
                     starting_point = 1
                 if ann.start() > archaic_word.start():
                     archaic_part = archaic_word[0].split(",")[0][starting_point:]
-                    length_before = length_before + (
-                        len(archaic_word[0]) - len(archaic_part)
-                    )
+                    length_before = length_before + (len(archaic_word[0]) - len(archaic_part))
 
         if re.search(pat_list["abs_er_pattern"], line):
             abs_ers = re.finditer(
@@ -470,9 +460,7 @@ class HFMLFormatter(BaseFormatter):
         Return:
             base_line (str): It contains the base text which is being extracted from the given annotated line.
         """
-        base_line = (
-            annotated_line  # stores the base_line which is line without annotation
-        )
+        base_line = annotated_line  # stores the base_line which is line without annotation
         for pattern in [
             "line_pattern",
             "topic_pattern",
@@ -522,9 +510,7 @@ class HFMLFormatter(BaseFormatter):
                 else:
                     starting_point = 1
                 archaic_part = archaic_word[0].split(",")[0][starting_point:]
-                base_line = re.sub(
-                    pat_list["archaic_word_pattern"], archaic_part, base_line, 1
-                )
+                base_line = re.sub(pat_list["archaic_word_pattern"], archaic_part, base_line, 1)
 
         if re.search(pat_list["abs_er_pattern"], annotated_line):
             abs_ers = re.finditer(
@@ -536,10 +522,7 @@ class HFMLFormatter(BaseFormatter):
                 else:
                     starting_point = 1
                 base_line = re.sub(
-                    pat_list["abs_er_pattern"],
-                    abs_er[0][starting_point:-1],
-                    base_line,
-                    1,
+                    pat_list["abs_er_pattern"], abs_er[0][starting_point:-1], base_line, 1,
                 )
 
         return base_line
@@ -568,36 +551,20 @@ class HFMLFormatter(BaseFormatter):
 
         poti_titles = []
         chapter_titles = []
-        start_cit_patterns = (
-            []
-        )  # list variable to store index of start citation pattern => (g
-        end_cit_patterns = (
-            []
-        )  # list variable to store index of start citation pattern => g)
-        start_sabche_pattern = (
-            []
-        )  # list variable to store index of start sabche pattern => (q
-        end_sabche_pattern = (
-            []
-        )  # list variable to store index of end sabche pattern => q)
-        start_tsawa_pattern = (
-            []
-        )  # list variable to store index of start tsawa pattern => (m
-        end_tsawa_pattern = (
-            []
-        )  # list variable to store index of end sabche pattern => m)
-        start_yigchung_pattern = (
-            []
-        )  # list variable to store index of start yigchung pattern => (y
-        end_yigchung_pattern = (
-            []
-        )  # list variable to store index of end yigchung pattern => y)
+        start_cit_patterns = []  # list variable to store index of start citation pattern => (g
+        end_cit_patterns = []  # list variable to store index of start citation pattern => g)
+        start_sabche_pattern = []  # list variable to store index of start sabche pattern => (q
+        end_sabche_pattern = []  # list variable to store index of end sabche pattern => q)
+        start_tsawa_pattern = []  # list variable to store index of start tsawa pattern => (m
+        end_tsawa_pattern = []  # list variable to store index of end sabche pattern => m)
+        start_yigchung_pattern = []  # list variable to store index of start yigchung pattern => (y
+        end_yigchung_pattern = []  # list variable to store index of end yigchung pattern => y)
 
         pat_list = {
-            "author_pattern": r"\(au.+?\)",
-            "pecha_title_pattern": r"\(k1.+?\)",
-            "poti_title_pattern": r"\(k2.+?\)",
-            "chapter_title_pattern": r"\(k3.+?\)",
+            "author_pattern": r"\(([󴉀-󴉱])?au.+?\)",
+            "pecha_title_pattern": r"\(([󴉀-󴉱])?k1.+?\)",
+            "poti_title_pattern": r"\(([󴉀-󴉱])?k2.+?\)",
+            "chapter_title_pattern": r"\(([󴉀-󴉱])?k3.+?\)",
             "page_pattern": r"\[([󴉀-󴉱])?[0-9]+[a-z]{1}\]",
             "line_pattern": r"\[\w+\.\d+\]",
             "topic_pattern": r"\{([󴉀-󴉱])?\w+\}",
@@ -637,17 +604,21 @@ class HFMLFormatter(BaseFormatter):
 
         for idx, line in enumerate(text_lines):
             line = line.strip()
+            start_line = i
+            length = len(line)
             pat_len_before_ann = 0  # length of pattern recognised before  annotation
             if re.search(
                 pat_list["page_pattern"], line
             ):  # checking current line contains page annotation or not
                 start_page = end_page
                 end_page = end_line
-                pg_tid.append(
-                    self.get_tofu_id(re.search(pat_list["page_pattern"], line))
-                )
+                local_id = self.get_tofu_id(re.search(pat_list["page_pattern"], line))
+                pg_tid.append(local_id)
                 page_info = line[re.search(pat_list["page_pattern"], line).end() :]
-                pg_ann.append(re.search(pat_list["page_pattern"], line)[0][2:-1])
+                if local_id:
+                    pg_ann.append(re.search(pat_list["page_pattern"], line)[0][2:-1])
+                else:
+                    pg_ann.append(re.search(pat_list["page_pattern"], line)[0][1:-1])
                 pg_info.append(page_info)
                 if len(pg_info) >= 2:
                     cur_vol_pages.append(
@@ -664,86 +635,60 @@ class HFMLFormatter(BaseFormatter):
                         i = i + 1  # To accumulate the \n character
                         end_page = end_page + 3
                     self.base_text = self.base_text + "\n"
+                continue
 
-            elif re.search(
-                pat_list["line_pattern"], line
-            ):  # checking current line contains line annotation or not
-                start_line = i
-                length = len(line)
+            # elif re.search(
+            #     pat_list["line_pattern"], line
+            # ):  # checking current line contains line annotation or not
 
-                for pp in [
-                    "author_pattern",
-                    "pecha_title_pattern",
-                    "poti_title_pattern",
-                    "chapter_title_pattern",
-                ]:
-                    title_pattern = re.search(pat_list[pp], line)
-                    if title_pattern:
-                        pat_len_before_ann = self.search_before(
-                            title_pattern, pat_list, line
+            for pp in [
+                "author_pattern",
+                "pecha_title_pattern",
+                "poti_title_pattern",
+                "chapter_title_pattern",
+            ]:
+                title_pattern = re.search(pat_list[pp], line)
+                if title_pattern:
+                    local_id = self.get_tofu_id(title_pattern)
+                    pat_len_before_ann = self.search_before(title_pattern, pat_list, line)
+                    start_title = title_pattern.start() + i - pat_len_before_ann
+                    end_title = start_title + len(title_pattern[0]) - 5
+                    if pp == "author_pattern":
+                        self.author_pattern.append(
+                            (local_id, {"span": {"start": start_title, "end": end_title}})
                         )
-                        start_title = title_pattern.start() + i - pat_len_before_ann
-                        end_title = start_title + len(title_pattern[0]) - 5
-                        if pp == "author_pattern":
-                            self.author_pattern.append((start_title, end_title))
-                        if pp == "pecha_title_pattern":
-                            self.pecha_title.append((start_title, end_title))
-                        if pp == "poti_title_pattern":
-                            poti_titles.append((start_title, end_title))
+                    if pp == "pecha_title_pattern":
+                        self.pecha_title.append(
+                            (local_id, {"span": {"start": start_title, "end": end_title}})
+                        )
+                    if pp == "poti_title_pattern":
+                        poti_titles.append(
+                            (local_id, {"span": {"start": start_title, "end": end_title}})
+                        )
+                        if local_id:
                             end_topic = len(title_pattern[0][2:])
                             end_sub_topic = len(title_pattern[0][2:])
-                        if pp == "chapter_title_pattern":
-                            chapter_titles.append((start_title, end_title))
+                        else:
+                            end_topic = len(title_pattern[0][1:])
+                            end_sub_topic = len(title_pattern[0][1:])
+                    if pp == "chapter_title_pattern":
+                        chapter_titles.append(
+                            (local_id, {"span": {"start": start_title, "end": end_title}})
+                        )
 
-                if re.search(
-                    pat_list["sub_topic_pattern"], line
-                ):  # checking current line contain sub_topicID annotation or not
-                    sub_topic_match = re.search(pat_list["sub_topic_pattern"], line)
-                    self.sub_topic_info.append(sub_topic_match[0][2:-1])
-                    self.sub_topic_tofu.append(self.get_tofu_id(sub_topic_match))
-                    pat_len_before_ann = self.search_before(
-                        sub_topic_match, pat_list, line
-                    )
-                    if start_sub_topic == 0:
-                        start_sub_topic = end_sub_topic
-                        end_sub_topic = sub_topic_match.start() + i - pat_len_before_ann
+            if re.search(
+                pat_list["sub_topic_pattern"], line
+            ):  # checking current line contain sub_topicID annotation or not
+                sub_topic_match = re.search(pat_list["sub_topic_pattern"], line)
+                self.sub_topic_info.append(sub_topic_match[0][2:-1])
+                self.sub_topic_tofu.append(self.get_tofu_id(sub_topic_match))
+                pat_len_before_ann = self.search_before(sub_topic_match, pat_list, line)
+                if start_sub_topic == 0:
+                    start_sub_topic = end_sub_topic
+                    end_sub_topic = sub_topic_match.start() + i - pat_len_before_ann
 
-                        if start_sub_topic < end_sub_topic:
-                            if len(self.sub_topic_info) >= 2:
-                                self.sub_topic_Id.append(
-                                    (
-                                        self.sub_topic_tofu[-2],
-                                        {
-                                            "work_id": self.sub_topic_info[-2],
-                                            "span": {
-                                                "vol": self.vol_walker + 1,
-                                                "start": start_sub_topic,
-                                                "end": end_sub_topic,
-                                            },
-                                        },
-                                    )
-                                )
-                                end_sub_topic = end_sub_topic
-                            else:
-                                self.sub_topic_Id.append(
-                                    (
-                                        self.sub_topic_tofu[-1],
-                                        {
-                                            "work_id": self.sub_topic_info[-1],
-                                            "span": {
-                                                "vol": self.vol_walker + 1,
-                                                "start": start_sub_topic,
-                                                "end": end_sub_topic,
-                                            },
-                                        },
-                                    )
-                                )
-                                end_sub_topic = end_sub_topic
-                    else:
-                        start_sub_topic = end_sub_topic
-                        end_sub_topic = sub_topic_match.start() + i - pat_len_before_ann
-
-                        if start_sub_topic < end_sub_topic:
+                    if start_sub_topic < end_sub_topic:
+                        if len(self.sub_topic_info) >= 2:
                             self.sub_topic_Id.append(
                                 (
                                     self.sub_topic_tofu[-2],
@@ -758,52 +703,7 @@ class HFMLFormatter(BaseFormatter):
                                 )
                             )
                             end_sub_topic = end_sub_topic
-
-                if re.search(
-                    pat_list["topic_pattern"], line
-                ):  # checking current line contain topicID annotation or not
-                    topic = re.search(pat_list["topic_pattern"], line)
-                    pat_len_before_ann = self.search_before(topic, pat_list, line)
-                    self.topic_info.append(topic[0][2:-1])
-                    self.topic_tofu.append(self.get_tofu_id(topic))
-                    start_topic = end_topic
-                    end_topic = topic.start() + i - pat_len_before_ann
-
-                    if start_topic != end_topic or len(self.topic_info) >= 2:
-                        if (
-                            len(self.topic_info) >= 2
-                        ):  # as we are ignoring the self.topic[0]
-                            if start_topic < end_topic:
-                                self.current_topic_id.append(
-                                    (
-                                        self.topic_tofu[-2],
-                                        {
-                                            "work_id": self.topic_info[-2],
-                                            "span": {
-                                                "vol": self.vol_walker + 1,
-                                                "start": start_topic,
-                                                "end": end_topic,
-                                            },
-                                        },
-                                    )
-                                )  # -2 as we need the secondlast item
                         else:
-                            self.current_topic_id.append(
-                                (
-                                    self.topic_tofu[-1],
-                                    {
-                                        "work_id": self.topic_info[-1],
-                                        "span": {
-                                            "vol": self.vol_walker + 1,
-                                            "start": start_topic,
-                                            "end": end_topic,
-                                        },
-                                    },
-                                )
-                            )
-                        self.topic_id.append(self.current_topic_id)
-                        self.current_topic_id = []
-                        if self.sub_topic_Id and end_sub_topic < end_topic:
                             self.sub_topic_Id.append(
                                 (
                                     self.sub_topic_tofu[-1],
@@ -811,207 +711,60 @@ class HFMLFormatter(BaseFormatter):
                                         "work_id": self.sub_topic_info[-1],
                                         "span": {
                                             "vol": self.vol_walker + 1,
-                                            "start": end_sub_topic,
-                                            "end": end_topic,
+                                            "start": start_sub_topic,
+                                            "end": end_sub_topic,
                                         },
                                     },
                                 )
                             )
-                        self.sub_topic.append(self.sub_topic_Id)
-                        self.sub_topic_Id = []
-                        if self.sub_topic_Id:
-                            last = self.sub_topic_info[-1]
-                            self.sub_topic_info = []
-                            self.sub_topic_info.append(last)
-
-                if re.search(
-                    pat_list["error_pattern"], line
-                ):  # checking current line contain error annotation or not
-                    errors = re.finditer(pat_list["error_pattern"], line)
-                    for error in errors:
-                        suggestion = error[0].split(",")[1][
-                            :-1
-                        ]  # extracting the suggestion component
-                        error_part = error[0].split(",")[0][
-                            2:
-                        ]  # extracting the error component
-                        tofu_id = self.get_tofu_id(error)
-                        pat_len_before_ann = self.search_before(error, pat_list, line)
-                        start_error = error.start() + i - pat_len_before_ann
-
-                        end_error = start_error + len(error_part)
-                        cur_vol_error_id.append(
-                            (
-                                tofu_id,
-                                {
-                                    "correction": suggestion,
-                                    "span": {"start": start_error, "end": end_error},
-                                },
-                            )
-                        )
-
-                if re.search(
-                    pat_list["archaic_word_pattern"], line
-                ):  # checking current line contain error annotation or not
-                    archaics = re.finditer(pat_list["archaic_pattern"], line)
-                    for archaic in archaics:
-                        modern_word = archaic[0].split(",")[1][
-                            :-1
-                        ]  # extracting the modern word
-                        archaic_word = archaic[0].split(",")[0][
-                            2:
-                        ]  # extracting the error component
-                        tofu_id = self.get_tofu_id(archaic)
-                        pat_len_before_ann = self.search_before(archaic, pat_list, line)
-                        start_archaic = archaic.start() + i - pat_len_before_ann
-
-                        end_archaic = (
-                            start_archaic + len(modern_word) - 3
-                        )  # 3 is minus as two border bracket and tofu chr
-                        cur_vol_archaic_id.append(
-                            (
-                                tofu_id,
-                                {
-                                    "modern_word": modern_word,
-                                    "span": {
-                                        "start": start_archaic,
-                                        "end": end_archaic,
-                                    },
-                                },
-                            )
-                        )
-
-                if re.search(pat_list["abs_er_pattern"], line):
-                    abs_ers = re.finditer(pat_list["abs_er_pattern"], line)
-                    for abs_er in abs_ers:
-                        pat_len_before_ann = self.search_before(abs_er, pat_list, line)
-                        tofu_id = self.get_tofu_id(abs_er)
-                        start_abs_er = abs_er.start() + i - pat_len_before_ann
-                        end_abs_er = start_abs_er + len(
-                            abs_er[0][2:-1]
-                        )  # 3 is minus as two border bracket and tofu chr
-                        cur_vol_abs_er_id.append(
-                            (
-                                tofu_id,
-                                {"span": {"start": start_abs_er, "end": end_abs_er}},
-                            )
-                        )
-
-                if re.search(pat_list["note_pattern"], line):
-                    notes_in_line = re.finditer(pat_list["note_pattern"], line)
-                    for notes in notes_in_line:
-                        pat_len_before_ann = self.search_before(notes, pat_list, line)
-                        tofu_id = self.get_tofu_id(notes)
-                        note = notes.start() + i - pat_len_before_ann
-                        note_id.append(
-                            (tofu_id, {"span": {"start": note, "end": note}})
-                        )
-
-                if re.search(pat_list["start_cit_pattern"], line):
-                    start_cits = re.finditer(pat_list["start_cit_pattern"], line)
-                    for start_cit in start_cits:
-                        pat_len_before_ann = self.search_before(
-                            start_cit, pat_list, line
-                        )
-                        tofu_id = self.get_tofu_id(start_cit)
-                        cit_start = start_cit.start() + i - pat_len_before_ann
-                        start_cit_patterns.append((tofu_id, cit_start))
-
-                if re.search(pat_list["end_cit_pattern"], line):
-                    end_cits = re.finditer(pat_list["end_cit_pattern"], line)
-                    for end_cit in end_cits:
-                        pat_len_before_ann = self.search_before(end_cit, pat_list, line)
-                        cit_end = end_cit.start() + i - pat_len_before_ann - 1
-                        end_cit_patterns.append(cit_end)
-
-                if re.search(pat_list["start_sabche_pattern"], line):
-                    start_sabches = re.finditer(pat_list["start_sabche_pattern"], line)
-                    for start_sabche in start_sabches:
-                        pat_len_before_ann = self.search_before(
-                            start_sabche, pat_list, line
-                        )
-                        tofu_id = self.get_tofu_id(start_sabche)
-                        sabche_start = start_sabche.start() + i - pat_len_before_ann
-                        start_sabche_pattern.append((tofu_id, sabche_start))
-
-                if re.search(pat_list["end_sabche_pattern"], line):
-                    end_sabches = re.finditer(pat_list["end_sabche_pattern"], line)
-                    for end_sabche in end_sabches:
-                        pat_len_before_ann = self.search_before(
-                            end_sabche, pat_list, line
-                        )
-                        sabche_end = end_sabche.start() + i - pat_len_before_ann - 1
-                        end_sabche_pattern.append(sabche_end)
-
-                if re.search(pat_list["start_tsawa_pattern"], line):
-                    start_tsawas = re.finditer(pat_list["start_tsawa_pattern"], line)
-                    for start_tsawa in start_tsawas:
-                        pat_len_before_ann = self.search_before(
-                            start_tsawa, pat_list, line
-                        )
-                        tofu_id = self.get_tofu_id(start_tsawa)
-                        tsawa_start = start_tsawa.start() + i - pat_len_before_ann
-                        start_tsawa_pattern.append((tofu_id, tsawa_start))
-
-                if re.search(pat_list["end_tsawa_pattern"], line):
-                    end_tsawas = re.finditer(pat_list["end_tsawa_pattern"], line)
-                    for end_tsawa in end_tsawas:
-                        pat_len_before_ann = self.search_before(
-                            end_tsawa, pat_list, line
-                        )
-                        tsawa_end = end_tsawa.start() + i - pat_len_before_ann - 1
-                        end_tsawa_pattern.append(tsawa_end)
-
-                if re.search(pat_list["start_yigchung_pattern"], line):
-                    start_yigchungs = re.finditer(
-                        pat_list["start_yigchung_pattern"], line
-                    )
-                    for start_yigchung in start_yigchungs:
-                        pat_len_before_ann = self.search_before(
-                            start_yigchung, pat_list, line
-                        )
-                        tofu_id = self.get_tofu_id(start_yigchung)
-                        yigchung_start = start_yigchung.start() + i - pat_len_before_ann
-                        start_yigchung_pattern.append((tofu_id, yigchung_start))
-
-                if re.search(pat_list["end_yigchung_pattern"], line):
-                    end_yigchungs = re.finditer(pat_list["end_yigchung_pattern"], line)
-                    for end_yigchung in end_yigchungs:
-                        pat_len_before_ann = self.search_before(
-                            end_yigchung, pat_list, line
-                        )
-                        yigchung_end = end_yigchung.start() + i - pat_len_before_ann - 1
-                        end_yigchung_pattern.append(yigchung_end)
-
-                pat_len_before_ann = self.total_pattern(pat_list, line)
-                end_line = start_line + length - pat_len_before_ann - 1
-                i = end_line + 2
-                base_line = self.base_extract(pat_list, line) + "\n"
-                self.base_text += base_line
-
-                if idx == n_line - 1:  # Last line case
-                    start_page = end_page
-                    start_topic = end_topic
+                            end_sub_topic = end_sub_topic
+                else:
                     start_sub_topic = end_sub_topic
-                    if self.sub_topic_Id:
+                    end_sub_topic = sub_topic_match.start() + i - pat_len_before_ann
+
+                    if start_sub_topic < end_sub_topic:
                         self.sub_topic_Id.append(
                             (
-                                self.sub_topic_tofu[-1]
-                                if self.sub_topic_tofu
-                                else None,
+                                self.sub_topic_tofu[-2],
                                 {
-                                    "work_id": self.sub_topic_info[-1]
-                                    if self.sub_topic_info
-                                    else None,
+                                    "work_id": self.sub_topic_info[-2],
                                     "span": {
                                         "vol": self.vol_walker + 1,
                                         "start": start_sub_topic,
-                                        "end": i - 2,
+                                        "end": end_sub_topic,
                                     },
                                 },
                             )
                         )
-                    if self.topic_info:
+                        end_sub_topic = end_sub_topic
+
+            if re.search(
+                pat_list["topic_pattern"], line
+            ):  # checking current line contain topicID annotation or not
+                topic = re.search(pat_list["topic_pattern"], line)
+                pat_len_before_ann = self.search_before(topic, pat_list, line)
+                self.topic_info.append(topic[0][2:-1])
+                self.topic_tofu.append(self.get_tofu_id(topic))
+                start_topic = end_topic
+                end_topic = topic.start() + i - pat_len_before_ann
+
+                if start_topic != end_topic or len(self.topic_info) >= 2:
+                    if len(self.topic_info) >= 2:  # as we are ignoring the self.topic[0]
+                        if start_topic < end_topic:
+                            self.current_topic_id.append(
+                                (
+                                    self.topic_tofu[-2],
+                                    {
+                                        "work_id": self.topic_info[-2],
+                                        "span": {
+                                            "vol": self.vol_walker + 1,
+                                            "start": start_topic,
+                                            "end": end_topic,
+                                        },
+                                    },
+                                )
+                            )  # -2 as we need the secondlast item
+                    else:
                         self.current_topic_id.append(
                             (
                                 self.topic_tofu[-1],
@@ -1020,31 +773,221 @@ class HFMLFormatter(BaseFormatter):
                                     "span": {
                                         "vol": self.vol_walker + 1,
                                         "start": start_topic,
-                                        "end": i - 2,
+                                        "end": end_topic,
                                     },
                                 },
                             )
                         )
-                    cur_vol_pages.append(
+                    self.topic_id.append(self.current_topic_id)
+                    self.current_topic_id = []
+                    if self.sub_topic_Id and end_sub_topic < end_topic:
+                        self.sub_topic_Id.append(
+                            (
+                                self.sub_topic_tofu[-1],
+                                {
+                                    "work_id": self.sub_topic_info[-1],
+                                    "span": {
+                                        "vol": self.vol_walker + 1,
+                                        "start": end_sub_topic,
+                                        "end": end_topic,
+                                    },
+                                },
+                            )
+                        )
+                    self.sub_topic.append(self.sub_topic_Id)
+                    self.sub_topic_Id = []
+                    if self.sub_topic_Id:
+                        last = self.sub_topic_info[-1]
+                        self.sub_topic_info = []
+                        self.sub_topic_info.append(last)
+
+            if re.search(
+                pat_list["error_pattern"], line
+            ):  # checking current line contain error annotation or not
+                errors = re.finditer(pat_list["error_pattern"], line)
+                for error in errors:
+                    suggestion = error[0].split(",")[1][:-1]  # extracting the suggestion component
+                    error_part = error[0].split(",")[0][2:]  # extracting the error component
+                    tofu_id = self.get_tofu_id(error)
+                    pat_len_before_ann = self.search_before(error, pat_list, line)
+                    start_error = error.start() + i - pat_len_before_ann
+
+                    end_error = start_error + len(error_part)
+                    cur_vol_error_id.append(
                         (
-                            pg_tid[-1],
+                            tofu_id,
                             {
-                                "page_index": pg_ann[-1],
-                                "page_info": pg_info[-1],
-                                "span": {"start": start_page, "end": i - 2},
+                                "correction": suggestion,
+                                "span": {"start": start_error, "end": end_error},
                             },
                         )
                     )
-                    self.page.append(cur_vol_pages)
-                    self.error_id.append(cur_vol_error_id)
-                    cur_vol_error_id = []
-                    self.abs_er_id.append(cur_vol_abs_er_id)
-                    cur_vol_abs_er_id = []
-                    self.notes_id.append(note_id)
-                    note_id = []
-                    self.poti_title.append(poti_titles)
-                    self.chapter_title.append(chapter_titles)
-                    self.vol_walker += 1
+
+            if re.search(
+                pat_list["archaic_word_pattern"], line
+            ):  # checking current line contain error annotation or not
+                archaics = re.finditer(pat_list["archaic_pattern"], line)
+                for archaic in archaics:
+                    modern_word = archaic[0].split(",")[1][:-1]  # extracting the modern word
+                    archaic_word = archaic[0].split(",")[0][2:]  # extracting the error component
+                    tofu_id = self.get_tofu_id(archaic)
+                    pat_len_before_ann = self.search_before(archaic, pat_list, line)
+                    start_archaic = archaic.start() + i - pat_len_before_ann
+
+                    end_archaic = (
+                        start_archaic + len(modern_word) - 3
+                    )  # 3 is minus as two border bracket and tofu chr
+                    cur_vol_archaic_id.append(
+                        (
+                            tofu_id,
+                            {
+                                "modern_word": modern_word,
+                                "span": {"start": start_archaic, "end": end_archaic,},
+                            },
+                        )
+                    )
+
+            if re.search(pat_list["abs_er_pattern"], line):
+                abs_ers = re.finditer(pat_list["abs_er_pattern"], line)
+                for abs_er in abs_ers:
+                    pat_len_before_ann = self.search_before(abs_er, pat_list, line)
+                    tofu_id = self.get_tofu_id(abs_er)
+                    start_abs_er = abs_er.start() + i - pat_len_before_ann
+                    end_abs_er = start_abs_er + len(
+                        abs_er[0][2:-1]
+                    )  # 3 is minus as two border bracket and tofu chr
+                    cur_vol_abs_er_id.append(
+                        (tofu_id, {"span": {"start": start_abs_er, "end": end_abs_er}},)
+                    )
+
+            if re.search(pat_list["note_pattern"], line):
+                notes_in_line = re.finditer(pat_list["note_pattern"], line)
+                for notes in notes_in_line:
+                    pat_len_before_ann = self.search_before(notes, pat_list, line)
+                    tofu_id = self.get_tofu_id(notes)
+                    note = notes.start() + i - pat_len_before_ann
+                    note_id.append((tofu_id, {"span": {"start": note, "end": note}}))
+
+            if re.search(pat_list["start_cit_pattern"], line):
+                start_cits = re.finditer(pat_list["start_cit_pattern"], line)
+                for start_cit in start_cits:
+                    pat_len_before_ann = self.search_before(start_cit, pat_list, line)
+                    tofu_id = self.get_tofu_id(start_cit)
+                    cit_start = start_cit.start() + i - pat_len_before_ann
+                    start_cit_patterns.append((tofu_id, cit_start))
+
+            if re.search(pat_list["end_cit_pattern"], line):
+                end_cits = re.finditer(pat_list["end_cit_pattern"], line)
+                for end_cit in end_cits:
+                    pat_len_before_ann = self.search_before(end_cit, pat_list, line)
+                    cit_end = end_cit.start() + i - pat_len_before_ann - 1
+                    end_cit_patterns.append(cit_end)
+
+            if re.search(pat_list["start_sabche_pattern"], line):
+                start_sabches = re.finditer(pat_list["start_sabche_pattern"], line)
+                for start_sabche in start_sabches:
+                    pat_len_before_ann = self.search_before(start_sabche, pat_list, line)
+                    tofu_id = self.get_tofu_id(start_sabche)
+                    sabche_start = start_sabche.start() + i - pat_len_before_ann
+                    start_sabche_pattern.append((tofu_id, sabche_start))
+
+            if re.search(pat_list["end_sabche_pattern"], line):
+                end_sabches = re.finditer(pat_list["end_sabche_pattern"], line)
+                for end_sabche in end_sabches:
+                    pat_len_before_ann = self.search_before(end_sabche, pat_list, line)
+                    sabche_end = end_sabche.start() + i - pat_len_before_ann - 1
+                    end_sabche_pattern.append(sabche_end)
+
+            if re.search(pat_list["start_tsawa_pattern"], line):
+                start_tsawas = re.finditer(pat_list["start_tsawa_pattern"], line)
+                for start_tsawa in start_tsawas:
+                    pat_len_before_ann = self.search_before(start_tsawa, pat_list, line)
+                    tofu_id = self.get_tofu_id(start_tsawa)
+                    tsawa_start = start_tsawa.start() + i - pat_len_before_ann
+                    start_tsawa_pattern.append((tofu_id, tsawa_start))
+
+            if re.search(pat_list["end_tsawa_pattern"], line):
+                end_tsawas = re.finditer(pat_list["end_tsawa_pattern"], line)
+                for end_tsawa in end_tsawas:
+                    pat_len_before_ann = self.search_before(end_tsawa, pat_list, line)
+                    tsawa_end = end_tsawa.start() + i - pat_len_before_ann - 1
+                    end_tsawa_pattern.append(tsawa_end)
+
+            if re.search(pat_list["start_yigchung_pattern"], line):
+                start_yigchungs = re.finditer(pat_list["start_yigchung_pattern"], line)
+                for start_yigchung in start_yigchungs:
+                    pat_len_before_ann = self.search_before(start_yigchung, pat_list, line)
+                    tofu_id = self.get_tofu_id(start_yigchung)
+                    yigchung_start = start_yigchung.start() + i - pat_len_before_ann
+                    start_yigchung_pattern.append((tofu_id, yigchung_start))
+
+            if re.search(pat_list["end_yigchung_pattern"], line):
+                end_yigchungs = re.finditer(pat_list["end_yigchung_pattern"], line)
+                for end_yigchung in end_yigchungs:
+                    pat_len_before_ann = self.search_before(end_yigchung, pat_list, line)
+                    yigchung_end = end_yigchung.start() + i - pat_len_before_ann - 1
+                    end_yigchung_pattern.append(yigchung_end)
+
+            pat_len_before_ann = self.total_pattern(pat_list, line)
+            end_line = start_line + length - pat_len_before_ann - 1
+            i = end_line + 2
+            base_line = self.base_extract(pat_list, line) + "\n"
+            self.base_text += base_line
+
+            if idx == n_line - 1:  # Last line case
+                start_page = end_page
+                start_topic = end_topic
+                start_sub_topic = end_sub_topic
+                if self.sub_topic_Id:
+                    self.sub_topic_Id.append(
+                        (
+                            self.sub_topic_tofu[-1] if self.sub_topic_tofu else None,
+                            {
+                                "work_id": self.sub_topic_info[-1]
+                                if self.sub_topic_info
+                                else None,
+                                "span": {
+                                    "vol": self.vol_walker + 1,
+                                    "start": start_sub_topic,
+                                    "end": i - 2,
+                                },
+                            },
+                        )
+                    )
+                if self.topic_info:
+                    self.current_topic_id.append(
+                        (
+                            self.topic_tofu[-1],
+                            {
+                                "work_id": self.topic_info[-1],
+                                "span": {
+                                    "vol": self.vol_walker + 1,
+                                    "start": start_topic,
+                                    "end": i - 2,
+                                },
+                            },
+                        )
+                    )
+                cur_vol_pages.append(
+                    (
+                        pg_tid[-1],
+                        {
+                            "page_index": pg_ann[-1],
+                            "page_info": pg_info[-1],
+                            "span": {"start": start_page, "end": i - 2},
+                        },
+                    )
+                )
+                self.page.append(cur_vol_pages)
+                self.error_id.append(cur_vol_error_id)
+                cur_vol_error_id = []
+                self.abs_er_id.append(cur_vol_abs_er_id)
+                cur_vol_abs_er_id = []
+                self.notes_id.append(note_id)
+                note_id = []
+                self.poti_title.append(poti_titles)
+                self.chapter_title.append(chapter_titles)
+                self.vol_walker += 1
 
         if num_vol == self.vol_walker:  # checks the last volume
             self.topic_id.append(self.current_topic_id)
@@ -1291,9 +1234,7 @@ class HFMLTextFromatter(HFMLFormatter):
                 if cur_vol_top[2] == 1:
                     start += extra
                     end += extra
-                cur_top.append(
-                    (start, end, cur_vol_top[2] + vol_walker, cur_vol_top[3])
-                )
+                cur_top.append((start, end, cur_vol_top[2] + vol_walker, cur_vol_top[3]))
             self.topic_id[0] = cur_top
 
         if self.sub_topic[0][0]:

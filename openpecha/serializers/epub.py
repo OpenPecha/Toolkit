@@ -11,7 +11,7 @@ class Tsadra_template:
 
     # SP = Start_Payload
     end_payload = "</span>"
-    book_title_SP = '<span class="credits-page_front-title ">'
+    book_title_SP = '<span class="credits-page_front-title">'
     author_SP = '<span class="credits-page_front-page---text-author">'
     chapter_SP = '<span class="tibetan-chapter">'
     tsawa_SP = '<span class="tibetan-root-text_tibetan-root-text-middle-lines">'
@@ -20,6 +20,7 @@ class Tsadra_template:
     )
     quatation__SP = '<span class="tibetan-external-citations">'
     sabche_SP = '<span class="tibetan-sabche">'
+    sabche1_SP = '<span class="tibetan-sabche1">'
     yigchung_SP = '<span class="tibetan-commentary-small">'
 
 
@@ -45,7 +46,7 @@ class EpubSerializer(Serialize):
         adapted_end = span["end"] - self.text_spans[vol_id]["start"]
         return adapted_start, adapted_end
 
-    def apply_annotation(self, vol_id, ann):
+    def apply_annotation(self, vol_id, ann, uuid2localid):
         """Applies annotation to specific volume base-text, where part of the text exists.
 
         Args:
@@ -90,7 +91,10 @@ class EpubSerializer(Serialize):
                 start_payload = Tsadra_template.quatation__SP
             end_payload = Tsadra_template.end_payload
         elif ann["type"] == AnnType.sabche:
-            start_payload = Tsadra_template.sabche_SP
+            if ann["isinline"]:
+                start_payload = Tsadra_template.sabche1_SP
+            else:
+                start_payload = Tsadra_template.sabche_SP
             end_payload = Tsadra_template.end_payload
         elif ann["type"] == AnnType.yigchung:
             start_payload = Tsadra_template.yigchung_SP
@@ -116,31 +120,34 @@ class EpubSerializer(Serialize):
         #     pecha_title = self.meta['source_metadata']['title']
         # else:
         pecha_title = self.meta["ebook_metadata"]["title"]
-        result, _ = self.get_result()
-        result_lines = (
-            result.splitlines()
-        )  # Result is split where there is newline as we are going to consider newline as one para tag
-        results = f"<html>\n<head>\n\t<title>{pecha_title}</title>\n</head>\n<body>\n"
-        for result_line in result_lines:
-            results += f'<p class="tibetan-regular-indented">{result_line}</p>\n'
-        results += "</body>\n</html>"
-        Path(out_fn).write_text(results)
-        # Downloading css template file from ebook template repo and saving it
-        template = requests.get(
-            "https://raw.githubusercontent.com/OpenPecha/ebook-template/master/tsadra_template.css"
-        )
-        Path("template.css").write_bytes(template.content)
-        # click.echo(template.content, file=open('template.css', 'w'))
-        # Running ebook-convert command to convert html file to .epub (From calibre)
-        chapter_Xpath = (
-            "//*[@class='tibetan-chapter']"  # XPath expression to detect chapter titles.
-        )
-        font_family = "Monlam Uni Ouchan2"
-        font_size = 16
-        chapter_mark = "pagebreak"
-        os.system(
-            f'ebook-convert {out_fn} ./output/epub_output/{pecha_id}.epub --extra-css=./template.css --chapter={chapter_Xpath} --chapter-mark="{chapter_mark}" --base-font-size={font_size} --embed-font-family="{font_family}"'
-        )
-        # Removing html file and template file
-        os.system(f"rm {out_fn}")
-        os.system("rm template.css")
+        cover_image = self.meta["ebook_metadata"]["cover"]
+        results = self.get_result()
+        for vol_id, result in results.items():
+            result_lines = (
+                result.splitlines()
+            )  # Result is split where there is newline as we are going to consider newline as one para tag
+            results = f"<html>\n<head>\n\t<title>{pecha_title}</title>\n</head>\n<body>\n"
+            for result_line in result_lines:
+                results += f'<p class="tibetan-regular-indented">{result_line}</p>\n'
+            results += "</body>\n</html>"
+            Path(out_fn).write_text(results)
+            # Downloading css template file from ebook template repo and saving it
+            template = requests.get(
+                "https://raw.githubusercontent.com/OpenPecha/ebook-template/master/tsadra_template.css"
+            )
+            Path("template.css").write_bytes(template.content)
+            # click.echo(template.content, file=open('template.css', 'w'))
+            # Running ebook-convert command to convert html file to .epub (From calibre)
+            chapter_Xpath = (
+                "//*[@class='tibetan-chapter']"  # XPath expression to detect chapter titles.
+            )
+            font_family = "Monlam Uni Ouchan2"
+            font_size = 16
+            chapter_mark = "pagebreak"
+            cover_path = self.opfpath / f"asset/image/{cover_image}"
+            os.system(
+                f'ebook-convert {out_fn} ./output/epub_output/{pecha_id}.epub --extra-css=./template.css --chapter={chapter_Xpath} --chapter-mark="{chapter_mark}" --base-font-size={font_size} --embed-font-family="{font_family}" --cover={cover_path}'
+            )
+            # Removing html file and template file
+            os.system(f"rm {out_fn}")
+            os.system("rm template.css")
