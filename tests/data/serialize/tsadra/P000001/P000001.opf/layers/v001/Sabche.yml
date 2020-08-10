@@ -1,0 +1,40 @@
+id: f8db67b1396b43d084f7a5114ddf404a
+annotation_type: Sabche
+revision: '00001'
+annotations:
+  804aff482e0d40a8bb3e887e7f26271e:
+    span:
+      start: 913
+      end: 942
+  f226e618d5204610869b8ba9f42eb00b:
+    span:
+      start: 6862
+      end: 6956
+  b793a42d073344a8a2ff65c21b364cf5:
+    span:
+      start: 10583
+      end: 10608
+  e3b8f88c32a84d828479621a3cd2d742:
+    span:
+      start: 17000
+      end: 17030
+  4933fa3f8da240aea43d91ba43a6910e:
+    span:
+      start: 24313
+      end: 24388
+  4e6165cb496e44c59b035e4bb42a79f3:
+    span:
+      start: 32593
+      end: 32661
+  2ceef874c2d44f2ba89f91d811409016:
+    span:
+      start: 70715
+      end: 70776
+  cba4ad9c6e0e4bc69a1458cb33721e54:
+    span:
+      start: 74771
+      end: 74796
+  4422d7f62696436995ed4244052d560a:
+    span:
+      start: 89474
+      end: 89497
