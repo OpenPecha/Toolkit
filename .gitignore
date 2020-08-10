@@ -13,6 +13,7 @@ output/
 opfs/
 resources/
 error_logs/
+assets/
 
 # scripts
 usage/
