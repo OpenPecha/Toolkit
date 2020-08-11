@@ -141,10 +141,12 @@ class TsadraFormatter(BaseFormatter):
             self.cover_image = cover
         ps = soup.find_all("p")
         for p in ps:
-            if "credits-page_front-title" in p["class"][0]:  # to get the book title index
+            if (
+                "credits-page_front-title" in p["class"][0]
+            ):  # to get the book title index
                 book_title_tmp = self.text_preprocess(p.text) + "\n"
                 self.book_title.append(
-                    {"span": {"start": self.walker, "end": len(book_title_tmp) - 2 + self.walker}}
+                    BookTitle(Span(self.walker, len(book_title_tmp) - 2 + self.walker))
                 )
                 self.base_text += book_title_tmp
                 self.walker += len(book_title_tmp)
@@ -152,7 +154,7 @@ class TsadraFormatter(BaseFormatter):
             if "text-author" in p["class"][0]:  # to get the author annotation index
                 author_tmp = self.text_preprocess(p.text) + "\n"
                 self.author.append(
-                    {"span": {"start": self.walker, "end": len(author_tmp) - 2 + self.walker}}
+                    Author(Span(self.walker, len(author_tmp) - 2 + self.walker))
                 )
                 self.base_text += author_tmp
                 self.walker += len(author_tmp)
@@ -173,10 +175,10 @@ class TsadraFormatter(BaseFormatter):
                             root_text_tmp += self.text_preprocess(s.text)
                             self.root_text.append(
                                 {
-                                    "span": {
-                                        "start": self.walker,
-                                        "end": len(root_text_tmp) - 1 + self.walker,
-                                    },
+                                    "span": Span(
+                                        self.walker,
+                                        len(root_text_tmp) - 1 + self.walker,
+                                    ),
                                     "isverse": True,
                                 }
                             )
@@ -189,20 +191,21 @@ class TsadraFormatter(BaseFormatter):
             elif "tibetan-chapter" in p["class"][0]:  # to get chapter title index
                 chapter_title_tmp = self.text_preprocess(p.text) + "\n"
                 self.chapter.append(
-                    {
-                        "span": {
-                            "start": self.walker,
-                            "end": len(chapter_title_tmp) - 2 + self.walker,
-                        }
-                    }
+                    Chapter(Span(self.walker, len(chapter_title_tmp) - 2 + self.walker))
                 )
                 self.walker += len(chapter_title_tmp)
                 self.base_text += chapter_title_tmp
 
-            elif "commentary" in p["class"][0] or "tibetan-regular-indented" in p["class"][0]:
+            elif (
+                "commentary" in p["class"][0]
+                or "tibetan-regular-indented" in p["class"][0]
+            ):
 
                 # travesing through commetary which are in verse form
-                if p["class"][0] == com_classes["first"] or p["class"][0] == com_classes["middle"]:
+                if (
+                    p["class"][0] == com_classes["first"]
+                    or p["class"][0] == com_classes["middle"]
+                ):
                     commentary_tmp += self.text_preprocess(p.text) + "\n"
                     self.base_text += self.text_preprocess(p.text) + "\n"
                 elif p["class"][0] == com_classes["last"]:
@@ -222,7 +225,7 @@ class TsadraFormatter(BaseFormatter):
                         # some child are not <span> rather like <a> and some <span> has no 'class' attr
                         try:
                             s["class"][0]
-                        except:
+                        except Exception:
                             p_tmp += self.text_preprocess(s.text)
                             continue
 
@@ -232,10 +235,9 @@ class TsadraFormatter(BaseFormatter):
                                 # citation_tmp += citation_tmp
                                 self.citation.append(
                                     {
-                                        "span": {
-                                            "start": p_walker,
-                                            "end": len(citation_tmp) + p_walker - 1,
-                                        },
+                                        "span": Span(
+                                            p_walker, len(citation_tmp) + p_walker - 1
+                                        ),
                                         "isverse": False,
                                     }
                                 )
@@ -245,10 +247,9 @@ class TsadraFormatter(BaseFormatter):
                             if sabche_tmp:
                                 self.sabche.append(
                                     {
-                                        "span": {
-                                            "start": p_walker,
-                                            "end": len(sabche_tmp) + p_walker - 1,
-                                        },
+                                        "span": Span(
+                                            p_walker, len(sabche_tmp) + p_walker - 1
+                                        ),
                                         "isinline": True,
                                     }
                                 )
@@ -256,12 +257,14 @@ class TsadraFormatter(BaseFormatter):
                                 sabche_tmp = ""
 
                             self.yigchung.append(
-                                {
-                                    "span": {
-                                        "start": p_walker,
-                                        "end": len(self.text_preprocess(s.text)) - 1 + p_walker,
-                                    }
-                                }
+                                Yigchung(
+                                    Span(
+                                        p_walker,
+                                        len(self.text_preprocess(s.text))
+                                        - 1
+                                        + p_walker,
+                                    )
+                                )
                             )
                             p_walker += len(self.text_preprocess(s.text))
 
@@ -270,17 +273,18 @@ class TsadraFormatter(BaseFormatter):
                         ):  # checking for citation annotation
                             citation_tmp += self.text_preprocess(s.text)
 
-                        elif "sabche" in s["class"][0]:  # checking for citation annotation
+                        elif (
+                            "sabche" in s["class"][0]
+                        ):  # checking for citation annotation
                             sabche_tmp += self.text_preprocess(s.text)
 
                         elif "front-title" in s["class"][0]:
                             if citation_tmp:
                                 self.citation.append(
                                     {
-                                        "span": {
-                                            "start": p_walker,
-                                            "end": len(citation_tmp) + p_walker - 1,
-                                        },
+                                        "span": Span(
+                                            p_walker, len(citation_tmp) + p_walker - 1
+                                        ),
                                         "isverse": False,
                                     }
                                 )
@@ -289,10 +293,9 @@ class TsadraFormatter(BaseFormatter):
                             if sabche_tmp:
                                 self.sabche.append(
                                     {
-                                        "span": {
-                                            "start": p_walker,
-                                            "end": len(sabche_tmp) + p_walker - 1,
-                                        },
+                                        "span": Span(
+                                            p_walker, len(sabche_tmp) + p_walker - 1
+                                        ),
                                         "isinline": True,
                                     }
                                 )
@@ -303,10 +306,9 @@ class TsadraFormatter(BaseFormatter):
                             if citation_tmp:
                                 self.citation.append(
                                     {
-                                        "span": {
-                                            "start": p_walker,
-                                            "end": len(citation_tmp) + p_walker - 1,
-                                        },
+                                        "span": Span(
+                                            p_walker, len(citation_tmp) + p_walker - 1
+                                        ),
                                         "isverse": False,
                                     }
                                 )
@@ -316,10 +318,9 @@ class TsadraFormatter(BaseFormatter):
                             if sabche_tmp:
                                 self.sabche.append(
                                     {
-                                        "span": {
-                                            "start": p_walker,
-                                            "end": len(sabche_tmp) + p_walker - 1,
-                                        },
+                                        "span": Span(
+                                            p_walker, len(sabche_tmp) + p_walker - 1
+                                        ),
                                         "isinline": True,
                                     }
                                 )
@@ -332,10 +333,9 @@ class TsadraFormatter(BaseFormatter):
                     if citation_tmp:
                         self.citation.append(
                             {
-                                "span": {
-                                    "start": p_walker,
-                                    "end": len(citation_tmp) + p_walker - 1,
-                                },
+                                "span": Span(
+                                    p_walker, len(citation_tmp) + p_walker - 1
+                                ),
                                 "isverse": False,
                             }
                         )
@@ -345,10 +345,7 @@ class TsadraFormatter(BaseFormatter):
                     if sabche_tmp:
                         self.sabche.append(
                             {
-                                "span": {
-                                    "start": p_walker,
-                                    "end": len(sabche_tmp) + p_walker - 1,
-                                },
+                                "span": Span(p_walker, len(sabche_tmp) + p_walker - 1),
                                 "isinline": True,
                             }
                         )
@@ -368,7 +365,7 @@ class TsadraFormatter(BaseFormatter):
                 for s in p.find_all("span"):
                     try:
                         s["class"][0]
-                    except:
+                    except Exception:
                         p_with_sabche_tmp += self.text_preprocess(s.text)
                         continue
 
@@ -382,10 +379,9 @@ class TsadraFormatter(BaseFormatter):
                 if sabche_tmp:
                     self.sabche.append(
                         {
-                            "span": {
-                                "start": sabche_walker,
-                                "end": len(sabche_tmp) + sabche_walker - 1,
-                            },
+                            "span": Span(
+                                sabche_walker, len(sabche_tmp) + sabche_walker - 1
+                            ),
                             "isinline": False,
                         }
                     )
@@ -396,17 +392,19 @@ class TsadraFormatter(BaseFormatter):
             elif (
                 cit_base in p["class"][0]
             ):  # checking for citation annotation first two if for verse form and last for non verse
-                if p["class"][0] == cit_classes["first"] or p["class"][0] == cit_classes["middle"]:
+                if (
+                    p["class"][0] == cit_classes["first"]
+                    or p["class"][0] == cit_classes["middle"]
+                ):
                     citation_tmp += self.text_preprocess(p.text) + "\n"
                     self.base_text += self.text_preprocess(p.text) + "\n"
                 elif p["class"][0] == cit_classes["last"]:
                     citation_tmp += self.text_preprocess(p.text) + "\n"
                     self.citation.append(
                         {
-                            "span": {
-                                "start": self.walker,
-                                "end": len(citation_tmp) - 1 + self.walker,
-                            },
+                            "span": Span(
+                                self.walker, len(citation_tmp) + self.walker - 1
+                            ),
                             "isverse": True,
                         }
                     )
@@ -418,10 +416,9 @@ class TsadraFormatter(BaseFormatter):
                     self.base_text += self.text_preprocess(p.text) + "\n"
                     self.citation.append(
                         {
-                            "span": {
-                                "start": self.walker,
-                                "end": len(citation_tmp) - 1 + self.walker,
-                            },
+                            "span": Span(
+                                self.walker, len(citation_tmp) + self.walker - 1
+                            ),
                             "isverse": True,
                         }
                     )
@@ -466,7 +463,9 @@ class TsadraFormatter(BaseFormatter):
                 return 0
 
         html_paths = [
-            o for o in input_path.iterdir() if o.suffix == ".xhtml" and o.stem != "cover"
+            o
+            for o in input_path.iterdir()
+            if o.suffix == ".xhtml" and o.stem != "cover"
         ]
         sku_sementic_order = partial(semantic_order, get_prefix(html_paths))
         html_paths = sorted(html_paths, key=sku_sementic_order)
@@ -480,11 +479,11 @@ class TsadraFormatter(BaseFormatter):
             return self.base_text[span["start"] : span["end"] + 1].replace("\n", "")
 
         meta_data = {}
-        meta_data["title"] = get_text(layers["Book Title"][0]["span"])
+        meta_data["title"] = get_text(layers["BookTitle"][0]["span"])
         meta_data["authors"] = [get_text(span["span"]) for span in layers["Author"]]
         meta_data["sku"] = self.sku
         meta_data["cover"] = self.cover_image
-        meta_data["layers"] = [l for l in layers if layers[l]]
+        meta_data["layers"] = [layer for layer in layers if layers[layer]]
         return {"ebook_metadata": meta_data}
 
     def create_opf(self, input_path, id):
@@ -503,7 +502,7 @@ class TsadraFormatter(BaseFormatter):
             self.build_layers(html)
 
         # save base-text
-        (self.dirs["opf_path"] / "base" / f"v001.txt").write_text(self.get_base_text())
+        (self.dirs["opf_path"] / "base" / "v001.txt").write_text(self.get_base_text())
 
         # format and save layer
         vol_layer_path = self.dirs["layers_path"] / "v001"
@@ -521,7 +520,7 @@ class TsadraFormatter(BaseFormatter):
         self.dump(meta_data, meta_fn)
 
 
-if __name__ == "__main__":
-    path = "./P000100/OEBPS/"
-    formatter = TsadraFormatter(output_path="./test_opf")
-    formatter.create_opf(path, 1)
+# if __name__ == "__main__":
+#     path = "./P000100/OEBPS/"
+#     formatter = TsadraFormatter(output_path="./test_opf")
+#     formatter.create_opf(path, 1)

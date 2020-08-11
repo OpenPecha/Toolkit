@@ -36,6 +36,8 @@ class TestHFMLFormatter:
 
         result = formatter.get_result()
         expected_result = {
+            AnnType.book_title: [[], [], []],
+            AnnType.author: [[], [], []],
             AnnType.poti_title: [
                 [(None, {"span": {"start": 0, "end": 24}})],
                 [(None, {"span": {"start": 0, "end": 24}})],
@@ -57,6 +59,7 @@ class TestHFMLFormatter:
                         {
                             "page_index": "1a",
                             "page_info": "kk",
+                            "reference": None,
                             "span": {"start": 0, "end": 24},
                         },
                     ),
@@ -65,6 +68,7 @@ class TestHFMLFormatter:
                         {
                             "page_index": "1b",
                             "page_info": "kl",
+                            "reference": None,
                             "span": {"start": 27, "end": 676},
                         },
                     ),
@@ -73,6 +77,7 @@ class TestHFMLFormatter:
                         {
                             "page_index": "2a",
                             "page_info": "lm",
+                            "reference": None,
                             "span": {"start": 679, "end": 2173},
                         },
                     ),
@@ -83,6 +88,7 @@ class TestHFMLFormatter:
                         {
                             "page_index": "1a",
                             "page_info": "kk",
+                            "reference": None,
                             "span": {"start": 0, "end": 0},
                         },
                     ),
@@ -91,6 +97,7 @@ class TestHFMLFormatter:
                         {
                             "page_index": "1b",
                             "page_info": "",
+                            "reference": None,
                             "span": {"start": 0, "end": 266},
                         },
                     ),
@@ -101,6 +108,7 @@ class TestHFMLFormatter:
                         {
                             "page_index": "1a",
                             "page_info": "ko",
+                            "reference": None,
                             "span": {"start": 0, "end": 266},
                         },
                     )
@@ -335,6 +343,8 @@ class TestTsadraFormatter:
 
 if __name__ == "__main__":
     TestHFMLFormatter().test_tofu_id()
-    path = Path("./tests/data/formatter/new_hfml/")
+    # path = Path("./tests/data/formatter/tsadra_hfml/")
+    path = Path("./output/tsadra_hfml/tsadra_hfml.opf/")
+    pecha_id = 6
     formatter = HFMLFormatter()
     formatter.create_opf(path)

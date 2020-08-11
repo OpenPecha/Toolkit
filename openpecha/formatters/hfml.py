@@ -106,8 +106,9 @@ class HFMLFormatter(BaseFormatter):
         self.is_book = is_book
         self.base_text = ""
         self.vol_walker = 0
-        self.pecha_title = []
+        self.book_title = []
         self.poti_title = []
+        self.author = []
         self.chapter_title = []
         self.topic_id = []  # made class variable as it needs to update cross poti
         self.current_topic_id = (
@@ -183,7 +184,7 @@ class HFMLFormatter(BaseFormatter):
 
     def create_new_layer(self, layer_name, anns):
         new_layer = Layer(self.get_unique_id(), layer_name)
-        for _, ann in anns:
+        for local_id, ann in anns:
             self.add_new_ann(new_layer, ann)
         new_layer[
             _attr_names.LOCAL_ID
@@ -325,7 +326,7 @@ class HFMLFormatter(BaseFormatter):
                     total_length += 2
         for pattern in [
             "author_pattern",
-            "pecha_title_pattern",
+            "book_title_pattern",
             "poti_title_pattern",
             "chapter_title_pattern",
         ]:
@@ -364,7 +365,7 @@ class HFMLFormatter(BaseFormatter):
             result.append(
                 (
                     start_list[walker][0],
-                    {"span": {"start": start_list[walker][1], "end": end_list[walker]}},
+                    {"span": Span(start_list[walker][1], end_list[walker])},
                 )
             )
             walker += 1
@@ -442,7 +443,7 @@ class HFMLFormatter(BaseFormatter):
 
         for pp in [
             "author_pattern",
-            "pecha_title_pattern",
+            "book_title_pattern",
             "poti_title_pattern",
             "chapter_title_pattern",
         ]:
@@ -496,7 +497,7 @@ class HFMLFormatter(BaseFormatter):
 
         for pattern in [
             "author_pattern",
-            "pecha_title_pattern",
+            "book_title_pattern",
             "poti_title_pattern",
             "chapter_title_pattern",
         ]:
@@ -571,6 +572,8 @@ class HFMLFormatter(BaseFormatter):
         pg_ann = []  # list variable to store page annotation content
         pg_tid = []
 
+        author_titles = []
+        book_titles = []
         poti_titles = []
         chapter_titles = []
         start_cit_patterns = (
@@ -600,7 +603,7 @@ class HFMLFormatter(BaseFormatter):
 
         pat_list = {
             "author_pattern": r"\(([󴉀-󴉱])?au.+?\)",
-            "pecha_title_pattern": r"\(([󴉀-󴉱])?k1.+?\)",
+            "book_title_pattern": r"\(([󴉀-󴉱])?k1.+?\)",
             "poti_title_pattern": r"\(([󴉀-󴉱])?k2.+?\)",
             "chapter_title_pattern": r"\(([󴉀-󴉱])?k3.+?\)",
             "page_pattern": r"\[([󴉀-󴉱])?[0-9]+[a-z]{1}\]",
@@ -662,11 +665,11 @@ class HFMLFormatter(BaseFormatter):
                     cur_vol_pages.append(
                         (
                             pg_tid[-2],
-                            {
-                                "page_index": pg_ann[-2],
-                                "page_info": pg_info[-2],
-                                "span": {"start": start_page, "end": end_page},
-                            },
+                            Page(
+                                Span(start_page, end_page),
+                                page_index=pg_ann[-2],
+                                page_info=pg_info[-2],
+                            ),
                         )
                     )
                     if start_page < end_page:  # to ignore the empty pages
@@ -681,7 +684,7 @@ class HFMLFormatter(BaseFormatter):
 
             for pp in [
                 "author_pattern",
-                "pecha_title_pattern",
+                "book_title_pattern",
                 "poti_title_pattern",
                 "chapter_title_pattern",
             ]:
@@ -693,27 +696,13 @@ class HFMLFormatter(BaseFormatter):
                     )
                     start_title = title_pattern.start() + i - pat_len_before_ann
                     end_title = start_title + len(title_pattern[0]) - 5
+                    span = Span(start_title, end_title)
                     if pp == "author_pattern":
-                        self.author_pattern.append(
-                            (
-                                local_id,
-                                {"span": {"start": start_title, "end": end_title}},
-                            )
-                        )
-                    if pp == "pecha_title_pattern":
-                        self.pecha_title.append(
-                            (
-                                local_id,
-                                {"span": {"start": start_title, "end": end_title}},
-                            )
-                        )
+                        author_titles.append((local_id, Author(span)))
+                    if pp == "book_title_pattern":
+                        book_titles.append((local_id, BookTitle(span)))
                     if pp == "poti_title_pattern":
-                        poti_titles.append(
-                            (
-                                local_id,
-                                {"span": {"start": start_title, "end": end_title}},
-                            )
-                        )
+                        poti_titles.append((local_id, PotiTitle(span)))
                         if local_id:
                             end_topic = len(title_pattern[0][2:])
                             end_sub_topic = len(title_pattern[0][2:])
@@ -721,12 +710,7 @@ class HFMLFormatter(BaseFormatter):
                             end_topic = len(title_pattern[0][1:])
                             end_sub_topic = len(title_pattern[0][1:])
                     if pp == "chapter_title_pattern":
-                        chapter_titles.append(
-                            (
-                                local_id,
-                                {"span": {"start": start_title, "end": end_title}},
-                            )
-                        )
+                        chapter_titles.append((local_id, Chapter(span)))
 
             if re.search(
                 pat_list["sub_topic_pattern"], line
@@ -745,32 +729,24 @@ class HFMLFormatter(BaseFormatter):
 
                     if start_sub_topic < end_sub_topic:
                         if len(self.sub_topic_info) >= 2:
+                            span = CrossVolSpan(
+                                self.vol_walker + 1, start_sub_topic, end_sub_topic
+                            )
                             self.sub_topic_Id.append(
                                 (
                                     self.sub_topic_local_id[-2],
-                                    {
-                                        "work_id": self.sub_topic_info[-2],
-                                        "span": {
-                                            "vol": self.vol_walker + 1,
-                                            "start": start_sub_topic,
-                                            "end": end_sub_topic,
-                                        },
-                                    },
+                                    {"work_id": self.sub_topic_info[-2], "span": span},
                                 )
                             )
                             end_sub_topic = end_sub_topic
                         else:
+                            span = CrossVolSpan(
+                                self.vol_walker + 1, start_sub_topic, end_sub_topic
+                            )
                             self.sub_topic_Id.append(
                                 (
                                     self.sub_topic_local_id[-1],
-                                    {
-                                        "work_id": self.sub_topic_info[-1],
-                                        "span": {
-                                            "vol": self.vol_walker + 1,
-                                            "start": start_sub_topic,
-                                            "end": end_sub_topic,
-                                        },
-                                    },
+                                    {"work_id": self.sub_topic_info[-1], "span": span},
                                 )
                             )
                             end_sub_topic = end_sub_topic
@@ -779,17 +755,13 @@ class HFMLFormatter(BaseFormatter):
                     end_sub_topic = sub_topic_match.start() + i - pat_len_before_ann
 
                     if start_sub_topic < end_sub_topic:
+                        span = CrossVolSpan(
+                            self.vol_walker + 1, start_sub_topic, end_sub_topic
+                        )
                         self.sub_topic_Id.append(
                             (
                                 self.sub_topic_local_id[-2],
-                                {
-                                    "work_id": self.sub_topic_info[-2],
-                                    "span": {
-                                        "vol": self.vol_walker + 1,
-                                        "start": start_sub_topic,
-                                        "end": end_sub_topic,
-                                    },
-                                },
+                                {"work_id": self.sub_topic_info[-2], "span": span},
                             )
                         )
                         end_sub_topic = end_sub_topic
@@ -813,17 +785,13 @@ class HFMLFormatter(BaseFormatter):
                         len(self.topic_info) >= 2
                     ):  # as we are ignoring the self.topic[0]
                         if start_topic < end_topic:
+                            span = CrossVolSpan(
+                                self.vol_walker + 1, start_topic, end_topic
+                            )
                             self.current_topic_id.append(
                                 (
                                     self.topic_local_id[-2],
-                                    {
-                                        "work_id": self.topic_info[-2],
-                                        "span": {
-                                            "vol": self.vol_walker + 1,
-                                            "start": start_topic,
-                                            "end": end_topic,
-                                        },
-                                    },
+                                    {"work_id": self.topic_info[-2], "span": span},
                                 )
                             )  # -2 as we need the secondlast item
                     else:
@@ -832,11 +800,9 @@ class HFMLFormatter(BaseFormatter):
                                 self.topic_local_id[-1],
                                 {
                                     "work_id": self.topic_info[-1],
-                                    "span": {
-                                        "vol": self.vol_walker + 1,
-                                        "start": start_topic,
-                                        "end": end_topic,
-                                    },
+                                    "span": CrossVolSpan(
+                                        self.vol_walker + 1, start_topic, end_topic
+                                    ),
                                 },
                             )
                         )
@@ -848,11 +814,9 @@ class HFMLFormatter(BaseFormatter):
                                 self.sub_topic_local_id[-1],
                                 {
                                     "work_id": self.sub_topic_info[-1],
-                                    "span": {
-                                        "vol": self.vol_walker + 1,
-                                        "start": end_sub_topic,
-                                        "end": end_topic,
-                                    },
+                                    "span": CrossVolSpan(
+                                        self.vol_walker + 1, end_sub_topic, end_topic
+                                    ),
                                 },
                             )
                         )
@@ -882,14 +846,9 @@ class HFMLFormatter(BaseFormatter):
                     start_error = error.start() + i - pat_len_before_ann
 
                     end_error = start_error + len(error_part) - 1
+                    span = Span(start_error, end_error)
                     cur_vol_error_id.append(
-                        (
-                            local_id,
-                            {
-                                "correction": suggestion,
-                                "span": {"start": start_error, "end": end_error},
-                            },
-                        )
+                        (local_id, Correction(span, correction=suggestion))
                     )
 
             if re.search(
@@ -909,16 +868,10 @@ class HFMLFormatter(BaseFormatter):
                         archaic_word = archaic[0].split(",")[0][1:]
                     pat_len_before_ann = self.search_before(archaic, pat_list, line)
                     start_archaic = archaic.start() + i - pat_len_before_ann
-
                     end_archaic = start_archaic + len(archaic_word) - 1
+                    span = Span(start_archaic, end_archaic)
                     cur_vol_archaic_id.append(
-                        (
-                            local_id,
-                            {
-                                "modern_word": modern_word,
-                                "span": {"start": start_archaic, "end": end_archaic},
-                            },
-                        )
+                        (local_id, Archaic(span, modern=modern_word))
                     )
 
             if re.search(pat_list["abs_er_pattern"], line):
@@ -934,7 +887,7 @@ class HFMLFormatter(BaseFormatter):
                     else:
                         end_abs_er = start_abs_er + len(abs_er[0][1:-1])
                     cur_vol_abs_er_id.append(
-                        (local_id, {"span": {"start": start_abs_er, "end": end_abs_er}})
+                        (local_id, ErrorCandidate(Span(start_abs_er, end_abs_er)))
                     )
 
             if re.search(pat_list["note_pattern"], line):
@@ -1031,11 +984,9 @@ class HFMLFormatter(BaseFormatter):
                                 "work_id": self.sub_topic_info[-1]
                                 if self.sub_topic_info
                                 else None,
-                                "span": {
-                                    "vol": self.vol_walker + 1,
-                                    "start": start_sub_topic,
-                                    "end": i - 2,
-                                },
+                                "span": CrossVolSpan(
+                                    self.vol_walker + 1, start_sub_topic, i - 2
+                                ),
                             },
                         )
                     )
@@ -1045,24 +996,23 @@ class HFMLFormatter(BaseFormatter):
                             self.topic_local_id[-1],
                             {
                                 "work_id": self.topic_info[-1],
-                                "span": {
-                                    "vol": self.vol_walker + 1,
-                                    "start": start_topic,
-                                    "end": i - 2,
-                                },
+                                "span": CrossVolSpan(
+                                    self.vol_walker + 1, start_topic, i - 2
+                                ),
                             },
                         )
                     )
-                cur_vol_pages.append(
-                    (
-                        pg_tid[-1],
-                        {
-                            "page_index": pg_ann[-1],
-                            "page_info": pg_info[-1],
-                            "span": {"start": start_page, "end": i - 2},
-                        },
+                if pg_tid:
+                    cur_vol_pages.append(
+                        (
+                            pg_tid[-1],
+                            Page(
+                                Span(start_page, i - 2),
+                                page_index=pg_ann[-1],
+                                page_info=pg_info[-1],
+                            ),
+                        )
                     )
-                )
                 self.page.append(cur_vol_pages)
                 self.error_id.append(cur_vol_error_id)
                 cur_vol_error_id = []
@@ -1070,6 +1020,8 @@ class HFMLFormatter(BaseFormatter):
                 cur_vol_abs_er_id = []
                 self.notes_id.append(note_id)
                 note_id = []
+                self.author.append(author_titles)
+                self.book_title.append(book_titles)
                 self.poti_title.append(poti_titles)
                 self.chapter_title.append(chapter_titles)
                 self.vol_walker += 1
@@ -1100,6 +1052,8 @@ class HFMLFormatter(BaseFormatter):
                 self.sub_topic = self.sub_topic[1:]
         self.sub_topic = self.__final_sub_topic(self.sub_topic)
         result = {
+            AnnType.book_title: self.book_title,
+            AnnType.author: self.author,
             AnnType.poti_title: self.poti_title,
             AnnType.chapter: self.chapter_title,
             AnnType.citation: self.citation_pattern,
