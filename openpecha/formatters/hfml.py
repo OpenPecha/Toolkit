@@ -5,6 +5,7 @@ This module implements all classes necessary to format HFML annotation to OpenPe
 HFML (Human Friendly Markup Language) contains tagset used for structuring and annotating the text.
 """
 import re
+from collections import defaultdict
 from copy import deepcopy
 from pathlib import Path
 
@@ -162,11 +163,13 @@ class HFMLFormatter(BaseFormatter):
             yield self.text_preprocess(fn.read_text()), fn.name, fns_len
 
     def get_old_layers(self, new_layers):
-        layers = {}
+        layers = defaultdict(dict)
         for layer in new_layers:
-            layer_fn = self.dirs["layers_path"] / f"{layer}.yml"
-            if layer_fn.is_file():
-                layers[layer] = self.load(layer_fn)
+            for vol in self.dirs["layers_path"].iterdir():
+                vol_layer_fn = vol / f"{layer}.yml"
+                if not vol_layer_fn.is_file():
+                    continue
+                layers[layer][vol.name] = self.load(vol_layer_fn)
         return layers
 
     def _inc_layer_revision(self, layer):
@@ -223,19 +226,21 @@ class HFMLFormatter(BaseFormatter):
 
         # Create Annotaion layers
         for (i, vol_layers) in enumerate(self._get_vol_layers(layers)):
-            base_id = f"v{i+1:03}"
+            vol_id = f"v{i+1:03}"
             result = {}
-            for layer_name, layer_anns in vol_layers:
-                if not layer_anns:
+            for layer_name, vol_layer_anns in vol_layers:
+                if not vol_layer_anns:
                     continue
-                if layer_name not in old_layers:
-                    result[layer_name] = self.create_new_layer(layer_name, layer_anns)
+                if vol_id in old_layers[layer_name]:
+                    vol_old_layer = old_layers[layer_name][vol_id]
+                    self.update_layer(vol_old_layer, vol_layer_anns)
+                    result[layer_name] = vol_old_layer
                 else:
-                    old_layer = old_layers[layer_name]
-                    self.update_layer(old_layer, layer_anns)
-                    result[layer_name] = old_layer
+                    result[layer_name] = self.create_new_layer(
+                        layer_name, vol_layer_anns
+                    )
 
-            yield result, base_id
+            yield result, vol_id
 
         if AnnType.topic not in old_layers:
             # Create Index layer
