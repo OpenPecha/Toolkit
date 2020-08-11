@@ -1,9 +1,11 @@
 import os
+from pathlib import Path
+
 import requests
 
-from .serialize import Serialize
-from pathlib import Path
 from openpecha.formatters.layers import AnnType
+
+from .serialize import Serialize
 
 
 class Tsadra_template:
@@ -112,35 +114,32 @@ class EpubSerializer(Serialize):
 
         """
         out_fn = f"{pecha_id}.html"
-        # if self.meta['source_metadata']:
-        #     pecha_title = self.meta['source_metadata']['title']
-        # else:
         pecha_title = self.meta["ebook_metadata"]["title"]
         result, _ = self.get_result()
-        result_lines = (
-            result.splitlines()
-        )  # Result is split where there is newline as we are going to consider newline as one para tag
+
+        # Result is split where there is newline as we are going to consider newline as one para tag
+        result_lines = result.splitlines()
         results = f"<html>\n<head>\n\t<title>{pecha_title}</title>\n</head>\n<body>\n"
         for result_line in result_lines:
             results += f'<p class="tibetan-regular-indented">{result_line}</p>\n'
         results += "</body>\n</html>"
         Path(out_fn).write_text(results)
+
         # Downloading css template file from ebook template repo and saving it
         template = requests.get(
             "https://raw.githubusercontent.com/OpenPecha/ebook-template/master/tsadra_template.css"
         )
         Path("template.css").write_bytes(template.content)
-        # click.echo(template.content, file=open('template.css', 'w'))
+
         # Running ebook-convert command to convert html file to .epub (From calibre)
-        chapter_Xpath = (
-            "//*[@class='tibetan-chapter']"  # XPath expression to detect chapter titles.
-        )
+        chapter_Xpath = "//*[@class='tibetan-chapter']"
         font_family = "Monlam Uni Ouchan2"
         font_size = 16
         chapter_mark = "pagebreak"
         os.system(
             f'ebook-convert {out_fn} ./output/epub_output/{pecha_id}.epub --extra-css=./template.css --chapter={chapter_Xpath} --chapter-mark="{chapter_mark}" --base-font-size={font_size} --embed-font-family="{font_family}"'
         )
+
         # Removing html file and template file
         os.system(f"rm {out_fn}")
         os.system("rm template.css")

@@ -1,16 +1,17 @@
-import requests
 import base64
-import re
-from pathlib import Path
-from tqdm import tqdm
-import traceback
-import csv
-import json
-import os
-import glob
-from contextlib import closing
 import codecs
+import csv
+import glob
+import json
 import logging
+import os
+import re
+import traceback
+from contextlib import closing
+from pathlib import Path
+
+import requests
+from tqdm import tqdm
 
 from openpecha.buda.errors import Error
 from openpecha.buda.openpecha_git import OpenpechaGit
@@ -18,7 +19,7 @@ from openpecha.serializers.rdf import Rdf
 
 
 class OpenpechaManager:
-    def __init__(self, cache_dir=str(Path.home()/'.cache'/'openpecha')):
+    def __init__(self, cache_dir=str(Path.home() / ".cache" / "openpecha")):
         self.openpecha_api = "https://api.github.com/repos/OpenPecha"
         self.openpecha_git = "https://github.com/OpenPecha"
         self.cache_dir = cache_dir
@@ -34,20 +35,25 @@ class OpenpechaManager:
 
         TODO: we should use a local repo that we pull instead of the github api directly (less urgent)
         """
-        catalog_url = f'{self.openpecha_api}/openpecha-catalog/git/trees/master'
+        catalog_url = f"{self.openpecha_api}/openpecha-catalog/git/trees/master"
         data = requests.get(url=catalog_url).json()  # getting the full repo
         try:
-            tree_entry = [t for t in data['tree'] if t['path'] == 'README.md'][0]  # find the README to get its URL
-            return tree_entry['url']
+            tree_entry = [t for t in data["tree"] if t["path"] == "README.md"][
+                0
+            ]  # find the README to get its URL
+            return tree_entry["url"]
         except IndexError:
-            Error(IndexError, f"The README.md file not found at the root of the openpecha git\n```{traceback.format_exc()}```")
+            Error(
+                IndexError,
+                f"The README.md file not found at the root of the openpecha git\n```{traceback.format_exc()}```",
+            )
 
     @staticmethod
     def get_blob_content(blob_url):
         """
         Get the blob content from the url provided in parameter
         """
-        base64_content = requests.get(blob_url).json()['content']
+        base64_content = requests.get(blob_url).json()["content"]
 
         return base64_content
 
@@ -99,7 +105,9 @@ class OpenpechaManager:
         Getting all the poti from the list and either cloning them or pulling to the latest commit.
         All the repo are going to be stored in a local directory set by self.cache_dir
         """
-        for lname in tqdm(self.get_list_of_pecha(), ascii=True, desc='Cloning or pulling the pecha'):
+        for lname in tqdm(
+            self.get_list_of_pecha(), ascii=True, desc="Cloning or pulling the pecha"
+        ):
             self.fetch_pecha(lname)
 
     def fetch_pecha(self, lname):
@@ -109,7 +117,7 @@ class OpenpechaManager:
         opg = OpenpechaGit(lname, cache_dir=self.cache_dir)
         try:
             opg.get_repo(dst_sync=True)
-        except:
+        except Exception:
             logging.error("error fetching %s", lname)
 
     def get_local_poti_info(self, get_commit=True):
@@ -118,7 +126,7 @@ class OpenpechaManager:
         All the repo are going to be stored in a local directory set by self.cache_dir
         """
         res = {}
-        for d in glob.glob(self.cache_dir+"/*"):
+        for d in glob.glob(self.cache_dir + "/*"):
             lname = os.path.basename(d)
             if not lname.startswith("P"):
                 continue
@@ -135,13 +143,20 @@ class OpenpechaManager:
         Fetches the list of all openpecha commits on BUDA
         """
         res = {}
-        headers = {'Accept': 'text/csv'}
-        params = {'format': "csv"}
-        with closing(requests.get(ldspdibaseurl+"/query/table/OP_allCommits", stream=True, headers=headers, params=params)) as r:
-            reader = csv.reader(codecs.iterdecode(r.iter_lines(), 'utf-8'))
+        headers = {"Accept": "text/csv"}
+        params = {"format": "csv"}
+        with closing(
+            requests.get(
+                ldspdibaseurl + "/query/table/OP_allCommits",
+                stream=True,
+                headers=headers,
+                params=params,
+            )
+        ) as r:
+            reader = csv.reader(codecs.iterdecode(r.iter_lines(), "utf-8"))
             for row in reader:
                 if not row[0].startswith("http://purl.bdrc.io/resource/IE0OP"):
-                    Error("store", "cannot interpret csv line starting with "+row[0])
+                    Error("store", "cannot interpret csv line starting with " + row[0])
                     continue
                 res[row[0][34:]] = row[1]
         return res
@@ -155,7 +170,7 @@ class OpenpechaManager:
                 self.commits = json.load(json_file)
                 return self.commits
         commits = self.fetch_op_commits(ldspdibaseurl)
-        with open(path, 'w') as outfile:
+        with open(path, "w") as outfile:
             json.dump(commits, outfile)
         self.commits = commits
         return commits
@@ -171,40 +186,54 @@ class OpenpechaManager:
             logging.warn("not writing None commits")
             return
         path = Path(self.cache_dir, "buda-commits.json")
-        with open(path, 'w') as outfile:
+        with open(path, "w") as outfile:
             json.dump(self.commits, outfile)
 
     @staticmethod
     def send_model_to_store(model, graphuri, storeurl):
         logging.info("sending %s to store", graphuri)
         ttlstr = model.serialize(format="turtle")
-        headers = {'Content-Type': 'text/turtle'}
-        params = {'graph': graphuri}
+        headers = {"Content-Type": "text/turtle"}
+        params = {"graph": graphuri}
         r = requests.put(storeurl, data=ttlstr, headers=headers, params=params)
         sc = r.status_code
-        if sc != requests.codes.ok and sc != requests.codes.created and sc != requests.codes.accepted:
-            Error("store", "The request to Fuseki returned code "+str(r.status_code))
+        if (
+            sc != requests.codes.ok
+            and sc != requests.codes.created
+            and sc != requests.codes.accepted
+        ):
+            Error("store", "The request to Fuseki returned code " + str(r.status_code))
 
     @staticmethod
     def write_model_debug(model, graphuri):
         lastslidx = graphuri.rfind("/")
-        graphlname = graphuri[lastslidx+1:]
-        fname = "/tmp/"+graphlname+".ttl"
-        model.serialize(destination=fname, format='turtle')
+        graphlname = graphuri[lastslidx + 1 :]
+        fname = "/tmp/" + graphlname + ".ttl"
+        model.serialize(destination=fname, format="turtle")
 
     def sync_cache_to_store(self, storeurl, ldspdibaseurl, force=False, idlist=None):
         buda_commits = {}
         if not force:
             buda_commits = self.get_buda_op_commits(ldspdibaseurl, force)
-        for oplname, info in tqdm(self.get_local_poti_info(get_commit=(not force)).items(), ascii=True, desc='Converting into rdf'):
+        for oplname, info in tqdm(
+            self.get_local_poti_info(get_commit=(not force)).items(),
+            ascii=True,
+            desc="Converting into rdf",
+        ):
             if idlist is not None and oplname not in idlist:
                 continue
-            if force or (oplname not in buda_commits) or buda_commits[oplname] != info["rev"]:
+            if (
+                force
+                or (oplname not in buda_commits)
+                or buda_commits[oplname] != info["rev"]
+            ):
                 # we need to sync this repo
                 opgit = OpenpechaGit(oplname, cache_dir=self.cache_dir)
                 op = opgit.get_openpecha()
                 if op is None:
-                    logging.error("skipping %s, can't get the openpecha object", oplname)
+                    logging.error(
+                        "skipping %s, can't get the openpecha object", oplname
+                    )
                     continue
                 if not op.is_ocr():
                     logging.info("skipping %s, not ocr", oplname)
@@ -212,10 +241,8 @@ class OpenpechaManager:
                 rdf = Rdf(oplname, op)
                 rdfgraph = rdf.get_graph()
                 self.send_model_to_store(rdfgraph, str(rdf.graph_r), storeurl)
-                #self.write_model_debug(rdfgraph, str(rdf.graph_r))
+                # self.write_model_debug(rdfgraph, str(rdf.graph_r))
                 self.set_commit(oplname, opgit.openpecharev)
             else:
                 logging.info("skipping %s, already synced", oplname)
         self.write_commits()
-            
-

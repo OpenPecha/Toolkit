@@ -24,7 +24,7 @@ if __name__ == "__main__":
     for repo in org.get_repos("all"):
         if repo.name.startswith(args.prefix):
             if args.start:
-                repo_num = int(repo.name[len(args.prefix):])
+                repo_num = int(repo.name[len(args.prefix) :])
                 if repo_num >= args.start:
                     repo.delete()
                     print(f"[INFO] {repo} is deleted.")

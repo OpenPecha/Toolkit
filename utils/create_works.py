@@ -127,7 +127,7 @@ def get_works_from_bdrc_outlines(fn):
     for node in dom.getElementsByTagName("outline:node"):
         if node.attributes["type"].value != "text":
             continue
-        bdrc_work_id = node.attributes['RID'].value
+        bdrc_work_id = node.attributes["RID"].value
         title = get_value(node, "title", "bibliographicalTitle", convert=True)
         author = get_value(node, "creator", "hasMainAuthor", convert=True)
         # toh = get_value(node, "description", "toh")
