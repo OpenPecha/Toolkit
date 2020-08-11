@@ -1,5 +1,6 @@
-from .serialize import Serialize
 from openpecha.formatters.layers import AnnType
+
+from .serialize import Serialize
 
 
 class SerializeHFML(Serialize):
@@ -10,7 +11,8 @@ class SerializeHFML(Serialize):
     def get_tofu_id(self, ann, uuid2localid):
         try:
             return uuid2localid[ann["id"]]
-        except:
+        except Exception:
+            print("Local Id not found!!")
             return ""
 
     def apply_annotation(self, vol_id, ann, uuid2localid):
@@ -44,8 +46,8 @@ class SerializeHFML(Serialize):
                 start_payload += "\n"
             only_start_ann = True
         elif ann["type"] == AnnType.correction:
-            start_payload = f"({tofu_id}"
-            end_payload = f',{ann["correction"]})'
+            start_payload = f"<{tofu_id}"
+            end_payload = f',{ann["correction"]}>'
         elif ann["type"] == AnnType.peydurma:
             start_payload = f"#{tofu_id}"
             only_start_ann = True
@@ -53,25 +55,28 @@ class SerializeHFML(Serialize):
             start_payload = f"[{tofu_id}"
             end_payload = "]"
         elif ann["type"] == AnnType.book_title:
-            start_payload = f"(k1{tofu_id}"
+            start_payload = f"({tofu_id}k1"
+            end_payload = ")"
+        elif ann["type"] == AnnType.poti_title:
+            start_payload = f"({tofu_id}k2"
             end_payload = ")"
         elif ann["type"] == AnnType.author:
-            start_payload = f"(au{tofu_id}"
+            start_payload = f"({tofu_id}au"
             end_payload = ")"
         elif ann["type"] == AnnType.chapter:
-            start_payload = f"(k3{tofu_id}"
+            start_payload = f"({tofu_id}k3"
             end_payload = ")"
         elif ann["type"] == AnnType.tsawa:
-            start_payload = f"<m{tofu_id}"
+            start_payload = f"<{tofu_id}m"
             end_payload = "m>"
         elif ann["type"] == AnnType.citation:
-            start_payload = f"<g{tofu_id}"
+            start_payload = f"<{tofu_id}g"
             end_payload = "g>"
         elif ann["type"] == AnnType.sabche:
-            start_payload = f"<q{tofu_id}"
+            start_payload = f"<{tofu_id}q"
             end_payload = "q>"
         elif ann["type"] == AnnType.yigchung:
-            start_payload = f"<y{tofu_id}"
+            start_payload = f"<{tofu_id}y"
             end_payload = "y>"
 
         start_cc, end_cc = self._get_adapted_span(ann["span"], vol_id)

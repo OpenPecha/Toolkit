@@ -1,22 +1,19 @@
 from pathlib import Path
 
-# import pytest
+import pytest
 
+from openpecha.serializers import EpubSerializer, SerializeHFML, SerializeMd
 from openpecha.serializers.serialize import Serialize
-from openpecha.serializers import SerializeMd
-from openpecha.serializers import SerializeHFML
-from openpecha.serializers import EpubSerializer
 
 
 # For testing read_base_layer, add_chars and apply_layer
-# @pytest.fixture(scope="module")
+@pytest.fixture(scope="module")
 def opf_path():
-    opf_path = "tests/data/W1OP000001/W1OP000001.opf"
-    return opf_path
+    return Path("./tests/data/serialize/tsadra/P000001/P000001.opf")
 
 
 # Test HFML Serializer
-hfml_opf_path = Path("tests/data/serialize_test/hfml/hfml.opf")
+# hfml_opf_path = Path("tests/data/serialize_test/hfml/hfml.opf")
 
 # def test_hfml_serializer():
 #     opf_path = 'tests/data/serialize/hfml/P000001/P000001.opf'
@@ -29,24 +26,24 @@ hfml_opf_path = Path("tests/data/serialize_test/hfml/hfml.opf")
 #     print(result)
 
 
-def test_hfml_serializer_tsadra():
-    opf_path = Path("./tests/data/serialize/tsadra/P000001/P000001.opf")
+def test_hfml_serializer_tsadra(opf_path):
     pecha_id = "P000001"
     serializer = EpubSerializer(opf_path)
     serializer.apply_layers()
     serializer.serilize(pecha_id)
 
 
-if __name__ == "__main__":
-    # test_hfml_serializer()
-    opf_path = Path("./output/new_hfml/new_hfml.opf/")
-    pecha_id = "P000001"
-    # serializer = EpubSerializer(opf_path)
-    # serializer = SerializeHFML(opf_path)
-    # serializer.apply_layers()
-    # serializer.serilize(pecha_id)
-    serializer = SerializeHFML(opf_path, vol_ids=["v001", "v002", "v003"])
-    serializer.apply_layers()
-    results = serializer.get_result()
-    for vol_id, hfml_text in results.items():
-        Path(f"./output/{vol_id}.txt").write_text(hfml_text)
+# if __name__ == "__main__":
+# test_hfml_serializer()
+# opf_path = Path("./output/new_hfml/new_hfml.opf/")
+# opf_path = Path("./tests/data/serialize/tsadra/P000001/P000001.opf/")
+# pecha_id = "P000001"
+# serializer = EpubSerializer(opf_path)
+# serializer = SerializeHFML(opf_path)
+# serializer.apply_layers()
+# serializer.serilize(pecha_id)
+# serializer = SerializeHFML(opf_path)
+# serializer.apply_layers()
+# results = serializer.get_result()
+# for vol_id, hfml_text in results.items():
+#     Path(f"./output/{vol_id}1.txt").write_text(hfml_text)

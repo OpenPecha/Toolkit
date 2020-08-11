@@ -1,4 +1,3 @@
-import os
 from collections import defaultdict, namedtuple
 from pathlib import Path
 
@@ -20,7 +19,9 @@ class Serialize(object):
     To use it, instantiate a concrete class with the path of the opf file, and call apply_layers() then get_result()
     """
 
-    def __init__(self, opfpath, text_id=None, vol_ids="v001", layers=None, index_layer=None):
+    def __init__(
+        self, opfpath, text_id=None, vol_ids=None, layers=None, index_layer=None
+    ):
         self.opfpath = Path(opfpath)
         self.meta = self.get_meta_data()
         self.text_id = text_id
@@ -33,10 +34,11 @@ class Serialize(object):
             if self.text_spans:
                 self.base_layers = self.get_text_base_layer()
         else:
-            vol_ids = (self.opfpath / "base").iterdir()
+            if not vol_ids:
+                vol_ids = [vol.stem for vol in (self.opfpath / "base").iterdir()]
             for vol_id in vol_ids:
-                text_spans = {vol_id.stem: {"start": 0, "end": float("inf")}}
-                base_layers = {vol_id.stem: self.get_base_layer(vol_id=vol_id.stem)}
+                text_spans = {vol_id: {"start": 0, "end": float("inf")}}
+                base_layers = {vol_id: self.get_base_layer(vol_id=vol_id)}
                 self.text_spans.update(text_spans)
                 self.base_layers.update(base_layers)
         """
@@ -103,7 +105,8 @@ class Serialize(object):
         opf_path = self.opfpath
         try:
             meta = yaml.safe_load((opf_path / "meta.yml").open())
-        except:
+        except Exception:
+            print("Meta data not Found!!!")
             meta = {}
         return meta
 
@@ -170,7 +173,8 @@ class Serialize(object):
                 a["id"] = ann_id
                 try:
                     uuid2localid = layer["local_ids"]
-                except:
+                except Exception:
+                    print("Local Id not found!!")
                     uuid2localid = ""
                 self.apply_annotation(vol_id, a, uuid2localid)
 

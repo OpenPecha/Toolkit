@@ -22,7 +22,9 @@ class Global2LocalId:
     def __init__(self, local_id_dict=None):
         self.start_local_id = 200_000
         self.global2local_id = self._initialize(local_id_dict)
-        self.local2global_id = {l_id: g_id for l_id, g_id in self.global2local_id.items()}
+        self.local2global_id = {
+            l_id: g_id for l_id, g_id in self.global2local_id.items()
+        }
         self.last_local_id = self.find_last()
 
     def _initialize(self, local_id_dict):
@@ -108,7 +110,9 @@ class HFMLFormatter(BaseFormatter):
         self.poti_title = []
         self.chapter_title = []
         self.topic_id = []  # made class variable as it needs to update cross poti
-        self.current_topic_id = []  # made class variable as it needs to update cross poti
+        self.current_topic_id = (
+            []
+        )  # made class variable as it needs to update cross poti
         self.sub_topic = []  # made class variable as it needs to update cross poti
         self.page = []
         self.error_id = []
@@ -117,9 +121,9 @@ class HFMLFormatter(BaseFormatter):
         self.notes_id = []
         self.sub_topic_Id = []  # made class variable as it needs to update cross poti
         self.topic_info = []
-        self.topic_tofu = []
+        self.topic_local_id = []
         self.sub_topic_info = []
-        self.sub_topic_tofu = []
+        self.sub_topic_local_id = []
         self.cur_sub = []
         self.author_pattern = []
         self.citation_pattern = []
@@ -181,16 +185,18 @@ class HFMLFormatter(BaseFormatter):
         new_layer = Layer(self.get_unique_id(), layer_name)
         for _, ann in anns:
             self.add_new_ann(new_layer, ann)
-        new_layer[_attr_names.LOCAL_ID] = self.local_id_manager.get_serialized_global2local_id(
-            layer_name
-        )
+        new_layer[
+            _attr_names.LOCAL_ID
+        ] = self.local_id_manager.get_serialized_global2local_id(layer_name)
         return new_layer
 
     def update_layer(self, layer, anns):
         self._inc_layer_revision(layer)
         for local_id, ann in anns:
             if local_id:
-                uuid = self.local_id_manager.maps[layer["annotation_type"]].get_global_id(local_id)
+                uuid = self.local_id_manager.maps[
+                    layer["annotation_type"]
+                ].get_global_id(local_id)
                 if uuid:
                     for key, value in ann.items():
                         layer["annotations"][uuid][key] = value
@@ -245,7 +251,9 @@ class HFMLFormatter(BaseFormatter):
             ):
 
                 Topic = deepcopy(Text)
-                Topic["parts"] += [[ann for none_local_id, ann in anns] for anns in sub_topics]
+                Topic["parts"] += [
+                    [ann for none_local_id, ann in anns] for anns in sub_topics
+                ]
                 Topic["span"] += [ann for none_local_id, ann in topics]
                 uuid = self.get_unique_id()
                 Index_layer["annotations"][uuid] = Topic
@@ -416,7 +424,9 @@ class HFMLFormatter(BaseFormatter):
                     starting_point = 1
                 if ann.start() > archaic_word.start():
                     archaic_part = archaic_word[0].split(",")[0][starting_point:]
-                    length_before = length_before + (len(archaic_word[0]) - len(archaic_part))
+                    length_before = length_before + (
+                        len(archaic_word[0]) - len(archaic_part)
+                    )
 
         if re.search(pat_list["abs_er_pattern"], line):
             abs_ers = re.finditer(
@@ -465,7 +475,9 @@ class HFMLFormatter(BaseFormatter):
         Return:
             base_line (str): It contains the base text which is being extracted from the given annotated line.
         """
-        base_line = annotated_line  # stores the base_line which is line without annotation
+        base_line = (
+            annotated_line
+        )  # stores the base_line which is line without annotation
         for pattern in [
             "line_pattern",
             "topic_pattern",
@@ -515,7 +527,9 @@ class HFMLFormatter(BaseFormatter):
                 else:
                     starting_point = 1
                 archaic_part = archaic_word[0].split(",")[0][starting_point:]
-                base_line = re.sub(pat_list["archaic_word_pattern"], archaic_part, base_line, 1)
+                base_line = re.sub(
+                    pat_list["archaic_word_pattern"], archaic_part, base_line, 1
+                )
 
         if re.search(pat_list["abs_er_pattern"], annotated_line):
             abs_ers = re.finditer(
@@ -527,12 +541,15 @@ class HFMLFormatter(BaseFormatter):
                 else:
                     starting_point = 1
                 base_line = re.sub(
-                    pat_list["abs_er_pattern"], abs_er[0][starting_point:-1], base_line, 1,
+                    pat_list["abs_er_pattern"],
+                    abs_er[0][starting_point:-1],
+                    base_line,
+                    1,
                 )
 
         return base_line
 
-    def get_tofu_id(self, match_obj):
+    def get_local_id(self, match_obj):
         if match_obj.group(1):
             return ord(match_obj.group(1))
         else:
@@ -556,14 +573,30 @@ class HFMLFormatter(BaseFormatter):
 
         poti_titles = []
         chapter_titles = []
-        start_cit_patterns = []  # list variable to store index of start citation pattern => (g
-        end_cit_patterns = []  # list variable to store index of start citation pattern => g)
-        start_sabche_pattern = []  # list variable to store index of start sabche pattern => (q
-        end_sabche_pattern = []  # list variable to store index of end sabche pattern => q)
-        start_tsawa_pattern = []  # list variable to store index of start tsawa pattern => (m
-        end_tsawa_pattern = []  # list variable to store index of end sabche pattern => m)
-        start_yigchung_pattern = []  # list variable to store index of start yigchung pattern => (y
-        end_yigchung_pattern = []  # list variable to store index of end yigchung pattern => y)
+        start_cit_patterns = (
+            []
+        )  # list variable to store index of start citation pattern => (g
+        end_cit_patterns = (
+            []
+        )  # list variable to store index of start citation pattern => g)
+        start_sabche_pattern = (
+            []
+        )  # list variable to store index of start sabche pattern => (q
+        end_sabche_pattern = (
+            []
+        )  # list variable to store index of end sabche pattern => q)
+        start_tsawa_pattern = (
+            []
+        )  # list variable to store index of start tsawa pattern => (m
+        end_tsawa_pattern = (
+            []
+        )  # list variable to store index of end sabche pattern => m)
+        start_yigchung_pattern = (
+            []
+        )  # list variable to store index of start yigchung pattern => (y
+        end_yigchung_pattern = (
+            []
+        )  # list variable to store index of end yigchung pattern => y)
 
         pat_list = {
             "author_pattern": r"\(([󴉀-󴉱])?au.+?\)",
@@ -617,7 +650,7 @@ class HFMLFormatter(BaseFormatter):
             ):  # checking current line contains page annotation or not
                 start_page = end_page
                 end_page = end_line
-                local_id = self.get_tofu_id(re.search(pat_list["page_pattern"], line))
+                local_id = self.get_local_id(re.search(pat_list["page_pattern"], line))
                 pg_tid.append(local_id)
                 page_info = line[re.search(pat_list["page_pattern"], line).end() :]
                 if local_id:
@@ -654,21 +687,32 @@ class HFMLFormatter(BaseFormatter):
             ]:
                 title_pattern = re.search(pat_list[pp], line)
                 if title_pattern:
-                    local_id = self.get_tofu_id(title_pattern)
-                    pat_len_before_ann = self.search_before(title_pattern, pat_list, line)
+                    local_id = self.get_local_id(title_pattern)
+                    pat_len_before_ann = self.search_before(
+                        title_pattern, pat_list, line
+                    )
                     start_title = title_pattern.start() + i - pat_len_before_ann
                     end_title = start_title + len(title_pattern[0]) - 5
                     if pp == "author_pattern":
                         self.author_pattern.append(
-                            (local_id, {"span": {"start": start_title, "end": end_title}})
+                            (
+                                local_id,
+                                {"span": {"start": start_title, "end": end_title}},
+                            )
                         )
                     if pp == "pecha_title_pattern":
                         self.pecha_title.append(
-                            (local_id, {"span": {"start": start_title, "end": end_title}})
+                            (
+                                local_id,
+                                {"span": {"start": start_title, "end": end_title}},
+                            )
                         )
                     if pp == "poti_title_pattern":
                         poti_titles.append(
-                            (local_id, {"span": {"start": start_title, "end": end_title}})
+                            (
+                                local_id,
+                                {"span": {"start": start_title, "end": end_title}},
+                            )
                         )
                         if local_id:
                             end_topic = len(title_pattern[0][2:])
@@ -678,15 +722,22 @@ class HFMLFormatter(BaseFormatter):
                             end_sub_topic = len(title_pattern[0][1:])
                     if pp == "chapter_title_pattern":
                         chapter_titles.append(
-                            (local_id, {"span": {"start": start_title, "end": end_title}})
+                            (
+                                local_id,
+                                {"span": {"start": start_title, "end": end_title}},
+                            )
                         )
 
             if re.search(
                 pat_list["sub_topic_pattern"], line
             ):  # checking current line contain sub_topicID annotation or not
                 sub_topic_match = re.search(pat_list["sub_topic_pattern"], line)
-                self.sub_topic_info.append(sub_topic_match[0][2:-1])
-                self.sub_topic_tofu.append(self.get_tofu_id(sub_topic_match))
+                local_id = self.get_local_id(sub_topic_match)
+                if local_id:
+                    self.sub_topic_info.append(sub_topic_match[0][2:-1])
+                else:
+                    self.sub_topic_info.append(sub_topic_match[0][1:-1])
+                self.sub_topic_local_id.append(local_id)
                 pat_len_before_ann = self.search_before(sub_topic_match, pat_list, line)
                 if start_sub_topic == 0:
                     start_sub_topic = end_sub_topic
@@ -696,7 +747,7 @@ class HFMLFormatter(BaseFormatter):
                         if len(self.sub_topic_info) >= 2:
                             self.sub_topic_Id.append(
                                 (
-                                    self.sub_topic_tofu[-2],
+                                    self.sub_topic_local_id[-2],
                                     {
                                         "work_id": self.sub_topic_info[-2],
                                         "span": {
@@ -711,7 +762,7 @@ class HFMLFormatter(BaseFormatter):
                         else:
                             self.sub_topic_Id.append(
                                 (
-                                    self.sub_topic_tofu[-1],
+                                    self.sub_topic_local_id[-1],
                                     {
                                         "work_id": self.sub_topic_info[-1],
                                         "span": {
@@ -730,7 +781,7 @@ class HFMLFormatter(BaseFormatter):
                     if start_sub_topic < end_sub_topic:
                         self.sub_topic_Id.append(
                             (
-                                self.sub_topic_tofu[-2],
+                                self.sub_topic_local_id[-2],
                                 {
                                     "work_id": self.sub_topic_info[-2],
                                     "span": {
@@ -748,17 +799,23 @@ class HFMLFormatter(BaseFormatter):
             ):  # checking current line contain topicID annotation or not
                 topic = re.search(pat_list["topic_pattern"], line)
                 pat_len_before_ann = self.search_before(topic, pat_list, line)
-                self.topic_info.append(topic[0][2:-1])
-                self.topic_tofu.append(self.get_tofu_id(topic))
+                local_id = self.get_local_id(topic)
+                if local_id:
+                    self.topic_info.append(topic[0][2:-1])
+                else:
+                    self.topic_info.append(topic[0][1:-1])
+                self.topic_local_id.append(local_id)
                 start_topic = end_topic
                 end_topic = topic.start() + i - pat_len_before_ann
 
                 if start_topic != end_topic or len(self.topic_info) >= 2:
-                    if len(self.topic_info) >= 2:  # as we are ignoring the self.topic[0]
+                    if (
+                        len(self.topic_info) >= 2
+                    ):  # as we are ignoring the self.topic[0]
                         if start_topic < end_topic:
                             self.current_topic_id.append(
                                 (
-                                    self.topic_tofu[-2],
+                                    self.topic_local_id[-2],
                                     {
                                         "work_id": self.topic_info[-2],
                                         "span": {
@@ -772,7 +829,7 @@ class HFMLFormatter(BaseFormatter):
                     else:
                         self.current_topic_id.append(
                             (
-                                self.topic_tofu[-1],
+                                self.topic_local_id[-1],
                                 {
                                     "work_id": self.topic_info[-1],
                                     "span": {
@@ -788,7 +845,7 @@ class HFMLFormatter(BaseFormatter):
                     if self.sub_topic_Id and end_sub_topic < end_topic:
                         self.sub_topic_Id.append(
                             (
-                                self.sub_topic_tofu[-1],
+                                self.sub_topic_local_id[-1],
                                 {
                                     "work_id": self.sub_topic_info[-1],
                                     "span": {
@@ -811,16 +868,23 @@ class HFMLFormatter(BaseFormatter):
             ):  # checking current line contain error annotation or not
                 errors = re.finditer(pat_list["error_pattern"], line)
                 for error in errors:
-                    suggestion = error[0].split(",")[1][:-1]  # extracting the suggestion component
-                    error_part = error[0].split(",")[0][2:]  # extracting the error component
-                    tofu_id = self.get_tofu_id(error)
+                    local_id = self.get_local_id(error)
+                    suggestion = error[0].split(",")[1][
+                        :-1
+                    ]  # extracting the suggestion component
+                    if local_id:
+                        error_part = error[0].split(",")[0][
+                            2:
+                        ]  # extracting the error component
+                    else:
+                        error_part = error[0].split(",")[0][1:]
                     pat_len_before_ann = self.search_before(error, pat_list, line)
                     start_error = error.start() + i - pat_len_before_ann
 
-                    end_error = start_error + len(error_part)
+                    end_error = start_error + len(error_part) - 1
                     cur_vol_error_id.append(
                         (
-                            tofu_id,
+                            local_id,
                             {
                                 "correction": suggestion,
                                 "span": {"start": start_error, "end": end_error},
@@ -833,21 +897,26 @@ class HFMLFormatter(BaseFormatter):
             ):  # checking current line contain error annotation or not
                 archaics = re.finditer(pat_list["archaic_pattern"], line)
                 for archaic in archaics:
-                    modern_word = archaic[0].split(",")[1][:-1]  # extracting the modern word
-                    archaic_word = archaic[0].split(",")[0][2:]  # extracting the error component
-                    tofu_id = self.get_tofu_id(archaic)
+                    local_id = self.get_local_id(archaic)
+                    modern_word = archaic[0].split(",")[1][
+                        :-1
+                    ]  # extracting the modern word
+                    if local_id:
+                        archaic_word = archaic[0].split(",")[0][
+                            2:
+                        ]  # extracting the error component
+                    else:
+                        archaic_word = archaic[0].split(",")[0][1:]
                     pat_len_before_ann = self.search_before(archaic, pat_list, line)
                     start_archaic = archaic.start() + i - pat_len_before_ann
 
-                    end_archaic = (
-                        start_archaic + len(modern_word) - 3
-                    )  # 3 is minus as two border bracket and tofu chr
+                    end_archaic = start_archaic + len(archaic_word) - 1
                     cur_vol_archaic_id.append(
                         (
-                            tofu_id,
+                            local_id,
                             {
                                 "modern_word": modern_word,
-                                "span": {"start": start_archaic, "end": end_archaic,},
+                                "span": {"start": start_archaic, "end": end_archaic},
                             },
                         )
                     )
@@ -856,30 +925,33 @@ class HFMLFormatter(BaseFormatter):
                 abs_ers = re.finditer(pat_list["abs_er_pattern"], line)
                 for abs_er in abs_ers:
                     pat_len_before_ann = self.search_before(abs_er, pat_list, line)
-                    tofu_id = self.get_tofu_id(abs_er)
+                    local_id = self.get_local_id(abs_er)
                     start_abs_er = abs_er.start() + i - pat_len_before_ann
-                    end_abs_er = start_abs_er + len(
-                        abs_er[0][2:-1]
-                    )  # 3 is minus as two border bracket and tofu chr
+                    if local_id:
+                        end_abs_er = start_abs_er + len(
+                            abs_er[0][2:-1]
+                        )  # 3 is minus as two border bracket and local id
+                    else:
+                        end_abs_er = start_abs_er + len(abs_er[0][1:-1])
                     cur_vol_abs_er_id.append(
-                        (tofu_id, {"span": {"start": start_abs_er, "end": end_abs_er}},)
+                        (local_id, {"span": {"start": start_abs_er, "end": end_abs_er}})
                     )
 
             if re.search(pat_list["note_pattern"], line):
                 notes_in_line = re.finditer(pat_list["note_pattern"], line)
                 for notes in notes_in_line:
                     pat_len_before_ann = self.search_before(notes, pat_list, line)
-                    tofu_id = self.get_tofu_id(notes)
+                    local_id = self.get_local_id(notes)
                     note = notes.start() + i - pat_len_before_ann
-                    note_id.append((tofu_id, {"span": {"start": note, "end": note}}))
+                    note_id.append((local_id, {"span": {"start": note, "end": note}}))
 
             if re.search(pat_list["start_cit_pattern"], line):
                 start_cits = re.finditer(pat_list["start_cit_pattern"], line)
                 for start_cit in start_cits:
                     pat_len_before_ann = self.search_before(start_cit, pat_list, line)
-                    tofu_id = self.get_tofu_id(start_cit)
+                    local_id = self.get_local_id(start_cit)
                     cit_start = start_cit.start() + i - pat_len_before_ann
-                    start_cit_patterns.append((tofu_id, cit_start))
+                    start_cit_patterns.append((local_id, cit_start))
 
             if re.search(pat_list["end_cit_pattern"], line):
                 end_cits = re.finditer(pat_list["end_cit_pattern"], line)
@@ -891,10 +963,12 @@ class HFMLFormatter(BaseFormatter):
             if re.search(pat_list["start_sabche_pattern"], line):
                 start_sabches = re.finditer(pat_list["start_sabche_pattern"], line)
                 for start_sabche in start_sabches:
-                    pat_len_before_ann = self.search_before(start_sabche, pat_list, line)
-                    tofu_id = self.get_tofu_id(start_sabche)
+                    pat_len_before_ann = self.search_before(
+                        start_sabche, pat_list, line
+                    )
+                    local_id = self.get_local_id(start_sabche)
                     sabche_start = start_sabche.start() + i - pat_len_before_ann
-                    start_sabche_pattern.append((tofu_id, sabche_start))
+                    start_sabche_pattern.append((local_id, sabche_start))
 
             if re.search(pat_list["end_sabche_pattern"], line):
                 end_sabches = re.finditer(pat_list["end_sabche_pattern"], line)
@@ -907,9 +981,9 @@ class HFMLFormatter(BaseFormatter):
                 start_tsawas = re.finditer(pat_list["start_tsawa_pattern"], line)
                 for start_tsawa in start_tsawas:
                     pat_len_before_ann = self.search_before(start_tsawa, pat_list, line)
-                    tofu_id = self.get_tofu_id(start_tsawa)
+                    local_id = self.get_local_id(start_tsawa)
                     tsawa_start = start_tsawa.start() + i - pat_len_before_ann
-                    start_tsawa_pattern.append((tofu_id, tsawa_start))
+                    start_tsawa_pattern.append((local_id, tsawa_start))
 
             if re.search(pat_list["end_tsawa_pattern"], line):
                 end_tsawas = re.finditer(pat_list["end_tsawa_pattern"], line)
@@ -921,15 +995,19 @@ class HFMLFormatter(BaseFormatter):
             if re.search(pat_list["start_yigchung_pattern"], line):
                 start_yigchungs = re.finditer(pat_list["start_yigchung_pattern"], line)
                 for start_yigchung in start_yigchungs:
-                    pat_len_before_ann = self.search_before(start_yigchung, pat_list, line)
-                    tofu_id = self.get_tofu_id(start_yigchung)
+                    pat_len_before_ann = self.search_before(
+                        start_yigchung, pat_list, line
+                    )
+                    local_id = self.get_local_id(start_yigchung)
                     yigchung_start = start_yigchung.start() + i - pat_len_before_ann
-                    start_yigchung_pattern.append((tofu_id, yigchung_start))
+                    start_yigchung_pattern.append((local_id, yigchung_start))
 
             if re.search(pat_list["end_yigchung_pattern"], line):
                 end_yigchungs = re.finditer(pat_list["end_yigchung_pattern"], line)
                 for end_yigchung in end_yigchungs:
-                    pat_len_before_ann = self.search_before(end_yigchung, pat_list, line)
+                    pat_len_before_ann = self.search_before(
+                        end_yigchung, pat_list, line
+                    )
                     yigchung_end = end_yigchung.start() + i - pat_len_before_ann - 1
                     end_yigchung_pattern.append(yigchung_end)
 
@@ -946,7 +1024,9 @@ class HFMLFormatter(BaseFormatter):
                 if self.sub_topic_Id:
                     self.sub_topic_Id.append(
                         (
-                            self.sub_topic_tofu[-1] if self.sub_topic_tofu else None,
+                            self.sub_topic_local_id[-1]
+                            if self.sub_topic_local_id
+                            else None,
                             {
                                 "work_id": self.sub_topic_info[-1]
                                 if self.sub_topic_info
@@ -962,7 +1042,7 @@ class HFMLFormatter(BaseFormatter):
                 if self.topic_info:
                     self.current_topic_id.append(
                         (
-                            self.topic_tofu[-1],
+                            self.topic_local_id[-1],
                             {
                                 "work_id": self.topic_info[-1],
                                 "span": {
@@ -1239,7 +1319,9 @@ class HFMLTextFromatter(HFMLFormatter):
                 if cur_vol_top[2] == 1:
                     start += extra
                     end += extra
-                cur_top.append((start, end, cur_vol_top[2] + vol_walker, cur_vol_top[3]))
+                cur_top.append(
+                    (start, end, cur_vol_top[2] + vol_walker, cur_vol_top[3])
+                )
             self.topic_id[0] = cur_top
 
         if self.sub_topic[0][0]:
