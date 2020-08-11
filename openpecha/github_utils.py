@@ -118,7 +118,7 @@ def upload_assets(release, tag_name=None, assets_path=[]):
     if not tag_name:
         tag_name = release.tag_name
     for asset_path in assets_path:
-        asset_path = _add_tag_in_filename(asset_path, tag_name)
+        # asset_path = _add_tag_in_filename(asset_path, tag_name)
         release.upload_asset(str(asset_path))
         print(f"[INFO] Uploaded asset {asset_path}")
 
@@ -158,4 +158,4 @@ def delete_repo(repo_name):
 
 
 if __name__ == "__main__":
-    add_assets_to_latest_release("P000780", Path("assets").iterdir())
+    create_release("P000780", Path("assets").iterdir())
