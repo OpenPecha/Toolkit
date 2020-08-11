@@ -70,7 +70,7 @@ def get_pecha(id, batch_path, layers):
 
     # If filter by layers
     if layers:
-        layers_name = [l.strip() for l in layers.split(",")]
+        layers_name = [layer.strip() for layer in layers.split(",")]
         for layer in layers_name:
             batch_ids = None
             if id:
@@ -79,10 +79,14 @@ def get_pecha(id, batch_path, layers):
                 if not batch_ids:
                     batch_ids = _get_batch(batch_path)
                 for b_id in batch_ids:
-                    _check_pecha(id=b_id, pechas=pechas, layer=layer, pecha_list=pecha_list)
+                    _check_pecha(
+                        id=b_id, pechas=pechas, layer=layer, pecha_list=pecha_list
+                    )
             else:
                 for p_id in pechas:
-                    _check_pecha(id=p_id, pechas=pechas, layer=layer, pecha_list=pecha_list)
+                    _check_pecha(
+                        id=p_id, pechas=pechas, layer=layer, pecha_list=pecha_list
+                    )
     else:
         if id:
             _check_pecha(id=id, pechas=pechas, pecha_list=pecha_list)
@@ -161,7 +165,9 @@ layers_name = ["title", "tsawa", "yigchung", "quotes", "sapche"]
 
 
 @cli.command()
-@click.option("--name", "-n", type=click.Choice(layers_name), help="name of a layer to be applied")
+@click.option(
+    "--name", "-n", type=click.Choice(layers_name), help="name of a layer to be applied"
+)
 @click.option(
     "--list",
     "-l",
@@ -223,7 +229,7 @@ def setup_credential(repo):
         # save credential
         (config["CONFIG_PATH"] / "credential").write_text(f"{username},{password}")
 
-    if not "@" in repo.remotes.origin.url:
+    if "@" not in repo.remotes.origin.url:
         # get user credentials
         credential = (config["CONFIG_PATH"] / "credential").read_text()
         username, password = [s.strip() for s in credential.split(",")]
@@ -253,7 +259,7 @@ def github_push(repo, branch_name, msg="made edits"):
             repo.git.push("--set-upstream", "origin", current)
         except Exception as e:
             print(e)
-            msg = f"Authentication failed: Try again later"
+            msg = "Authentication failed: Try again later"
             click.echo(ERROR.format(msg))
             return False
 
@@ -330,7 +336,9 @@ formatter_types = ["ocr", "hfml(default)", "tsadra"]
 
 
 @cli.command()
-@click.option("--name", "-n", type=click.Choice(formatter_types), help="Type of formatter")
+@click.option(
+    "--name", "-n", type=click.Choice(formatter_types), help="Type of formatter"
+)
 @click.option("--id", "-i", type=int, help="Id of the pecha")
 @click.argument("input_path")
 def format(**kwargs):
@@ -402,9 +410,14 @@ def pull_pechas(cache_folder, idlist):
 @click.option("--cache-folder", "-c", help="path to the folder of the local cache")
 @click.option("--store-uri", "-s", help="Fuseki URI", required=True)
 @click.option(
-    "--force", "-f", help="force upload even when commit match with triple store", is_flag=True,
+    "--force",
+    "-f",
+    help="force upload even when commit match with triple store",
+    is_flag=True,
 )
-@click.option("--ldspdi-uri", "-u", help="lds-pdi URI", default="https://ldspdi.bdrc.io/")
+@click.option(
+    "--ldspdi-uri", "-u", help="lds-pdi URI", default="https://ldspdi.bdrc.io/"
+)
 @click.option("--idlist", "-l", help="comma-separated list of Openpecha IDs")
 @click.option("--verbose", "-v", help="verbose", is_flag=True)
 @click.option("--debug", "-d", help="debug", is_flag=True)
@@ -428,13 +441,18 @@ def cache_to_store(cache_folder, ldspdi_uri, store_uri, force, verbose, debug, i
 
 
 @cli.command()
-@click.argument("pecha_num")
+@click.option("--pecha_num", "-pn")
+@click.option("--opf_path", "-op")
 def export(**kwargs):
     """
     Command to export Pecha in epub
     """
-    pecha_id = get_pecha_id(kwargs["pecha_num"])
-    opf_path = f'{config["OP_DATA_PATH"]}/{pecha_id}/{pecha_id}.opf'
+
+    pecha_num = kwargs["pecha_num"]
+    opf_path = kwargs["opf_path"]
+    if not opf_path:
+        pecha_id = get_pecha_id(kwargs["pecha_num"])
+        opf_path = f'{config["OP_DATA_PATH"]}/{pecha_id}/{pecha_id}.opf'
     serializer = EpubSerializer(opf_path)
     serializer.apply_layers()
     serializer.serilize(pecha_id)
