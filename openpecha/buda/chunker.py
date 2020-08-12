@@ -61,11 +61,9 @@ class StringChunker:
         """
         list_of_index = [0]
         string = self.string
-        while len(string[list_of_index[-1]:]) > self.n:
-            index = self.get_chunk(string[list_of_index[-1]:], self.n)
+        while len(string[list_of_index[-1] :]) > self.n:
+            index = self.get_chunk(string[list_of_index[-1] :], self.n)
             list_of_index.append(list_of_index[-1] + index)
 
-        list_of_index.append(list_of_index[-1] + len(string[list_of_index[-1]:]))
+        list_of_index.append(list_of_index[-1] + len(string[list_of_index[-1] :]))
         return list_of_index
-
-

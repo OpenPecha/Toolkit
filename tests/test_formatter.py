@@ -4,7 +4,7 @@ from pathlib import Path
 import pytest
 
 from openpecha.formatters import GoogleOCRFormatter, HFMLFormatter, TsadraFormatter
-from openpecha.formatters.hfml import LocalIdManager
+from openpecha.formatters.formatter import LocalIdManager
 from openpecha.formatters.layers import AnnType
 
 
@@ -302,26 +302,38 @@ class TestTsadraFormatter:
         result = formatter.get_result()
 
         expected_result = {
-            AnnType.book_title: [{"span": {"start": 0, "end": 84}}],
+            AnnType.book_title: [[(None, {"span": {"start": 0, "end": 84}})]],
+            AnnType.poti_title: [[]],
             AnnType.author: [
-                {"span": {"start": 86, "end": 109}},
-                {"span": {"start": 111, "end": 134}},
-                {"span": {"start": 136, "end": 181}},
+                [
+                    (None, {"span": {"start": 86, "end": 109}}),
+                    (None, {"span": {"start": 111, "end": 134}}),
+                    (None, {"span": {"start": 136, "end": 181}}),
+                ]
             ],
-            AnnType.chapter: [{"span": {"start": 183, "end": 200}}],
+            AnnType.chapter: [[(None, {"span": {"start": 183, "end": 200}})]],
+            AnnType.topic: [[]],
+            AnnType.sub_topic: [[]],
+            AnnType.pagination: [[]],
             AnnType.tsawa: [
-                {"span": {"start": 4150, "end": 4300}, "isverse": True},
-                {"span": {"start": 5122, "end": 5298}, "isverse": True},
+                [
+                    (None, {"span": {"start": 4150, "end": 4300}, "isverse": True}),
+                    (None, {"span": {"start": 5122, "end": 5298}, "isverse": True}),
+                ]
             ],
             AnnType.citation: [
-                {"span": {"start": 3993, "end": 4132}, "isverse": False},
-                {"span": {"start": 4302, "end": 4418}, "isverse": True},
+                [
+                    (None, {"span": {"start": 3993, "end": 4132}, "isverse": False}),
+                    (None, {"span": {"start": 4302, "end": 4418}, "isverse": True}),
+                ]
             ],
             AnnType.sabche: [
-                {"span": {"start": 5091, "end": 5120}, "isinline": False},
-                {"span": {"start": 7313, "end": 7375}, "isinline": False},
+                [
+                    (None, {"span": {"start": 5091, "end": 5120}, "isverse": False}),
+                    (None, {"span": {"start": 7313, "end": 7375}, "isverse": False}),
+                ]
             ],
-            AnnType.yigchung: [{"span": {"start": 7273, "end": 7311}}],
+            AnnType.yigchung: [[(None, {"span": {"start": 7273, "end": 7311}})]],
         }
 
         for layer in result:
@@ -341,9 +353,16 @@ class TestTsadraFormatter:
         assert result == expected1
 
 
-# if __name__ == "__main__":
-#     TestHFMLFormatter().test_tofu_id()
-#     path = Path("./output/tsadra_hfml/tsadra_hfml.opf/")
-#     pecha_id = 6
-#     formatter = HFMLFormatter()
-#     formatter.create_opf(path)
+if __name__ == "__main__":
+    # TestHFMLFormatter().test_tofu_id()
+    # path = Path("./tests/data/formatter/tsadra_hfml/")
+    # path = Path("./output/tsadra_hfml/tsadra_hfml.opf/")
+
+    path = "./output/chagchen/"
+    pecha_id = 8
+    formatter = HFMLFormatter()
+    formatter.create_opf(path, pecha_id)
+
+    # path = "./output/P000100/OEBPS/"
+    # formatter = TsadraFormatter()
+    # formatter.create_opf(path, 8)

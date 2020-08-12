@@ -97,7 +97,7 @@ class EpubSerializer(Serialize):
             end_payload = Tsadra_template.end_payload
         elif ann["type"] == AnnType.sabche:
             try:
-                if ann["isinline"]:
+                if ann["isverse"]:
                     start_payload = Tsadra_template.sabche1_SP
                 else:
                     start_payload = Tsadra_template.sabche_SP
@@ -124,9 +124,6 @@ class EpubSerializer(Serialize):
 
         """
         out_fn = f"{pecha_id}.html"
-        # if self.meta['source_metadata']:
-        #     pecha_title = self.meta['source_metadata']['title']
-        # else:
         pecha_title = self.meta["ebook_metadata"]["title"]
         cover_image = self.meta["ebook_metadata"]["cover"]
         results = self.get_result()
