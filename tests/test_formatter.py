@@ -4,7 +4,7 @@ from pathlib import Path
 import pytest
 
 from openpecha.formatters import GoogleOCRFormatter, HFMLFormatter, TsadraFormatter
-from openpecha.formatters.formatter import LocalIdManager
+from openpecha.formatters.hfml import LocalIdManager
 from openpecha.formatters.layers import AnnType
 
 
@@ -21,11 +21,6 @@ class TestHFMLFormatter:
 
         assert result == expected
 
-    def test_format_layer(self):
-        m_text_fn = Path("tests/data/formatter/new_hfml/")
-        formatter = HFMLFormatter()
-        formatter.create_opf(m_text_fn)
-
     def test_build_layers(self):
         m_text1 = Path("tests/data/formatter/hfml/kangyur_01.txt").read_text()
         m_text2 = Path("tests/data/formatter/hfml/kangyur_02.txt").read_text()
@@ -41,8 +36,14 @@ class TestHFMLFormatter:
 
         result = formatter.get_result()
         expected_result = {
-            AnnType.poti_title: [[(0, 24)], [(0, 24)], [(0, 24)]],
-            AnnType.chapter: [[(98, 125)], [], []],
+            AnnType.book_title: [[], [], []],
+            AnnType.author: [[], [], []],
+            AnnType.poti_title: [
+                [(None, {"span": {"start": 0, "end": 24}})],
+                [(None, {"span": {"start": 0, "end": 24}})],
+                [(None, {"span": {"start": 0, "end": 24}})],
+            ],
+            AnnType.chapter: [[(None, {"span": {"start": 98, "end": 125}})], [], []],
             AnnType.citation: [
                 [],
                 [
@@ -58,6 +59,7 @@ class TestHFMLFormatter:
                         {
                             "page_index": "1a",
                             "page_info": "kk",
+                            "reference": None,
                             "span": {"start": 0, "end": 24},
                         },
                     ),
@@ -66,6 +68,7 @@ class TestHFMLFormatter:
                         {
                             "page_index": "1b",
                             "page_info": "kl",
+                            "reference": None,
                             "span": {"start": 27, "end": 676},
                         },
                     ),
@@ -74,6 +77,7 @@ class TestHFMLFormatter:
                         {
                             "page_index": "2a",
                             "page_info": "lm",
+                            "reference": None,
                             "span": {"start": 679, "end": 2173},
                         },
                     ),
@@ -84,6 +88,7 @@ class TestHFMLFormatter:
                         {
                             "page_index": "1a",
                             "page_info": "kk",
+                            "reference": None,
                             "span": {"start": 0, "end": 0},
                         },
                     ),
@@ -92,6 +97,7 @@ class TestHFMLFormatter:
                         {
                             "page_index": "1b",
                             "page_info": "",
+                            "reference": None,
                             "span": {"start": 0, "end": 266},
                         },
                     ),
@@ -102,6 +108,7 @@ class TestHFMLFormatter:
                         {
                             "page_index": "1a",
                             "page_info": "ko",
+                            "reference": None,
                             "span": {"start": 0, "end": 266},
                         },
                     )
@@ -211,7 +218,7 @@ class TestHFMLFormatter:
                 [
                     (
                         1000010,
-                        {"correction": "མཆིའོ་", "span": {"start": 1838, "end": 1844}},
+                        {"correction": "མཆིའོ་", "span": {"start": 1838, "end": 1843}},
                     )
                 ],
                 [],
@@ -247,8 +254,6 @@ class TestHFMLFormatter:
         old_layers = formatter.get_old_layers(layers)
         local_id2uuid = LocalIdManager(old_layers)
         local_id2uuid.add("tsawa", 1231232)
-        d = local_id2uuid.get_serialized_global2local_id("tsawa")
-        print(d)
 
 
 class TestGoogleOCRFormatter:
@@ -297,13 +302,13 @@ class TestTsadraFormatter:
         result = formatter.get_result()
 
         expected_result = {
-            AnnType.book_title: [{"span": {"start": 0, "end": 85}}],
+            AnnType.book_title: [{"span": {"start": 0, "end": 84}}],
             AnnType.author: [
-                {"span": {"start": 86, "end": 110}},
-                {"span": {"start": 111, "end": 135}},
-                {"span": {"start": 136, "end": 182}},
+                {"span": {"start": 86, "end": 109}},
+                {"span": {"start": 111, "end": 134}},
+                {"span": {"start": 136, "end": 181}},
             ],
-            AnnType.chapter: [{"span": {"start": 183, "end": 201}}],
+            AnnType.chapter: [{"span": {"start": 183, "end": 200}}],
             AnnType.tsawa: [
                 {"span": {"start": 4150, "end": 4300}, "isverse": True},
                 {"span": {"start": 5122, "end": 5298}, "isverse": True},
@@ -313,8 +318,8 @@ class TestTsadraFormatter:
                 {"span": {"start": 4302, "end": 4418}, "isverse": True},
             ],
             AnnType.sabche: [
-                {"span": {"start": 5091, "end": 5121}},
-                {"span": {"start": 7313, "end": 7376}},
+                {"span": {"start": 5091, "end": 5120}, "isinline": False},
+                {"span": {"start": 7313, "end": 7375}, "isinline": False},
             ],
             AnnType.yigchung: [{"span": {"start": 7273, "end": 7311}}],
         }
@@ -337,4 +342,9 @@ class TestTsadraFormatter:
 
 
 if __name__ == "__main__":
-    TestHFMLFormatter().test_format_layer()
+    TestHFMLFormatter().test_tofu_id()
+    path = Path("./tests/data/formatter/tsadra_hfml/")
+    # path = Path("./output/tsadra_hfml/tsadra_hfml.opf/")
+    pecha_id = 6
+    formatter = HFMLFormatter()
+    formatter.create_opf(path)
