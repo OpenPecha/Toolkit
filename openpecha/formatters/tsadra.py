@@ -501,7 +501,10 @@ class TsadraFormatter(BaseFormatter):
         for vol_layer, base_id in self.format_layer(layers):
             for layer, ann in vol_layer.items():
                 if ann["annotations"]:
-                    layer_fn = vol_layer_path / f"{layer}.yml"
+                    if layer == "index":
+                        layer_fn = self.dirs["opf_path"] / f"{layer}.yml"
+                    else:
+                        layer_fn = vol_layer_path / f"{layer}.yml"
                     self.dump(ann, layer_fn)
 
         # save metatdata

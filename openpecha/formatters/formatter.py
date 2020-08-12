@@ -32,11 +32,11 @@ class Global2LocalId:
         """Return last local id in a layer."""
         if self.global2local_id:
             return list(self.global2local_id.values()).pop()["local_id"]
-        return chr(self.start_local_id - 1)
+        return self.start_local_id - 1
 
     def add(self, global_id):
         """Map given `global_id` to the last local id."""
-        next_local_id = chr(ord(self.last_local_id) + 1)
+        next_local_id = self.last_local_id + 1
         self.global2local_id[global_id] = next_local_id
         self.last_local_id = next_local_id
 
@@ -56,7 +56,7 @@ class Global2LocalId:
         """Return just the global and local id paris."""
         result = {}
         for global_id, id_obj in self.global2local_id.items():
-            if isinstance(id_obj, str):
+            if isinstance(id_obj, int):
                 result[global_id] = id_obj
             elif id_obj["is_found"]:
                 result[global_id] = id_obj["is_found"]

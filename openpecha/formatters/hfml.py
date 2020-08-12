@@ -380,7 +380,7 @@ class HFMLFormatter(BaseFormatter):
 
     def get_local_id(self, match_obj):
         if match_obj.group(1):
-            return match_obj.group(1)
+            return ord(match_obj.group(1))
         else:
             return None
 

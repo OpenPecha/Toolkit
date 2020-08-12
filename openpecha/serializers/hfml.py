@@ -8,9 +8,9 @@ class SerializeHFML(Serialize):
     HFML (Human Friendly Markup Language) serializer class for OpenPecha.
     """
 
-    def get_tofu_id(self, ann, uuid2localid):
+    def get_local_id(self, ann, uuid2localid):
         try:
-            return uuid2localid[ann["id"]]
+            return chr(uuid2localid[ann["id"]])
         except Exception:
             print("Local Id not found!!")
             return ""
@@ -20,7 +20,7 @@ class SerializeHFML(Serialize):
         start_payload = "("
         end_payload = ")"
         side = "ab"
-        tofu_id = self.get_tofu_id(ann, uuid2localid)
+        local_id = self.get_local_id(ann, uuid2localid)
         if ann["type"] == AnnType.pagination:
             if ann["page_index"] == "0b":
                 pg_n = ann["reference"][5:-1]
@@ -28,15 +28,15 @@ class SerializeHFML(Serialize):
                 if "-" in pg_n:
                     pg_n = int(pg_n.split("-")[0])
                     pg_side = side[int(pg_side)]
-                    start_payload = f"[{tofu_id}{pg_n}{pg_side}]"
+                    start_payload = f"[{local_id}{pg_n}{pg_side}]"
                 else:
                     pg_n = int(pg_n)
                     if pg_side.isdigit():
                         pg_n = str(pg_n) + pg_side
                         pg_side = ""
-                    start_payload = f"[{tofu_id}{pg_n}{pg_side}]"
+                    start_payload = f"[{local_id}{pg_n}{pg_side}]"
             else:
-                start_payload = f'[{tofu_id}{ann["page_index"]}]'
+                start_payload = f'[{local_id}{ann["page_index"]}]'
 
             if ann["page_info"]:
                 start_payload += f' {ann["page_info"]}\n'
@@ -46,37 +46,37 @@ class SerializeHFML(Serialize):
                 start_payload += "\n"
             only_start_ann = True
         elif ann["type"] == AnnType.correction:
-            start_payload = f"<{tofu_id}"
+            start_payload = f"<{local_id}"
             end_payload = f',{ann["correction"]}>'
         elif ann["type"] == AnnType.peydurma:
-            start_payload = f"#{tofu_id}"
+            start_payload = f"#{local_id}"
             only_start_ann = True
         elif ann["type"] == AnnType.error_candidate:
-            start_payload = f"[{tofu_id}"
+            start_payload = f"[{local_id}"
             end_payload = "]"
         elif ann["type"] == AnnType.book_title:
-            start_payload = f"({tofu_id}k1"
+            start_payload = f"({local_id}k1"
             end_payload = ")"
         elif ann["type"] == AnnType.poti_title:
-            start_payload = f"({tofu_id}k2"
+            start_payload = f"({local_id}k2"
             end_payload = ")"
         elif ann["type"] == AnnType.author:
-            start_payload = f"({tofu_id}au"
+            start_payload = f"({local_id}au"
             end_payload = ")"
         elif ann["type"] == AnnType.chapter:
-            start_payload = f"({tofu_id}k3"
+            start_payload = f"({local_id}k3"
             end_payload = ")"
         elif ann["type"] == AnnType.tsawa:
-            start_payload = f"<{tofu_id}m"
+            start_payload = f"<{local_id}m"
             end_payload = "m>"
         elif ann["type"] == AnnType.citation:
-            start_payload = f"<{tofu_id}g"
+            start_payload = f"<{local_id}g"
             end_payload = "g>"
         elif ann["type"] == AnnType.sabche:
-            start_payload = f"<{tofu_id}q"
+            start_payload = f"<{local_id}q"
             end_payload = "q>"
         elif ann["type"] == AnnType.yigchung:
-            start_payload = f"<{tofu_id}y"
+            start_payload = f"<{local_id}y"
             end_payload = "y>"
 
         start_cc, end_cc = self._get_adapted_span(ann["span"], vol_id)
