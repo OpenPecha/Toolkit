@@ -20,6 +20,7 @@ __all__ = [
     "Yigchung",
     "BookTitle",
     "Author",
+    "Span",
 ]
 
 

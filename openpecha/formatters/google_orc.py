@@ -8,7 +8,7 @@ import yaml
 
 from ..utils import gzip_str
 from .formatter import BaseFormatter
-from .layers import Layer, Page, Span
+from .layers import *
 
 
 class GoogleOCRFormatter(BaseFormatter):
