@@ -77,6 +77,9 @@ class _attr_names:
     # Archaic word
     MODERN = "modern"
 
+    # Sabche
+    ISVERSE = "isverse"  # Boolean flag to indicate a sache in verse format or not
+
 
 def Layer(id_, type_, rev=f"{1:05}"):
     return {
@@ -166,8 +169,8 @@ def Quotation(span):
     return {_attr_names.SPAN: span}
 
 
-def Sabche(span):
-    return {_attr_names.SPAN: span}
+def Sabche(span, isverse=False):
+    return {_attr_names.SPAN: span, _attr_names.ISVERSE: isverse}
 
 
 def Yigchung(span):

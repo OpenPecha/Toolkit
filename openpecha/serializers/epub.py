@@ -1,9 +1,11 @@
 import os
+from pathlib import Path
+
 import requests
 
-from .serialize import Serialize
-from pathlib import Path
 from openpecha.formatters.layers import AnnType
+
+from .serialize import Serialize
 
 
 class Tsadra_template:
@@ -85,16 +87,22 @@ class EpubSerializer(Serialize):
             start_payload = Tsadra_template.tsawa_SP
             end_payload = Tsadra_template.end_payload
         elif ann["type"] == AnnType.citation:
-            if ann["isverse"]:
-                start_payload = Tsadra_template.quatation_verse_SP
-            else:
+            try:
+                if ann["isverse"]:
+                    start_payload = Tsadra_template.quatation_verse_SP
+                else:
+                    start_payload = Tsadra_template.quatation__SP
+            except Exception:
                 start_payload = Tsadra_template.quatation__SP
             end_payload = Tsadra_template.end_payload
         elif ann["type"] == AnnType.sabche:
-            if ann["isinline"]:
+            try:
+                if ann["isinline"]:
+                    start_payload = Tsadra_template.sabche1_SP
+                else:
+                    start_payload = Tsadra_template.sabche_SP
+            except Exception:
                 start_payload = Tsadra_template.sabche1_SP
-            else:
-                start_payload = Tsadra_template.sabche_SP
             end_payload = Tsadra_template.end_payload
         elif ann["type"] == AnnType.yigchung:
             start_payload = Tsadra_template.yigchung_SP
@@ -126,7 +134,9 @@ class EpubSerializer(Serialize):
             result_lines = (
                 result.splitlines()
             )  # Result is split where there is newline as we are going to consider newline as one para tag
-            results = f"<html>\n<head>\n\t<title>{pecha_title}</title>\n</head>\n<body>\n"
+            results = (
+                f"<html>\n<head>\n\t<title>{pecha_title}</title>\n</head>\n<body>\n"
+            )
             for result_line in result_lines:
                 results += f'<p class="tibetan-regular-indented">{result_line}</p>\n'
             results += "</body>\n</html>"
@@ -138,9 +148,8 @@ class EpubSerializer(Serialize):
             Path("template.css").write_bytes(template.content)
             # click.echo(template.content, file=open('template.css', 'w'))
             # Running ebook-convert command to convert html file to .epub (From calibre)
-            chapter_Xpath = (
-                "//*[@class='tibetan-chapter']"  # XPath expression to detect chapter titles.
-            )
+            # XPath expression to detect chapter titles.
+            chapter_Xpath = "//*[@class='tibetan-chapter']"
             font_family = "Monlam Uni Ouchan2"
             font_size = 16
             chapter_mark = "pagebreak"
