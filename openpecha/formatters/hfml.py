@@ -150,7 +150,10 @@ class HFMLFormatter(BaseFormatter):
         ]:
             title_pattern = re.search(pat_list[pattern], annotated_line)
             if title_pattern:
-                total_length += 4
+                if title_pattern.group(1):
+                    total_length += 5
+                else:
+                    total_length += 4
 
         for pattern in [
             "end_cit_pattern",
@@ -268,7 +271,10 @@ class HFMLFormatter(BaseFormatter):
             title_pattern = re.search(pat_list[pp], line)
             if title_pattern:
                 if ann.start() > title_pattern.start():
-                    length_before += 4
+                    if title_pattern.group(1):
+                        length_before += 4
+                    else:
+                        length_before += 3
 
         for pp in [
             "end_cit_pattern",
@@ -295,8 +301,8 @@ class HFMLFormatter(BaseFormatter):
             base_line (str): It contains the base text which is being extracted from the given annotated line.
         """
         base_line = (
-            annotated_line  # stores the base_line which is line without annotation
-        )
+            annotated_line
+        )  # stores the base_line which is line without annotation
         for pattern in [
             "line_pattern",
             "topic_pattern",
@@ -321,7 +327,11 @@ class HFMLFormatter(BaseFormatter):
         ]:
             title_pattern = re.search(pat_list[pattern], annotated_line)
             if title_pattern:
-                title = title_pattern[0][3:-1]
+                if title_pattern.group(1):
+                    starting_point = 4
+                else:
+                    starting_point = 3
+                title = title_pattern[0][starting_point:-1]
                 base_line = re.sub(pat_list[pattern], title, base_line, 1)
 
         if re.search(pat_list["error_pattern"], annotated_line):
@@ -932,9 +942,8 @@ class HFMLFormatter(BaseFormatter):
         return base_text
 
     def create_opf(self, input_path, id=None, **kwargs):
-        input_path = Path(input_path, id=id)
-        self._build_dirs(input_path)
-        (self.dirs["opf_path"] / "base").mkdir(exist_ok=True)
+        input_path = Path(input_path)
+        self._build_dirs(input_path, id=id)
 
         for i, (m_text, vol_name, n_vol) in enumerate(self.get_input(input_path)):
             print(f"[INFO] Processing Vol {i+1:03} of {n_vol}: {vol_name} ...")
