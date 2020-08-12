@@ -5,6 +5,7 @@ from uuid import uuid4
 
 import yaml
 
+from .. import config
 from .layers import *
 from .layers import AnnType, _attr_names
 
@@ -104,18 +105,21 @@ class BaseFormatter:
             |   ├── citation.yml
     """
 
-    def __init__(self, output_path="./output"):
-        self.output_path = Path(output_path)
+    def __init__(self, output_path=None):
+        self.output_path = Path(output_path if output_path else config.OPF_OUTPUT_PATH)
 
     def get_unique_id(self):
         return uuid4().hex
 
-    def _build_dirs(self, input_path, id=None):
+    def _build_dirs(self, input_path, id_=None):
         """
         Build the necessary directories for OpenPecha format.
         """
-        if id:
-            pecha_id = f"P{id:06}"
+        if id_:
+            if not id_.startswith(config.PECHA_PREFIX):
+                pecha_id = id_
+            elif id_.isdigit():
+                pecha_id = f"{config.PECHA_PREFIX}{id_:06}"
         else:
             pecha_id = input_path.stem
 
