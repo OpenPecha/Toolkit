@@ -174,7 +174,6 @@ class Serialize(object):
                 try:
                     uuid2localid = layer["local_ids"]
                 except Exception:
-                    print("Local Id not found!!")
                     uuid2localid = ""
                 self.apply_annotation(vol_id, a, uuid2localid)
 

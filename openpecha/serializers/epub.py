@@ -113,7 +113,7 @@ class EpubSerializer(Serialize):
         if not only_start_ann:
             self.add_chars(vol_id, end_cc, False, end_payload)
 
-    def serilize(self, pecha_id):
+    def serilize(self, pecha_id, output_path="./output/epub_output"):
         """ This module serialize .opf file to other format such as .epub etc. In case of epub,
         we are using calibre ebook-convert command to do the conversion by passing our custom css template
         and embedding our custom font. The converted output will be then saved in current directory
@@ -123,7 +123,6 @@ class EpubSerializer(Serialize):
         pecha_id (string): Pecha id that needs to be exported in other format
 
         """
-        pecha_id = f"P{pecha_id:06}"
         out_fn = f"{pecha_id}.html"
         pecha_title = self.meta["ebook_metadata"]["title"]
         cover_image = self.meta["ebook_metadata"]["cover"]
@@ -153,7 +152,7 @@ class EpubSerializer(Serialize):
             chapter_mark = "pagebreak"
             cover_path = self.opfpath / f"asset/image/{cover_image}"
             os.system(
-                f'ebook-convert {out_fn} ./output/epub_output/{pecha_id}.epub --extra-css=./template.css --chapter={chapter_Xpath} --chapter-mark="{chapter_mark}" --base-font-size={font_size} --embed-font-family="{font_family}" --cover={cover_path}'
+                f'ebook-convert {out_fn} {output_path}/{pecha_id}.epub --extra-css=./template.css --chapter={chapter_Xpath} --chapter-mark="{chapter_mark}" --base-font-size={font_size} --embed-font-family="{font_family}" --cover={cover_path}'
             )
             # Removing html file and template file
             os.system(f"rm {out_fn}")

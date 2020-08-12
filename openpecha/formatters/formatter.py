@@ -228,7 +228,7 @@ class BaseFormatter:
             # 1. New Annotation created
             # 2. Local_id gets deleted
             else:
-                self.add_new_ann(layer, ann)
+                self.add_new_ann(layer, vol_id, ann)
                 # TODO: implement case 2
 
         self._remove_deleted_anns(layer, vol_id)

@@ -12,7 +12,6 @@ class SerializeHFML(Serialize):
         try:
             return chr(uuid2localid[ann["id"]])
         except Exception:
-            print("Local Id not found!!")
             return ""
 
     def apply_annotation(self, vol_id, ann, uuid2localid):
