@@ -341,10 +341,9 @@ class TestTsadraFormatter:
         assert result == expected1
 
 
-if __name__ == "__main__":
-    TestHFMLFormatter().test_tofu_id()
-    path = Path("./tests/data/formatter/tsadra_hfml/")
-    # path = Path("./output/tsadra_hfml/tsadra_hfml.opf/")
-    pecha_id = 6
-    formatter = HFMLFormatter()
-    formatter.create_opf(path)
+# if __name__ == "__main__":
+#     TestHFMLFormatter().test_tofu_id()
+#     path = Path("./output/tsadra_hfml/tsadra_hfml.opf/")
+#     pecha_id = 6
+#     formatter = HFMLFormatter()
+#     formatter.create_opf(path)

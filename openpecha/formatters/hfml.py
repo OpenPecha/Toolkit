@@ -332,7 +332,10 @@ class HFMLFormatter(BaseFormatter):
         ]:
             title_pattern = re.search(pat_list[pattern], annotated_line)
             if title_pattern:
-                total_length += 4
+                if title_pattern.group(1):
+                    total_length += 5
+                else:
+                    total_length += 4
 
         for pattern in [
             "end_cit_pattern",
@@ -450,7 +453,10 @@ class HFMLFormatter(BaseFormatter):
             title_pattern = re.search(pat_list[pp], line)
             if title_pattern:
                 if ann.start() > title_pattern.start():
-                    length_before += 4
+                    if title_pattern.group(1):
+                        length_before += 4
+                    else:
+                        length_before += 3
 
         for pp in [
             "end_cit_pattern",
@@ -503,7 +509,11 @@ class HFMLFormatter(BaseFormatter):
         ]:
             title_pattern = re.search(pat_list[pattern], annotated_line)
             if title_pattern:
-                title = title_pattern[0][3:-1]
+                if title_pattern.group(1):
+                    starting_point = 4
+                else:
+                    starting_point = 3
+                title = title_pattern[0][starting_point:-1]
                 base_line = re.sub(pat_list[pattern], title, base_line, 1)
 
         if re.search(pat_list["error_pattern"], annotated_line):
