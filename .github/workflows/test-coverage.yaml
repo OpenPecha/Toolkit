@@ -1,4 +1,4 @@
-name: Test
+name: Test Coverage
 
 on:
   push:
@@ -33,5 +33,7 @@ jobs:
         pip install -r requirements-dev.txt
         pip install -e .
     
-    - name: Run test
-      run: pytest -vv
+    - name: Run Test Coverage
+      run: |
+        coverage run -m pytest tests/
+        coverage report

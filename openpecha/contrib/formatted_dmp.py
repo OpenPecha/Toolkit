@@ -1,6 +1,7 @@
-from diff_match_patch import diff_match_patch
 import re
 import urllib
+
+from diff_match_patch import diff_match_patch
 
 
 class Format:
@@ -8,7 +9,7 @@ class Format:
         pass
 
     def apply_patch(self, patch, mode=None):
-        if mode == 'CM':
+        if mode == "CM":
             return self.cm_format(patch)
         else:  # default mode. same as DMP natively does.
             return self.default_format(patch)
@@ -17,13 +18,13 @@ class Format:
     def default_format(patch):
         op, data = patch
         if op == -1:
-            return ''
+            return ""
         elif op == 1:
             return data
         elif op == 0:
             return data
         else:
-            raise ValueError('wrong patch operation value')
+            raise ValueError("wrong patch operation value")
 
     @staticmethod
     def cm_format(patch):
@@ -35,13 +36,13 @@ class Format:
         """
         op, data = patch
         if op == -1:
-            return '{--' + data + '--}'
+            return "{--" + data + "--}"
         elif op == 1:
-            return '{++' + data + '++}'
+            return "{++" + data + "++}"
         elif op == 0:
             return data
         else:
-            raise ValueError('wrong patch operation value')
+            raise ValueError("wrong patch operation value")
 
     @staticmethod
     def cm_substitutions(string):
@@ -49,8 +50,10 @@ class Format:
         merges all sequences of deletion+insertion into a substitution
         ( {-- xx--}{++ yy++} ==> {~~xx~>yy~~} )
         """
-        if '--}{++' in string:
-            return re.sub(r'{-- ([^{}\-+]+)--}{\+\+ ([^{}\-+]+)\+\+}', r'{~~\1~>\2~~}', string)
+        if "--}{++" in string:
+            return re.sub(
+                r"{-- ([^{}\-+]+)--}{\+\+ ([^{}\-+]+)\+\+}", r"{~~\1~>\2~~}", string
+            )
         else:
             return string
 
@@ -95,11 +98,15 @@ class FormattedDMP(diff_match_patch):
             if len(text1) > self.Match_MaxBits:
                 # patch_splitMax will only provide an oversized pattern in the case of
                 # a monster delete.
-                start_loc = self.match_main(text, text1[:self.Match_MaxBits],
-                                            expected_loc)
+                start_loc = self.match_main(
+                    text, text1[: self.Match_MaxBits], expected_loc
+                )
                 if start_loc != -1:
-                    end_loc = self.match_main(text, text1[-self.Match_MaxBits:],
-                                              expected_loc + len(text1) - self.Match_MaxBits)
+                    end_loc = self.match_main(
+                        text,
+                        text1[-self.Match_MaxBits :],
+                        expected_loc + len(text1) - self.Match_MaxBits,
+                    )
                     if end_loc == -1 or start_loc >= end_loc:
                         # Can't find valid trailing context.  Drop this patch.
                         start_loc = -1
@@ -115,20 +122,25 @@ class FormattedDMP(diff_match_patch):
                 results.append(True)
                 delta = start_loc - expected_loc
                 if end_loc == -1:
-                    text2 = text[start_loc: start_loc + len(text1)]
+                    text2 = text[start_loc : start_loc + len(text1)]
                 else:
-                    text2 = text[start_loc: end_loc + self.Match_MaxBits]
+                    text2 = text[start_loc : end_loc + self.Match_MaxBits]
                 if text1 == text2:
                     # Perfect match, just shove the replacement text in.
-                    text = (text[:start_loc] + self.diff_text2(patch.diffs, mode) +
-                            text[start_loc + len(text1):])
+                    text = (
+                        text[:start_loc]
+                        + self.diff_text2(patch.diffs, mode)
+                        + text[start_loc + len(text1) :]
+                    )
                 else:
                     # Imperfect match.
                     # Run a diff to get a framework of equivalent indices.
                     diffs = self.diff_main(text1, text2, False)
-                    if (len(text1) > self.Match_MaxBits and
-                            self.diff_levenshtein(diffs) / float(len(text1)) >
-                            self.Patch_DeleteThreshold):
+                    if (
+                        len(text1) > self.Match_MaxBits
+                        and self.diff_levenshtein(diffs) / float(len(text1))
+                        > self.Patch_DeleteThreshold
+                    ):
                         # The end points match, but the content is unacceptably bad.
                         results[-1] = False
                     else:
@@ -138,18 +150,25 @@ class FormattedDMP(diff_match_patch):
                             if op != self.DIFF_EQUAL:
                                 index2 = self.diff_xIndex(diffs, index1)
                             if op == self.DIFF_INSERT:  # Insertion
-                                text = text[:start_loc + index2] \
-                                       + self.formatting.apply_patch((op, data), mode) \
-                                       + text[start_loc + index2:]
+                                text = (
+                                    text[: start_loc + index2]
+                                    + self.formatting.apply_patch((op, data), mode)
+                                    + text[start_loc + index2 :]
+                                )
                             elif op == self.DIFF_DELETE:  # Deletion
-                                text = text[:start_loc + index2] \
-                                       + self.formatting.apply_patch((op, data), mode) \
-                                       + text[start_loc + self.diff_xIndex(diffs, index1 + len(data)):]
+                                text = (
+                                    text[: start_loc + index2]
+                                    + self.formatting.apply_patch((op, data), mode)
+                                    + text[
+                                        start_loc
+                                        + self.diff_xIndex(diffs, index1 + len(data)) :
+                                    ]
+                                )
                             if op != self.DIFF_DELETE:
                                 index1 += len(data)
         # Strip the padding off.
-        text = text[len(nullPadding):-len(nullPadding)]
-        if mode == 'CM':
+        text = text[len(nullPadding) : -len(nullPadding)]
+        if mode == "CM":
             text = self.formatting.cm_substitutions(text)
         return (text, results)
 
@@ -173,10 +192,10 @@ class FormattedDMP(diff_match_patch):
         presents the given patch in a Critic Markup format
         :return: string
         """
-        out = [str(patch).split('\n')[0] + '\n']
+        out = [str(patch).split("\n")[0] + "\n"]
         for p in patch.diffs:
-            out.append(self.formatting.apply_patch(p, 'CM'))
-        return ''.join(out)
+            out.append(self.formatting.apply_patch(p, "CM"))
+        return "".join(out)
 
     @staticmethod
     def decode_patch(patch):
@@ -187,26 +206,26 @@ class FormattedDMP(diff_match_patch):
         :return: the patch with readable content. \n are encoded to %0A to retain the patch's format
         :rtype: str
         """
-        lines = patch.rstrip('\n').split('\n')
+        lines = patch.rstrip("\n").split("\n")
         out = []
         for line in lines:
-            if not line.startswith('@'):
-                line = line[0] + urllib.parse.unquote(line[1:]).replace('\n', '%0A')
+            if not line.startswith("@"):
+                line = line[0] + urllib.parse.unquote(line[1:]).replace("\n", "%0A")
             out.append(line)
-        return '\n'.join(out)
+        return "\n".join(out)
 
 
-if __name__ == '__main__':
-    orig = 'zabcde'
-    edited = 'abbdey'
+if __name__ == "__main__":
+    orig = "zabcde"
+    edited = "abbdey"
 
     dmp = FormattedDMP()
     patches = dmp.patch_make(orig, edited)
 
     applied = dmp.patch_apply(patches, orig)
-    edit = dmp.patch_apply(patches, orig, mode='CM')
+    edit = dmp.patch_apply(patches, orig, mode="CM")
 
-    print('orig:', orig)
-    print('edited:', applied)
-    print('edited == applied:', edited == applied[0])
-    print('critic markup:', edit)
+    print("orig:", orig)
+    print("edited:", applied)
+    print("edited == applied:", edited == applied[0])
+    print("critic markup:", edit)

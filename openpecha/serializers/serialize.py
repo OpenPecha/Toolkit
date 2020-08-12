@@ -20,7 +20,9 @@ class Serialize(object):
     To use it, instantiate a concrete class with the path of the opf file, and call apply_layers() then get_result()
     """
 
-    def __init__(self, opfpath, text_id=None, vol_id="v001", layers=None, index_layer=None):
+    def __init__(
+        self, opfpath, text_id=None, vol_id="v001", layers=None, index_layer=None
+    ):
         self.opfpath = Path(opfpath)
         self.meta = self.get_meta_data()
         self.text_id = text_id

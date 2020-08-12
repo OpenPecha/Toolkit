@@ -1,6 +1,7 @@
-from urllib import request, parse
-import sys
 import json
+import sys
+from urllib import parse, request
+
 
 class Error:
     def __init__(self, type, content):

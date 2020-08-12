@@ -7,6 +7,7 @@ from collections import namedtuple
 __all__ = [
     "Layer",
     "Page",
+    "Span",
     "Text",
     "Correction",
     "ErrorCandidate",
@@ -19,7 +20,9 @@ __all__ = [
     "Sabche",
     "Yigchung",
     "BookTitle",
+    "PotiTitle",
     "Author",
+    "Archaic",
 ]
 
 
@@ -52,6 +55,7 @@ class _attr_names:
 
     # Spans
     SPAN = "span"
+    VOL = "vol"
     START = "start"
     END = "end"
 
@@ -60,12 +64,21 @@ class _attr_names:
     PAGE_INFO = "page_info"  # Page information. type: str
     PAGE_REFERENCE = "reference"  # Any reference of page, eg: img_url. type: str
 
+    # Text
+    WORK_ID = "work_id"
+
     # Correction
     CORRECTION = "correction"  # Correct text suggestion. type: str
     CERTAINTY = "certainty"  # Certainty of the suggested correct text. type: int
 
     # Peydurma
     NOTE = "note"  # syls, word or phrase to be compared to other publication
+
+    # Archaic word
+    MODERN = "modern"
+
+    # Sabche
+    ISVERSE = "isverse"  # Boolean flag to indicate a sache in verse format or not
 
 
 def Layer(id_, type_, rev=f"{1:05}"):
@@ -84,6 +97,11 @@ def Span(start, end):
 # ~~~ INDEX Layer ~~~~~
 # Cross vol Span
 CrossVolSpan = {"vol": None, "span": None}
+
+
+def CrossVolSpan(vol, start, end):
+    return {_attr_names.VOL: vol, _attr_names.START: start, _attr_names.END: end}
+
 
 # Sub_text annotation
 SubText = {"work": None, "span": []}  # index of the sub_text  # span of the sub_text
@@ -106,7 +124,15 @@ def Page(span, page_index=None, page_info=None, page_ref=None):
 def Correction(span, correction=None, certainty=None):
     return {
         _attr_names.CORRECTION: correction,
-        _attr_names.CERTAINTY: certainty,
+        # _attr_names.CERTAINTY: certainty,
+        _attr_names.SPAN: span,
+    }
+
+
+def Archaic(span, modern=None, certainty=None):
+    return {
+        _attr_names.MODERN: modern,
+        # _attr_names.CERTAINTY: certainty,
         _attr_names.SPAN: span,
     }
 
@@ -120,6 +146,10 @@ def Peydurma(span, note=None):
 
 
 def BookTitle(span):
+    return {_attr_names.SPAN: span}
+
+
+def PotiTitle(span):
     return {_attr_names.SPAN: span}
 
 
@@ -139,8 +169,8 @@ def Quotation(span):
     return {_attr_names.SPAN: span}
 
 
-def Sabche(span):
-    return {_attr_names.SPAN: span}
+def Sabche(span, isverse=False):
+    return {_attr_names.SPAN: span, _attr_names.ISVERSE: isverse}
 
 
 def Yigchung(span):
