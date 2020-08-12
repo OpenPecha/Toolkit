@@ -79,16 +79,16 @@ class LocalIdManager:
                 )
         return maps
 
-    def add(self, layer_name, global_id):
+    def add(self, layer_name, vol_id, global_id):
         """Add `global_id` to layer's global2local id map."""
         if layer_name not in self.maps:
-            self.maps[layer_name] = Global2LocalId()
-        self.maps[layer_name].add(global_id)
+            self.maps[layer_name][vol_id] = Global2LocalId()
+        self.maps[layer_name][vol_id].add(global_id)
 
-    def get_serialized_global2local_id(self, layer_name):
+    def get_serialized_global2local_id(self, layer_name, vol_id):
         """Convert map of given `layer_name` in global and local id pairs."""
-        serialized_dict = self.maps[layer_name].serialize()
-        del self.maps[layer_name]
+        serialized_dict = self.maps[layer_name][vol_id].serialize()
+        del self.maps[layer_name][vol_id]
         return serialized_dict
 
 
@@ -185,19 +185,34 @@ class BaseFormatter:
         inc_rev_int = int(layer["revision"]) + 1
         layer["revision"] = f"{inc_rev_int:05}"
 
-    def add_new_ann(self, layer, ann):
+    def add_new_ann(self, layer, vol_id, ann):
         uuid = self.get_unique_id()
         layer["annotations"][uuid] = ann
-        self.local_id_manager.add(layer["annotation_type"], uuid)
+        self.local_id_manager.add(layer["annotation_type"], vol_id, uuid)
 
-    def create_new_layer(self, layer_name, anns):
+    def _add_local_id(self, layer, vol_id):
+        layer[
+            _attr_names.LOCAL_ID
+        ] = self.local_id_manager.get_serialized_global2local_id(
+            layer[_attr_names.ANNOTATION_TYPE], vol_id
+        )
+
+    def create_new_layer(self, layer_name, vol_id, anns):
         new_layer = Layer(self.get_unique_id(), layer_name)
         for _, ann in anns:
-            self.add_new_ann(new_layer, ann)
-        new_layer[
-            _attr_names.LOCAL_ID
-        ] = self.local_id_manager.get_serialized_global2local_id(layer_name)
+            self.add_new_ann(new_layer, vol_id, ann)
+        self._add_local_id(new_layer, vol_id)
         return new_layer
+
+    def _remove_deleted_anns(self, layer, vol_id):
+        global2local_id = self.local_id_manager.maps[
+            layer[_attr_names.ANNOTATION_TYPE]
+        ][vol_id].global2local_id
+        for global_id, id_obj in global2local_id.items():
+            if isinstance(id_obj, int) or id_obj["is_found"]:
+                continue
+            else:
+                del layer[_attr_names.ANNOTATION][global_id]
 
     def update_layer(self, layer, anns, vol_id):
         self._inc_layer_revision(layer)
@@ -215,6 +230,8 @@ class BaseFormatter:
             else:
                 self.add_new_ann(layer, ann)
                 # TODO: implement case 2
+
+        self._remove_deleted_anns(layer, vol_id)
 
     def _get_vol_layers(self, layers):
         for layer_name in layers:
@@ -246,7 +263,7 @@ class BaseFormatter:
                     result[layer_name] = vol_old_layer
                 else:
                     result[layer_name] = self.create_new_layer(
-                        layer_name, vol_layer_anns
+                        layer_name, vol_id, vol_layer_anns
                     )
 
             yield result, vol_id

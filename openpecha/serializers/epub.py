@@ -123,6 +123,7 @@ class EpubSerializer(Serialize):
         pecha_id (string): Pecha id that needs to be exported in other format
 
         """
+        pecha_id = f"P{pecha_id:06}"
         out_fn = f"{pecha_id}.html"
         pecha_title = self.meta["ebook_metadata"]["title"]
         cover_image = self.meta["ebook_metadata"]["cover"]
