@@ -301,8 +301,8 @@ class HFMLFormatter(BaseFormatter):
             base_line (str): It contains the base text which is being extracted from the given annotated line.
         """
         base_line = (
-            annotated_line
-        )  # stores the base_line which is line without annotation
+            annotated_line  # stores the base_line which is line without annotation
+        )
         for pattern in [
             "line_pattern",
             "topic_pattern",

@@ -23,6 +23,7 @@ __all__ = [
     "PotiTitle",
     "Author",
     "Archaic",
+    "Span",
 ]
 
 
