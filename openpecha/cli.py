@@ -340,16 +340,18 @@ formatter_types = ["ocr", "hfml(default)", "tsadra"]
     "--name", "-n", type=click.Choice(formatter_types), help="Type of formatter"
 )
 @click.option("--id", "-i", type=int, help="Id of the pecha")
+@click.option("--output_path", "-o", help="output path to store opf pechas")
 @click.argument("input_path")
 def format(**kwargs):
     """
     Command to format pecha into opf
     """
-    formatter = HFMLFormatter()
     if kwargs["name"] == "ocr":
-        formatter = GoogleOCRFormatter()
+        formatter = GoogleOCRFormatter(kwargs["output_path"])
     elif kwargs["name"] == "tsadra":
-        formatter = HFMLFormatter()
+        formatter = HFMLFormatter(kwargs["output_path"])
+    else:
+        formatter = HFMLFormatter(kwargs["output_path"])
 
     formatter.create_opf(kwargs["input_path"], kwargs["id"])
 
