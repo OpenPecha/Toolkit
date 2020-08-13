@@ -941,9 +941,9 @@ class HFMLFormatter(BaseFormatter):
 
         return base_text
 
-    def create_opf(self, input_path, id=None, **kwargs):
+    def create_opf(self, input_path, id_=None, **kwargs):
         input_path = Path(input_path)
-        self._build_dirs(input_path, id=id)
+        self._build_dirs(input_path, id_=id_)
 
         for i, (m_text, vol_name, n_vol) in enumerate(self.get_input(input_path)):
             print(f"[INFO] Processing Vol {i+1:03} of {n_vol}: {vol_name} ...")
