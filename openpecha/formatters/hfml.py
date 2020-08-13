@@ -523,7 +523,10 @@ class HFMLFormatter(BaseFormatter):
                         title_pattern, pat_list, line
                     )
                     start_title = title_pattern.start() + i - pat_len_before_ann
-                    end_title = start_title + len(title_pattern[0]) - 5
+                    if local_id:
+                        end_title = start_title + len(title_pattern[0]) - 6
+                    else:
+                        end_title = start_title + len(title_pattern[0]) - 5
                     span = Span(start_title, end_title)
                     if pp == "author_pattern":
                         author_titles.append((local_id, Author(span)))
