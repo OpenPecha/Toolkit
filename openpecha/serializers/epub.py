@@ -132,20 +132,11 @@ class EpubSerializer(Serialize):
         cover_image = self.meta["ebook_metadata"]["cover"]
         results = self.get_result()
         for vol_id, result in results.items():
-            result_lines = (
-                result.splitlines()
-            )  # Result is split where there is newline as we are going to consider newline as one para tag
+            result = result.replace("\n", "<br>\n")
             results = (
                 f"<html>\n<head>\n\t<title>{pecha_title}</title>\n</head>\n<body>\n"
             )
-            for result_line in result_lines:
-                if Tsadra_template.book_title_SP in result_line:
-                    results += f"{result_line}{Tsadra_template.span_EP}{Tsadra_template.para_EP}\n"
-                elif Tsadra_template.author_SP in result_line:
-                    results += f"{result_line}{Tsadra_template.span_EP}{Tsadra_template.para_EP}\n"
-                else:
-                    results += f'<p class="tibetan-regular-indented">{Tsadra_template.ft}{result_line}</span></p>\n'
-            results += "</body>\n</html>"
+            results += f"{result}</body>\n</html>"
             Path(out_fn).write_text(results)
             # Downloading css template file from ebook template repo and saving it
             template = requests.get(
