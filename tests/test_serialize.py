@@ -27,21 +27,19 @@ def opf_path():
 
 
 def test_hfml_serializer_tsadra(opf_path):
-    pecha_id = "P000001"
     serializer = EpubSerializer(opf_path)
     serializer.apply_layers()
-    serializer.serilize(pecha_id)
+    serializer.serilize()
 
 
-if __name__ == "__main__":
-    # opf_path = Path("./output/P000009/P000009.opf/")
-    pecha_id = "P000009"
-    serializer = EpubSerializer(opf_path)
-    serializer.apply_layers()
-    serializer.serilize(pecha_id)
+# if __name__ == "__main__":
+# opf_path = Path("./output/P000009/P000009.opf/")
+# serializer = EpubSerializer(opf_path)
+# serializer.apply_layers()
+# serializer.serilize()
 
-    # serializer = SerializeHFML(opf_path)
-    # serializer.apply_layers()
-    # results = serializer.get_result()
-    # for vol_id, hfml_text in results.items():
-    #     Path(f"./output/chagchen_{vol_id}.txt").write_text(hfml_text)
+# serializer = SerializeHFML(opf_path)
+# serializer.apply_layers()
+# results = serializer.get_result()
+# for vol_id, hfml_text in results.items():
+#     Path(f"./output/chagchen_{vol_id}.txt").write_text(hfml_text)
