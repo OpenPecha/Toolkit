@@ -5,6 +5,7 @@ from uuid import uuid4
 
 import yaml
 
+from .. import config
 from .layers import *
 from .layers import AnnType, _attr_names
 
@@ -16,7 +17,7 @@ class Global2LocalId:
         self.start_local_id = 200_000
         self.global2local_id = self._initialize(local_id_dict)
         self.local2global_id = {
-            l_id: g_id for l_id, g_id in self.global2local_id.items()
+            l_id["local_id"]: g_id for g_id, l_id in self.global2local_id.items()
         }
         self.last_local_id = self.find_last()
 
@@ -32,11 +33,11 @@ class Global2LocalId:
         """Return last local id in a layer."""
         if self.global2local_id:
             return list(self.global2local_id.values()).pop()["local_id"]
-        return chr(self.start_local_id - 1)
+        return self.start_local_id - 1
 
     def add(self, global_id):
         """Map given `global_id` to the last local id."""
-        next_local_id = chr(ord(self.last_local_id) + 1)
+        next_local_id = self.last_local_id + 1
         self.global2local_id[global_id] = next_local_id
         self.last_local_id = next_local_id
 
@@ -46,13 +47,17 @@ class Global2LocalId:
 
     def get_global_id(self, local_id):
         """Return `global_id` associated to given `local_id`."""
-        return self.local2global_id.get(local_id, None)
+        global_id = self.local2global_id.get(local_id, None)
+        if not global_id:
+            return
+        self.global2local_id[global_id]["is_found"] = True
+        return global_id
 
     def serialize(self):
         """Return just the global and local id paris."""
         result = {}
         for global_id, id_obj in self.global2local_id.items():
-            if isinstance(id_obj, str):
+            if isinstance(id_obj, int):
                 result[global_id] = id_obj
             elif id_obj["is_found"]:
                 result[global_id] = id_obj["is_found"]
@@ -67,21 +72,24 @@ class LocalIdManager:
         self.maps = self._get_local_id_maps(layers)
 
     def _get_local_id_maps(self, layers):
-        maps = {}
+        maps = defaultdict(dict)
         for layer in layers:
-            maps[layer] = Global2LocalId(layers[layer].get(self.map_name, {}))
+            for vol in layers[layer]:
+                maps[layer][vol] = Global2LocalId(
+                    layers[layer][vol].get(self.map_name, {})
+                )
         return maps
 
-    def add(self, layer_name, global_id):
+    def add(self, layer_name, vol_id, global_id):
         """Add `global_id` to layer's global2local id map."""
         if layer_name not in self.maps:
-            self.maps[layer_name] = Global2LocalId()
-        self.maps[layer_name].add(global_id)
+            self.maps[layer_name][vol_id] = Global2LocalId()
+        self.maps[layer_name][vol_id].add(global_id)
 
-    def get_serialized_global2local_id(self, layer_name):
+    def get_serialized_global2local_id(self, layer_name, vol_id):
         """Convert map of given `layer_name` in global and local id pairs."""
-        serialized_dict = self.maps[layer_name].serialize()
-        del self.maps[layer_name]
+        serialized_dict = self.maps[layer_name][vol_id].serialize()
+        del self.maps[layer_name][vol_id]
         return serialized_dict
 
 
@@ -104,18 +112,21 @@ class BaseFormatter:
             |   ├── citation.yml
     """
 
-    def __init__(self, output_path="./output"):
-        self.output_path = Path(output_path)
+    def __init__(self, output_path=None):
+        self.output_path = Path(output_path if output_path else config.OPF_OUTPUT_PATH)
 
     def get_unique_id(self):
         return uuid4().hex
 
-    def _build_dirs(self, input_path, id=None):
+    def _build_dirs(self, input_path, id_=None):
         """
         Build the necessary directories for OpenPecha format.
         """
-        if id:
-            pecha_id = f"P{id:06}"
+        if id_:
+            if not id_.startswith(config.PECHA_PREFIX):
+                pecha_id = id_
+            elif id_.isdigit():
+                pecha_id = f"{config.PECHA_PREFIX}{id_:06}"
         else:
             pecha_id = input_path.stem
 
@@ -178,26 +189,41 @@ class BaseFormatter:
         inc_rev_int = int(layer["revision"]) + 1
         layer["revision"] = f"{inc_rev_int:05}"
 
-    def add_new_ann(self, layer, ann):
+    def add_new_ann(self, layer, vol_id, ann):
         uuid = self.get_unique_id()
         layer["annotations"][uuid] = ann
-        self.local_id_manager.add(layer["annotation_type"], uuid)
+        self.local_id_manager.add(layer["annotation_type"], vol_id, uuid)
 
-    def create_new_layer(self, layer_name, anns):
+    def _add_local_id(self, layer, vol_id):
+        layer[
+            _attr_names.LOCAL_ID
+        ] = self.local_id_manager.get_serialized_global2local_id(
+            layer[_attr_names.ANNOTATION_TYPE], vol_id
+        )
+
+    def create_new_layer(self, layer_name, vol_id, anns):
         new_layer = Layer(self.get_unique_id(), layer_name)
         for _, ann in anns:
-            self.add_new_ann(new_layer, ann)
-        new_layer[
-            _attr_names.LOCAL_ID
-        ] = self.local_id_manager.get_serialized_global2local_id(layer_name)
+            self.add_new_ann(new_layer, vol_id, ann)
+        self._add_local_id(new_layer, vol_id)
         return new_layer
 
-    def update_layer(self, layer, anns):
+    def _remove_deleted_anns(self, layer, vol_id):
+        global2local_id = self.local_id_manager.maps[
+            layer[_attr_names.ANNOTATION_TYPE]
+        ][vol_id].global2local_id
+        for global_id, id_obj in global2local_id.items():
+            if isinstance(id_obj, int) or id_obj["is_found"]:
+                continue
+            else:
+                del layer[_attr_names.ANNOTATION][global_id]
+
+    def update_layer(self, layer, anns, vol_id):
         self._inc_layer_revision(layer)
         for local_id, ann in anns:
             if local_id:
-                uuid = self.local_id_manager.maps[
-                    layer["annotation_type"]
+                uuid = self.local_id_manager.maps[layer["annotation_type"]][
+                    vol_id
                 ].get_global_id(local_id)
                 if uuid:
                     for key, value in ann.items():
@@ -206,8 +232,10 @@ class BaseFormatter:
             # 1. New Annotation created
             # 2. Local_id gets deleted
             else:
-                self.add_new_ann(layer, ann)
+                self.add_new_ann(layer, vol_id, ann)
                 # TODO: implement case 2
+
+        self._remove_deleted_anns(layer, vol_id)
 
     def _get_vol_layers(self, layers):
         for layer_name in layers:
@@ -235,11 +263,11 @@ class BaseFormatter:
                     continue
                 if vol_id in old_layers[layer_name]:
                     vol_old_layer = old_layers[layer_name][vol_id]
-                    self.update_layer(vol_old_layer, vol_layer_anns)
+                    self.update_layer(vol_old_layer, vol_layer_anns, vol_id)
                     result[layer_name] = vol_old_layer
                 else:
                     result[layer_name] = self.create_new_layer(
-                        layer_name, vol_layer_anns
+                        layer_name, vol_id, vol_layer_anns
                     )
 
             yield result, vol_id

@@ -28,5 +28,4 @@ dist/
 # Config
 **/config/*
 .idea/*
-openpecha/config.py
 **/.openpecha

@@ -16,13 +16,14 @@ __all__ = [
     "Peydurma",
     "Chapter",
     "Tsawa",
-    "Quotation",
+    "Citation",
     "Sabche",
     "Yigchung",
     "BookTitle",
     "PotiTitle",
     "Author",
     "Archaic",
+    "Span",
 ]
 
 
@@ -161,12 +162,12 @@ def Chapter(span):
     return {_attr_names.SPAN: span}
 
 
-def Tsawa(span):
-    return {_attr_names.SPAN: span}
+def Tsawa(span, isverse=False):
+    return {_attr_names.SPAN: span, _attr_names.ISVERSE: isverse}
 
 
-def Quotation(span):
-    return {_attr_names.SPAN: span}
+def Citation(span, isverse=False):
+    return {_attr_names.SPAN: span, _attr_names.ISVERSE: isverse}
 
 
 def Sabche(span, isverse=False):

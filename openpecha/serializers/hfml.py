@@ -1,3 +1,5 @@
+from openpecha.formatters.layers import AnnType
+
 from .serialize import Serialize
 
 
@@ -6,65 +8,75 @@ class SerializeHFML(Serialize):
     HFML (Human Friendly Markup Language) serializer class for OpenPecha.
     """
 
-    def apply_annotation(self, vol_id, ann):
+    def get_local_id(self, ann, uuid2localid):
+        try:
+            return chr(uuid2localid[ann["id"]])
+        except Exception:
+            return ""
+
+    def apply_annotation(self, vol_id, ann, uuid2localid):
         only_start_ann = False
         start_payload = "("
         end_payload = ")"
         side = "ab"
-        if ann["type"] == "pagination":
+        local_id = self.get_local_id(ann, uuid2localid)
+        if ann["type"] == AnnType.pagination:
             if ann["page_index"] == "0b":
                 pg_n = ann["reference"][5:-1]
                 pg_side = ann["reference"][-1]
                 if "-" in pg_n:
                     pg_n = int(pg_n.split("-")[0])
                     pg_side = side[int(pg_side)]
-                    start_payload = f"[{pg_n}{pg_side}]"
+                    start_payload = f"[{local_id}{pg_n}{pg_side}]"
                 else:
                     pg_n = int(pg_n)
                     if pg_side.isdigit():
                         pg_n = str(pg_n) + pg_side
                         pg_side = ""
-                    start_payload = f"[{pg_n}{pg_side}]"
+                    start_payload = f"[{local_id}{pg_n}{pg_side}]"
             else:
-                start_payload = f'[{ann["page_index"]}]'
+                start_payload = f'[{local_id}{ann["page_index"]}]'
 
             if ann["page_info"]:
                 start_payload += f' {ann["page_info"]}\n'
-            elif ann["reference"]:
-                start_payload += f' {ann["reference"]}\n'
+            # elif ann["reference"]:
+            #     start_payload += f' {ann["reference"]}\n'
             else:
                 start_payload += "\n"
             only_start_ann = True
-        elif ann["type"] == "correction":
-            start_payload = "("
-            end_payload = f',{ann["correction"]})'
-        elif ann["type"] == "peydurma":
-            start_payload = "#"
+        elif ann["type"] == AnnType.correction:
+            start_payload = f"<{local_id}"
+            end_payload = f',{ann["correction"]}>'
+        elif ann["type"] == AnnType.peydurma:
+            start_payload = f"#{local_id}"
             only_start_ann = True
-        elif ann["type"] == "error_candidate":
-            start_payload = "["
+        elif ann["type"] == AnnType.error_candidate:
+            start_payload = f"[{local_id}"
             end_payload = "]"
-        elif ann["type"] == "book_title":
-            start_payload = "(k1"
+        elif ann["type"] == AnnType.book_title:
+            start_payload = f"({local_id}k1"
             end_payload = ")"
-        elif ann["type"] == "author":
-            start_payload = "(au"
+        elif ann["type"] == AnnType.poti_title:
+            start_payload = f"({local_id}k2"
             end_payload = ")"
-        elif ann["type"] == "chapter_title":
-            start_payload = "(k3"
+        elif ann["type"] == AnnType.author:
+            start_payload = f"({local_id}au"
             end_payload = ")"
-        elif ann["type"] == "tsawa":
-            start_payload = "(m"
-            end_payload = "m)"
-        elif ann["type"] == "quotation":
-            start_payload = "(g"
-            end_payload = "g)"
-        elif ann["type"] == "sabche":
-            start_payload = "(q"
-            end_payload = "q)"
-        elif ann["type"] == "yigchung":
-            start_payload = "(y"
-            end_payload = "y)"
+        elif ann["type"] == AnnType.chapter:
+            start_payload = f"({local_id}k3"
+            end_payload = ")"
+        elif ann["type"] == AnnType.tsawa:
+            start_payload = f"<{local_id}m"
+            end_payload = "m>"
+        elif ann["type"] == AnnType.citation:
+            start_payload = f"<{local_id}g"
+            end_payload = "g>"
+        elif ann["type"] == AnnType.sabche:
+            start_payload = f"<{local_id}q"
+            end_payload = "q>"
+        elif ann["type"] == AnnType.yigchung:
+            start_payload = f"<{local_id}y"
+            end_payload = "y>"
 
         start_cc, end_cc = self._get_adapted_span(ann["span"], vol_id)
         # start_cc -= 4

@@ -3,7 +3,8 @@ ebook_metadata:
     །
   authors:
   - མཛད་པ་པོ། འཇམ་མགོན་ཀོང་སྤྲུལ་བློ་གྲོས་མཐའ་ཡས། །
-  sku: P000100
+  sku: P000101
+  cover: LEK-PHI-001.jpg
   layers:
   - Book Title
   - Author

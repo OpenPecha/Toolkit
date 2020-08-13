@@ -1,4 +1,3 @@
-import os
 from collections import defaultdict, namedtuple
 from pathlib import Path
 
@@ -21,20 +20,27 @@ class Serialize(object):
     """
 
     def __init__(
-        self, opfpath, text_id=None, vol_id="v001", layers=None, index_layer=None
+        self, opfpath, text_id=None, vol_ids=None, layers=None, index_layer=None
     ):
         self.opfpath = Path(opfpath)
         self.meta = self.get_meta_data()
         self.text_id = text_id
         self.index_layer = index_layer
         self.n_char_shifted = []
+        self.text_spans = {}
+        self.base_layers = {}
         if self.text_id:
             self.text_spans = self.get_text_spans(text_id)
             if self.text_spans:
                 self.base_layers = self.get_text_base_layer()
         else:
-            self.text_spans = {vol_id: {"start": 0, "end": float("inf")}}
-            self.base_layers = {vol_id: self.get_base_layer(vol_id=vol_id)}
+            if not vol_ids:
+                vol_ids = [vol.stem for vol in (self.opfpath / "base").iterdir()]
+            for vol_id in vol_ids:
+                text_spans = {vol_id: {"start": 0, "end": float("inf")}}
+                base_layers = {vol_id: self.get_base_layer(vol_id=vol_id)}
+                self.text_spans.update(text_spans)
+                self.base_layers.update(base_layers)
         """
         The chars_toapply is an important piece of the puzzle here. Basically applying the changes to the string directly is a
         bad idea for several reasons:
@@ -97,7 +103,11 @@ class Serialize(object):
 
     def get_meta_data(self):
         opf_path = self.opfpath
-        meta = yaml.safe_load((opf_path / "meta.yml").open())
+        try:
+            meta = yaml.safe_load((opf_path / "meta.yml").open())
+        except Exception:
+            print("Meta data not Found!!!")
+            meta = {}
         return meta
 
     def load_layer(self, fn):
@@ -153,14 +163,19 @@ class Serialize(object):
         if not layer_fn.is_file():
             return
         layer = yaml.safe_load(layer_fn.open())
-        for _, a in layer["annotations"].items():
+        for ann_id, a in layer["annotations"].items():
             # text begins in middle of the page
             if (
                 a["span"]["end"] >= self.text_spans[vol_id]["start"]
                 and a["span"]["start"] <= self.text_spans[vol_id]["end"]
             ):
                 a["type"] = layer["annotation_type"]
-                self.apply_annotation(vol_id, a)
+                a["id"] = ann_id
+                try:
+                    uuid2localid = layer["local_ids"]
+                except Exception:
+                    uuid2localid = ""
+                self.apply_annotation(vol_id, a, uuid2localid)
 
     def get_all_layer(self, vol_id):
         """
@@ -182,6 +197,7 @@ class Serialize(object):
                 self.layers = self.get_all_layer(vol_id)
             for layer_id in self.layers:
                 self.apply_layer(vol_id, layer_id)
+            self.layers = []
 
     def add_chars(self, vol_id, cc, frombefore, charstoadd):
         """
@@ -239,12 +255,13 @@ class Serialize(object):
 
         The algorithm should be something like:
         """
-        result = ""
+        result = {}
         # don't actually do naive string concatenations
         # see https://waymoot.org/home/python_string/ where method 5 is good
         for vol_id, base_layer in self.base_layers.items():
+            cur_vol_result = ""
             if self.text_id:
-                result += f"\n[{vol_id}]\n"
+                cur_vol_result += f"\n[{vol_id}]\n"
             i = 0
             for c in base_layer:
                 # UTF bom \ufeff takes the 0th index
@@ -253,15 +270,15 @@ class Serialize(object):
                 if i in self.chars_toapply[vol_id]:
                     apply = self.chars_toapply[vol_id][i]
                     for s in apply[0]:
-                        result += s
-                    result += c
+                        cur_vol_result += s
+                    cur_vol_result += c
                     for s in apply[1]:
-                        result += s
+                        cur_vol_result += s
                 else:
-                    result += c
+                    cur_vol_result += c
                 i += 1
 
-        if "pagination" in self.layers:
-            return self._assign_line_layer(result, vol_id)
-        else:
-            return result, self.text_id
+            if "Pagination" in self.layers:
+                cur_vol_result = self._assign_line_layer(cur_vol_result, vol_id)
+            result.update({vol_id: cur_vol_result})
+        return result
