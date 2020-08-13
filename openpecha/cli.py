@@ -445,16 +445,16 @@ def cache_to_store(cache_folder, ldspdi_uri, store_uri, force, verbose, debug, i
 @cli.command()
 @click.option("--pecha_num", "-pn")
 @click.option("--opf_path", "-op")
+@click.option("--output_path", "-o")
 def export(**kwargs):
     """
     Command to export Pecha in epub
     """
 
-    pecha_num = kwargs["pecha_num"]
+    pecha_id = get_pecha_id(kwargs["pecha_num"])
     opf_path = kwargs["opf_path"]
     if not opf_path:
-        pecha_id = get_pecha_id(kwargs["pecha_num"])
         opf_path = f'{config["OP_DATA_PATH"]}/{pecha_id}/{pecha_id}.opf'
     serializer = EpubSerializer(opf_path)
     serializer.apply_layers()
-    serializer.serilize(pecha_id)
+    serializer.serilize(pecha_id, kwargs["output_path"])
