@@ -468,5 +468,6 @@ def export(**kwargs):
     else:
         serializer = SerializeHFML(opf_path)
         serializer.apply_layers()
+        results = serializer.get_result()
         for vol_id, hfml_text in results.items():
             Path(f"{output_path}/{vol_id}.txt").write_text(hfml_text)
