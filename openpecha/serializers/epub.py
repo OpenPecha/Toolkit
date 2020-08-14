@@ -116,7 +116,7 @@ class EpubSerializer(Serialize):
         if not only_start_ann:
             self.add_chars(vol_id, end_cc, False, end_payload)
 
-    def serilize(self, output_path="./output/epub_output"):
+    def serialize(self, output_path="./output/epub_output"):
         """ This module serialize .opf file to other format such as .epub etc. In case of epub,
         we are using calibre ebook-convert command to do the conversion by passing our custom css template
         and embedding our custom font. The converted output will be then saved in current directory
@@ -130,6 +130,7 @@ class EpubSerializer(Serialize):
         out_fn = f"{pecha_id}.html"
         pecha_title = self.meta["ebook_metadata"]["title"]
         cover_image = self.meta["ebook_metadata"]["cover"]
+        self.apply_layers()
         results = self.get_result()
         for vol_id, result in results.items():
             result = result.replace("\n", "<br>\n")

@@ -463,11 +463,6 @@ def export(**kwargs):
 
     if kwargs["name"] == "epub":
         serializer = EpubSerializer(opf_path)
-        serializer.apply_layers()
-        serializer.serilize(kwargs["output_path"])
     else:
         serializer = SerializeHFML(opf_path)
-        serializer.apply_layers()
-        results = serializer.get_result()
-        for vol_id, hfml_text in results.items():
-            Path(f"{output_path}/{vol_id}.txt").write_text(hfml_text)
+    serializer.serialize(kwargs["output_path"])
