@@ -442,7 +442,13 @@ def cache_to_store(cache_folder, ldspdi_uri, store_uri, force, verbose, debug, i
     opm.sync_cache_to_store(store_uri, ldspdi_uri, force, opids)
 
 
+export_types = ["hfml(default)", "epub"]
+
+
 @cli.command()
+@click.option(
+    "--name", "-n", type=click.Choice(export_types), help="Type of export format"
+)
 @click.option("--opf_path", "-op")
 @click.option("--output_path", "-o")
 def export(**kwargs):
@@ -451,8 +457,12 @@ def export(**kwargs):
     """
 
     opf_path = kwargs["opf_path"]
+    output_path = kwargs["output_path"]
     if not opf_path:
         opf_path = f'{config["OP_DATA_PATH"]}/{pecha_id}/{pecha_id}.opf'
-    serializer = EpubSerializer(opf_path)
-    serializer.apply_layers()
-    serializer.serilize(kwargs["output_path"])
+
+    if kwargs["name"] == "epub":
+        serializer = EpubSerializer(opf_path)
+    else:
+        serializer = SerializeHFML(opf_path)
+    serializer.serialize(kwargs["output_path"])

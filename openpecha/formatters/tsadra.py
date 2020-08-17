@@ -72,16 +72,20 @@ class TsadraFormatter(BaseFormatter):
             "first": f"{rt_base}-first-line",
             "middle": f"{rt_base}-middle-lines",
             "last": f"{rt_base}-last-line",
+            "one_liner": f"{rt_base}-1-line-only",
         }
         # p_with_citations = []
+        title_tags = [
+            "credits-page_front-title",
+            "tibetan-book-title",
+            "tibetan-book-sub-title",
+        ]
         cover = self.get_cover_image(soup)
         if cover:
             self.cover_image = cover
         ps = soup.find_all("p")
         for p in ps:
-            if (
-                "credits-page_front-title" in p["class"][0]
-            ):  # to get the book title index
+            if p["class"][0] in title_tags:  # to get the book title index
                 book_title_tmp = self.text_preprocess(p.text) + "\n"
                 self.book_title.append(
                     (
@@ -94,7 +98,7 @@ class TsadraFormatter(BaseFormatter):
                 self.base_text += book_title_tmp
                 self.walker += len(book_title_tmp)
 
-            if "text-author" in p["class"][0]:  # to get the author annotation index
+            elif "text-author" in p["class"][0]:  # to get the author annotation index
                 author_tmp = self.text_preprocess(p.text) + "\n"
                 self.author.append(
                     (None, Author(Span(self.walker, len(author_tmp) - 2 + self.walker)))
@@ -102,7 +106,7 @@ class TsadraFormatter(BaseFormatter):
                 self.base_text += author_tmp
                 self.walker += len(author_tmp)
 
-            if (
+            elif (
                 rt_base in p["class"][0]
             ):  # to get the root text or 'tsawa' annotation index (verse form)
                 # TODO: one line root text.
@@ -113,6 +117,27 @@ class TsadraFormatter(BaseFormatter):
                     root_text_tmp += self.text_preprocess(p.text) + "\n"
                     self.base_text += self.text_preprocess(p.text) + "\n"
                 elif p["class"][0] == root_text_classes["last"]:
+                    for s in p.find_all("span"):
+                        if "root" in s["class"][0]:
+                            root_text_tmp += self.text_preprocess(s.text)
+                            self.root_text.append(
+                                (
+                                    None,
+                                    Tsawa(
+                                        Span(
+                                            self.walker,
+                                            len(root_text_tmp) - 1 + self.walker,
+                                        ),
+                                        isverse=True,
+                                    ),
+                                )
+                            )
+                            self.walker += len(root_text_tmp) + 1
+                            root_text_tmp = ""
+                        else:
+                            self.walker += len(self.text_preprocess(s.text))
+                    self.base_text += self.text_preprocess(p.text) + "\n"
+                else:
                     for s in p.find_all("span"):
                         if "root" in s["class"][0]:
                             root_text_tmp += self.text_preprocess(s.text)
@@ -413,6 +438,9 @@ class TsadraFormatter(BaseFormatter):
                     )
                     self.walker += len(citation_tmp)
                     citation_tmp = ""
+            else:
+                self.base_text += self.text_preprocess(p.text) + "\n"
+                self.walker += len(self.text_preprocess(p.text)) + 1
 
     def get_result(self):
         """

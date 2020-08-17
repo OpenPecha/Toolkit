@@ -3,13 +3,12 @@ from pathlib import Path
 import pytest
 
 from openpecha.serializers import EpubSerializer, SerializeHFML, SerializeMd
-from openpecha.serializers.serialize import Serialize
 
 
 # For testing read_base_layer, add_chars and apply_layer
 @pytest.fixture(scope="module")
 def opf_path():
-    return Path("./tests/data/serialize/tsadra/P000001/P000001.opf")
+    return Path("./tests/data/serialize/tsadra/P000100.opf")
 
 
 # Test HFML Serializer
@@ -26,20 +25,11 @@ def opf_path():
 #     print(result)
 
 
-def test_hfml_serializer_tsadra(opf_path):
+def test_hfml_2_tsadra_serializer(opf_path):
     serializer = EpubSerializer(opf_path)
     serializer.apply_layers()
-    serializer.serilize()
+    serializer.serialize()
 
 
 if __name__ == "__main__":
-    # opf_path = Path("./output/demo/output/P000100/P000100.opf/")
-    serializer = EpubSerializer(opf_path)
-    serializer.apply_layers()
-    serializer.serilize()
-
-# serializer = SerializeHFML(opf_path)
-# serializer.apply_layers()
-# results = serializer.get_result()
-# for vol_id, hfml_text in results.items():
-#     Path(f"./output/chagchen_{vol_id}.txt").write_text(hfml_text)
+    test_hfml_2_tsadra_serializer(Path("./tests/data/serialize/tsadra/P000100.opf"))

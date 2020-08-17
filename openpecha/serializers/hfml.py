@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from openpecha.formatters.layers import AnnType
 
 from .serialize import Serialize
@@ -83,3 +85,14 @@ class SerializeHFML(Serialize):
         self.add_chars(vol_id, start_cc, True, start_payload)
         if not only_start_ann:
             self.add_chars(vol_id, end_cc, False, end_payload)
+
+    def serialize(self, output_path="./output/publication"):
+        pecha_id = self.opfpath.stem
+        self.apply_layers()
+        results = self.get_result()
+        output_path = Path(output_path) / pecha_id
+        output_path.mkdir(exist_ok=True, parents=True)
+        for vol_id, hfml_text in results.items():
+            vol_hfml_fn = output_path / f"{vol_id}.txt"
+            print(f"[INFO] saving {vol_id} hfml text")
+            vol_hfml_fn.write_text(hfml_text)

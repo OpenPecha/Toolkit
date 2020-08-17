@@ -20,7 +20,7 @@ class Tsadra_template:
     author_SP = '<p class="credits-page_front-page---text-author"><span class="front-page---text-titles">'
     chapter_SP = '<span class="tibetan-chapter">'
     tsawa_SP = '<span class="tibetan-root-text">'
-    tsawa_verse_SP = '<span class="tibetan-root-text_tibetan-root-text-middle-lines">'
+    tsawa_verse_SP = '<span class="tibetan-root-text_tibetan-root-text-middle-lines tibetan-root-text">'
     quatation__verse_SP = (
         '<span class="tibetan-citations-in-verse_tibetan-citations-middle-lines">'
     )
@@ -116,7 +116,7 @@ class EpubSerializer(Serialize):
         if not only_start_ann:
             self.add_chars(vol_id, end_cc, False, end_payload)
 
-    def serilize(self, output_path="./output/epub_output"):
+    def serialize(self, output_path="./output/epub_output"):
         """ This module serialize .opf file to other format such as .epub etc. In case of epub,
         we are using calibre ebook-convert command to do the conversion by passing our custom css template
         and embedding our custom font. The converted output will be then saved in current directory
