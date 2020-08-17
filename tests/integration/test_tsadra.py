@@ -31,4 +31,4 @@ if __name__ == "__main__":
     # 4. Convert OPF to Ebook
     serializer = EpubSerializer(Path(opf_path))
     serializer.apply_layers()
-    serializer.serilize(pecha_name, ebook_output_path)
+    serializer.serilize(ebook_output_path)

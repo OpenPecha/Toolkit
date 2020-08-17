@@ -187,7 +187,7 @@ class TsadraFormatter(BaseFormatter):
                                 self.citation.append(
                                     (
                                         None,
-                                        Sabche(
+                                        Citation(
                                             Span(
                                                 p_walker,
                                                 len(citation_tmp) + p_walker - 1,
@@ -206,8 +206,7 @@ class TsadraFormatter(BaseFormatter):
                                         Sabche(
                                             Span(
                                                 p_walker, len(sabche_tmp) + p_walker - 1
-                                            ),
-                                            isverse=True,
+                                            )
                                         ),
                                     )
                                 )
@@ -262,8 +261,7 @@ class TsadraFormatter(BaseFormatter):
                                         Sabche(
                                             Span(
                                                 p_walker, len(sabche_tmp) + p_walker - 1
-                                            ),
-                                            isverse=True,
+                                            )
                                         ),
                                     )
                                 )
@@ -294,8 +292,7 @@ class TsadraFormatter(BaseFormatter):
                                         Sabche(
                                             Span(
                                                 p_walker, len(sabche_tmp) + p_walker - 1
-                                            ),
-                                            isverse=True,
+                                            )
                                         ),
                                     )
                                 )
@@ -322,10 +319,7 @@ class TsadraFormatter(BaseFormatter):
                         self.sabche.append(
                             (
                                 None,
-                                Sabche(
-                                    Span(p_walker, len(sabche_tmp) + p_walker - 1),
-                                    isverse=True,
-                                ),
+                                Sabche(Span(p_walker, len(sabche_tmp) + p_walker - 1)),
                             )
                         )
                         p_walker += len(sabche_tmp)
@@ -351,7 +345,21 @@ class TsadraFormatter(BaseFormatter):
                     if "sabche" in s["class"][0]:
                         sabche_tmp += self.text_preprocess(s.text)
 
-                    elif "front-tile" in s["class"][0]:
+                    else:
+                        if sabche_tmp:
+                            self.sabche.append(
+                                (
+                                    None,
+                                    Sabche(
+                                        Span(
+                                            sabche_walker,
+                                            len(sabche_tmp) + sabche_walker - 1,
+                                        )
+                                    ),
+                                )
+                            )
+                            sabche_walker = len(sabche_tmp) + sabche_walker
+                            sabche_tmp = ""
                         sabche_walker += len(self.text_preprocess(s.text))
 
                 # when sabche ends the para
@@ -360,10 +368,7 @@ class TsadraFormatter(BaseFormatter):
                         (
                             None,
                             Sabche(
-                                Span(
-                                    sabche_walker, len(sabche_tmp) + sabche_walker - 1
-                                ),
-                                isverse=False,
+                                Span(sabche_walker, len(sabche_tmp) + sabche_walker - 1)
                             ),
                         )
                     )
@@ -476,14 +481,13 @@ class TsadraFormatter(BaseFormatter):
         meta_data["layers"] = [layer for layer in layers if layers[layer]]
         return {"ebook_metadata": meta_data}
 
-    def create_opf(self, input_path, id):
+    def create_opf(self, input_path, id_):
         input_path = Path(input_path)
-        self._build_dirs(input_path, id=id)
+        self._build_dirs(input_path, id_=id_)
         (self.dirs["opf_path"] / "base").mkdir(exist_ok=True)
 
         # cover image path
         image_path = input_path / "image"
-        self._build_dirs(input_path, id=id)
         (self.dirs["opf_path"] / "asset").mkdir(exist_ok=True)
         os.system(f"cp -R {image_path} {self.dirs['opf_path']}/asset")
 

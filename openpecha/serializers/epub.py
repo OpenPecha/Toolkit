@@ -19,13 +19,13 @@ class Tsadra_template:
     book_title_SP = '<p class="credits-page_front-title"><span class="front-title">'
     author_SP = '<p class="credits-page_front-page---text-author"><span class="front-page---text-titles">'
     chapter_SP = '<span class="tibetan-chapter">'
-    tsawa_SP = '<span class="tibetan-root-text_tibetan-root-text-middle-lines">'
+    tsawa_SP = '<span class="tibetan-root-text">'
+    tsawa_verse_SP = '<span class="tibetan-root-text_tibetan-root-text-middle-lines">'
     quatation__verse_SP = (
         '<span class="tibetan-citations-in-verse_tibetan-citations-middle-lines">'
     )
     quatation__SP = '<span class="tibetan-external-citations">'
-    sabche_SP = '<span class="tibetan-sabche">'
-    sabche1_SP = '<span class="tibetan-sabche1">'
+    sabche_SP = '<span class="tibetan-sabche1">'
     yigchung_SP = '<span class="tibetan-commentary-small">'
 
 
@@ -87,7 +87,13 @@ class EpubSerializer(Serialize):
             start_payload = Tsadra_template.chapter_SP
             end_payload = Tsadra_template.span_EP
         elif ann["type"] == AnnType.tsawa:
-            start_payload = Tsadra_template.tsawa_SP
+            try:
+                if ann["isverse"]:
+                    start_payload = Tsadra_template.tsawa_verse_SP
+                else:
+                    start_payload = Tsadra_template.tsawa_SP
+            except Exception:
+                start_payload = Tsadra_template.tsawa_SP
             end_payload = Tsadra_template.span_EP
         elif ann["type"] == AnnType.citation:
             try:
@@ -99,13 +105,7 @@ class EpubSerializer(Serialize):
                 start_payload = Tsadra_template.quatation__SP
             end_payload = Tsadra_template.span_EP
         elif ann["type"] == AnnType.sabche:
-            try:
-                if ann["isverse"]:
-                    start_payload = Tsadra_template.sabche1_SP
-                else:
-                    start_payload = Tsadra_template.sabche_SP
-            except Exception:
-                start_payload = Tsadra_template.sabche1_SP
+            start_payload = Tsadra_template.sabche_SP
             end_payload = Tsadra_template.span_EP
         elif ann["type"] == AnnType.yigchung:
             start_payload = Tsadra_template.yigchung_SP
@@ -128,24 +128,21 @@ class EpubSerializer(Serialize):
         """
         pecha_id = self.opfpath.name.split(".")[0]
         out_fn = f"{pecha_id}.html"
-        pecha_title = self.meta["ebook_metadata"]["title"]
-        cover_image = self.meta["ebook_metadata"]["cover"]
+        try:
+            pecha_title = self.meta["ebook_metadata"]["title"]
+        except KeyError:
+            pecha_title = ""
+        try:
+            cover_image = self.meta["ebook_metadata"]["cover"]
+        except KeyError:
+            cover_image = ""
         results = self.get_result()
         for vol_id, result in results.items():
-            result_lines = (
-                result.splitlines()
-            )  # Result is split where there is newline as we are going to consider newline as one para tag
+            result = result.replace("\n", "<br>\n")
             results = (
                 f"<html>\n<head>\n\t<title>{pecha_title}</title>\n</head>\n<body>\n"
             )
-            for result_line in result_lines:
-                if Tsadra_template.book_title_SP in result_line:
-                    results += f"{result_line}{Tsadra_template.span_EP}{Tsadra_template.para_EP}\n"
-                elif Tsadra_template.author_SP in result_line:
-                    results += f"{result_line}{Tsadra_template.span_EP}{Tsadra_template.para_EP}\n"
-                else:
-                    results += f'<p class="tibetan-regular-indented">{Tsadra_template.ft}{result_line}</span></p>\n'
-            results += "</body>\n</html>"
+            results += f"{result}</body>\n</html>"
             Path(out_fn).write_text(results)
             # Downloading css template file from ebook template repo and saving it
             template = requests.get(
@@ -155,10 +152,6 @@ class EpubSerializer(Serialize):
             # click.echo(template.content, file=open('template.css', 'w'))
             # Running ebook-convert command to convert html file to .epub (From calibre)
             # XPath expression to detect chapter titles.
-            font_res = requests.get(
-                "https://github.com/OpenPecha/ebook-template/blob/master/MonlamUniOuChan2.ttf?raw=true"
-            )
-            Path("./MonlamUniOuChan2.ttf").write_bytes(font_res.content)
             chapter_Xpath = "//*[@class='tibetan-chapter']"
             font_family = "Monlam Uni Ouchan2"
             font_size = 15
@@ -169,5 +162,4 @@ class EpubSerializer(Serialize):
             )
             # Removing html file and template file
             os.system(f"rm {out_fn}")
-            os.system("rm MonlamUniOuChan2.ttf")
             os.system("rm template.css")

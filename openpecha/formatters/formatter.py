@@ -123,10 +123,12 @@ class BaseFormatter:
         Build the necessary directories for OpenPecha format.
         """
         if id_:
-            if not id_.startswith(config.PECHA_PREFIX):
+            if isinstance(id_, str) and not id_.startswith(config.PECHA_PREFIX):
                 pecha_id = id_
-            elif id_.isdigit():
+            elif isinstance(id_, int):
                 pecha_id = f"{config.PECHA_PREFIX}{id_:06}"
+            elif id_.isdigit():
+                pecha_id = f"{config.PECHA_PREFIX}{int(id_):06}"
         else:
             pecha_id = input_path.stem
 

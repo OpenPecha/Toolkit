@@ -32,11 +32,11 @@ def test_hfml_serializer_tsadra(opf_path):
     serializer.serilize()
 
 
-# if __name__ == "__main__":
-# opf_path = Path("./output/P000009/P000009.opf/")
-# serializer = EpubSerializer(opf_path)
-# serializer.apply_layers()
-# serializer.serilize()
+if __name__ == "__main__":
+    # opf_path = Path("./output/demo/output/P000100/P000100.opf/")
+    serializer = EpubSerializer(opf_path)
+    serializer.apply_layers()
+    serializer.serilize()
 
 # serializer = SerializeHFML(opf_path)
 # serializer.apply_layers()
