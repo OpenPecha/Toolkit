@@ -5,6 +5,7 @@ This module implements all classes necessary to format HFML annotation to OpenPe
 HFML (Human Friendly Markup Language) contains tagset used for structuring and annotating the text.
 """
 import re
+from collections import defaultdict
 from pathlib import Path
 
 import yaml
@@ -12,6 +13,33 @@ import yaml
 from .formatter import BaseFormatter
 from .layers import *
 from .layers import AnnType
+
+
+class Vol2FnManager:
+    def __init__(self, metadata):
+        self.name = "vol2fn"
+        self.vol_num = 0
+        self.vol2fn = self._get_vol2fn(metadata)
+        self.fn2vol = {fn: vol for vol, fn in self.vol2fn.items()}
+
+    def _get_vol2fn(self, metadata):
+        if self.name in metadata:
+            return metadata[self.name]
+        else:
+            return defaultdict(dict)
+
+    def get_fn(self, vol):
+        return self.vol2fn.get(vol)
+
+    def get_vol_id(self, fn):
+        vol_id = self.fn2vol.get(fn)
+        if vol_id:
+            return vol_id
+        else:
+            self.vol_num += 1
+            vol_id = f"v{self.vol_num:03}"
+            self.vol2fn[vol_id] = fn
+            return vol_id
 
 
 class HFMLFormatter(BaseFormatter):
@@ -74,6 +102,19 @@ class HFMLFormatter(BaseFormatter):
                 else:
                     result_text += line + "\n"
         return result_text
+
+    def _load_metadata(self):
+        meta_fn = self.dirs["opf_path"] / "meta.yml"
+        if meta_fn.is_file():
+            return self.load(meta_fn)
+        else:
+            return {}
+
+    def _save_metadata(self, **kwargs):
+        meta_fn = self.dirs["opf_path"] / "meta.yml"
+        if kwargs:
+            self.metadata.update(kwargs)
+        self.dump(self.metadata, meta_fn)
 
     def get_input(self, input_path):
         fns = list(input_path.iterdir())
@@ -951,26 +992,26 @@ class HFMLFormatter(BaseFormatter):
     def create_opf(self, input_path, id_=None, **kwargs):
         input_path = Path(input_path)
         self._build_dirs(input_path, id_=id_)
+        self.metadata = self._load_metadata()
+        vol2fn_manager = Vol2FnManager(self.metadata)
 
-        for i, (m_text, vol_name, n_vol) in enumerate(self.get_input(input_path)):
-            print(f"[INFO] Processing Vol {i+1:03} of {n_vol}: {vol_name} ...")
-            base_id = f"v{i+1:03}"
+        for m_text, vol_name, n_vol in self.get_input(input_path):
+            vol_id = vol2fn_manager.get_vol_id(vol_name)
+            print(f"[INFO] Processing Vol {vol_id} of {n_vol}: {vol_name} ...")
             self.build_layers(m_text, n_vol)
-            # save base_text
-            # if (self.dirs['opf_path']/'base'/f'{base_id}.txt').is_file(): continue
             if "is_text" in kwargs:
                 if kwargs["is_text"]:
                     continue
 
             base_text = self.get_base_text()
-            (self.dirs["opf_path"] / "base" / f"{base_id}.txt").write_text(base_text)
+            (self.dirs["opf_path"] / "base" / f"{vol_id}.txt").write_text(base_text)
 
         # save pecha layers
         layers = self.get_result()
-        for vol_layers, base_id in self.format_layer(layers):
-            if base_id:
-                print(f"[INFO] Creating layers for {base_id} ...")
-                vol_layer_path = self.dirs["layers_path"] / base_id
+        for vol_layers, vol_id in self.format_layer(layers):
+            if vol_id:
+                print(f"[INFO] Creating layers for {vol_id} ...")
+                vol_layer_path = self.dirs["layers_path"] / vol_id
                 vol_layer_path.mkdir(exist_ok=True)
             else:
                 print("[INFO] Creating index layer for Pecha ...")
@@ -981,6 +1022,8 @@ class HFMLFormatter(BaseFormatter):
                 else:
                     layer_fn = vol_layer_path / f"{layer}.yml"
                 self.dump(ann, layer_fn)
+
+        self._save_metadata(vol2fn=dict(vol2fn_manager.vol2fn))
 
 
 class HFMLTextFromatter(HFMLFormatter):
@@ -1152,11 +1195,3 @@ class HFMLTextFromatter(HFMLFormatter):
         }
 
         return result
-
-
-if __name__ == "__main__":
-    formatter = HFMLFormatter()
-    formatter.create_opf("./tests/data/formatter/hfml/P000002/")
-
-    formatter = HFMLTextFromatter()
-    formatter.new_poti("./tests/data/formatter/hfml/vol_sep_test")
