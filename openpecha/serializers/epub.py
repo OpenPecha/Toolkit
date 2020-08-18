@@ -18,7 +18,7 @@ class Tsadra_template:
     ft = '<span class="front-title">'
     book_title_SP = '<p class="credits-page_front-title"><span class="front-title">'
     author_SP = '<p class="credits-page_front-page---text-author"><span class="front-page---text-titles">'
-    chapter_SP = '<span class="tibetan-chapter">'
+    chapter_SP = '<span class="tibetan-chapter1">'
     tsawa_SP = '<span class="tibetan-root-text">'
     tsawa_verse_SP = '<span class="tibetan-root-text_tibetan-root-text-middle-lines tibetan-root-text">'
     quatation__verse_SP = (

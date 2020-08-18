@@ -446,8 +446,8 @@ class HFMLFormatter(BaseFormatter):
             "start_yigchung_pattern": r"\<([𰵀-󴉱])?y",
             "end_yigchung_pattern": r"y\>",
             "sub_topic_pattern": r"\{([𰵀-󴉱])?\w+\-\w+\}",
-            "error_pattern": r"\<([𰵀-󴉱])?\S+\,\S+\>",
-            "archaic_word_pattern": r"\{([𰵀-󴉱])?\S+,\S+\}",
+            "error_pattern": r"\<([𰵀-󴉱])?\S+?\,\S+?\>",
+            "archaic_word_pattern": r"\{([𰵀-󴉱])?\S+?\,\S+?\}",
             "abs_er_pattern": r"\[([𰵀-󴉱])?[^0-9].*?\]",
             "note_pattern": r"#([𰵀-󴉱])?",
         }
@@ -685,7 +685,7 @@ class HFMLFormatter(BaseFormatter):
             if re.search(
                 pat_list["archaic_word_pattern"], line
             ):  # checking current line contain error annotation or not
-                archaics = re.finditer(pat_list["archaic_pattern"], line)
+                archaics = re.finditer(pat_list["archaic_word_pattern"], line)
                 for archaic in archaics:
                     local_id = self.get_local_id(archaic)
                     modern_word = archaic[0].split(",")[1][

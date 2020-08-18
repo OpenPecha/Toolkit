@@ -363,6 +363,7 @@ if __name__ == "__main__":
     # formatter = HFMLFormatter()
     # formatter.create_opf(path, pecha_id)
 
-    path = "./output/demo/src/P000101/OEBPS/"
-    formatter = TsadraFormatter()
-    formatter.create_opf(path, 9)
+    # path = "./output/demo/src/P000101/OEBPS/"
+    # formatter = TsadraFormatter()
+    # formatter.create_opf(path, 9)
+    TestTsadraFormatter().test_tsadra_formatter()
