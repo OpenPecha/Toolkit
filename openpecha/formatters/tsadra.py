@@ -197,7 +197,6 @@ class TsadraFormatter(BaseFormatter):
                         if (
                             s["class"][0] == TsadraTemplate.yigchung
                         ):  # checking for yigchung annotation
-                            # p_tmp += f'{{++*++}}{self.text_preprocess(s.text)}{{++*++}}'
                             if citation_tmp:
                                 # citation_tmp += citation_tmp
                                 self.citation.append(
