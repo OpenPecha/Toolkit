@@ -44,6 +44,7 @@ class AnnType:
     sabche = "Sabche"
     tsawa = "Tsawa"
     yigchung = "Yigchung"
+    archaic = "Archaic"
 
 
 class _attr_names:

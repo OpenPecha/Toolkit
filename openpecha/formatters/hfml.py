@@ -301,8 +301,8 @@ class HFMLFormatter(BaseFormatter):
             base_line (str): It contains the base text which is being extracted from the given annotated line.
         """
         base_line = (
-            annotated_line
-        )  # stores the base_line which is line without annotation
+            annotated_line  # stores the base_line which is line without annotation
+        )
         for pattern in [
             "line_pattern",
             "topic_pattern",
@@ -395,6 +395,7 @@ class HFMLFormatter(BaseFormatter):
             []
         )  # list variable to store error annotation according to base string index eg : [(es,ee,'suggestion')]
         cur_vol_abs_er_id = []  # list variable to store abs_er annotation
+        cur_vol_archaic_id = []
         note_id = []  # list variable to store note annotation '#"
         pg_info = []  # lsit variable to store page info component
         pg_ann = []  # list variable to store page annotation content
@@ -447,7 +448,7 @@ class HFMLFormatter(BaseFormatter):
             "end_yigchung_pattern": r"y\>",
             "sub_topic_pattern": r"\{([𰵀-󴉱])?\w+\-\w+\}",
             "error_pattern": r"\<([𰵀-󴉱])?\S+\,\S+\>",
-            "archaic_word_pattern": r"\{([𰵀-󴉱])?\S+,\S+\}",
+            "archaic_word_pattern": r"\{([𰵀-󴉱])?\S+?\,\S+?\}",
             "abs_er_pattern": r"\[([𰵀-󴉱])?[^0-9].*?\]",
             "note_pattern": r"#([𰵀-󴉱])?",
         }
@@ -685,7 +686,7 @@ class HFMLFormatter(BaseFormatter):
             if re.search(
                 pat_list["archaic_word_pattern"], line
             ):  # checking current line contain error annotation or not
-                archaics = re.finditer(pat_list["archaic_pattern"], line)
+                archaics = re.finditer(pat_list["archaic_word_pattern"], line)
                 for archaic in archaics:
                     local_id = self.get_local_id(archaic)
                     modern_word = archaic[0].split(",")[1][
@@ -848,6 +849,8 @@ class HFMLFormatter(BaseFormatter):
                 self.error_id.append(cur_vol_error_id)
                 cur_vol_error_id = []
                 self.abs_er_id.append(cur_vol_abs_er_id)
+                self.archaic_word_id.append(cur_vol_archaic_id)
+                cur_vol_archaic_id = []
                 cur_vol_abs_er_id = []
                 self.notes_id.append(note_id)
                 note_id = []
@@ -897,6 +900,7 @@ class HFMLFormatter(BaseFormatter):
             AnnType.correction: self.error_id,
             AnnType.error_candidate: self.abs_er_id,
             AnnType.peydurma: self.notes_id,
+            AnnType.archaic: self.archaic_word_id,
         }
 
         return result
