@@ -32,7 +32,7 @@ setup(
     install_requires=[
         "Click==7.0",
         "diff-match-patch==20181111",
-        "PyYAML==5.1.2",
+        "PyYAML>=5.0.0",
         "requests==2.22.0",
         "tqdm==4.35.0",
         "PyGithub==1.43.8",

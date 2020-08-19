@@ -82,7 +82,7 @@ class LocalIdManager:
 
     def add(self, layer_name, vol_id, global_id):
         """Add `global_id` to layer's global2local id map."""
-        if layer_name not in self.maps:
+        if layer_name not in self.maps or vol_id not in self.maps[layer_name]:
             self.maps[layer_name][vol_id] = Global2LocalId()
         self.maps[layer_name][vol_id].add(global_id)
 
