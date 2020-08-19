@@ -5,41 +5,14 @@ This module implements all classes necessary to format HFML annotation to OpenPe
 HFML (Human Friendly Markup Language) contains tagset used for structuring and annotating the text.
 """
 import re
-from collections import defaultdict
 from pathlib import Path
 
 import yaml
 
+from ..utils import Vol2FnManager
 from .formatter import BaseFormatter
 from .layers import *
 from .layers import AnnType, _attr_names
-
-
-class Vol2FnManager:
-    def __init__(self, metadata):
-        self.name = "vol2fn"
-        self.vol_num = 0
-        self.vol2fn = self._get_vol2fn(metadata)
-        self.fn2vol = {fn: vol for vol, fn in self.vol2fn.items()}
-
-    def _get_vol2fn(self, metadata):
-        if self.name in metadata:
-            return metadata[self.name]
-        else:
-            return defaultdict(dict)
-
-    def get_fn(self, vol):
-        return self.vol2fn.get(vol)
-
-    def get_vol_id(self, fn):
-        vol_id = self.fn2vol.get(fn)
-        if vol_id:
-            return vol_id
-        else:
-            self.vol_num += 1
-            vol_id = f"v{self.vol_num:03}"
-            self.vol2fn[vol_id] = fn
-            return vol_id
 
 
 class HFMLFormatter(BaseFormatter):
