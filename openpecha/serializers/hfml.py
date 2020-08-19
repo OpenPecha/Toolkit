@@ -49,6 +49,9 @@ class SerializeHFML(Serialize):
         elif ann["type"] == AnnType.correction:
             start_payload = f"<{local_id}"
             end_payload = f',{ann["correction"]}>'
+        elif ann["type"] == AnnType.archaic:
+            start_payload = "{" + f"{local_id}"
+            end_payload = f',{ann["modern"]}' + "}"
         elif ann["type"] == AnnType.peydurma:
             start_payload = f"#{local_id}"
             only_start_ann = True

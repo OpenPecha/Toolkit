@@ -833,7 +833,10 @@ class HFMLFormatter(BaseFormatter):
                     )
 
             pat_len_before_ann = self.total_pattern(pat_list, line)
-            end_line = start_line + length - pat_len_before_ann - 1
+            if length == pat_len_before_ann:
+                end_line = start_line + length - pat_len_before_ann - 2
+            else:
+                end_line = start_line + length - pat_len_before_ann - 1
             char_walker = end_line + 2
             base_line = self.base_extract(pat_list, line) + "\n"
             self.base_text += base_line
@@ -890,8 +893,6 @@ class HFMLFormatter(BaseFormatter):
                 self.archaic_word_id.append(cur_vol_archaic_id)
                 cur_vol_archaic_id = []
                 cur_vol_abs_er_id = []
-                self.archaic_word_id.append(cur_vol_archaic_id)
-                cur_vol_archaic_id = []
                 self.notes_id.append(note_id)
                 note_id = []
                 self.author.append(author_titles)
@@ -920,7 +921,7 @@ class HFMLFormatter(BaseFormatter):
 
     def get_result(self):
 
-        if self.topic_id[0]:
+        if len(self.topic_id) > 1:
             if self.topic_id[0][0][1]["work_id"] == self.topic_id[1][0][1]["work_id"]:
                 self.topic_id = self.topic_id[1:]
                 self.sub_topic = self.sub_topic[1:]
