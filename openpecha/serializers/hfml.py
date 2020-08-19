@@ -1,7 +1,7 @@
 from pathlib import Path
 
-from openpecha.formatters.layers import AnnType
-
+from ..formatters.layers import AnnType
+from ..utils import Vol2FnManager
 from .serialize import Serialize
 
 
@@ -90,9 +90,11 @@ class SerializeHFML(Serialize):
         pecha_id = self.opfpath.stem
         self.apply_layers()
         results = self.get_result()
+        vol2fn_manager = Vol2FnManager(self.get_meta_data())
         output_path = Path(output_path) / pecha_id
         output_path.mkdir(exist_ok=True, parents=True)
         for vol_id, hfml_text in results.items():
-            vol_hfml_fn = output_path / f"{vol_id}.txt"
-            print(f"[INFO] saving {vol_id} hfml text")
+            fn = vol2fn_manager.get_fn(vol_id)
+            vol_hfml_fn = output_path / fn
+            print(f"[INFO] saving {fn} hfml text")
             vol_hfml_fn.write_text(hfml_text)
