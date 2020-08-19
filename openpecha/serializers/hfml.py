@@ -16,7 +16,7 @@ class SerializeHFML(Serialize):
         except Exception:
             return ""
 
-    def apply_annotation(self, vol_id, ann, uuid2localid):
+    def apply_annotation(self, vol_id, ann, uuid2localid=None):
         only_start_ann = False
         start_payload = "("
         end_payload = ")"
@@ -45,6 +45,12 @@ class SerializeHFML(Serialize):
             #     start_payload += f' {ann["reference"]}\n'
             else:
                 start_payload += "\n"
+            only_start_ann = True
+        elif ann["type"] == AnnType.topic:
+            start_payload = "{" + f"{ann['work_id']}" + "}"
+            only_start_ann = True
+        elif ann["type"] == AnnType.sub_topic:
+            start_payload = f"{{{ann['work_id']}}}"
             only_start_ann = True
         elif ann["type"] == AnnType.correction:
             start_payload = f"<{local_id}"

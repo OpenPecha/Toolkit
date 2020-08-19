@@ -4,6 +4,8 @@ from pathlib import Path
 import requests
 import yaml
 
+from openpecha.formatters.layers import AnnType, SubText
+
 INFO = "[INFO] {}"
 
 
@@ -163,19 +165,35 @@ class Serialize(object):
         if not layer_fn.is_file():
             return
         layer = yaml.safe_load(layer_fn.open())
-        for ann_id, a in layer["annotations"].items():
+        for ann_id, ann in layer["annotations"].items():
             # text begins in middle of the page
             if (
-                a["span"]["end"] >= self.text_spans[vol_id]["start"]
-                and a["span"]["start"] <= self.text_spans[vol_id]["end"]
+                ann["span"]["end"] >= self.text_spans[vol_id]["start"]
+                and ann["span"]["start"] <= self.text_spans[vol_id]["end"]
             ):
-                a["type"] = layer["annotation_type"]
-                a["id"] = ann_id
+                ann["type"] = layer["annotation_type"]
+                ann["id"] = ann_id
                 try:
                     uuid2localid = layer["local_ids"]
                 except Exception:
                     uuid2localid = ""
-                self.apply_annotation(vol_id, a, uuid2localid)
+                self.apply_annotation(vol_id, ann, uuid2localid)
+
+    def apply_index(self, index_path):
+        index = yaml.safe_load(index_path.open())
+        for ann_id, topic in index["annotations"].items():
+            topic_ann = defaultdict(str)
+            sub_topics = topic["parts"]
+            for sub_topic in sub_topics:
+                if sub_topic:
+                    vol_id = f"v{sub_topic[0]['span']['vol']:03}"
+                    sub_topic[0]["type"] = AnnType.sub_topic
+                    self.apply_annotation(vol_id, sub_topic[0])
+            vol_id = f"v{topic['span'][0]['span']['vol']:03}"
+            topic_ann["type"] = AnnType.topic
+            topic_ann["span"] = topic["span"][0]["span"]
+            topic_ann["work_id"] = topic["span"][0]["work_id"]
+            self.apply_annotation(vol_id, topic_ann)
 
     def get_all_layer(self, vol_id):
         """
@@ -191,7 +209,9 @@ class Serialize(object):
         """
         This applies all the layers recorded in self.layers. If self.layers is none, it reads all the layers from the layer directory.
         """
-
+        index_path = self.opfpath / "index.yml"
+        if index_path.is_file():
+            self.apply_index(index_path)
         for vol_id in self.base_layers:
             if not self.layers:
                 self.layers = self.get_all_layer(vol_id)

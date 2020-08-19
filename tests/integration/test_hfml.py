@@ -11,8 +11,8 @@ if __name__ == "__main__":
     hfml_path = "./output/P000001_hfml/"
     pecha_id = 1
 
-    formatter = HFMLFormatter(output_path=opfs_path)
-    formatter.create_opf(hfml_text, pecha_id)
+    # formatter = HFMLFormatter(output_path=opfs_path)
+    # formatter.create_opf(hfml_text, pecha_id)
 
     serializer = SerializeHFML(opf_path)
     serializer.apply_layers()
