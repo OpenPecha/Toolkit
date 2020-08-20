@@ -730,11 +730,11 @@ class HFMLFormatter(BaseFormatter):
                     local_id = self.get_local_id(abs_er)
                     start_abs_er = abs_er.start() + char_walker - pat_len_before_ann
                     if local_id:
-                        end_abs_er = start_abs_er + len(
-                            abs_er[0][2:-1]
+                        end_abs_er = (
+                            start_abs_er + len(abs_er[0][2:-1]) - 1
                         )  # 3 is minus as two border bracket and local id
                     else:
-                        end_abs_er = start_abs_er + len(abs_er[0][1:-1])
+                        end_abs_er = start_abs_er + len(abs_er[0][1:-1]) - 1
                     cur_vol_abs_er_id.append(
                         (local_id, ErrorCandidate(Span(start_abs_er, end_abs_er)))
                     )

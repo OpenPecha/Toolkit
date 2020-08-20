@@ -226,8 +226,8 @@ class TestHFMLFormatter:
             ],
             AnnType.error_candidate: [
                 [
-                    (1000012, {"span": {"start": 2040, "end": 2043}}),
-                    (1000013, {"span": {"start": 2044, "end": 2046}}),
+                    (1000012, {"span": {"start": 2040, "end": 2042}}),
+                    (1000013, {"span": {"start": 2044, "end": 2045}}),
                 ],
                 [],
                 [],
