@@ -1,9 +1,0 @@
-id: 19bf2041187a4e9ab10fa49b3c96e5eb
-annotation_type: error_candidate
-revision: '00001'
-annotations:
-- id: 41d288dfbe304e6ab4d62cdfe88c395f
-  span:
-    start: 2125
-    end: 2126
-

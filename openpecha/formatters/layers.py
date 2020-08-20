@@ -172,7 +172,7 @@ def Citation(span, isverse=False):
 
 
 def Sabche(span, isverse=False):
-    return {_attr_names.SPAN: span, _attr_names.ISVERSE: isverse}
+    return {_attr_names.SPAN: span}
 
 
 def Yigchung(span):
