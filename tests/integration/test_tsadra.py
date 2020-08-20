@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from openpecha.formatters import HFMLFormatter, TsadraFormatter
-from openpecha.serializers import EpubSerializer, SerializeHFML
+from openpecha.serializers import EpubSerializer, HFMLSerializer
 
 if __name__ == "__main__":
 
@@ -18,7 +18,7 @@ if __name__ == "__main__":
     formatter.create_opf(ebook_path, pecha_id)
 
     # 2. Serialize OPF to HFML (Human Friendly Markup Language)
-    serializer = SerializeHFML(opf_path)
+    serializer = HFMLSerializer(opf_path)
     serializer.apply_layers()
     results = serializer.get_result()
     for vol_id, hfml_text in results.items():

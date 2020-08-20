@@ -189,11 +189,12 @@ class Serialize(object):
                     vol_id = f"v{sub_topic[0]['span']['vol']:03}"
                     sub_topic[0]["type"] = AnnType.sub_topic
                     self.apply_annotation(vol_id, sub_topic[0])
-            vol_id = f"v{topic['span'][0]['span']['vol']:03}"
-            topic_ann["type"] = AnnType.topic
-            topic_ann["span"] = topic["span"][0]["span"]
-            topic_ann["work_id"] = topic["span"][0]["work_id"]
-            self.apply_annotation(vol_id, topic_ann)
+            if topic["span"]:
+                vol_id = f"v{topic['span'][0]['span']['vol']:03}"
+                topic_ann["type"] = AnnType.topic
+                topic_ann["span"] = topic["span"][0]["span"]
+                topic_ann["work_id"] = topic["span"][0]["work_id"]
+                self.apply_annotation(vol_id, topic_ann)
 
     def get_all_layer(self, vol_id):
         """

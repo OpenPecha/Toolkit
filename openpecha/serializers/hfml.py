@@ -5,7 +5,7 @@ from ..utils import Vol2FnManager
 from .serialize import Serialize
 
 
-class SerializeHFML(Serialize):
+class HFMLSerializer(Serialize):
     """
     HFML (Human Friendly Markup Language) serializer class for OpenPecha.
     """
