@@ -469,10 +469,10 @@ class HFMLFormatter(BaseFormatter):
         )  # list variable to store index of end yigchung pattern => y)
 
         pat_list = {
-            "author_pattern": r"\(([𰵀-󴉱])?au.+?\)",
-            "book_title_pattern": r"\(([𰵀-󴉱])?k1.+?\)",
-            "poti_title_pattern": r"\(([𰵀-󴉱])?k2.+?\)",
-            "chapter_title_pattern": r"\(([𰵀-󴉱])?k3.+?\)",
+            "author_pattern": r"\<([𰵀-󴉱])?au.+?\>",
+            "book_title_pattern": r"\<([𰵀-󴉱])?k1.+?\>",
+            "poti_title_pattern": r"\<([𰵀-󴉱])?k2.+?\>",
+            "chapter_title_pattern": r"\<([𰵀-󴉱])?k3.+?\>",
             "page_pattern": r"\[([𰵀-󴉱])?[0-9]+[a-z]{1}\]",
             "line_pattern": r"\[\w+\.\d+\]",
             "topic_pattern": r"\{([𰵀-󴉱])?\w+\}",

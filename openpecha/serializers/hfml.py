@@ -47,7 +47,7 @@ class SerializeHFML(Serialize):
                 start_payload += "\n"
             only_start_ann = True
         elif ann["type"] == AnnType.topic:
-            start_payload = "{" + f"{ann['work_id']}" + "}"
+            start_payload = f"{{{ann['work_id']}}}"
             only_start_ann = True
         elif ann["type"] == AnnType.sub_topic:
             start_payload = f"{{{ann['work_id']}}}"
@@ -56,8 +56,8 @@ class SerializeHFML(Serialize):
             start_payload = f"<{local_id}"
             end_payload = f',{ann["correction"]}>'
         elif ann["type"] == AnnType.archaic:
-            start_payload = "{" + f"{local_id}"
-            end_payload = f',{ann["modern"]}' + "}"
+            start_payload = f"{{{local_id}"
+            end_payload = f',{ann["modern"]}}}'
         elif ann["type"] == AnnType.peydurma:
             start_payload = f"#{local_id}"
             only_start_ann = True
@@ -65,17 +65,17 @@ class SerializeHFML(Serialize):
             start_payload = f"[{local_id}"
             end_payload = "]"
         elif ann["type"] == AnnType.book_title:
-            start_payload = f"({local_id}k1"
-            end_payload = ")"
+            start_payload = f"<{local_id}k1"
+            end_payload = ">"
         elif ann["type"] == AnnType.poti_title:
-            start_payload = f"({local_id}k2"
-            end_payload = ")"
+            start_payload = f"<{local_id}k2"
+            end_payload = ">"
         elif ann["type"] == AnnType.author:
-            start_payload = f"({local_id}au"
-            end_payload = ")"
+            start_payload = f"<{local_id}au"
+            end_payload = ">"
         elif ann["type"] == AnnType.chapter:
-            start_payload = f"({local_id}k3"
-            end_payload = ")"
+            start_payload = f"<{local_id}k3"
+            end_payload = ">"
         elif ann["type"] == AnnType.tsawa:
             start_payload = f"<{local_id}m"
             end_payload = "m>"
