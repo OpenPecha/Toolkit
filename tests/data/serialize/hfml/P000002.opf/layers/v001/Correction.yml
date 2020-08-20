@@ -1,0 +1,11 @@
+id: 54e01fae8a054de1a8c282e9495fa0f4
+annotation_type: Correction
+revision: '00001'
+annotations:
+  7324678d53e948278a866451db008e17:
+    correction: མཆིའོ་
+    span:
+      start: 1846
+      end: 1851
+local_ids:
+  7324678d53e948278a866451db008e17: 200000

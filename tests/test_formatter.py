@@ -226,8 +226,8 @@ class TestHFMLFormatter:
             ],
             AnnType.error_candidate: [
                 [
-                    (1000012, {"span": {"start": 2040, "end": 2043}}),
-                    (1000013, {"span": {"start": 2044, "end": 2046}}),
+                    (1000012, {"span": {"start": 2040, "end": 2042}}),
+                    (1000013, {"span": {"start": 2044, "end": 2045}}),
                 ],
                 [],
                 [],
@@ -241,6 +241,7 @@ class TestHFMLFormatter:
                 [],
                 [],
             ],
+            AnnType.archaic: [[], [], []],
         }
 
         for layer in result:
@@ -329,8 +330,8 @@ class TestTsadraFormatter:
             ],
             AnnType.sabche: [
                 [
-                    (None, {"span": {"start": 5091, "end": 5120}, "isverse": False}),
-                    (None, {"span": {"start": 7313, "end": 7375}, "isverse": False}),
+                    (None, {"span": {"start": 5091, "end": 5120}}),
+                    (None, {"span": {"start": 7313, "end": 7375}}),
                 ]
             ],
             AnnType.yigchung: [[(None, {"span": {"start": 7273, "end": 7311}})]],
@@ -358,11 +359,12 @@ if __name__ == "__main__":
     # path = Path("./tests/data/formatter/tsadra_hfml/")
     # path = Path("./output/tsadra_hfml/tsadra_hfml.opf/")
 
-    path = "./output/chagchen/"
-    pecha_id = 9
-    formatter = HFMLFormatter()
-    formatter.create_opf(path, pecha_id)
+    # path = "./output/chagchen/"
+    # pecha_id = 9
+    # formatter = HFMLFormatter()
+    # formatter.create_opf(path, pecha_id)
 
-    # path = "./output/P000100/OEBPS/"
+    # path = "./output/demo/src/P000101/OEBPS/"
     # formatter = TsadraFormatter()
     # formatter.create_opf(path, 9)
+    TestHFMLFormatter().test_build_layers()

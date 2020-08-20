@@ -12,7 +12,7 @@ import yaml
 from ..utils import Vol2FnManager
 from .formatter import BaseFormatter
 from .layers import *
-from .layers import AnnType
+from .layers import AnnType, _attr_names
 
 
 class HFMLFormatter(BaseFormatter):
@@ -398,9 +398,33 @@ class HFMLFormatter(BaseFormatter):
         else:
             return None
 
+    def parse_start_ann(self, ann, pat_list, walker, line):
+        pat_len_before_ann = self.search_before(ann, pat_list, line)
+        local_id = self.get_local_id(ann)
+        ann_start = ann.start() + walker - pat_len_before_ann
+        return (local_id, ann_start)
+
+    def parse_end_ann(self, ann, pat_list, walker, line):
+        pat_len_before_ann = self.search_before(ann, pat_list, line)
+        ann_end = ann.start() + walker - pat_len_before_ann - 1
+        return ann_end
+
+    def parse_payload_ann(self, ann, pat_list, walker, line):
+        local_id = self.get_local_id(ann)
+        payload = ann[0].split(",")[1][:-1]  # extracting the modern word
+        if local_id:
+            annotation = ann[0].split(",")[0][2:]  # extracting the error component
+        else:
+            annotation = ann[0].split(",")[0][1:]
+        pat_len_before_ann = self.search_before(ann, pat_list, line)
+        start_ann = ann.start() + walker - pat_len_before_ann
+        end_ann = start_ann + len(annotation) - 1
+        span = Span(start_ann, end_ann)
+        return (local_id, span, payload)
+
     def build_layers(self, m_text, num_vol):
 
-        i = 0  # tracker variable through out the text
+        char_walker = 0  # tracker variable through out the text
 
         cur_vol_pages = (
             []
@@ -445,10 +469,10 @@ class HFMLFormatter(BaseFormatter):
         )  # list variable to store index of end yigchung pattern => y)
 
         pat_list = {
-            "author_pattern": r"\(([𰵀-󴉱])?au.+?\)",
-            "book_title_pattern": r"\(([𰵀-󴉱])?k1.+?\)",
-            "poti_title_pattern": r"\(([𰵀-󴉱])?k2.+?\)",
-            "chapter_title_pattern": r"\(([𰵀-󴉱])?k3.+?\)",
+            "author_pattern": r"\<([𰵀-󴉱])?au.+?\>",
+            "book_title_pattern": r"\<([𰵀-󴉱])?k1.+?\>",
+            "poti_title_pattern": r"\<([𰵀-󴉱])?k2.+?\>",
+            "chapter_title_pattern": r"\<([𰵀-󴉱])?k3.+?\>",
             "page_pattern": r"\[([𰵀-󴉱])?[0-9]+[a-z]{1}\]",
             "line_pattern": r"\[\w+\.\d+\]",
             "topic_pattern": r"\{([𰵀-󴉱])?\w+\}",
@@ -461,7 +485,7 @@ class HFMLFormatter(BaseFormatter):
             "start_yigchung_pattern": r"\<([𰵀-󴉱])?y",
             "end_yigchung_pattern": r"y\>",
             "sub_topic_pattern": r"\{([𰵀-󴉱])?\w+\-\w+\}",
-            "error_pattern": r"\<([𰵀-󴉱])?\S+\,\S+\>",
+            "error_pattern": r"\<([𰵀-󴉱])?\S+?\,\S+?\>",
             "archaic_word_pattern": r"\{([𰵀-󴉱])?\S+?\,\S+?\}",
             "abs_er_pattern": r"\[([𰵀-󴉱])?[^0-9].*?\]",
             "note_pattern": r"#([𰵀-󴉱])?",
@@ -488,7 +512,7 @@ class HFMLFormatter(BaseFormatter):
 
         for idx, line in enumerate(text_lines):
             line = line.strip()
-            start_line = i
+            start_line = char_walker
             length = len(line)
             pat_len_before_ann = 0  # length of pattern recognised before  annotation
             if re.search(
@@ -516,14 +540,10 @@ class HFMLFormatter(BaseFormatter):
                         )
                     )
                     if start_page < end_page:  # to ignore the empty pages
-                        i = i + 1  # To accumulate the \n character
+                        char_walker = char_walker + 1  # To accumulate the \n character
                         end_page = end_page + 3
                     self.base_text = self.base_text + "\n"
                 continue
-
-            # elif re.search(
-            #     pat_list["line_pattern"], line
-            # ):  # checking current line contains line annotation or not
 
             for pp in [
                 "author_pattern",
@@ -537,7 +557,9 @@ class HFMLFormatter(BaseFormatter):
                     pat_len_before_ann = self.search_before(
                         title_pattern, pat_list, line
                     )
-                    start_title = title_pattern.start() + i - pat_len_before_ann
+                    start_title = (
+                        title_pattern.start() + char_walker - pat_len_before_ann
+                    )
                     if local_id:
                         end_title = start_title + len(title_pattern[0]) - 6
                     else:
@@ -571,7 +593,9 @@ class HFMLFormatter(BaseFormatter):
                 pat_len_before_ann = self.search_before(sub_topic_match, pat_list, line)
                 if start_sub_topic == 0:
                     start_sub_topic = end_sub_topic
-                    end_sub_topic = sub_topic_match.start() + i - pat_len_before_ann
+                    end_sub_topic = (
+                        sub_topic_match.start() + char_walker - pat_len_before_ann
+                    )
 
                     if start_sub_topic < end_sub_topic:
                         if len(self.sub_topic_info) >= 2:
@@ -598,7 +622,9 @@ class HFMLFormatter(BaseFormatter):
                             end_sub_topic = end_sub_topic
                 else:
                     start_sub_topic = end_sub_topic
-                    end_sub_topic = sub_topic_match.start() + i - pat_len_before_ann
+                    end_sub_topic = (
+                        sub_topic_match.start() + char_walker - pat_len_before_ann
+                    )
 
                     if start_sub_topic < end_sub_topic:
                         span = CrossVolSpan(
@@ -624,7 +650,7 @@ class HFMLFormatter(BaseFormatter):
                     self.topic_info.append(topic[0][1:-1])
                 self.topic_local_id.append(local_id)
                 start_topic = end_topic
-                end_topic = topic.start() + i - pat_len_before_ann
+                end_topic = topic.start() + char_walker - pat_len_before_ann
 
                 if start_topic != end_topic or len(self.topic_info) >= 2:
                     if (
@@ -678,21 +704,9 @@ class HFMLFormatter(BaseFormatter):
             ):  # checking current line contain error annotation or not
                 errors = re.finditer(pat_list["error_pattern"], line)
                 for error in errors:
-                    local_id = self.get_local_id(error)
-                    suggestion = error[0].split(",")[1][
-                        :-1
-                    ]  # extracting the suggestion component
-                    if local_id:
-                        error_part = error[0].split(",")[0][
-                            2:
-                        ]  # extracting the error component
-                    else:
-                        error_part = error[0].split(",")[0][1:]
-                    pat_len_before_ann = self.search_before(error, pat_list, line)
-                    start_error = error.start() + i - pat_len_before_ann
-
-                    end_error = start_error + len(error_part) - 1
-                    span = Span(start_error, end_error)
+                    local_id, span, suggestion = self.parse_payload_ann(
+                        error, pat_list, char_walker, line
+                    )
                     cur_vol_error_id.append(
                         (local_id, Correction(span, correction=suggestion))
                     )
@@ -702,20 +716,9 @@ class HFMLFormatter(BaseFormatter):
             ):  # checking current line contain error annotation or not
                 archaics = re.finditer(pat_list["archaic_word_pattern"], line)
                 for archaic in archaics:
-                    local_id = self.get_local_id(archaic)
-                    modern_word = archaic[0].split(",")[1][
-                        :-1
-                    ]  # extracting the modern word
-                    if local_id:
-                        archaic_word = archaic[0].split(",")[0][
-                            2:
-                        ]  # extracting the error component
-                    else:
-                        archaic_word = archaic[0].split(",")[0][1:]
-                    pat_len_before_ann = self.search_before(archaic, pat_list, line)
-                    start_archaic = archaic.start() + i - pat_len_before_ann
-                    end_archaic = start_archaic + len(archaic_word) - 1
-                    span = Span(start_archaic, end_archaic)
+                    local_id, span, modern_word = self.parse_payload_ann(
+                        archaic, pat_list, char_walker, line
+                    )
                     cur_vol_archaic_id.append(
                         (local_id, Archaic(span, modern=modern_word))
                     )
@@ -725,13 +728,13 @@ class HFMLFormatter(BaseFormatter):
                 for abs_er in abs_ers:
                     pat_len_before_ann = self.search_before(abs_er, pat_list, line)
                     local_id = self.get_local_id(abs_er)
-                    start_abs_er = abs_er.start() + i - pat_len_before_ann
+                    start_abs_er = abs_er.start() + char_walker - pat_len_before_ann
                     if local_id:
-                        end_abs_er = start_abs_er + len(
-                            abs_er[0][2:-1]
+                        end_abs_er = (
+                            start_abs_er + len(abs_er[0][2:-1]) - 1
                         )  # 3 is minus as two border bracket and local id
                     else:
-                        end_abs_er = start_abs_er + len(abs_er[0][1:-1])
+                        end_abs_er = start_abs_er + len(abs_er[0][1:-1]) - 1
                     cur_vol_abs_er_id.append(
                         (local_id, ErrorCandidate(Span(start_abs_er, end_abs_er)))
                     )
@@ -741,78 +744,73 @@ class HFMLFormatter(BaseFormatter):
                 for notes in notes_in_line:
                     pat_len_before_ann = self.search_before(notes, pat_list, line)
                     local_id = self.get_local_id(notes)
-                    note = notes.start() + i - pat_len_before_ann
-                    note_id.append((local_id, {"span": {"start": note, "end": note}}))
+                    note = notes.start() + char_walker - pat_len_before_ann
+                    note_id.append((local_id, {_attr_names.SPAN: Span(note, note)}))
 
             if re.search(pat_list["start_cit_pattern"], line):
                 start_cits = re.finditer(pat_list["start_cit_pattern"], line)
                 for start_cit in start_cits:
-                    pat_len_before_ann = self.search_before(start_cit, pat_list, line)
-                    local_id = self.get_local_id(start_cit)
-                    cit_start = start_cit.start() + i - pat_len_before_ann
-                    start_cit_patterns.append((local_id, cit_start))
+                    start_cit_patterns.append(
+                        self.parse_start_ann(start_cit, pat_list, char_walker, line)
+                    )
 
             if re.search(pat_list["end_cit_pattern"], line):
                 end_cits = re.finditer(pat_list["end_cit_pattern"], line)
                 for end_cit in end_cits:
-                    pat_len_before_ann = self.search_before(end_cit, pat_list, line)
-                    cit_end = end_cit.start() + i - pat_len_before_ann - 1
-                    end_cit_patterns.append(cit_end)
+                    end_cit_patterns.append(
+                        self.parse_end_ann(end_cit, pat_list, char_walker, line)
+                    )
 
             if re.search(pat_list["start_sabche_pattern"], line):
                 start_sabches = re.finditer(pat_list["start_sabche_pattern"], line)
                 for start_sabche in start_sabches:
-                    pat_len_before_ann = self.search_before(
-                        start_sabche, pat_list, line
+                    start_sabche_pattern.append(
+                        self.parse_start_ann(start_sabche, pat_list, char_walker, line)
                     )
-                    local_id = self.get_local_id(start_sabche)
-                    sabche_start = start_sabche.start() + i - pat_len_before_ann
-                    start_sabche_pattern.append((local_id, sabche_start))
 
             if re.search(pat_list["end_sabche_pattern"], line):
                 end_sabches = re.finditer(pat_list["end_sabche_pattern"], line)
                 for end_sabche in end_sabches:
-                    pat_len_before_ann = self.search_before(end_sabche, pat_list, line)
-                    sabche_end = end_sabche.start() + i - pat_len_before_ann - 1
-                    end_sabche_pattern.append(sabche_end)
+                    end_sabche_pattern.append(
+                        self.parse_end_ann(end_sabche, pat_list, char_walker, line)
+                    )
 
             if re.search(pat_list["start_tsawa_pattern"], line):
                 start_tsawas = re.finditer(pat_list["start_tsawa_pattern"], line)
                 for start_tsawa in start_tsawas:
-                    pat_len_before_ann = self.search_before(start_tsawa, pat_list, line)
-                    local_id = self.get_local_id(start_tsawa)
-                    tsawa_start = start_tsawa.start() + i - pat_len_before_ann
-                    start_tsawa_pattern.append((local_id, tsawa_start))
+                    start_tsawa_pattern.append(
+                        self.parse_start_ann(start_tsawa, pat_list, char_walker, line)
+                    )
 
             if re.search(pat_list["end_tsawa_pattern"], line):
                 end_tsawas = re.finditer(pat_list["end_tsawa_pattern"], line)
                 for end_tsawa in end_tsawas:
-                    pat_len_before_ann = self.search_before(end_tsawa, pat_list, line)
-                    tsawa_end = end_tsawa.start() + i - pat_len_before_ann - 1
-                    end_tsawa_pattern.append(tsawa_end)
+                    end_tsawa_pattern.append(
+                        self.parse_end_ann(end_tsawa, pat_list, char_walker, line)
+                    )
 
             if re.search(pat_list["start_yigchung_pattern"], line):
                 start_yigchungs = re.finditer(pat_list["start_yigchung_pattern"], line)
                 for start_yigchung in start_yigchungs:
-                    pat_len_before_ann = self.search_before(
-                        start_yigchung, pat_list, line
+                    start_yigchung_pattern.append(
+                        self.parse_start_ann(
+                            start_yigchung, pat_list, char_walker, line
+                        )
                     )
-                    local_id = self.get_local_id(start_yigchung)
-                    yigchung_start = start_yigchung.start() + i - pat_len_before_ann
-                    start_yigchung_pattern.append((local_id, yigchung_start))
 
             if re.search(pat_list["end_yigchung_pattern"], line):
                 end_yigchungs = re.finditer(pat_list["end_yigchung_pattern"], line)
                 for end_yigchung in end_yigchungs:
-                    pat_len_before_ann = self.search_before(
-                        end_yigchung, pat_list, line
+                    end_yigchung_pattern.append(
+                        self.parse_end_ann(end_yigchung, pat_list, char_walker, line)
                     )
-                    yigchung_end = end_yigchung.start() + i - pat_len_before_ann - 1
-                    end_yigchung_pattern.append(yigchung_end)
 
             pat_len_before_ann = self.total_pattern(pat_list, line)
-            end_line = start_line + length - pat_len_before_ann - 1
-            i = end_line + 2
+            if length == pat_len_before_ann:
+                end_line = start_line + length - pat_len_before_ann - 2
+            else:
+                end_line = start_line + length - pat_len_before_ann - 1
+            char_walker = end_line + 2
             base_line = self.base_extract(pat_list, line) + "\n"
             self.base_text += base_line
 
@@ -831,7 +829,9 @@ class HFMLFormatter(BaseFormatter):
                                 if self.sub_topic_info
                                 else None,
                                 "span": CrossVolSpan(
-                                    self.vol_walker + 1, start_sub_topic, i - 2
+                                    self.vol_walker + 1,
+                                    start_sub_topic,
+                                    char_walker - 2,
                                 ),
                             },
                         )
@@ -843,7 +843,7 @@ class HFMLFormatter(BaseFormatter):
                             {
                                 "work_id": self.topic_info[-1],
                                 "span": CrossVolSpan(
-                                    self.vol_walker + 1, start_topic, i - 2
+                                    self.vol_walker + 1, start_topic, char_walker - 2
                                 ),
                             },
                         )
@@ -853,7 +853,7 @@ class HFMLFormatter(BaseFormatter):
                         (
                             pg_tid[-1],
                             Page(
-                                Span(start_page, i - 2),
+                                Span(start_page, char_walker - 2),
                                 page_index=pg_ann[-1],
                                 page_info=pg_info[-1],
                             ),
@@ -894,7 +894,7 @@ class HFMLFormatter(BaseFormatter):
 
     def get_result(self):
 
-        if self.topic_id[0]:
+        if len(self.topic_id) > 1:
             if self.topic_id[0][0][1]["work_id"] == self.topic_id[1][0][1]["work_id"]:
                 self.topic_id = self.topic_id[1:]
                 self.sub_topic = self.sub_topic[1:]
