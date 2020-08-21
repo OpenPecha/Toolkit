@@ -13,7 +13,6 @@ from openpecha.blupdate import Blupdate
 from openpecha.buda.openpecha_manager import OpenpechaManager
 from openpecha.formatters import *
 from openpecha.serializers import *
-from openpecha.serializers import EpubSerializer
 
 OP_PATH = Path("./.openpecha")
 config = {
@@ -368,14 +367,14 @@ def edit(**kwargs):
     opf_path = f'{config["OP_DATA_PATH"]}/{pecha_id}/{pecha_id}.opf'
 
     if kwargs["text_id"]:
-        serializer = SerializeHFML(opf_path, text_id=kwargs["text_id"])
+        serializer = HFMLSerializer(opf_path, text_id=kwargs["text_id"])
         out_fn = f'{pecha_id}-{kwargs["text_id"]}.txt'
     elif kwargs["vol_number"]:
         vol_id = f'v{kwargs["vol_number"]:03}'
-        serializer = SerializeHFML(opf_path, vol_id=vol_id)
+        serializer = HFMLSerializer(opf_path, vol_id=vol_id)
         out_fn = f"{pecha_id}-{vol_id}.txt"
     else:
-        serializer = SerializeHFML(opf_path)
+        serializer = HFMLSerializer(opf_path)
         out_fn = f"{pecha_id}-v001.txt"
 
     serializer.apply_layers()
@@ -464,5 +463,5 @@ def export(**kwargs):
     if kwargs["name"] == "epub":
         serializer = EpubSerializer(opf_path)
     else:
-        serializer = SerializeHFML(opf_path)
+        serializer = HFMLSerializer(opf_path)
     serializer.serialize(kwargs["output_path"])
