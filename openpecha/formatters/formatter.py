@@ -283,9 +283,9 @@ class BaseFormatter:
             ):
 
                 Topic = deepcopy(Text)
-                Topic["parts"] += [
-                    [ann for none_local_id, ann in anns] for anns in sub_topics
-                ]
+                Topic["parts"] += sum(
+                    [[ann for none_local_id, ann in anns] for anns in sub_topics], []
+                )
                 Topic["span"] += [ann for none_local_id, ann in topics]
                 uuid = self.get_unique_id()
                 Index_layer["annotations"][uuid] = Topic
