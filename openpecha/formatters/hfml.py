@@ -970,7 +970,7 @@ class HFMLFormatter(BaseFormatter):
 
         for m_text, vol_name, n_vol in self.get_input(input_path):
             vol_id = vol2fn_manager.get_vol_id(vol_name)
-            print(f"[INFO] Processing Vol {vol_id} of {n_vol}: {vol_name} ...")
+            print(f"[INFO] parsing Vol {vol_name} ...")
             self.build_layers(m_text, n_vol)
             if "is_text" in kwargs:
                 if kwargs["is_text"]:
