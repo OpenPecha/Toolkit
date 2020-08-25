@@ -5,12 +5,12 @@ from openpecha.serializers import EpubSerializer, HFMLSerializer
 
 if __name__ == "__main__":
 
-    ebook_path = "./output/demo/src/P000111/OEBPS/"
+    ebook_path = "./output/demo/src/P000101/OEBPS/"
     opfs_path = "./output/demo/output"
-    opf_path = "./output/demo/output/P000111/P000111.opf/"
-    hfml_path = "./output/demo/output/P000111_hfml"
+    opf_path = "./output/demo/output/P000101/P000101.opf/"
+    hfml_path = "./output/demo/output/P000101_hfml"
     ebook_output_path = "./output/demo/output/ebooks"
-    pecha_id = 111
+    pecha_id = 101
     pecha_name = f"P{pecha_id:06}"
 
     # 1. Format Tsadra Ebook to OPF (OpenPecha Format)
