@@ -186,9 +186,9 @@ class Serialize(object):
             sub_topics = topic["parts"]
             for sub_topic in sub_topics:
                 if sub_topic:
-                    vol_id = f"v{sub_topic[0]['span']['vol']:03}"
-                    sub_topic[0]["type"] = AnnType.sub_topic
-                    self.apply_annotation(vol_id, sub_topic[0])
+                    vol_id = f"v{sub_topic['span']['vol']:03}"
+                    sub_topic["type"] = AnnType.sub_topic
+                    self.apply_annotation(vol_id, sub_topic)
             if topic["span"]:
                 vol_id = f"v{topic['span'][0]['span']['vol']:03}"
                 topic_ann["type"] = AnnType.topic
