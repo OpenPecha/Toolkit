@@ -18,7 +18,7 @@ class Tsadra_template:
     ft = '<span class="front-title">'
     book_title_SP = '<p class="credits-page_front-title"><span class="front-title">'
     author_SP = '<p class="credits-page_front-page---text-author"><span class="front-page---text-titles">'
-    chapter_SP = '<span class="tibetan-chapter1">'
+    chapter_SP = '<span class="tibetan-chapter">'
     tsawa_SP = '<span class="tibetan-root-text">'
     tsawa_verse_SP = '<span class="tibetan-root-text_tibetan-root-text-middle-lines tibetan-root-text">'
     quatation__verse_SP = (
@@ -98,7 +98,7 @@ class EpubSerializer(Serialize):
         elif ann["type"] == AnnType.citation:
             try:
                 if ann["isverse"]:
-                    start_payload = Tsadra_template.quatation_verse_SP
+                    start_payload = Tsadra_template.quatation__verse_SP
                 else:
                     start_payload = Tsadra_template.quatation__SP
             except Exception:
@@ -154,7 +154,7 @@ class EpubSerializer(Serialize):
             # XPath expression to detect chapter titles.
             chapter_Xpath = "//*[@class='tibetan-chapter']"
             font_family = "Monlam Uni Ouchan2"
-            font_size = 15
+            font_size = 16
             chapter_mark = "pagebreak"
             cover_path = self.opfpath / f"asset/image/{cover_image}"
             os.system(

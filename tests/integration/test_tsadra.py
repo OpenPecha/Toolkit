@@ -5,12 +5,20 @@ from openpecha.serializers import EpubSerializer, HFMLSerializer
 
 if __name__ == "__main__":
 
-    ebook_path = "./output/demo/src/P000111/OEBPS/"
+    # ebook_path = "./output/demo/src/P000111/OEBPS/"
+    # opfs_path = "./output/demo/output"
+    # opf_path = "./output/demo/output/P000111/P000111.opf/"
+    # hfml_path = "./output/demo/output/P000111_hfml/"
+    # ebook_output_path = "./output/demo/output/ebooks"
+    # pecha_id = 111
+    # pecha_name = f"P{pecha_id:06}"
+
+    ebook_path = "./output/demo/src/tsadra_publication/IBA-MT-06-1/OEBPS/"
     opfs_path = "./output/demo/output"
-    opf_path = "./output/demo/output/P000111/P000111.opf/"
-    hfml_path = "./output/demo/output/P000111_hfml"
+    opf_path = "./output/demo/output/P000101/P000101.opf/"
+    hfml_path = "./output/demo/output/P000101_hfml/"
     ebook_output_path = "./output/demo/output/ebooks"
-    pecha_id = 111
+    pecha_id = 101
     pecha_name = f"P{pecha_id:06}"
 
     # 1. Format Tsadra Ebook to OPF (OpenPecha Format)
@@ -19,14 +27,11 @@ if __name__ == "__main__":
 
     # 2. Serialize OPF to HFML (Human Friendly Markup Language)
     serializer = HFMLSerializer(opf_path)
-    serializer.apply_layers()
-    results = serializer.get_result()
-    for vol_id, hfml_text in results.items():
-        Path(f"{hfml_path}/{vol_id}.txt").write_text(hfml_text)
+    serializer.serialize(output_path=hfml_path)
 
     # 3. Format HFML to OPF
     formatter = HFMLFormatter(output_path=opfs_path)
-    formatter.create_opf(hfml_path, pecha_id)
+    formatter.create_opf(f"{hfml_path}/{pecha_name}", pecha_id)
 
     # 4. Convert OPF to Ebook
     serializer = EpubSerializer(Path(opf_path))

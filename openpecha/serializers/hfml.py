@@ -105,6 +105,9 @@ class HFMLSerializer(Serialize):
         print("[INFO] Creating HFML view")
         for vol_id, hfml_text in results.items():
             fn = vol2fn_manager.get_fn(vol_id)
-            vol_hfml_fn = output_path / fn
+            try:
+                vol_hfml_fn = output_path / fn
+            except Exception:
+                vol_hfml_fn = output_path / vol_id
             print(f"[INFO]\t- saving {fn}")
             vol_hfml_fn.write_text(hfml_text)

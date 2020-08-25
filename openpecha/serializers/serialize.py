@@ -299,6 +299,7 @@ class Serialize(object):
                     cur_vol_result += c
                 i += 1
 
-            cur_vol_result = self._assign_line_layer(cur_vol_result, vol_id)
+            if "Pagination" in self.layers:
+                cur_vol_result = self._assign_line_layer(cur_vol_result, vol_id)
             result.update({vol_id: cur_vol_result})
         return result

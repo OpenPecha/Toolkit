@@ -111,11 +111,12 @@ class TsadraFormatter(BaseFormatter):
         for p in ps:
             if p["class"][0] in TsadraTemplate.titles:  # to get the book title index
                 book_title_tmp = self.text_preprocess(p.text)
-                self.book_title.append(
-                    self.parse_ann(BookTitle, book_title_tmp, self.walker)
-                )
-                self.base_text += book_title_tmp + "\n"
-                self.walker += len(book_title_tmp) + 1
+                if book_title_tmp:
+                    self.book_title.append(
+                        self.parse_ann(BookTitle, book_title_tmp, self.walker)
+                    )
+                    self.base_text += book_title_tmp + "\n"
+                    self.walker += len(book_title_tmp) + 1
 
             elif (
                 p["class"][0] in TsadraTemplate.author
@@ -166,11 +167,12 @@ class TsadraFormatter(BaseFormatter):
 
             elif "tibetan-chapter" in p["class"][0]:  # to get chapter title index
                 chapter_title_tmp = self.text_preprocess(p.text)
-                self.chapter.append(
-                    self.parse_ann(Chapter, chapter_title_tmp, self.walker)
-                )
-                self.walker += len(chapter_title_tmp) + 1
-                self.base_text += chapter_title_tmp + "\n"
+                if chapter_title_tmp:
+                    self.chapter.append(
+                        self.parse_ann(Chapter, chapter_title_tmp, self.walker)
+                    )
+                    self.walker += len(chapter_title_tmp) + 1
+                    self.base_text += chapter_title_tmp + "\n"
 
             elif (
                 p["class"][0] in TsadraTemplate.commentaries["verse"]
