@@ -249,7 +249,7 @@ class Serialize(object):
     def _assign_line_layer(self, result, vol_id):
         def _get_page_index(line):
             page_index = ""
-            i = 1
+            i = 2
             while line[i] != "]":
                 page_index += line[i]
                 i += 1

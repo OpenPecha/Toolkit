@@ -5,7 +5,7 @@ from openpecha.serializers import EpubSerializer, HFMLSerializer
 
 if __name__ == "__main__":
 
-    ebook_path = "./output/demo/src/P000101/OEBPS/"
+    ebook_path = "./output/demo/src/P000111/OEBPS/"
     opfs_path = "./output/demo/output"
     opf_path = "./output/demo/output/P000101/P000101.opf/"
     hfml_path = "./output/demo/output/P000101_hfml"

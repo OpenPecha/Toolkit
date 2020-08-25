@@ -102,8 +102,9 @@ class HFMLSerializer(Serialize):
         vol2fn_manager = Vol2FnManager(self.get_meta_data())
         output_path = Path(output_path) / pecha_id
         output_path.mkdir(exist_ok=True, parents=True)
+        print("[INFO] Creating HFML view")
         for vol_id, hfml_text in results.items():
             fn = vol2fn_manager.get_fn(vol_id)
             vol_hfml_fn = output_path / fn
-            print(f"[INFO] saving {fn} hfml text")
+            print(f"[INFO]\t- saving {fn}")
             vol_hfml_fn.write_text(hfml_text)
