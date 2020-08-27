@@ -16,5 +16,7 @@ if __name__ == "__main__":
     formatter.create_opf(hfml_text, pecha_id)
 
     # Converts OPF to HFML
-    serializer = HFMLSerializer(opf_path)
+    serializer = HFMLSerializer(
+        opf_path, text_id="T1", layers=["BookTitle", "Citation"]
+    )
     serializer.serialize(output_path=hfml_path)

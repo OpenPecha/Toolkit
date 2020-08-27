@@ -67,6 +67,9 @@ class HFMLSerializer(Serialize):
         elif ann["type"] == AnnType.book_title:
             start_payload = f"<{local_id}k1"
             end_payload = ">"
+        elif ann["type"] == AnnType.book_number:
+            start_payload = f"<{local_id}k4"
+            end_payload = ">"
         elif ann["type"] == AnnType.poti_title:
             start_payload = f"<{local_id}k2"
             end_payload = ">"

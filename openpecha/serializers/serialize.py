@@ -28,11 +28,13 @@ class Serialize(object):
         self.meta = self.get_meta_data()
         self.text_id = text_id
         self.index_layer = index_layer
+        self.layers = layers
         self.n_char_shifted = []
         self.text_spans = {}
         self.base_layers = {}
         if self.text_id:
             self.text_spans = self.get_text_spans(text_id)
+            self.index_layer = self.get_index_layer(text_id)
             if self.text_spans:
                 self.base_layers = self.get_text_base_layer()
         else:
@@ -72,7 +74,6 @@ class Serialize(object):
         self.chars_toapply = defaultdict(dict)
         # layer lists the layers to be applied, in the order of which they should be applied
         # by convention, when it is None, all layers are applied in alphabetical order (?)
-        self.layers = layers
 
     def get_n_char_shitted(self, end):
         n_shifted = 0
@@ -119,14 +120,26 @@ class Serialize(object):
         """
         get spans of text
         """
-        if not self.index_layer:
-            self.index_layer = self.load_layer(self.opfpath / "index.yml")
-        for anno in self.index_layer["annotations"]:
-            if anno["work"] == text_id:
+        index_layer = self.load_layer(self.opfpath / "index.yml")
+        for id, anno in index_layer["annotations"].items():
+            if anno["span"][0]["work_id"] == text_id:
                 text_span = {}
                 for span in anno["span"]:
-                    text_span[span["vol"].split("/")[-1]] = span["span"]
+                    text_span[f'v{span["span"]["vol"]:03}'] = span["span"]
                 return text_span
+
+    def get_index_layer(self, text_id):
+        index_layer = self.load_layer(self.opfpath / "index.yml")
+        text_index_layer = defaultdict(str)
+        text_index_layer["id"] = index_layer["id"]
+        text_index_layer["annotation_type"] = index_layer["annotation_type"]
+        text_index_layer["revision"] = index_layer["revision"]
+        annotations = defaultdict(str)
+        for id, anno in index_layer["annotations"].items():
+            if anno["span"][0]["work_id"] == text_id:
+                annotations[id] = anno
+        text_index_layer["annotations"] = annotations
+        return text_index_layer
 
     def get_base_layer(self, vol_id=None):
         """
@@ -179,9 +192,8 @@ class Serialize(object):
                     uuid2localid = ""
                 self.apply_annotation(vol_id, ann, uuid2localid)
 
-    def apply_index(self, index_path):
-        index = yaml.safe_load(index_path.open())
-        for ann_id, topic in index["annotations"].items():
+    def apply_index(self):
+        for ann_id, topic in self.index_layer["annotations"].items():
             topic_ann = defaultdict(str)
             sub_topics = topic["parts"]
             for sub_topic in sub_topics:
@@ -210,15 +222,18 @@ class Serialize(object):
         """
         This applies all the layers recorded in self.layers. If self.layers is none, it reads all the layers from the layer directory.
         """
-        index_path = self.opfpath / "index.yml"
-        if index_path.is_file():
-            self.apply_index(index_path)
+        if not self.index_layer:
+            index_path = self.opfpath / "index.yml"
+            if index_path.is_file():
+                self.index_layer = self.load_layer(index_path)
+                self.apply_index()
+        else:
+            self.apply_index()
         for vol_id in self.base_layers:
             if not self.layers:
                 self.layers = self.get_all_layer(vol_id)
             for layer_id in self.layers:
                 self.apply_layer(vol_id, layer_id)
-            self.layers = []
 
     def add_chars(self, vol_id, cc, frombefore, charstoadd):
         """

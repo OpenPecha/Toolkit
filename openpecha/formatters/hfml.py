@@ -26,6 +26,7 @@ class HFMLFormatter(BaseFormatter):
         self.base_text = ""
         self.vol_walker = 0
         self.book_title = []
+        self.book_number = []
         self.poti_title = []
         self.author = []
         self.chapter_title = []
@@ -161,6 +162,7 @@ class HFMLFormatter(BaseFormatter):
             "book_title_pattern",
             "poti_title_pattern",
             "chapter_title_pattern",
+            "book_number_pattern",
         ]:
             title_pattern = re.search(pat_list[pattern], annotated_line)
             if title_pattern:
@@ -281,6 +283,7 @@ class HFMLFormatter(BaseFormatter):
             "book_title_pattern",
             "poti_title_pattern",
             "chapter_title_pattern",
+            "book_number_pattern",
         ]:
             title_pattern = re.search(pat_list[pp], line)
             if title_pattern:
@@ -338,6 +341,7 @@ class HFMLFormatter(BaseFormatter):
             "book_title_pattern",
             "poti_title_pattern",
             "chapter_title_pattern",
+            "book_number_pattern",
         ]:
             title_pattern = re.search(pat_list[pattern], annotated_line)
             if title_pattern:
@@ -441,6 +445,7 @@ class HFMLFormatter(BaseFormatter):
 
         author_titles = []
         book_titles = []
+        book_numbers = []
         poti_titles = []
         chapter_titles = []
         start_cit_patterns = (
@@ -471,6 +476,7 @@ class HFMLFormatter(BaseFormatter):
         pat_list = {
             "author_pattern": r"\<([𰵀-󴉱])?au.+?\>",
             "book_title_pattern": r"\<([𰵀-󴉱])?k1.+?\>",
+            "book_number_pattern": r"\<([𰵀-󴉱])?k4.+?\>",
             "poti_title_pattern": r"\<([𰵀-󴉱])?k2.+?\>",
             "chapter_title_pattern": r"\<([𰵀-󴉱])?k3.+?\>",
             "page_pattern": r"\[([𰵀-󴉱])?[0-9]+[a-z]{1}\]",
@@ -550,6 +556,7 @@ class HFMLFormatter(BaseFormatter):
                 "book_title_pattern",
                 "poti_title_pattern",
                 "chapter_title_pattern",
+                "book_number_pattern",
             ]:
                 title_pattern = re.search(pat_list[pp], line)
                 if title_pattern:
@@ -569,6 +576,8 @@ class HFMLFormatter(BaseFormatter):
                         author_titles.append((local_id, Author(span)))
                     if pp == "book_title_pattern":
                         book_titles.append((local_id, BookTitle(span)))
+                    if pp == "book_number_pattern":
+                        book_numbers.append((local_id, BookNumber(span)))
                     if pp == "poti_title_pattern":
                         poti_titles.append((local_id, PotiTitle(span)))
                         if local_id:
@@ -870,6 +879,7 @@ class HFMLFormatter(BaseFormatter):
                 note_id = []
                 self.author.append(author_titles)
                 self.book_title.append(book_titles)
+                self.book_number.append(book_numbers)
                 self.poti_title.append(poti_titles)
                 self.chapter_title.append(chapter_titles)
                 self.vol_walker += 1
@@ -901,6 +911,7 @@ class HFMLFormatter(BaseFormatter):
         self.sub_topic = self.__final_sub_topic(self.sub_topic)
         result = {
             AnnType.book_title: self.book_title,
+            AnnType.book_number: self.book_number,
             AnnType.author: self.author,
             AnnType.poti_title: self.poti_title,
             AnnType.chapter: self.chapter_title,

@@ -20,6 +20,7 @@ __all__ = [
     "Sabche",
     "Yigchung",
     "BookTitle",
+    "BookNumber",
     "PotiTitle",
     "Author",
     "Archaic",
@@ -29,6 +30,7 @@ __all__ = [
 
 class AnnType:
     book_title = "BookTitle"
+    book_number = "BookNumber"
     poti_title = "PotiTitle"
     author = "Author"
     chapter = "Chapter"
@@ -61,6 +63,9 @@ class _attr_names:
     START = "start"
     END = "end"
 
+    # Cover title
+    ISCOVER = "iscover"  # Boolean flag to indicate booktitle being on cover page or not
+
     # Page
     PAGE_INDEX = "page_index"  # Page number based on Volume specified, type: int
     PAGE_INFO = "page_info"  # Page information. type: str
@@ -79,7 +84,7 @@ class _attr_names:
     # Archaic word
     MODERN = "modern"
 
-    # Sabche
+    # Tsawa, Citation
     ISVERSE = "isverse"  # Boolean flag to indicate a sache in verse format or not
 
 
@@ -147,7 +152,11 @@ def Peydurma(span, note=None):
     return {_attr_names.NOTE: note, _attr_names.SPAN: span}
 
 
-def BookTitle(span):
+def BookTitle(span, iscover=True):
+    return {_attr_names.SPAN: span, _attr_names.ISCOVER: iscover}
+
+
+def BookNumber(span):
     return {_attr_names.SPAN: span}
 
 

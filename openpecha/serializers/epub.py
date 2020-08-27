@@ -1,10 +1,12 @@
 import os
+from os import stat
 from pathlib import Path
 
 import requests
 from bs4 import BeautifulSoup
 
 from openpecha.formatters.layers import AnnType
+from openpecha.formatters.tsadra import TsadraTemplate
 
 from .serialize import Serialize
 
@@ -16,7 +18,9 @@ class Tsadra_template:
     span_EP = "</span>"
     para_EP = "</p>"
     ft = '<span class="front-title">'
-    book_title_SP = '<p class="credits-page_front-title"><span class="front-title">'
+    cover_page_book_title_SP = '<span class="credits-page_front-title">'
+    book_title_SP = '<span class="tibetan-book-title">'
+    book_number_SP = f'<p class = "credits-page_front-page---book-number">{ft}'
     author_SP = '<p class="credits-page_front-page---text-author"><span class="front-page---text-titles">'
     chapter_SP = '<span class="tibetan-chapter">'
     tsawa_SP = '<span class="tibetan-root-text">'
@@ -78,7 +82,16 @@ class EpubSerializer(Serialize):
             start_payload = "["
             end_payload = "]"
         elif ann["type"] == AnnType.book_title:
-            start_payload = Tsadra_template.book_title_SP
+            try:
+                if ann["iscover"]:
+                    start_payload = Tsadra_template.cover_page_book_title_SP
+                else:
+                    start_payload = Tsadra_template.book_title_SP
+            except Exception:
+                start_payload = TsadraTemplate.book_title_SP
+            end_payload = Tsadra_template.span_EP
+        elif ann["type"] == AnnType.book_number:
+            start_payload = Tsadra_template.book_number_SP
             end_payload = f"{Tsadra_template.span_EP}{Tsadra_template.para_EP}"
         elif ann["type"] == AnnType.author:
             start_payload = Tsadra_template.author_SP
@@ -154,7 +167,7 @@ class EpubSerializer(Serialize):
             # XPath expression to detect chapter titles.
             chapter_Xpath = "//*[@class='tibetan-chapter']"
             font_family = "Monlam Uni Ouchan2"
-            font_size = 16
+            font_size = 15
             chapter_mark = "pagebreak"
             cover_path = self.opfpath / f"asset/image/{cover_image}"
             os.system(

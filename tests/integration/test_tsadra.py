@@ -13,7 +13,7 @@ if __name__ == "__main__":
     # pecha_id = 111
     # pecha_name = f"P{pecha_id:06}"
 
-    ebook_path = "./output/demo/src/tsadra_publication/IBA-MT-06-1/OEBPS/"
+    ebook_path = "./output/demo/src/tsadra_publication/RDI-TOK-06-1/OEBPS/"
     opfs_path = "./output/demo/output"
     opf_path = "./output/demo/output/P000101/P000101.opf/"
     hfml_path = "./output/demo/output/P000101_hfml/"
