@@ -120,13 +120,17 @@ class Serialize(object):
         """
         get spans of text
         """
+        text_span = {}
         index_layer = self.load_layer(self.opfpath / "index.yml")
         for id, anno in index_layer["annotations"].items():
-            if anno["span"][0]["work_id"] == text_id:
-                text_span = {}
+            if anno["parts"]:
+                for sub_topic in anno["parts"]:
+                    if sub_topic["work_id"] == text_id:
+                        text_span[f'v{sub_topic["span"]["vol"]:03}'] = sub_topic["span"]
+            if anno["work_id"] == text_id:
                 for span in anno["span"]:
-                    text_span[f'v{span["span"]["vol"]:03}'] = span["span"]
-                return text_span
+                    text_span[f'v{span["vol"]:03}'] = span
+        return text_span
 
     def get_index_layer(self, text_id):
         index_layer = self.load_layer(self.opfpath / "index.yml")
@@ -136,8 +140,19 @@ class Serialize(object):
         text_index_layer["revision"] = index_layer["revision"]
         annotations = defaultdict(str)
         for id, anno in index_layer["annotations"].items():
-            if anno["span"][0]["work_id"] == text_id:
+            if anno["work_id"] == text_id:
                 annotations[id] = anno
+            elif anno["parts"]:
+                annotation = {}
+                annotation_span_list = []
+                for sub_topic in anno["parts"]:
+                    if sub_topic["work_id"] == text_id:
+                        annotation["work_id"] = sub_topic["work_id"]
+                        annotation_span_list.append(sub_topic["span"])
+                        annotation["parts"] = []
+                if annotation_span_list:
+                    annotation["span"] = annotation_span_list
+                    annotations[id] = annotation
         text_index_layer["annotations"] = annotations
         return text_index_layer
 
@@ -196,16 +211,17 @@ class Serialize(object):
         for ann_id, topic in self.index_layer["annotations"].items():
             topic_ann = defaultdict(str)
             sub_topics = topic["parts"]
-            for sub_topic in sub_topics:
+            for i, sub_topic in enumerate(sub_topics):
                 if sub_topic:
                     vol_id = f"v{sub_topic['span']['vol']:03}"
                     sub_topic["type"] = AnnType.sub_topic
-                    self.apply_annotation(vol_id, sub_topic)
+                    if sub_topic["work_id"] != sub_topics[i - 1]["work_id"]:
+                        self.apply_annotation(vol_id, sub_topic)
             if topic["span"]:
-                vol_id = f"v{topic['span'][0]['span']['vol']:03}"
+                vol_id = f"v{topic['span'][0]['vol']:03}"
                 topic_ann["type"] = AnnType.topic
-                topic_ann["span"] = topic["span"][0]["span"]
-                topic_ann["work_id"] = topic["span"][0]["work_id"]
+                topic_ann["span"] = topic["span"][0]
+                topic_ann["work_id"] = topic["work_id"]
                 self.apply_annotation(vol_id, topic_ann)
 
     def get_all_layer(self, vol_id):
@@ -296,8 +312,8 @@ class Serialize(object):
         # see https://waymoot.org/home/python_string/ where method 5 is good
         for vol_id, base_layer in self.base_layers.items():
             cur_vol_result = ""
-            if self.text_id:
-                cur_vol_result += f"\n[{vol_id}]\n"
+            # if self.text_id:
+            #     cur_vol_result += f"\n[{vol_id}]\n"
             i = 0
             for c in base_layer:
                 # UTF bom \ufeff takes the 0th index

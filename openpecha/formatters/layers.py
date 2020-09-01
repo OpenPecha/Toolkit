@@ -114,7 +114,11 @@ def CrossVolSpan(vol, start, end):
 SubText = {"work": None, "span": []}  # index of the sub_text  # span of the sub_text
 
 # Text annotation
-Text = {"parts": [], "span": []}  # list of SubText  # list of CrossVolSpan
+Text = {
+    "parts": [],
+    "span": [],
+    "work_id": "",
+}  # list of SubText  # list of CrossVolSpan
 
 # ~~~~~ ANNOTATIONS Layers ~~~~~~
 
