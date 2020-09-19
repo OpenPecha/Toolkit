@@ -12,8 +12,8 @@ if __name__ == "__main__":
     pecha_id = 1
 
     # Converts HFML to OPF
-    formatter = HFMLFormatter(output_path=opfs_path)
-    formatter.create_opf(hfml_text, pecha_id)
+    # formatter = HFMLFormatter(output_path=opfs_path)
+    # formatter.create_opf(hfml_text, pecha_id)
 
     # Converts OPF to HFML
     serializer = HFMLSerializer(opf_path, text_id="D1")
