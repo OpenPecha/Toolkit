@@ -123,17 +123,20 @@ class BaseFormatter:
         Build the necessary directories for OpenPecha format.
         """
         if id_:
-            if isinstance(id_, str) and not id_.startswith(config.PECHA_PREFIX):
-                pecha_id = id_
+            if isinstance(id_, str) and id_.startswith(config.PECHA_PREFIX):
+                self.pecha_id = id_
             elif isinstance(id_, int):
-                pecha_id = f"{config.PECHA_PREFIX}{id_:06}"
+                self.pecha_id = f"{config.PECHA_PREFIX}{id_:06}"
             elif id_.isdigit():
-                pecha_id = f"{config.PECHA_PREFIX}{int(id_):06}"
+                self.pecha_id = f"{config.PECHA_PREFIX}{int(id_):06}"
+            else:
+                self.pecha_id = input_path.stem
         else:
-            pecha_id = input_path.stem
+            self.pecha_id = input_path.stem
 
-        self.pecha_id = pecha_id
-        self.dirs = {"opf_path": self.output_path / f"{pecha_id}/{pecha_id}.opf"}
+        self.dirs = {
+            "opf_path": self.output_path / f"{self.pecha_id}/{self.pecha_id}.opf"
+        }
         self.dirs["layers_path"] = self.dirs["opf_path"] / "layers"
         self.dirs["base_path"] = self.dirs["opf_path"] / "base"
 
