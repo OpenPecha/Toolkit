@@ -126,7 +126,7 @@ class EpubSerializer(Serialize):
         pecha_id (string): Pecha id that needs to be exported in other format
 
         """
-        pecha_id = self.opfpath.name.split(".")[0]
+        pecha_id = self.opf_path.name.split(".")[0]
         out_fn = f"{pecha_id}.html"
         try:
             pecha_title = self.meta["ebook_metadata"]["title"]
@@ -156,7 +156,7 @@ class EpubSerializer(Serialize):
             font_family = "Monlam Uni Ouchan2"
             font_size = 15
             chapter_mark = "pagebreak"
-            cover_path = self.opfpath / f"asset/image/{cover_image}"
+            cover_path = self.opf_path / f"asset/image/{cover_image}"
             os.system(
                 f'ebook-convert {out_fn} {output_path}/{pecha_id}.epub --extra-css=./template.css --chapter={chapter_Xpath} --chapter-mark="{chapter_mark}" --base-font-size={font_size} --embed-font-family="{font_family}" --cover={cover_path}'
             )
