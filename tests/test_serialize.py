@@ -27,4 +27,5 @@ def test_hfml_serializer():
 def test_hfml_2_tsadra_serializer(opf_path):
     serializer = EpubSerializer(opf_path)
     serializer.apply_layers()
-    serializer.serialize()
+    out_fn = serializer.serialize()
+    assert str(out_fn) == "output/epub_output/P000100.epub"
