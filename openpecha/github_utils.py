@@ -1,6 +1,7 @@
 import os
 import time
 from pathlib import Path
+from uuid import uuid4
 
 from git import Repo
 from github import Github
@@ -8,17 +9,17 @@ from github import Github
 org = None
 
 
-def _get_openpecha_org():
+def _get_openpecha_org(token=os.environ.get("GITHUB_TOKEN")):
     """OpenPecha github org singleton."""
     global org
     if org is None:
-        g = Github(os.environ.get("GITHUB_TOKEN"))
+        g = Github(token)
         org = g.get_organization("OpenPecha")
     return org
 
 
-def get_github_repo(repo_name):
-    org = _get_openpecha_org()
+def get_github_repo(repo_name, **kwargs):
+    org = _get_openpecha_org(**kwargs)
     repo = org.get_repo(repo_name)
     return repo
 
@@ -117,20 +118,31 @@ def _add_tag_in_filename(path, tag_name):
 def upload_assets(release, tag_name=None, assets_path=[]):
     if not tag_name:
         tag_name = release.tag_name
+    download_url = ""
     for asset_path in assets_path:
         # asset_path = _add_tag_in_filename(asset_path, tag_name)
-        release.upload_asset(str(asset_path))
+        asset = release.upload_asset(str(asset_path))
+        download_url = asset.browser_download_url
         print(f"[INFO] Uploaded asset {asset_path}")
+    return download_url
 
 
-def create_release(repo_name, assets_path=[]):
-    repo = get_github_repo(repo_name)
-    bumped_tag = get_bumped_tag(repo)
+def create_release(repo_name, prerelease=False, assets_path=[], **kwargs):
+    repo = get_github_repo(repo_name, **kwargs)
+    if prerelease:
+        bumped_tag = uuid4().hex
+        message = "Pre-release for download"
+    else:
+        bumped_tag = get_bumped_tag(repo)
+        message = "Official Release"
     new_release = repo.create_git_release(
-        bumped_tag, bumped_tag, f"Release for {bumped_tag}"
+        bumped_tag, bumped_tag, message, prerelease=prerelease
     )
     print(f"[INFO] Created release {bumped_tag} for {repo_name}")
-    upload_assets(new_release, tag_name=bumped_tag, assets_path=assets_path)
+    asset_download_url = upload_assets(
+        new_release, tag_name=bumped_tag, assets_path=assets_path
+    )
+    return asset_download_url
 
 
 def add_assets_to_latest_release(repo_name, assets_path=[]):
@@ -158,4 +170,8 @@ def delete_repo(repo_name):
 
 
 if __name__ == "__main__":
-    create_release("P000780", Path("assets").iterdir())
+    asset_download_url = create_release(
+        "P000780", prerelease=True, assets_path=Path("assets").iterdir()
+    )
+    print(asset_download_url)
+    create_release("P000780", assets_path=Path("assets").iterdir())
