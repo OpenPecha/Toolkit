@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.6.14 (2020-10-13)
+### Fix
+* Create prerelease and return asset download url ([`2b84ee3`](https://github.com/OpenPecha/openpecha-toolkit/commit/2b84ee39158e29b10a9a704dc42583966fbaa409))
+
 ## v0.6.13 (2020-10-08)
 ### Fix
 * Return serialized epub path ([`7d3e8a9`](https://github.com/OpenPecha/openpecha-toolkit/commit/7d3e8a9700d498cb347dfc52ce1ab0572c74ffeb))
