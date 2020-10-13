@@ -270,7 +270,7 @@ class Serialize(object):
             result_with_line += line + "\n"
         return result_with_line
 
-    def get_result(self):
+    def get_result(self, line_num=True):
         """
         returns a string which is the base layer where the changes recorded in self.chars_toapply have been applied.
 
@@ -299,6 +299,7 @@ class Serialize(object):
                     cur_vol_result += c
                 i += 1
 
-            cur_vol_result = self._assign_line_layer(cur_vol_result, vol_id)
+            if line_num:
+                cur_vol_result = self._assign_line_layer(cur_vol_result, vol_id)
             result.update({vol_id: cur_vol_result})
         return result

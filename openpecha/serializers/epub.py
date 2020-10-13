@@ -137,7 +137,7 @@ class EpubSerializer(Serialize):
             cover_image = self.meta["ebook_metadata"]["cover"]
         except KeyError:
             cover_image = ""
-        results = self.get_result()
+        results = self.get_result(line_num=False)
         for vol_id, result in results.items():
             result = result.replace("\n", "<br>\n")
             results = (
