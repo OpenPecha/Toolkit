@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.6.13 (2020-10-08)
+### Fix
+* Return serialized epub path ([`7d3e8a9`](https://github.com/OpenPecha/openpecha-toolkit/commit/7d3e8a9700d498cb347dfc52ce1ab0572c74ffeb))
+
 ## v0.6.12 (2020-10-08)
 ### Fix
 * Skip the hfml_serializer test for a new release ([`25fba24`](https://github.com/OpenPecha/openpecha-toolkit/commit/25fba241d4b1e94b08f2c96b300923dbe8009902))
