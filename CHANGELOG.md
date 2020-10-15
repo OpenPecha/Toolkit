@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.6.15 (2020-10-15)
+### Fix
+* Disable line-number for epub ([`3ed677e`](https://github.com/OpenPecha/openpecha-toolkit/commit/3ed677ebb4ef221dbceb1aba4dc5db6a5fce26c6))
+
 ## v0.6.14 (2020-10-13)
 ### Fix
 * Create prerelease and return asset download url ([`2b84ee3`](https://github.com/OpenPecha/openpecha-toolkit/commit/2b84ee39158e29b10a9a704dc42583966fbaa409))
