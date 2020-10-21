@@ -2,6 +2,13 @@
 
 <!--next-version-placeholder-->
 
+## v0.6.16 (2020-10-21)
+### Fix
+* Missing kwarg metadata ([`051ca1b`](https://github.com/OpenPecha/openpecha-toolkit/commit/051ca1bdcb795e2422bccf4fecd8355232f68e62))
+* Create orphan branch for each layer ([`4ff76f7`](https://github.com/OpenPecha/openpecha-toolkit/commit/4ff76f768507ac242ce511e85414b8e0cabcebd2))
+* Add source metadata ([`1b2bbe8`](https://github.com/OpenPecha/openpecha-toolkit/commit/1b2bbe8e7790555e9f73974977a095d37e626390))
+* Add hfml item ([`81a982a`](https://github.com/OpenPecha/openpecha-toolkit/commit/81a982abc59283d8a7e95f999f8fb9ee6f33d53f))
+
 ## v0.6.15 (2020-10-15)
 ### Fix
 * Disable line-number for epub ([`3ed677e`](https://github.com/OpenPecha/openpecha-toolkit/commit/3ed677ebb4ef221dbceb1aba4dc5db6a5fce26c6))
