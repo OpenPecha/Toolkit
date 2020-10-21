@@ -112,8 +112,9 @@ class BaseFormatter:
             |   ├── citation.yml
     """
 
-    def __init__(self, output_path=None):
+    def __init__(self, output_path, metadata):
         self.output_path = Path(output_path if output_path else config.OPF_OUTPUT_PATH)
+        self.metadata = metadata
 
     def get_unique_id(self):
         return uuid4().hex
@@ -142,6 +143,18 @@ class BaseFormatter:
 
         self.dirs["layers_path"].mkdir(parents=True, exist_ok=True)
         self.dirs["base_path"].mkdir(parents=True, exist_ok=True)
+
+    @property
+    def opf_path(self):
+        return self.dirs["opf_path"]
+
+    @property
+    def pecha_path(self):
+        return self.opf_path.parent
+
+    @property
+    def meta_fn(self):
+        return self.opf_path / "meta.yml"
 
     def normalizeUni(self, strNFC):
         strNFC = strNFC.replace("\u0F00", "\u0F68\u0F7C\u0F7E")  # ༀ

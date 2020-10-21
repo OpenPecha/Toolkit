@@ -20,8 +20,8 @@ class HFMLFormatter(BaseFormatter):
     OpenPecha Formatter for digitized wooden-printed Pecha based on annotation scheme from Esukhia.
     """
 
-    def __init__(self, output_path="./output", is_book=False):
-        super().__init__(output_path=output_path)
+    def __init__(self, output_path=None, metadata=None, is_book=False):
+        super().__init__(output_path, metadata)
         self.is_book = is_book
         self.base_text = ""
         self.vol_walker = 0
@@ -77,6 +77,8 @@ class HFMLFormatter(BaseFormatter):
         return result_text
 
     def _load_metadata(self):
+        if self.metadata:
+            return self.metadata
         meta_fn = self.dirs["opf_path"] / "meta.yml"
         if meta_fn.is_file():
             return self.load(meta_fn)
@@ -87,6 +89,8 @@ class HFMLFormatter(BaseFormatter):
         meta_fn = self.dirs["opf_path"] / "meta.yml"
         if kwargs:
             self.metadata.update(kwargs)
+        if "id" not in self.metadata:
+            self.metadata["id"] = f"opecha:{self.pecha_path.name}"
         self.dump(self.metadata, meta_fn)
 
     def get_input(self, input_path):
