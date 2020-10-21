@@ -57,8 +57,8 @@ class TsadraFormatter(BaseFormatter):
     OpenPecha Formatter for Tsadra DarmaCloud ebooks
     """
 
-    def __init__(self, output_path="./output"):
-        super().__init__(output_path=output_path)
+    def __init__(self, output_path="./output", metadata=None):
+        super().__init__(output_path, metadata=metadata)
         self.base_text = ""
         self.cover_image = ""
         self.walker = 0  # The walker to traverse every character in the pecha

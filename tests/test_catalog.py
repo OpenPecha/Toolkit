@@ -13,6 +13,7 @@ def test_googleocr():
     catalog.update_catalog()
 
 
+@pytest.mark.skip(reason="no urgent")
 def test_hfml_with_metadata():
     metadata = {"source_metadata": {"title": "example-title"}}
     layers = ["Citation", "BookTitle", "Author"]
