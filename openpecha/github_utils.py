@@ -1,4 +1,5 @@
 import os
+import shutil
 import time
 from pathlib import Path
 from uuid import uuid4
@@ -31,7 +32,7 @@ def create_github_repo(path):
     return repo._html_url.value
 
 
-def commit(repo, message, not_includes):
+def commit(repo, message, not_includes, branch="master"):
     has_changed = False
 
     # add untrack fns
@@ -62,7 +63,7 @@ def commit(repo, message, not_includes):
         if not message:
             message = "Initial commit"
         repo.git.commit("-m", message)
-        repo.git.push("origin", "master")
+        repo.git.push("origin", branch)
 
 
 def create_local_repo(path, remote_url):
@@ -77,11 +78,29 @@ def create_local_repo(path, remote_url):
         return repo
 
 
-def github_publish(path, message=None, type=None, not_includes=None):
+def create_orphan_branch(repo, branch_name):
+    repo.git.checkout("master")
+    repo.git.checkout("--orphan", branch_name)
+
+    # move base-text root level
+    repo_path = Path(repo.working_dir)
+    pecha_opf_path = repo_path / f"{repo_path.name}.opf"
+    for vol_fn in (pecha_opf_path / "base").iterdir():
+        shutil.move(str(vol_fn), str(repo_path))
+
+    repo.git.rm("-rf", str(pecha_opf_path.name))
+    repo.git.rm("-f", "README.md")
+
+
+def github_publish(path, message=None, type=None, not_includes=None, layers=[]):
     path = Path(path)
     remote_repo_url = create_github_repo(path)
     local_repo = create_local_repo(path, remote_repo_url)
     commit(local_repo, message, not_includes)
+
+    for layer in layers:
+        create_orphan_branch(local_repo, layer)
+        commit(local_repo, message, not_includes, branch=layer)
 
 
 def create_file(repo_name, path, content, msg, update=False):
@@ -154,10 +173,10 @@ def add_assets_to_latest_release(repo_name, assets_path=[]):
 def create_readme(metadata, path):
     result = ""
     # add title
-    result += f"## Title\n\t- {metadata['title']}\n\n"
+    result += f"## Title\n\t- {metadata.get('title')}\n\n"
 
     # add author
-    result += f"## Author\n\t- {metadata['author']}\n\n"
+    result += f"## Author\n\t- {metadata.get('author')}\n\n"
 
     readme_fn = path / "README.md"
     readme_fn.write_text(result)

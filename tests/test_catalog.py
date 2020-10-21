@@ -15,7 +15,13 @@ def test_googleocr():
 
 def test_hfml_with_metadata():
     metadata = {"source_metadata": {"title": "example-title"}}
+    layers = ["Citation", "BookTitle", "Author"]
     catalog = CatalogManager(
-        formatter=HFMLFormatter(output_path="./output", metadata=metadata)
+        formatter=HFMLFormatter(output_path="./output", metadata=metadata),
+        layers=layers,
     )
     catalog.add_hfml_item("./tests/data/formatter/hfml/P0001")
+
+
+if __name__ == "__main__":
+    test_hfml_with_metadata()

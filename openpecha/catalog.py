@@ -26,6 +26,7 @@ class CatalogManager:
         self,
         pipes=None,
         formatter=None,
+        layers=[],
         not_include_files=["releases"],
         last_id_fn="last_id",
     ):
@@ -35,6 +36,7 @@ class CatalogManager:
         self.batch = []
         self.last_id = self._get_last_id()
         self.formatter = formatter
+        self.layers = layers
         self.not_include_files = not_include_files
         self.pipes = pipes if pipes else buildin_pipes
 
@@ -92,7 +94,11 @@ class CatalogManager:
         self.last_id += 1
         self.formatter.create_opf(path, self.last_id)
         self._get_catalog_metadata(self.formatter.meta_fn)
-        github_publish(self.formatter.pecha_path, not_includes=self.not_include_files)
+        github_publish(
+            self.formatter.pecha_path,
+            not_includes=self.not_include_files,
+            layers=self.layers,
+        )
         return self.formatter.pecha_path
 
     def add_ocr_item(self, path):
