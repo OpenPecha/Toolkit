@@ -1,3 +1,4 @@
+import re
 from pathlib import Path
 
 from setuptools import find_packages, setup
@@ -9,9 +10,17 @@ def read(fname):
         return f.read()
 
 
+def get_version(prop, project):
+    project = Path(__file__).parent / project / "__init__.py"
+    result = re.search(
+        r'{}\s*=\s*[\'"]([^\'"]*)[\'"]'.format(prop), project.read_text()
+    )
+    return result.group(1)
+
+
 setup(
     name="openpecha",
-    version="0.5.3",
+    version=get_version("__version__", "openpecha"),
     author="Esukhia developers",
     author_email="esukhiadev@gmail.com",
     description="OpenPecha Toolkit allows state of the art for distributed standoff annotations on moving texts",
@@ -23,13 +32,14 @@ setup(
     install_requires=[
         "Click==7.0",
         "diff-match-patch==20181111",
-        "PyYAML==5.1.2",
+        "PyYAML>=5.0.0",
         "requests==2.22.0",
         "tqdm==4.35.0",
         "PyGithub==1.43.8",
         "GitPython==3.1.0",
         "bs4",
         "pyewts",
+        "rdflib==5.0.0",
     ],
     python_requires=">=3.6",
     tests_require=["pytest"],

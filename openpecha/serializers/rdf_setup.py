@@ -1,6 +1,6 @@
 import rdflib
-from rdflib import URIRef, Literal, BNode
-from rdflib.namespace import RDF, SKOS, OWL, Namespace, NamespaceManager, XSD, RDFS
+from rdflib import BNode, Literal, URIRef
+from rdflib.namespace import OWL, RDF, RDFS, SKOS, XSD, Namespace, NamespaceManager
 
 rdf = RDF
 rdfs = RDFS

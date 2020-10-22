@@ -12,6 +12,8 @@ usage/layer_output/
 output/
 opfs/
 resources/
+error_logs/
+assets/
 
 # scripts
 usage/
@@ -22,8 +24,9 @@ dist/
 
 # test
 .coverage
+design/
 
 # Config
 **/config/*
 .idea/*
-openpecha/config.py
+**/.openpecha

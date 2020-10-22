@@ -1,21 +1,38 @@
 import os
-from pathlib import Path
+import shutil
 import time
+from pathlib import Path
+from uuid import uuid4
 
-from github import Github
 from git import Repo
+from github import Github
+
+org = None
 
 
-g = Github(os.environ.get('GITHUB_TOKEN'))
-org = g.get_organization('OpenPecha')
+def _get_openpecha_org(token=os.environ.get("GITHUB_TOKEN")):
+    """OpenPecha github org singleton."""
+    global org
+    if org is None:
+        g = Github(token)
+        org = g.get_organization("OpenPecha")
+    return org
+
+
+def get_github_repo(repo_name, **kwargs):
+    org = _get_openpecha_org(**kwargs)
+    repo = org.get_repo(repo_name)
+    return repo
+
 
 def create_github_repo(path):
+    org = _get_openpecha_org()
     repo = org.create_repo(path.name)
     time.sleep(2)
     return repo._html_url.value
-    
 
-def commit(repo, message, not_includes):
+
+def commit(repo, message, not_includes, branch="master"):
     has_changed = False
 
     # add untrack fns
@@ -25,92 +42,155 @@ def commit(repo, message, not_includes):
         for not_include_fn in not_includes:
             if not_include_fn in fn:
                 ignored = True
-        
+
         if ignored:
             continue
 
-        if fn: repo.git.add(fn)
+        if fn:
+            repo.git.add(fn)
         if has_changed is False:
             has_changed = True
 
     # add modified fns
     if repo.is_dirty() is True:
-        for fn in repo.git.diff(None, name_only=True).split('\n'):
-            if fn: repo.git.add(fn)
+        for fn in repo.git.diff(None, name_only=True).split("\n"):
+            if fn:
+                repo.git.add(fn)
             if has_changed is False:
                 has_changed = True
-    
+
     if has_changed is True:
         if not message:
-            message = 'Initial commit'
-        repo.git.commit('-m', message)
-        repo.git.push('origin', 'master')
+            message = "Initial commit"
+        repo.git.commit("-m", message)
+        repo.git.push("origin", branch)
 
 
 def create_local_repo(path, remote_url):
-    if (path/'.git').is_dir():
+    if (path / ".git").is_dir():
         return Repo(path)
     else:
         repo = Repo.init(path)
-        old_url = remote_url.split('//')
-        usr, pw = os.environ['GH_USR'], os.environ['GH_PW']
-        auth_remote_url = f'{old_url[0]}//{usr}:{pw}@{old_url[1]}'
-        repo.create_remote('origin', auth_remote_url)
+        old_url = remote_url.split("//")
+        usr, pw = os.environ["GH_USR"], os.environ["GH_PW"]
+        auth_remote_url = f"{old_url[0]}//{usr}:{pw}@{old_url[1]}"
+        repo.create_remote("origin", auth_remote_url)
         return repo
 
 
-def github_publish(path, message=None, type=None, not_includes=None):
+def create_orphan_branch(repo, branch_name):
+    repo.git.checkout("master")
+    repo.git.checkout("--orphan", branch_name)
+
+    # move base-text root level
+    repo_path = Path(repo.working_dir)
+    pecha_opf_path = repo_path / f"{repo_path.name}.opf"
+    for vol_fn in (pecha_opf_path / "base").iterdir():
+        shutil.move(str(vol_fn), str(repo_path))
+
+    repo.git.rm("-rf", str(pecha_opf_path.name))
+    repo.git.rm("-f", "README.md")
+
+
+def github_publish(path, message=None, type=None, not_includes=None, layers=[]):
     path = Path(path)
     remote_repo_url = create_github_repo(path)
     local_repo = create_local_repo(path, remote_repo_url)
     commit(local_repo, message, not_includes)
 
+    for layer in layers:
+        create_orphan_branch(local_repo, layer)
+        commit(local_repo, message, not_includes, branch=layer)
+
 
 def create_file(repo_name, path, content, msg, update=False):
-    repo = org.get_repo(repo_name)
+    repo = get_github_repo(repo_name)
     if update:
         old_content = repo.get_contents(path)
         repo.update_file(old_content.path, msg, content, old_content.sha)
     else:
         repo.create_file(path, msg, content)
 
-def get_bump_tag(repo):
+
+def get_bumped_tag(repo):
     try:
         latest_release_tag = repo.get_latest_release().tag_name
-    except:
-        return 'v0.1'
+    except Exception:
+        return "v0.1"
 
-    tag_number = round(float(latest_release_tag[1:]), 1)
-    bump_tag_number = tag_number + 0.1
-    return f'v{bump_tag_number}'
+    tag_number = float(latest_release_tag[1:])
+    bump_tag_number = round(tag_number + 0.1, 1)
+    return f"v{bump_tag_number}"
 
 
-def create_release(repo_name, asset_paths=None):
-    repo = org.get_repo(repo_name)
-    bump_tag = get_bump_tag(repo)
+def _add_tag_in_filename(path, tag_name):
+    path = Path(path)
+    old_name = path.stem
+    old_extension = path.suffix
+    directory = path.parent
+    new_name = f"{old_name}-{tag_name}{old_extension}"
+    target_path = directory / new_name
+    path.rename(target_path)
+    return target_path
+
+
+def upload_assets(release, tag_name=None, assets_path=[]):
+    if not tag_name:
+        tag_name = release.tag_name
+    download_url = ""
+    for asset_path in assets_path:
+        # asset_path = _add_tag_in_filename(asset_path, tag_name)
+        asset = release.upload_asset(str(asset_path))
+        download_url = asset.browser_download_url
+        print(f"[INFO] Uploaded asset {asset_path}")
+    return download_url
+
+
+def create_release(repo_name, prerelease=False, assets_path=[], **kwargs):
+    repo = get_github_repo(repo_name, **kwargs)
+    if prerelease:
+        bumped_tag = uuid4().hex
+        message = "Pre-release for download"
+    else:
+        bumped_tag = get_bumped_tag(repo)
+        message = "Official Release"
     new_release = repo.create_git_release(
-        bump_tag, bump_tag, 'Initial Release'
+        bumped_tag, bumped_tag, message, prerelease=prerelease
     )
-    for asset_path in asset_paths:
-        new_release.upload_asset(asset_path)
+    print(f"[INFO] Created release {bumped_tag} for {repo_name}")
+    asset_download_url = upload_assets(
+        new_release, tag_name=bumped_tag, assets_path=assets_path
+    )
+    return asset_download_url
+
+
+def add_assets_to_latest_release(repo_name, assets_path=[]):
+    repo = get_github_repo(repo_name)
+    lastest_release = repo.get_latest_release()
+    upload_assets(lastest_release, assets_path=assets_path)
 
 
 def create_readme(metadata, path):
-    result = ''
+    result = ""
     # add title
-    result += f"## Title\n\t- {metadata['title']}\n\n"
+    result += f"## Title\n\t- {metadata.get('title')}\n\n"
 
     # add author
-    result += f"## Author\n\t- {metadata['author']}\n\n"
+    result += f"## Author\n\t- {metadata.get('author')}\n\n"
 
-    readme_fn = path/'README.md'
+    readme_fn = path / "README.md"
     readme_fn.write_text(result)
 
 
 def delete_repo(repo_name):
+    org = _get_openpecha_org()
     repo = org.get_repo(repo_name)
     repo.delete()
 
 
 if __name__ == "__main__":
-    create_release('P000002', asset_paths='./output/P000300/release.zip')
+    asset_download_url = create_release(
+        "P000780", prerelease=True, assets_path=Path("assets").iterdir()
+    )
+    print(asset_download_url)
+    create_release("P000780", assets_path=Path("assets").iterdir())

@@ -2,14 +2,13 @@ import gzip
 import json
 import math
 import re
-from copy import deepcopy
 from pathlib import Path
 
 import yaml
 
-from openpecha.formatters import BaseFormatter
-from openpecha.formatters.format import Layer, Page
-from openpecha.utils import gzip_str
+from ..utils import gzip_str
+from .formatter import BaseFormatter
+from .layers import *
 
 
 class GoogleOCRFormatter(BaseFormatter):
@@ -17,8 +16,8 @@ class GoogleOCRFormatter(BaseFormatter):
     OpenPecha Formatter for Google OCR JSON output of scanned pecha.
     """
 
-    def __init__(self, output_path="./output"):
-        super().__init__(output_path=output_path)
+    def __init__(self, output_path="./output", metadata=None):
+        super().__init__(output_path, metadata)
         self.n_page_breaker_char = 3
         self.page_break = "\n" * self.n_page_breaker_char
         self.base_text = []
@@ -38,7 +37,7 @@ class GoogleOCRFormatter(BaseFormatter):
                 yield json.load(gzip.open(str(fn), "rb")), fn.name.split(".")[0]
             except GeneratorExit:
                 return None, None
-            except:
+            except Exception:
                 yield None, None
 
     def _get_page_index(self, n):
@@ -52,18 +51,12 @@ class GoogleOCRFormatter(BaseFormatter):
 
     def format_layer(self, layers, base_id):
         # Format page annotation
-        Pagination = deepcopy(Layer)
-        Pagination["id"] = self.get_unique_id()
-        Pagination["annotation_type"] = "pagination"
-        Pagination["revision"] = f"{1:05}"
+        Pagination = Layer(self.get_unique_id(), "pagination")
         for pg, page_ref in zip(layers["pages"], layers["pages_ref"]):
-            page = deepcopy(Page)
-            page["id"] = self.get_unique_id()
-            page["span"]["start"] = pg[0]
-            page["span"]["end"] = pg[1]
-            page["page_index"] = self._get_page_index(pg[2])
-            page["reference"] = page_ref
-            Pagination["annotations"].append(page)
+            uuid = self.get_unique_id()
+            span = Span(pg[0], pg[1])
+            page = Page(span, page_index=self._get_page_index(pg[2]), page_ref=page_ref)
+            Pagination["annotations"][uuid] = page
 
         result = {"pagination": Pagination}
 
@@ -154,7 +147,7 @@ class GoogleOCRFormatter(BaseFormatter):
 
             try:
                 n_pg = int(n_pg_str)
-            except:
+            except Exception:
                 # TODO: fix later, collection all the cases as of now
                 n_pg = 0  # dummy value
 
@@ -185,10 +178,7 @@ class GoogleOCRFormatter(BaseFormatter):
                     response, low_conf_char_vol_path / f"{n_pg:04}.txt.gz"
                 )
 
-        result = {
-            "pages": pages,
-            "pages_ref": pages_ref,
-        }
+        result = {"pages": pages, "pages_ref": pages_ref}
 
         return result
 
@@ -199,8 +189,9 @@ class GoogleOCRFormatter(BaseFormatter):
         return base_text
 
     def get_metadata(self, work_id):
-        import requests
         import xml.etree.ElementTree as ET
+
+        import requests
         from pyewts import pyewts
 
         converter = pyewts()
@@ -210,7 +201,7 @@ class GoogleOCRFormatter(BaseFormatter):
 
         try:
             root = ET.fromstring(r.content.decode("utf-8"))
-        except:
+        except Exception:
             metadata = {
                 "id": f"opecha:{self.pecha_id}",
                 "initial_creation_type": "ocr",

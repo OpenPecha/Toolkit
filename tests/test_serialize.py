@@ -2,35 +2,30 @@ from pathlib import Path
 
 import pytest
 
-from openpecha.serializers import Serialize
-from openpecha.serializers import SerializeMd
-from openpecha.serializers import SerializeHFML
+from openpecha.serializers import EpubSerializer, HFMLSerializer, SerializeMd
 
 
 # For testing read_base_layer, add_chars and apply_layer
-@pytest.fixture(scope='module')
+@pytest.fixture(scope="module")
 def opf_path():
-    opf_path = 'tests/data/W1OP000001/W1OP000001.opf'
-    return opf_path
+    return Path("./tests/data/serialize/tsadra/P000100.opf")
 
 
 # Test HFML Serializer
-hfml_opf_path = Path('tests/data/serialize_test/hfml/hfml.opf')
+# hfml_opf_path = Path("tests/data/serialize_test/hfml/hfml.opf")
 
-# def test_hfml_serializer():
-#     opf_path = 'tests/data/serialize/hfml/P000001/P000001.opf'
-#     text_id = 'T1'
-#     layers = ['pagination']
 
-#     serializer = SerializeHFML(opf_path, text_id, layers)
-#     serializer.apply_layers()
-#     result = serializer.get_result()
-#     print(result)
+@pytest.mark.skip(reason="not important")
+def test_hfml_serializer():
 
-# def test_hfml_serializer_tsadra():
-#     serializer = SerializeHFML('output/htmls/htmls.opf')
-#     serializer.apply_layers()
-#     result = serializer.get_result()
+    opf_path = "./tests/data/serialize/hfml/P000002.opf/"
+    output_path = "./output/P000002_hfml/"
+    serializer = HFMLSerializer(opf_path)
+    serializer.serialize(output_path=output_path)
 
-# if __name__ == "__main__":
-#     test_hfml_serializer()
+
+def test_hfml_2_tsadra_serializer(opf_path):
+    serializer = EpubSerializer(opf_path)
+    serializer.apply_layers()
+    out_fn = serializer.serialize()
+    assert str(out_fn) == "output/epub_output/P000100.epub"
