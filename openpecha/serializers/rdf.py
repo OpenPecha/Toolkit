@@ -38,6 +38,7 @@ class Rdf:
             sour = meta['source_metadata']['id'].split(":")
             if sour[0] == "bdr":
                 self.add_triple(bdr[self.lname], bdo['instanceReproductionOf'], bdr['M'+sour[-1]])
+                self.add_triple(bdr[self.lname], bdo['contentMethod'], bdr['ContentMethod_OCR'])
                 self.add_triple(bdr['M'+sour[-1]], bdo['instanceHasReproduction'], bdr[self.lname])
                 self.add_triple(bdr[self.lname], bdo['instanceReproductionOf'], bdr[sour[-1]])
                 self.add_triple(bdr[sour[-1]], bdo['instanceHasReproduction'], bdr[self.lname])
