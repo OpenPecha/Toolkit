@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.6.17 (2020-10-23)
+### Fix
+* Github helper funcs to work on any org ([`b3aff03`](https://github.com/OpenPecha/openpecha-toolkit/commit/b3aff036bfbbd8bdcd69e3be1819575e5bfba8f2))
+
 ## v0.6.16 (2020-10-21)
 ### Fix
 * Missing kwarg metadata ([`051ca1b`](https://github.com/OpenPecha/openpecha-toolkit/commit/051ca1bdcb795e2422bccf4fecd8355232f68e62))
