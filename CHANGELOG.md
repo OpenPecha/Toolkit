@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.6.18 (2020-10-23)
+### Fix
+* Create_file to accept org and token ([`7bf1562`](https://github.com/OpenPecha/openpecha-toolkit/commit/7bf15622e57af244363e59d5c0f69e01ffb092a1))
+
 ## v0.6.17 (2020-10-23)
 ### Fix
 * Github helper funcs to work on any org ([`b3aff03`](https://github.com/OpenPecha/openpecha-toolkit/commit/b3aff036bfbbd8bdcd69e3be1819575e5bfba8f2))
