@@ -15,13 +15,21 @@ def test_googleocr():
 
 @pytest.mark.skip(reason="no urgent")
 def test_hfml_with_metadata():
-    metadata = {"source_metadata": {"title": "example-title"}}
+    metadata = {
+        "source_metadata": {
+            "title": "example-title",
+            "subtitle": "v001",
+            "author": "authors",
+            "id": "2323",
+        }
+    }
     layers = ["Citation", "BookTitle", "Author"]
     catalog = CatalogManager(
         formatter=HFMLFormatter(output_path="./output", metadata=metadata),
         layers=layers,
     )
     catalog.add_hfml_item("./tests/data/formatter/hfml/P0001")
+    catalog.update()
 
 
 if __name__ == "__main__":

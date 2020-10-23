@@ -57,7 +57,7 @@ class CatalogManager:
         row[0] = f"[{id}](https://github.com/{self.org}/{id})"
         return row
 
-    def update_catalog(self):
+    def update(self):
         """Updates the catalog csv to have new opf-pechas metadata"""
         # update last_id
         content = self.batch[-1][0].strip()
@@ -67,6 +67,8 @@ class CatalogManager:
             content,
             "update last id of Pecha",
             update=True,
+            org=self.org,
+            token=self.token,
         )
 
         # update last_id
@@ -77,7 +79,14 @@ class CatalogManager:
             "\n".join([",".join(row) for row in map(self._add_id_url, self.batch)])
             + "\n"
         )
-        create_file(self.repo_name, self.batch_path, content, "create new batch")
+        create_file(
+            self.repo_name,
+            self.batch_path,
+            content,
+            "create new batch",
+            org=self.org,
+            token=self.token,
+        )
         print("[INFO] Updated the catalog")
 
         # reset the batch

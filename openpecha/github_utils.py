@@ -109,8 +109,16 @@ def github_publish(
         commit(local_repo, message, not_includes, branch=layer)
 
 
-def create_file(repo_name, path, content, msg, update=False):
-    repo = get_github_repo(repo_name)
+def create_file(
+    repo_name,
+    path,
+    content,
+    msg,
+    update=False,
+    org="OpenPecha",
+    token=os.environ.get("GITHUB_TOKEN"),
+):
+    repo = get_github_repo(repo_name, org, token)
     if update:
         old_content = repo.get_contents(path)
         repo.update_file(old_content.path, msg, content, old_content.sha)
