@@ -6,6 +6,8 @@ the catalog. Functonalities includes:
 
 """
 
+import os
+
 import requests
 import yaml
 
@@ -27,10 +29,14 @@ class CatalogManager:
         pipes=None,
         formatter=None,
         layers=[],
+        org="OpenPecha",
+        token=os.environ.get("GITHUB_TOKEN"),
         not_include_files=["releases"],
         last_id_fn="last_id",
     ):
-        self.repo_name = "openpecha-catalog"
+        self.org = org
+        self.token = token
+        self.repo_name = "catalog"
         self.batch_path = "data/batch.csv"
         self.last_id_path = f"data/{last_id_fn}"
         self.batch = []
@@ -42,13 +48,13 @@ class CatalogManager:
 
     def _get_last_id(self):
         """returns the id assigin to last opf pecha"""
-        last_id_url = f"https://raw.githubusercontent.com/OpenPecha/openpecha-catalog/master/{self.last_id_path}"
+        last_id_url = f"https://raw.githubusercontent.com/{self.org}/{self.repo_name}/master/{self.last_id_path}"
         r = requests.get(last_id_url)
         return int(r.content.decode("utf-8").strip()[1:])
 
     def _add_id_url(self, row):
         id = row[0]
-        row[0] = f"[{id}](https://github.com/OpenPecha/{id})"
+        row[0] = f"[{id}](https://github.com/{self.org}/{id})"
         return row
 
     def update_catalog(self):
@@ -72,7 +78,7 @@ class CatalogManager:
             + "\n"
         )
         create_file(self.repo_name, self.batch_path, content, "create new batch")
-        print("[INFO] Updated the OpenPecha catalog")
+        print("[INFO] Updated the catalog")
 
         # reset the batch
         self.batch = []
@@ -98,6 +104,8 @@ class CatalogManager:
             self.formatter.pecha_path,
             not_includes=self.not_include_files,
             layers=self.layers,
+            org=self.org,
+            token=self.token,
         )
         return self.formatter.pecha_path
 

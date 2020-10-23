@@ -10,23 +10,23 @@ from github import Github
 org = None
 
 
-def _get_openpecha_org(token=os.environ.get("GITHUB_TOKEN")):
+def _get_openpecha_org(org_name, token):
     """OpenPecha github org singleton."""
     global org
     if org is None:
         g = Github(token)
-        org = g.get_organization("OpenPecha")
+        org = g.get_organization(org_name)
     return org
 
 
-def get_github_repo(repo_name, **kwargs):
-    org = _get_openpecha_org(**kwargs)
+def get_github_repo(repo_name, org_name, token):
+    org = _get_openpecha_org(org_name, token)
     repo = org.get_repo(repo_name)
     return repo
 
 
-def create_github_repo(path):
-    org = _get_openpecha_org()
+def create_github_repo(path, org_name, token):
+    org = _get_openpecha_org(org_name, token)
     repo = org.create_repo(path.name)
     time.sleep(2)
     return repo._html_url.value
@@ -66,14 +66,13 @@ def commit(repo, message, not_includes, branch="master"):
         repo.git.push("origin", branch)
 
 
-def create_local_repo(path, remote_url):
+def create_local_repo(path, remote_url, org, token):
     if (path / ".git").is_dir():
         return Repo(path)
     else:
         repo = Repo.init(path)
         old_url = remote_url.split("//")
-        usr, pw = os.environ["GH_USR"], os.environ["GH_PW"]
-        auth_remote_url = f"{old_url[0]}//{usr}:{pw}@{old_url[1]}"
+        auth_remote_url = f"{old_url[0]}//{org}:{token}@{old_url[1]}"
         repo.create_remote("origin", auth_remote_url)
         return repo
 
@@ -92,10 +91,17 @@ def create_orphan_branch(repo, branch_name):
     repo.git.rm("-f", "README.md")
 
 
-def github_publish(path, message=None, type=None, not_includes=None, layers=[]):
+def github_publish(
+    path,
+    message=None,
+    not_includes=None,
+    layers=[],
+    org="OpenPecha",
+    token=os.environ.get("GITHUB_TOKEN"),
+):
     path = Path(path)
-    remote_repo_url = create_github_repo(path)
-    local_repo = create_local_repo(path, remote_repo_url)
+    remote_repo_url = create_github_repo(path, org, token)
+    local_repo = create_local_repo(path, remote_repo_url, org, token)
     commit(local_repo, message, not_includes)
 
     for layer in layers:
@@ -146,8 +152,14 @@ def upload_assets(release, tag_name=None, assets_path=[]):
     return download_url
 
 
-def create_release(repo_name, prerelease=False, assets_path=[], **kwargs):
-    repo = get_github_repo(repo_name, **kwargs)
+def create_release(
+    repo_name,
+    prerelease=False,
+    assets_path=[],
+    org="OpenPecha",
+    token=os.environ.get("GITHUB_TOKEN"),
+):
+    repo = get_github_repo(repo_name, org, token)
     if prerelease:
         bumped_tag = uuid4().hex
         message = "Pre-release for download"
