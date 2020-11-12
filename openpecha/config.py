@@ -14,3 +14,4 @@ OPF_OUTPUT_PATH = _mkdir(BASE_PATH / "opfs")
 
 # Pecha
 PECHA_PREFIX = "P"
+N_SIG = 6  # no. of significant digits for pecha id
