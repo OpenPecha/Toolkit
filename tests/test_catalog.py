@@ -1,6 +1,6 @@
 import pytest
 
-from openpecha.catalog import CatalogManager
+from openpecha.catalog.manager import CatalogManager
 from openpecha.formatters import *
 
 
