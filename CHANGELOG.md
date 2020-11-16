@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.6.19 (2020-11-16)
+### Fix
+* Move catalog manager into catalog sub-pkg ([`fb6b084`](https://github.com/OpenPecha/openpecha-toolkit/commit/fb6b08442982c0a8aa0e49c862261ffed702d9b4))
+* Download corpus cli ([`69b82e6`](https://github.com/OpenPecha/openpecha-toolkit/commit/69b82e61b926fa25cc71ecc151caed2c0b4f7eef))
+* Get base of all pechas ([`878a31b`](https://github.com/OpenPecha/openpecha-toolkit/commit/878a31b87c3c4998ec30fce2c1db60443a26c737))
+
 ## v0.6.18 (2020-10-23)
 ### Fix
 * Create_file to accept org and token ([`7bf1562`](https://github.com/OpenPecha/openpecha-toolkit/commit/7bf15622e57af244363e59d5c0f69e01ffb092a1))
