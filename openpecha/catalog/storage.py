@@ -1,19 +1,16 @@
 import base64
+import logging
 import os
 from abc import ABC, abstractclassmethod
 
 import requests
 from github import Github
 
+from .config import GITHUB_BUCKET_CONFIG
 from .utils import create_pecha_id
 
-GITHUB_BUCKET_CONFIG = {
-    "catalog": {"start_id": 1, "end_id": 5},
-    "token": os.environ.get("GITHUB_TOKEN"),
-}
 
-
-class Bucket:
+class Bucket(ABC):
     """A class representing a Bucket on Cloud Storage."""
 
     def __init__(self, name, config):
@@ -67,14 +64,19 @@ class GithubBucket(Bucket):
         return decoded_blob
 
     def get_pecha_base(self, id):
-        repo = self.client.get_repo(id)
+        try:
+            repo = self.client.get_repo(id)
+        except Exception:
+            return [], ""
         for vol_base_file_obj in repo.get_contents(f"{id}.opf/base"):
+            logging.info(f"{vol_base_file_obj.name}")
             vol_base_content = self._get_content(vol_base_file_obj)
-            yield vol_base_content
+            yield vol_base_content, vol_base_file_obj.name
 
     def get_all_pechas_base(self):
         for pecha_num in range(
             self.config["catalog"]["start_id"], self.config["catalog"]["end_id"] + 1
         ):
             pecha_id = create_pecha_id(pecha_num)
+            logging.info(f"Downloading {pecha_id}")
             yield pecha_id, self.get_pecha_base(pecha_id)

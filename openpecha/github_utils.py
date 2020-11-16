@@ -74,6 +74,9 @@ def create_local_repo(path, remote_url, org, token):
         old_url = remote_url.split("//")
         auth_remote_url = f"{old_url[0]}//{org}:{token}@{old_url[1]}"
         repo.create_remote("origin", auth_remote_url)
+
+        repo.config_writer().set_value("user", "name", "10zinten").release()
+        repo.config_writer().set_value("user", "email", "ten13zin@gmail.com").release()
         return repo
 
 
