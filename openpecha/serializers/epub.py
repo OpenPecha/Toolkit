@@ -176,8 +176,9 @@ class EpubSerializer(Serialize):
         pecha_id (string): Pecha id that needs to be exported in other format
 
         """
-        pecha_id = self.opfpath.name.split(".")[0]
-        out_fn = f"{pecha_id}.html"
+        output_path = Path(output_path)
+        pecha_id = self.opf_path.name.split(".")[0]
+        out_html_fn = f"{pecha_id}.html"
         try:
             pecha_title = self.meta["ebook_metadata"]["title"]
         except KeyError:
@@ -194,7 +195,7 @@ class EpubSerializer(Serialize):
                 f"<html>\n<head>\n\t<title>{pecha_title}</title>\n</head>\n<body>\n"
             )
             results += f"{result}</body>\n</html>"
-            Path(out_fn).write_text(results)
+            Path(out_html_fn).write_text(results)
             # Downloading css template file from ebook template repo and saving it
             template = requests.get(
                 "https://raw.githubusercontent.com/OpenPecha/ebook-template/master/tsadra_template.css"
@@ -207,10 +208,13 @@ class EpubSerializer(Serialize):
             font_family = "Monlam Uni Ouchan2"
             font_size = 15
             chapter_mark = "pagebreak"
-            cover_path = self.opfpath / f"asset/image/{cover_image}"
+            cover_path = self.opf_path / f"asset/image/{cover_image}"
+            out_epub_fn = output_path / f"{pecha_id}.epub"
             os.system(
-                f'ebook-convert {out_fn} {output_path}/{pecha_id}.epub --extra-css=./template.css --chapter={chapter_Xpath} --chapter-mark="{chapter_mark}" --base-font-size={font_size} --embed-font-family="{font_family}" --cover={cover_path}'
+                f'ebook-convert {out_html_fn} {out_epub_fn} --extra-css=./template.css --chapter={chapter_Xpath} --chapter-mark="{chapter_mark}" --base-font-size={font_size} --embed-font-family="{font_family}" --cover={cover_path}'
             )
             # Removing html file and template file
-            os.system(f"rm {out_fn}")
+            os.system(f"rm {out_html_fn}")
             os.system("rm template.css")
+
+            return out_epub_fn

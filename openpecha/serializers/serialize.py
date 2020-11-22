@@ -23,9 +23,9 @@ class Serialize(object):
     """
 
     def __init__(
-        self, opfpath, text_id=None, vol_ids=None, layers=None, index_layer=None
+        self, opf_path, text_id=None, vol_ids=None, layers=None, index_layer=None
     ):
-        self.opfpath = Path(opfpath)
+        self.opf_path = Path(opf_path)
         self.meta = self.get_meta_data()
         self.text_id = text_id
         self.index_layer = index_layer
@@ -40,7 +40,7 @@ class Serialize(object):
                 self.base_layers = self.get_text_base_layer()
         else:
             if not vol_ids:
-                vol_ids = [vol.stem for vol in (self.opfpath / "base").iterdir()]
+                vol_ids = [vol.stem for vol in (self.opf_path / "base").iterdir()]
             for vol_id in vol_ids:
                 text_spans = {vol_id: {"start": 0, "end": float("inf")}}
                 base_layers = {vol_id: self.get_base_layer(vol_id=vol_id)}
@@ -106,7 +106,7 @@ class Serialize(object):
         return adapted_start, adapted_end
 
     def get_meta_data(self):
-        opf_path = self.opfpath
+        opf_path = self.opf_path
         try:
             meta = yaml.safe_load((opf_path / "meta.yml").open())
         except Exception:
@@ -122,7 +122,7 @@ class Serialize(object):
         get spans of text
         """
         text_span = {}
-        index_layer = self.load_layer(self.opfpath / "index.yml")
+        index_layer = self.load_layer(self.opf_path / "index.yml")
         for id, anno in index_layer["annotations"].items():
             if anno["parts"]:
                 for sub_topic in anno["parts"]:
@@ -134,7 +134,7 @@ class Serialize(object):
         return text_span
 
     def get_index_layer(self, text_id):
-        index_layer = self.load_layer(self.opfpath / "index.yml")
+        index_layer = self.load_layer(self.opf_path / "index.yml")
         text_index_layer = defaultdict(str)
         text_index_layer["id"] = index_layer["id"]
         text_index_layer["annotation_type"] = index_layer["annotation_type"]
@@ -162,12 +162,12 @@ class Serialize(object):
         return text for given span
         """
         if self.text_id:
-            vol_base = (self.opfpath / f"base/{vol_id}.txt").read_text()
+            vol_base = (self.opf_path / f"base/{vol_id}.txt").read_text()
             start = self.text_spans[vol_id]["start"]
             end = self.text_spans[vol_id]["end"]
             return vol_base[start:end]
         else:
-            vol_base = (self.opfpath / f"base/{vol_id}.txt").read_text()
+            vol_base = (self.opf_path / f"base/{vol_id}.txt").read_text()
             return vol_base
 
     def get_text_base_layer(self):
@@ -190,7 +190,7 @@ class Serialize(object):
         This reads the file opfpath/layers/layer_id.yml and applies all the annotations it contains, in the order in which they appear.
         I think it can be implemented in this class by just calling self.apply_annotation on each annotation of the file.
         """
-        layer_fn = self.opfpath / "layers" / vol_id / f"{layer_id}.yml"
+        layer_fn = self.opf_path / "layers" / vol_id / f"{layer_id}.yml"
         if not layer_fn.is_file():
             return
         layer = yaml.safe_load(layer_fn.open())
@@ -231,7 +231,7 @@ class Serialize(object):
         """
         return [
             layer.stem
-            for layer in (self.opfpath / "layers" / vol_id).iterdir()
+            for layer in (self.opf_path / "layers" / vol_id).iterdir()
             if layer.suffix == ".yml"
         ]
 
@@ -240,7 +240,7 @@ class Serialize(object):
         This applies all the layers recorded in self.layers. If self.layers is none, it reads all the layers from the layer directory.
         """
         if not self.index_layer:
-            index_path = self.opfpath / "index.yml"
+            index_path = self.opf_path / "index.yml"
             if index_path.is_file():
                 self.index_layer = self.load_layer(index_path)
                 self.apply_index()
@@ -305,7 +305,7 @@ class Serialize(object):
             result_with_line += line + "\n"
         return result_with_line
 
-    def get_result(self):
+    def get_result(self, line_num=True):
         """
         returns a string which is the base layer where the changes recorded in self.chars_toapply have been applied.
 

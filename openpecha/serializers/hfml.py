@@ -99,7 +99,7 @@ class HFMLSerializer(Serialize):
             self.add_chars(vol_id, end_cc, False, end_payload)
 
     def serialize(self, output_path="./output/publication"):
-        pecha_id = self.opfpath.stem
+        pecha_id = self.opf_path.stem
         self.apply_layers()
         results = self.get_result()
         vol2fn_manager = Vol2FnManager(self.get_meta_data())

@@ -112,8 +112,9 @@ class BaseFormatter:
             |   ├── citation.yml
     """
 
-    def __init__(self, output_path=None):
+    def __init__(self, output_path, metadata):
         self.output_path = Path(output_path if output_path else config.OPF_OUTPUT_PATH)
+        self.metadata = metadata
 
     def get_unique_id(self):
         return uuid4().hex
@@ -123,22 +124,37 @@ class BaseFormatter:
         Build the necessary directories for OpenPecha format.
         """
         if id_:
-            if isinstance(id_, str) and not id_.startswith(config.PECHA_PREFIX):
-                pecha_id = id_
+            if isinstance(id_, str) and id_.startswith(config.PECHA_PREFIX):
+                self.pecha_id = id_
             elif isinstance(id_, int):
-                pecha_id = f"{config.PECHA_PREFIX}{id_:06}"
+                self.pecha_id = f"{config.PECHA_PREFIX}{id_:06}"
             elif id_.isdigit():
-                pecha_id = f"{config.PECHA_PREFIX}{int(id_):06}"
+                self.pecha_id = f"{config.PECHA_PREFIX}{int(id_):06}"
+            else:
+                self.pecha_id = input_path.stem
         else:
-            pecha_id = input_path.stem
+            self.pecha_id = input_path.stem
 
-        self.pecha_id = pecha_id
-        self.dirs = {"opf_path": self.output_path / f"{pecha_id}/{pecha_id}.opf"}
+        self.dirs = {
+            "opf_path": self.output_path / f"{self.pecha_id}/{self.pecha_id}.opf"
+        }
         self.dirs["layers_path"] = self.dirs["opf_path"] / "layers"
         self.dirs["base_path"] = self.dirs["opf_path"] / "base"
 
         self.dirs["layers_path"].mkdir(parents=True, exist_ok=True)
         self.dirs["base_path"].mkdir(parents=True, exist_ok=True)
+
+    @property
+    def opf_path(self):
+        return self.dirs["opf_path"]
+
+    @property
+    def pecha_path(self):
+        return self.opf_path.parent
+
+    @property
+    def meta_fn(self):
+        return self.opf_path / "meta.yml"
 
     def normalizeUni(self, strNFC):
         strNFC = strNFC.replace("\u0F00", "\u0F68\u0F7C\u0F7E")  # ༀ

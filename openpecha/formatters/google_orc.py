@@ -16,8 +16,8 @@ class GoogleOCRFormatter(BaseFormatter):
     OpenPecha Formatter for Google OCR JSON output of scanned pecha.
     """
 
-    def __init__(self, output_path="./output"):
-        super().__init__(output_path=output_path)
+    def __init__(self, output_path="./output", metadata=None):
+        super().__init__(output_path, metadata)
         self.n_page_breaker_char = 3
         self.page_break = "\n" * self.n_page_breaker_char
         self.base_text = []
