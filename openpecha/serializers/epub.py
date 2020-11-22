@@ -1,4 +1,5 @@
 import os
+import re
 from os import stat
 from pathlib import Path
 
@@ -69,10 +70,10 @@ class EpubSerializer(Serialize):
         only_start_ann = False
         start_payload = "("
         end_payload = ")"
-        if ann["type"] == AnnType.pagination:
-            start_payload = f'[{ann["page_index"]}] {ann["page_info"]}\n'
-            only_start_ann = True
-        elif ann["type"] == AnnType.correction:
+        # if ann["type"] == AnnType.pagination:
+        #     start_payload = f'[{ann["page_index"]}] {ann["page_info"]}\n'
+        #     only_start_ann = True
+        if ann["type"] == AnnType.correction:
             start_payload = "("
             end_payload = f',{ann["correction"]})'
         elif ann["type"] == AnnType.peydurma:
@@ -88,7 +89,7 @@ class EpubSerializer(Serialize):
                 else:
                     start_payload = Tsadra_template.book_title_SP
             except Exception:
-                start_payload = TsadraTemplate.book_title_SP
+                start_payload = Tsadra_template.book_title_SP
             end_payload = Tsadra_template.span_EP
         elif ann["type"] == AnnType.book_number:
             start_payload = Tsadra_template.book_number_SP
@@ -129,6 +130,42 @@ class EpubSerializer(Serialize):
         if not only_start_ann:
             self.add_chars(vol_id, end_cc, False, end_payload)
 
+    def get_syls(self, vol_text):
+        result = []
+        cur_syl = ""
+        syls = re.split("(་|།)", vol_text)
+        for i, syl in enumerate(syls):
+            if i % 2 == 0:
+                cur_syl += syl
+            else:
+                cur_syl += syl
+                result.append(cur_syl)
+                cur_syl = ""
+        return result
+
+    def update_line_break(self, result_text):
+        result_text = result_text.replace("།\n", "། ")
+        result_text = result_text.replace("\n", "")
+        syls = self.get_syls(result_text)
+        walker = 0
+        result = []
+        br_flag = False
+        for syl in syls:
+            if br_flag:
+                if "།" in syl:
+                    result.append(syl)
+                    result.append("<br>")
+                    br_flag = False
+                    walker = 0
+                else:
+                    result.append(syl)
+            else:
+                if walker == 499:
+                    br_flag = True
+                result.append(syl)
+            walker += 1
+        return "".join(result)
+
     def serialize(self, output_path="./output/epub_output"):
         """ This module serialize .opf file to other format such as .epub etc. In case of epub,
         we are using calibre ebook-convert command to do the conversion by passing our custom css template
@@ -149,9 +186,10 @@ class EpubSerializer(Serialize):
             cover_image = self.meta["ebook_metadata"]["cover"]
         except KeyError:
             cover_image = ""
+        self.layers = [layer for layer in self.layers if layer != "Pagination"]
         results = self.get_result()
         for vol_id, result in results.items():
-            result = result.replace("\n", "<br>\n")
+            result = self.update_line_break(result)
             results = (
                 f"<html>\n<head>\n\t<title>{pecha_title}</title>\n</head>\n<body>\n"
             )

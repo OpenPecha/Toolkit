@@ -37,6 +37,7 @@ class TestHFMLFormatter:
         result = formatter.get_result()
         expected_result = {
             AnnType.book_title: [[], [], []],
+            AnnType.book_number: [[], [], []],
             AnnType.author: [[], [], []],
             AnnType.poti_title: [
                 [(None, {"span": {"start": 0, "end": 24}})],
@@ -303,7 +304,10 @@ class TestTsadraFormatter:
         result = formatter.get_result()
 
         expected_result = {
-            AnnType.book_title: [[(None, {"span": {"start": 0, "end": 84}})]],
+            AnnType.book_title: [
+                [(None, {"iscover": True, "span": {"start": 0, "end": 84}})]
+            ],
+            AnnType.book_number: [[]],
             AnnType.poti_title: [[]],
             AnnType.author: [
                 [
@@ -367,4 +371,4 @@ if __name__ == "__main__":
     # path = "./output/demo/src/P000101/OEBPS/"
     # formatter = TsadraFormatter()
     # formatter.create_opf(path, 9)
-    TestHFMLFormatter().test_build_layers()
+    TestTsadraFormatter().test_tsadra_formatter()

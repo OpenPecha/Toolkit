@@ -1,3 +1,4 @@
+import re
 from collections import defaultdict, namedtuple
 from pathlib import Path
 
@@ -280,7 +281,10 @@ class Serialize(object):
     def _assign_line_layer(self, result, vol_id):
         def _get_page_index(line):
             page_index = ""
-            i = 2
+            if re.search("[𰵀-󴉱]", line):
+                i = 2
+            else:
+                i = 1
             while line[i] != "]":
                 page_index += line[i]
                 i += 1
