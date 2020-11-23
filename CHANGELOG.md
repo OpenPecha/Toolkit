@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.6.20 (2020-11-23)
+### Fix
+* Break after 500 syllables ([`8d93203`](https://github.com/OpenPecha/openpecha-toolkit/commit/8d9320337029a232328dfcdf21ddb166a3f4f37e))
+
 ## v0.6.19 (2020-11-16)
 ### Fix
 * Move catalog manager into catalog sub-pkg ([`fb6b084`](https://github.com/OpenPecha/openpecha-toolkit/commit/fb6b08442982c0a8aa0e49c862261ffed702d9b4))
