@@ -297,15 +297,16 @@ class BaseFormatter:
             for topics, sub_topics in zip(
                 cross_vols_layers[AnnType.topic], cross_vols_layers[AnnType.sub_topic]
             ):
-
-                Topic = deepcopy(Text)
-                Topic["parts"] += sum(
-                    [[ann for none_local_id, ann in anns] for anns in sub_topics], []
-                )
-                Topic["span"] += [ann["span"] for none_local_id, ann in topics]
-                Topic["work_id"] = topics[0][1]["work_id"]
-                uuid = self.get_unique_id()
-                Index_layer["annotations"][uuid] = Topic
+                if topics:
+                    Topic = deepcopy(Text)
+                    Topic["parts"] += sum(
+                        [[ann for none_local_id, ann in anns] for anns in sub_topics],
+                        [],
+                    )
+                    Topic["span"] += [ann["span"] for none_local_id, ann in topics]
+                    Topic["work_id"] = topics[0][1]["work_id"]
+                    uuid = self.get_unique_id()
+                    Index_layer["annotations"][uuid] = Topic
 
             yield {"index": Index_layer}, None
         else:
