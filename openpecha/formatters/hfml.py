@@ -819,10 +819,10 @@ class HFMLFormatter(BaseFormatter):
                     )
 
             pat_len_before_ann = self.total_pattern(pat_list, line)
-            if length == pat_len_before_ann:
-                end_line = start_line + length - pat_len_before_ann - 2
-            else:
+            if line:
                 end_line = start_line + length - pat_len_before_ann - 1
+            else:
+                end_line = start_line + length - 1
             char_walker = end_line + 2
             base_line = self.base_extract(pat_list, line) + "\n"
             self.base_text += base_line
