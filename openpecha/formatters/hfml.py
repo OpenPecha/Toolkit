@@ -51,6 +51,7 @@ class HFMLFormatter(BaseFormatter):
         self.sabche_pattern = []
         self.tsawa_pattern = []
         self.yigchung_pattern = []
+        self.durchen_pattern = []
 
     def text_preprocess(self, text):
         if text[0] == "\ufeff":
@@ -120,6 +121,7 @@ class HFMLFormatter(BaseFormatter):
             "start_sabche_pattern",
             "start_tsawa_pattern",
             "start_yigchung_pattern",
+            "start_durchen_pattern",
         ]:
             if re.search(pat_list[pattern], annotated_line):
                 match_list = re.finditer(
@@ -180,6 +182,7 @@ class HFMLFormatter(BaseFormatter):
             "end_sabche_pattern",
             "end_tsawa_pattern",
             "end_yigchung_pattern",
+            "end_durchen_pattern",
         ]:
             end_patterns = re.findall(
                 pat_list[pattern], annotated_line
@@ -233,6 +236,7 @@ class HFMLFormatter(BaseFormatter):
             "start_sabche_pattern",
             "start_tsawa_pattern",
             "start_yigchung_pattern",
+            "start_durchen_pattern",
         ]:
             if re.search(pat_list[pp], line):
                 match_list = re.finditer(
@@ -302,6 +306,7 @@ class HFMLFormatter(BaseFormatter):
             "end_sabche_pattern",
             "end_tsawa_pattern",
             "end_yigchung_pattern",
+            "end_durchen_pattern",
         ]:
             end_patterns = re.finditer(
                 pat_list[pp], line
@@ -337,6 +342,8 @@ class HFMLFormatter(BaseFormatter):
             "end_tsawa_pattern",
             "start_yigchung_pattern",
             "end_yigchung_pattern",
+            "start_durchen_pattern",
+            "end_durchen_pattern",
         ]:
             base_line = re.sub(pat_list[pattern], "", base_line)
 
@@ -476,6 +483,12 @@ class HFMLFormatter(BaseFormatter):
         end_yigchung_pattern = (
             []
         )  # list variable to store index of end yigchung pattern => y)
+        start_durchen_pattern = (
+            []
+        )  # list variable to store index of start durchen pattern => <d
+        end_durchen_pattern = (
+            []
+        )  # list variable to store index of end durchen pattern => d>
 
         pat_list = {
             "author_pattern": r"\<([𰵀-󴉱])?au.+?\>",
@@ -494,6 +507,8 @@ class HFMLFormatter(BaseFormatter):
             "end_tsawa_pattern": r"m\>",
             "start_yigchung_pattern": r"\<([𰵀-󴉱])?y",
             "end_yigchung_pattern": r"y\>",
+            "start_durchen_pattern": r"\<([𰵀-󴉱])?d",
+            "end_durchen_pattern": r"d\>",
             "sub_topic_pattern": r"\{([𰵀-󴉱])?\w+\-\w+\}",
             "error_pattern": r"\<([𰵀-󴉱])?\S+?\,\S+?\>",
             "archaic_word_pattern": r"\{([𰵀-󴉱])?\S+?\,\S+?\}",
@@ -818,6 +833,20 @@ class HFMLFormatter(BaseFormatter):
                         self.parse_end_ann(end_yigchung, pat_list, char_walker, line)
                     )
 
+            if re.search(pat_list["start_durchen_pattern"], line):
+                start_durchens = re.finditer(pat_list["start_durchen_pattern"], line)
+                for start_durchen in start_durchens:
+                    start_durchen_pattern.append(
+                        self.parse_start_ann(start_durchen, pat_list, char_walker, line)
+                    )
+
+            if re.search(pat_list["end_durchen_pattern"], line):
+                end_durchens = re.finditer(pat_list["end_durchen_pattern"], line)
+                for end_durchen in end_durchens:
+                    end_durchen_pattern.append(
+                        self.parse_end_ann(end_durchen, pat_list, char_walker, line)
+                    )
+
             pat_len_before_ann = self.total_pattern(pat_list, line)
             if line:
                 end_line = start_line + length - pat_len_before_ann - 1
@@ -905,6 +934,9 @@ class HFMLFormatter(BaseFormatter):
         self.yigchung_pattern.append(
             self.merge(start_yigchung_pattern, end_yigchung_pattern)
         )  # The starting and ending of  yigchung pattern is merged
+        self.durchen_pattern.append(
+            self.merge(start_durchen_pattern, end_durchen_pattern)
+        )  # The starting and ending of  yigchung pattern is merged
 
     def get_result(self):
 
@@ -930,6 +962,7 @@ class HFMLFormatter(BaseFormatter):
             AnnType.error_candidate: self.abs_er_id,
             AnnType.peydurma: self.notes_id,
             AnnType.archaic: self.archaic_word_id,
+            AnnType.durchen: self.durchen_pattern,
         }
 
         return result
