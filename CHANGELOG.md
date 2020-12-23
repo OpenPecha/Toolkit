@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.6.21 (2020-12-23)
+### Fix
+* Small bugs ([`a1b1016`](https://github.com/OpenPecha/openpecha-toolkit/commit/a1b1016d78caccfc0b86f82e477c8fd8b0954f8a))
+
 ## v0.6.20 (2020-11-23)
 ### Fix
 * Break after 500 syllables ([`8d93203`](https://github.com/OpenPecha/openpecha-toolkit/commit/8d9320337029a232328dfcdf21ddb166a3f4f37e))
