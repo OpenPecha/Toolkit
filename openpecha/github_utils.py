@@ -151,11 +151,11 @@ def _add_tag_in_filename(path, tag_name):
     return target_path
 
 
-def upload_assets(release, tag_name=None, assets_path=[]):
+def upload_assets(release, tag_name=None, asset_paths=[]):
     if not tag_name:
         tag_name = release.tag_name
     download_url = ""
-    for asset_path in assets_path:
+    for asset_path in asset_paths:
         # asset_path = _add_tag_in_filename(asset_path, tag_name)
         asset = release.upload_asset(str(asset_path))
         download_url = asset.browser_download_url
@@ -166,7 +166,7 @@ def upload_assets(release, tag_name=None, assets_path=[]):
 def create_release(
     repo_name,
     prerelease=False,
-    assets_path=[],
+    asset_paths=[],
     org="OpenPecha",
     token=os.environ.get("GITHUB_TOKEN"),
 ):
@@ -182,15 +182,15 @@ def create_release(
     )
     print(f"[INFO] Created release {bumped_tag} for {repo_name}")
     asset_download_url = upload_assets(
-        new_release, tag_name=bumped_tag, assets_path=assets_path
+        new_release, tag_name=bumped_tag, asset_paths=asset_paths
     )
     return asset_download_url
 
 
-def add_assets_to_latest_release(repo_name, assets_path=[]):
+def add_assets_to_latest_release(repo_name, asset_paths=[]):
     repo = get_github_repo(repo_name)
     lastest_release = repo.get_latest_release()
-    upload_assets(lastest_release, assets_path=assets_path)
+    upload_assets(lastest_release, asset_paths=asset_paths)
 
 
 def create_readme(metadata, path):
@@ -213,7 +213,7 @@ def delete_repo(repo_name):
 
 if __name__ == "__main__":
     asset_download_url = create_release(
-        "P000780", prerelease=True, assets_path=Path("assets").iterdir()
+        "P000780", prerelease=True, asset_paths=Path("assets").iterdir()
     )
     print(asset_download_url)
-    create_release("P000780", assets_path=Path("assets").iterdir())
+    create_release("P000780", asset_paths=Path("assets").iterdir())

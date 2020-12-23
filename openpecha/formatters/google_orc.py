@@ -231,7 +231,7 @@ class GoogleOCRFormatter(BaseFormatter):
 
     def create_opf(self, input_path, pecha_id):
         input_path = Path(input_path)
-        self._build_dirs(input_path, id=pecha_id)
+        self._build_dirs(input_path, id_=pecha_id)
 
         self.dirs["release_path"] = self.dirs["opf_path"].parent / "releases"
         self.dirs["release_path"].mkdir(exist_ok=True, parents=True)

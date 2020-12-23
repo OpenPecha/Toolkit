@@ -69,8 +69,8 @@ class GithubBucket(Bucket):
         except Exception:
             return [], ""
         for vol_base_file_obj in repo.get_contents(f"{id}.opf/base"):
-            logging.info(f"{vol_base_file_obj.name}")
             vol_base_content = self._get_content(vol_base_file_obj)
+            logging.info(f"Downloaded {vol_base_file_obj.name}")
             yield vol_base_content, vol_base_file_obj.name
 
     def get_all_pechas_base(self):
