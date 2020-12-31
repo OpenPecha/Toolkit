@@ -98,7 +98,7 @@ class HFMLSerializer(Serialize):
         if not only_start_ann:
             self.add_chars(vol_id, end_cc, False, end_payload)
 
-    def serialize(self, output_path="./output/publication"):
+    def serialize(self, output_path="./output/publication", text_id=""):
         pecha_id = self.opf_path.stem
         self.apply_layers()
         results = self.get_result()
@@ -107,7 +107,7 @@ class HFMLSerializer(Serialize):
         output_path.mkdir(exist_ok=True, parents=True)
         print("[INFO] Creating HFML view")
         for vol_id, hfml_text in results.items():
-            fn = vol2fn_manager.get_fn(vol_id)
+            fn = vol2fn_manager.get_fn(vol_id) + text_id
             try:
                 vol_hfml_fn = output_path / fn
             except Exception:
