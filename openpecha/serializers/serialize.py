@@ -249,7 +249,10 @@ class Serialize(object):
         for vol_id in self.base_layers:
             if not self.layers:
                 self.layers = self.get_all_layer(vol_id)
-            self.layers.sort()
+            if "Pagination" in self.layers:
+                pagination_index = self.layers.index("Pagination")
+                del self.layers[pagination_index]
+                self.layers.append("Pagination")
             for layer_id in self.layers:
                 self.apply_layer(vol_id, layer_id)
 
