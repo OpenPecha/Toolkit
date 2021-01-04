@@ -47,6 +47,7 @@ class AnnType:
     tsawa = "Tsawa"
     yigchung = "Yigchung"
     archaic = "Archaic"
+    durchen = "Durchen"
 
 
 class _attr_names:

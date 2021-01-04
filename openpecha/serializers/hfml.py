@@ -91,6 +91,9 @@ class HFMLSerializer(Serialize):
         elif ann["type"] == AnnType.yigchung:
             start_payload = f"<{local_id}y"
             end_payload = "y>"
+        elif ann["type"] == AnnType.durchen:
+            start_payload = f"<{local_id}d"
+            end_payload = "d>"
 
         start_cc, end_cc = self._get_adapted_span(ann["span"], vol_id)
         # start_cc -= 4
