@@ -249,6 +249,10 @@ class Serialize(object):
         for vol_id in self.base_layers:
             if not self.layers:
                 self.layers = self.get_all_layer(vol_id)
+            if "Pagination" in self.layers:
+                pagination_index = self.layers.index("Pagination")
+                del self.layers[pagination_index]
+                self.layers.append("Pagination")
             for layer_id in self.layers:
                 self.apply_layer(vol_id, layer_id)
 
@@ -294,12 +298,10 @@ class Serialize(object):
         page_index = ""
         n_line = 1
         for line in result.split("\n"):
-            if not line:
-                continue
-            if line[0] == "[" and line[1] != vol_id[0]:
+            if re.search(r"\[([𰵀-󴉱])?[0-9]+[a-z]{1}\]", line):
                 page_index = _get_page_index(line)
                 n_line = 1
-            elif line[0] != "[":
+            elif not re.search(r"^\[", line):
                 line = f"[{page_index}.{n_line}]" + line
                 n_line += 1
             result_with_line += line + "\n"
