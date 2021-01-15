@@ -298,7 +298,7 @@ class Serialize(object):
         page_index = ""
         n_line = 1
         for line in result.split("\n"):
-            if re.search(r"\[([𰵀-󴉱])?[0-9]+[a-z]{1}\]", line):
+            if re.search(r"\[[𰵀-󴉱]?[0-9]+[a-z]{1}\]", line):
                 page_index = _get_page_index(line)
                 n_line = 1
             elif not re.search(r"^\[", line):
