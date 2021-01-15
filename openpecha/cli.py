@@ -2,7 +2,6 @@ import logging
 from pathlib import Path
 
 import click
-from bonltk.text_quality import non_words_ratio
 from git import Repo
 from tqdm import tqdm
 
@@ -101,7 +100,7 @@ def get_pecha(id, batch_path, layers):
 
 def download_pecha(pecha_id, out_path=None):
     # clone the repo
-    pecha_url = f"{config['OP_ORG']}/{pecha}.git"
+    pecha_url = f"{config['OP_ORG']}/{pecha_id}.git"
     if out_path:
         out_path = Path(out_path)
         out_path.mkdir(exist_ok=True, parents=True)
@@ -278,6 +277,14 @@ def _get_bucket(bucket_type, bucket_name, n):
 
 def _get_filter_strategy_caller(filter_strategy):
     if filter_strategy == "non_words_ratio":
+        try:
+            from bonltk.text_quality import non_words_ratio
+        except Exception:
+            msg = (
+                "bonltk not installed. Install it with `pip install bonltk` "
+                "or from https://github.com/10zinten/bonltk"
+            )
+            raise ImportError(msg)
         return non_words_ratio
 
 
