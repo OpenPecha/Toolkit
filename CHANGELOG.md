@@ -2,6 +2,7 @@
 
 <!--next-version-placeholder-->
 
+<<<<<<< HEAD
 ## v0.6.23 (2021-01-15)
 ### Fix
 * Return local path of downloaded pecha ([`fae9e58`](https://github.com/OpenPecha/openpecha-toolkit/commit/fae9e58260bfdc73b3d7f37298012283fc26f079))
@@ -18,6 +19,16 @@
 ## v0.6.21 (2020-12-23)
 ### Fix
 * Small bugs ([`a1b1016`](https://github.com/OpenPecha/openpecha-toolkit/commit/a1b1016d78caccfc0b86f82e477c8fd8b0954f8a))
+=======
+## v0.6.25 (2021-01-15)
+### Fix
+* Import bonltk only when in use ([`a7e5b48`](https://github.com/OpenPecha/openpecha-toolkit/commit/a7e5b487d65e2ba12440ecc1c9a28cfc5e650ce4))
+
+## v0.6.24 (2021-01-15)
+### Fix
+* Import bonltk only when in use ([`3ecd475`](https://github.com/OpenPecha/openpecha-toolkit/commit/3ecd4751353191f0c37555ac5fbcf8897030039e))
+* Return local path to downloaded pecha ([`e91fb4d`](https://github.com/OpenPecha/openpecha-toolkit/commit/e91fb4d5946c497c409dbef1ad26bfa5763097a4))
+>>>>>>> bde09bb05942f5eb18923cf3326c2a5f7180a10f
 
 ## v0.6.20 (2020-11-23)
 ### Fix
