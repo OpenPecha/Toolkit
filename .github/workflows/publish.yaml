@@ -31,7 +31,6 @@ jobs:
         pytest tests/
   
   publish:
-    
     needs: test
     runs-on: ubuntu-latest
 
