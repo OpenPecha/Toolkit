@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.6.23 (2021-01-15)
+### Fix
+* Return local path of downloaded pecha ([`fae9e58`](https://github.com/OpenPecha/openpecha-toolkit/commit/fae9e58260bfdc73b3d7f37298012283fc26f079))
+
 ## v0.6.22 (2021-01-12)
 ### Fix
 * **hfml-serializer:** Pagination needs to serialize last ([`468191b`](https://github.com/OpenPecha/openpecha-toolkit/commit/468191b536403c12c3775231b9fd90c11e5dbeac))
