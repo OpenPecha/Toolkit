@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.6.25 (2021-01-15)
+### Fix
+* Import bonltk only when in use ([`a7e5b48`](https://github.com/OpenPecha/openpecha-toolkit/commit/a7e5b487d65e2ba12440ecc1c9a28cfc5e650ce4))
+
 ## v0.6.24 (2021-01-15)
 ### Fix
 * Import bonltk only when in use ([`3ecd475`](https://github.com/OpenPecha/openpecha-toolkit/commit/3ecd4751353191f0c37555ac5fbcf8897030039e))
