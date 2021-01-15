@@ -1,5 +1,6 @@
 # Environment
 .env/
+.venv
 .vscode/
 openpecha.egg-info/
 .pytest_cache/
