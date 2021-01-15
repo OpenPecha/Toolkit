@@ -99,16 +99,23 @@ def get_pecha(id, batch_path, layers):
     return pecha_list
 
 
-def download_pecha(pecha, out):
+def download_pecha(pecha_id, out_path=None):
     # clone the repo
     pecha_url = f"{config['OP_ORG']}/{pecha}.git"
-    pecha_path = config["OP_DATA_PATH"] / pecha
+    if out_path:
+        out_path = Path(out_path)
+        out_path.mkdir(exist_ok=True, parents=True)
+        pecha_path = out_path / pecha_id
+    else:
+        pecha_path = config["OP_DATA_PATH"] / pecha_id
+
     if pecha_path.is_dir():  # if repo is already exits at local then try to pull
         repo = Repo(str(pecha_path))
         repo.heads["master"].checkout()
         repo.remotes.origin.pull()
     else:
         Repo.clone_from(pecha_url, str(pecha_path))
+    return pecha_path
 
 
 # Poti Download command
