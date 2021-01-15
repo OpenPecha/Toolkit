@@ -2,6 +2,11 @@
 
 <!--next-version-placeholder-->
 
+## v0.6.24 (2021-01-15)
+### Fix
+* Import bonltk only when in use ([`3ecd475`](https://github.com/OpenPecha/openpecha-toolkit/commit/3ecd4751353191f0c37555ac5fbcf8897030039e))
+* Return local path to downloaded pecha ([`e91fb4d`](https://github.com/OpenPecha/openpecha-toolkit/commit/e91fb4d5946c497c409dbef1ad26bfa5763097a4))
+
 ## v0.6.20 (2020-11-23)
 ### Fix
 * Break after 500 syllables ([`8d93203`](https://github.com/OpenPecha/openpecha-toolkit/commit/8d9320337029a232328dfcdf21ddb166a3f4f37e))
