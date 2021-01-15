@@ -2,6 +2,17 @@
 
 <!--next-version-placeholder-->
 
+## v0.6.26 (2021-01-15)
+### Fix
+* **serializer:** Empty line serialize correctly ([`e906287`](https://github.com/OpenPecha/openpecha-toolkit/commit/e906287f36499accf356aa667f01dc84648194c0))
+* Return local path of downloaded pecha ([`fae9e58`](https://github.com/OpenPecha/openpecha-toolkit/commit/fae9e58260bfdc73b3d7f37298012283fc26f079))
+* **hfml-serializer:** Pagination needs to serialize last ([`468191b`](https://github.com/OpenPecha/openpecha-toolkit/commit/468191b536403c12c3775231b9fd90c11e5dbeac))
+* **pagewise:** Pagewise obj created ([`2480e03`](https://github.com/OpenPecha/openpecha-toolkit/commit/2480e033c43b5129375cddc56f69025f3a8d70d1))
+* **hfm-formatter:** Durchen parser added ([`a4bdd15`](https://github.com/OpenPecha/openpecha-toolkit/commit/a4bdd15f08f94be407811219e8f8d3e1f4d82eae))
+* **serialize-base-module:** Empty line serialize correctly ([`cb4ebca`](https://github.com/OpenPecha/openpecha-toolkit/commit/cb4ebca1ad95871c2a441dd034ed68a1cb8775bd))
+* **formatter-basemodule:** Pecha without text formatted correctly ([`ff5dee2`](https://github.com/OpenPecha/openpecha-toolkit/commit/ff5dee213eb7a29a7a58f5717f5f593bd321b073))
+* **hmfl-formatter:** Empty line formatted correctly ([`5fcbe87`](https://github.com/OpenPecha/openpecha-toolkit/commit/5fcbe87a23260e28e95a1032e8c766d6f1cc790e))
+
 <<<<<<< HEAD
 ## v0.6.23 (2021-01-15)
 ### Fix
