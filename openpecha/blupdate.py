@@ -1,5 +1,5 @@
-import copy
 import math
+from pathlib import Path
 
 import diff_match_patch as dmp_module
 import yaml
@@ -183,20 +183,44 @@ class Blupdate:
         else:
             return self.get_updated_with_dmp(srcblcoord, cctvforcoord[0])
 
-    def update_layer(self, layer_fn):
-        """
-        Update individual layer, in format {0: [0, 17], 1: [20, 40], ...}
-        """
-        anns = yaml.safe_load(layer_fn.open())
-        for i, ann in anns.items():
-            start_cc = ann[0]
-            end_cc = ann[1]
-            anns[i] = [self.get_updated_coord(start_cc), self.get_updated_coord(end_cc)]
-        yaml.dump(anns, layer_fn.open("w"), default_flow_style=False)
 
-    def update_annotations(self, opfpath):
+class PechaBaseUpdate:
+    def __init__(self, src_opf_path, dst_opf_path, context_len=10):
+        self.src_opf_path = Path(src_opf_path)
+        self.dst_opf_path = Path(dst_opf_path)
+        self.context_len = context_len
+
+    def dump(self, data, output_fn):
+        with output_fn.open("w") as fn:
+            yaml.dump(
+                data, fn, default_flow_style=False, sort_keys=False, allow_unicode=True
+            )
+
+    def load(self, fn):
+        return yaml.safe_load(fn.open())
+
+    def update_layer(self, layer, updater):
+        """
+        Update individual layer
+        """
+        for _, ann in layer["annotations"].items():
+            ann["span"]["start"] = updater.get_updated_coord(ann["span"]["start"])
+            ann["span"]["end"] = updater.get_updated_coord(ann["span"]["end"])
+
+    def update_layers(self, vol_id, updater):
         """
         Update all the layer annotations
         """
-        for layer_fn in (opfpath / "layers").iterdir():
-            self.update_layer(layer_fn)
+        for layer_fn in (self.dst_opf_path / "layers" / vol_id).iterdir():
+            layer = self.load(layer_fn)
+            self.update_layer(layer, updater)
+            self.dump(layer, layer_fn)
+
+    def update_vol(self, vol_id):
+        src_base = (self.src_opf_path / "base" / f"{vol_id}.txt").read_text()
+        dst_base = (self.dst_opf_path / "base" / f"{vol_id}.txt").read_text()
+        self.update_layers(vol_id, Blupdate(src_base, dst_base))
+
+    def update(self):
+        for vol_fn in Path(self.dst_opf_path / "base").iterdir():
+            self.update_vol(vol_fn.stem)

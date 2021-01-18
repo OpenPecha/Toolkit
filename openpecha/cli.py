@@ -5,6 +5,7 @@ import click
 from git import Repo
 from tqdm import tqdm
 
+from openpecha.blupdate import PechaBaseUpdate
 from openpecha.buda.openpecha_manager import OpenpechaManager
 from openpecha.catalog import config as catalog_config
 from openpecha.catalog.filter import is_text_good_quality
@@ -12,7 +13,7 @@ from openpecha.catalog.storage import GithubBucket
 from openpecha.formatters import *
 from openpecha.serializers import *
 
-OP_PATH = Path("./.openpecha")
+OP_PATH = Path.home() / ".openpecha"
 config = {
     # Github
     "OP_CATALOG_URL": "https://raw.githubusercontent.com/OpenPoti/openpecha-catalog/master/data/catalog.csv",
@@ -107,6 +108,7 @@ def download_pecha(pecha_id, out_path=None):
         pecha_path = out_path / pecha_id
     else:
         pecha_path = config["OP_DATA_PATH"] / pecha_id
+        click.echo(pecha_path)
 
     if pecha_path.is_dir():  # if repo is already exits at local then try to pull
         repo = Repo(str(pecha_path))
@@ -331,3 +333,21 @@ def corpus_download(
                 vol_base, strategy=filter_strategy_caller, threshold=threshold
             ):
                 _save_text(vol_base, output_path, pecha_id, vol_fn)
+
+
+@cli.command()
+@click.argument("pecha_number")
+@click.argument("pecha_path")
+def update_layers(**kwargs):
+    """
+    Update all the layers when base has been updated.
+    """
+    pecha_id = get_pecha_id(kwargs["pecha_number"])
+    click.echo(INFO.format(f"Downloading {pecha_id} ..."))
+    src_pecha_path = download_pecha(pecha_id)
+
+    click.echo(INFO.format(f"Updating {pecha_id} ..."))
+    src_opf_path = src_pecha_path / f"{pecha_id}.opf"
+    dst_opf_path = Path(kwargs["pecha_path"]) / f"{pecha_id}.opf"
+    pecha = PechaBaseUpdate(src_opf_path, dst_opf_path)
+    pecha.update()

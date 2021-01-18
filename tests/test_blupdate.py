@@ -1,10 +1,11 @@
+import re
 import shutil
 from pathlib import Path
 
 import pytest
 import yaml
 
-from openpecha.blupdate import Blupdate
+from openpecha.blupdate import Blupdate, PechaBaseUpdate
 
 
 @pytest.fixture(params=[{"srcbl": "abefghijkl", "dstbl": "abcdefgkl"}])
@@ -91,16 +92,16 @@ def test_dmp_find(inputs, dmp_find_test_cases):
         {"srcblcoord": 7, "expected_result": 7},
     ]
 )
-def get_updated_coord_test_cases(request):
+def updated_coord(request):
     return request.param
 
 
-def test_updated_coord(inputs, get_updated_coord_test_cases):
+def test_updated_coord(inputs, updated_coord):
     updater = Blupdate(inputs["srcbl"], inputs["dstbl"], context_len=4)
 
-    result = updater.get_updated_coord(get_updated_coord_test_cases["srcblcoord"])
+    result = updater.get_updated_coord(updated_coord["srcblcoord"])
 
-    assert result == get_updated_coord_test_cases["expected_result"]
+    assert result == updated_coord["expected_result"]
 
 
 # Test on real text
@@ -115,49 +116,47 @@ def updater():
     return updater
 
 
-def get_layer(layer, v1, v2):
-    src_layer = data_path / f"{v1}" / "v1.opf" / "layers" / f"{layer}.yml"
-    dst_layer = data_path / f"{v2}" / f"{v2}.opf" / "layers" / f"{layer}.yml"
+def get_layer(layer_name, result, expected):
+    src_layer = (
+        data_path / result / f"{result}.opf" / "layers" / "v001" / f"{layer_name}.yml"
+    )
+    dst_layer = (
+        data_path
+        / expected
+        / f"{expected}.opf"
+        / "layers"
+        / "v001"
+        / f"{layer_name}.yml"
+    )
     return yaml.safe_load(src_layer.open()), yaml.safe_load(dst_layer.open())
 
 
-@pytest.fixture(
-    params=[
-        {"layer": "title"},
-        {"layer": "yigchung"},
-        {"layer": "quotes"},
-        {"layer": "tsawa"},
-        {"layer": "sapche"},
-    ]
-)
-def layers_test_cases(request):
-    return request.param
-
-
-def test_get_updated_coord_all(updater, layers_test_cases):
-    src_ann_cc, dst_ann_cc = get_layer(layers_test_cases["layer"], "v1", "v2")
-
-    start_result = updater.get_updated_coord(src_ann_cc[0][0])
-    end_result = updater.get_updated_coord(src_ann_cc[0][1])
-
-    assert start_result == dst_ann_cc[0][0]
-    assert end_result == dst_ann_cc[0][1]
+def is_layer_same(result_layer, expected_layer):
+    for ann_id, result_ann in result_layer["annotations"].items():
+        expected_span = expected_layer["annotations"][ann_id]["span"]
+        if (
+            expected_span["start"] != result_ann["span"]["start"]
+            or expected_span["end"] != result_ann["span"]["end"]
+        ):
+            return False
+    return True
 
 
 def test_update():
-    # prepare work to be updated
-    update_path = data_path / "update"
-    if update_path.is_dir():
-        shutil.rmtree(str(update_path))
-    shutil.copytree(str(data_path / "v1"), str(update_path))
+    src_opf_path = data_path / "v1" / "v1.opf"
+    dst_opf_path = data_path / "v1_base_edited" / "v1_base_edited.opf"
+    expected_opf_path = data_path / "v2" / "v2.opf"
 
-    srcbl = (update_path / "v1.opf" / "base.txt").read_text()
-    dstbl = (data_path / "v2" / "v2.opf" / "base.txt").read_text()
+    # edit v1 base
+    dst_opf_path.mkdir(exist_ok=True, parents=True)
+    shutil.copytree(str(src_opf_path / "layers"), str(dst_opf_path / "layers"))
+    shutil.copytree(str(expected_opf_path / "base"), str(dst_opf_path / "base"))
 
-    updater = Blupdate(srcbl, dstbl)
-
-    updater.update_annotations(update_path / "v1.opf")
+    pecha = PechaBaseUpdate(src_opf_path, dst_opf_path)
+    pecha.update()
 
     for layer in ["title", "yigchung", "quotes", "tsawa", "sapche"]:
-        update_result, v2_result = get_layer(layer, "update", "v2")
-        assert update_result == v2_result
+        result_layer, expected_layer = get_layer(layer, "v1_base_edited", "v2")
+        assert is_layer_same(result_layer, expected_layer)
+
+    shutil.rmtree(str(dst_opf_path.parent))
