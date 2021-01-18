@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.6.27 (2021-01-18)
+### Fix
+* Blupdate testcase and add cli ([`18d5a0c`](https://github.com/OpenPecha/openpecha-toolkit/commit/18d5a0c231608c80e4db904897c18b9314221fd2))
+
 ## v0.6.26 (2021-01-15)
 ### Fix
 * **serializer:** Empty line serialize correctly ([`e906287`](https://github.com/OpenPecha/openpecha-toolkit/commit/e906287f36499accf356aa667f01dc84648194c0))
