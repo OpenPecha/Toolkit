@@ -243,6 +243,7 @@ class TestHFMLFormatter:
                 [],
             ],
             AnnType.archaic: [[], [], []],
+            AnnType.durchen: [[], [], []],
         }
 
         for layer in result:
