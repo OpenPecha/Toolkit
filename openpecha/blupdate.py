@@ -3,6 +3,7 @@ from pathlib import Path
 
 import diff_match_patch as dmp_module
 import yaml
+from git.objects import base
 
 
 class Blupdate:
@@ -190,6 +191,14 @@ class PechaBaseUpdate:
         self.dst_opf_path = Path(dst_opf_path)
         self.context_len = context_len
 
+    @property
+    def index_path(self):
+        return self.dst_opf_path / "index.yml"
+
+    @property
+    def layer_path(self):
+        return self.dst_opf_path / "layers"
+
     def dump(self, data, output_fn):
         with output_fn.open("w") as fn:
             yaml.dump(
@@ -199,19 +208,34 @@ class PechaBaseUpdate:
     def load(self, fn):
         return yaml.safe_load(fn.open())
 
+    @staticmethod
+    def update_span(ann, updater):
+        start = updater.get_updated_coord(ann["span"]["start"])
+        end = updater.get_updated_coord(ann["span"]["end"])
+        if start == -1 and end == -1:
+            ann["span"]["fail_update"] = "both"
+        elif start == -1:
+            ann["span"]["fail_update"] = "start"
+            ann["span"]["end"] == end
+        elif end == -1:
+            ann["span"]["fail_update"] = "end"
+            ann["span"]["start"] == start
+        else:
+            ann["span"]["start"] = start
+            ann["span"]["end"] = end
+
     def update_layer(self, layer, updater):
         """
         Update individual layer
         """
         for _, ann in layer["annotations"].items():
-            ann["span"]["start"] = updater.get_updated_coord(ann["span"]["start"])
-            ann["span"]["end"] = updater.get_updated_coord(ann["span"]["end"])
+            self.update_span(ann, updater)
 
     def update_layers(self, vol_id, updater):
         """
         Update all the layer annotations
         """
-        for layer_fn in (self.dst_opf_path / "layers" / vol_id).iterdir():
+        for layer_fn in (self.layer_path / vol_id).iterdir():
             layer = self.load(layer_fn)
             self.update_layer(layer, updater)
             self.dump(layer, layer_fn)
@@ -219,8 +243,31 @@ class PechaBaseUpdate:
     def update_vol(self, vol_id):
         src_base = (self.src_opf_path / "base" / f"{vol_id}.txt").read_text()
         dst_base = (self.dst_opf_path / "base" / f"{vol_id}.txt").read_text()
-        self.update_layers(vol_id, Blupdate(src_base, dst_base))
+        self.update_layers(
+            vol_id, Blupdate(src_base, dst_base, context_len=self.context_len)
+        )
+
+    def update_text_span(self, span):
+        for span_vol in span:
+            vol_id = span_vol["vol"].split("/")[-1]
+            src_base = (self.src_opf_path / "base" / f"{vol_id}.txt").read_text()
+            dst_base = (self.dst_opf_path / "base" / f"{vol_id}.txt").read_text()
+            updater = Blupdate(src_base, dst_base, context_len=self.context_len)
+            self.update_span(span_vol, updater)
+
+    def update_index_layer(self):
+        layer = self.load(self.index_path)
+        for ann in layer["annotations"]:
+            # update text span
+            self.update_text_span(ann["span"])
+
+            # update sub-text span
+            for sub_text in ann["parts"]:
+                self.update_text_span(sub_text["span"])
+
+        self.dump(layer, self.index_path)
 
     def update(self):
         for vol_fn in Path(self.dst_opf_path / "base").iterdir():
             self.update_vol(vol_fn.stem)
+        self.update_index_layer()

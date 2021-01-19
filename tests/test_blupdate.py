@@ -1,4 +1,3 @@
-import re
 import shutil
 from pathlib import Path
 
@@ -6,6 +5,7 @@ import pytest
 import yaml
 
 from openpecha.blupdate import Blupdate, PechaBaseUpdate
+from openpecha.utils import load_yaml
 
 
 @pytest.fixture(params=[{"srcbl": "abefghijkl", "dstbl": "abcdefgkl"}])
@@ -134,29 +134,65 @@ def get_layer(layer_name, result, expected):
 def is_layer_same(result_layer, expected_layer):
     for ann_id, result_ann in result_layer["annotations"].items():
         expected_span = expected_layer["annotations"][ann_id]["span"]
-        if (
-            expected_span["start"] != result_ann["span"]["start"]
-            or expected_span["end"] != result_ann["span"]["end"]
+        assert expected_span["start"] == result_ann["span"]["start"]
+        assert expected_span["end"] == result_ann["span"]["end"]
+
+
+def is_index_same(result, expected):
+    for result_ann, expected_ann in zip(result["annotations"], expected["annotations"]):
+        # assert span
+        for result_span_vol, expected_span_vol in zip(
+            result_ann["span"], expected_ann["span"]
         ):
-            return False
-    return True
+            assert (
+                result_span_vol["span"]["start"] == expected_span_vol["span"]["start"]
+            )
+            assert result_span_vol["span"]["end"] == expected_span_vol["span"]["end"]
+
+        # assert parts
+        for result_part, expected_part in zip(
+            result_ann["parts"], expected_ann["parts"]
+        ):
+            for result_part_span_vol, expected_part_span_vol in zip(
+                result_part["span"], expected_part["span"]
+            ):
+                assert (
+                    result_part_span_vol["span"]["start"]
+                    == expected_part_span_vol["span"]["start"]
+                )
+                assert (
+                    result_part_span_vol["span"]["end"]
+                    == expected_part_span_vol["span"]["end"]
+                )
 
 
-def test_update():
+def test_update_index_layer():
     src_opf_path = data_path / "v1" / "v1.opf"
     dst_opf_path = data_path / "v1_base_edited" / "v1_base_edited.opf"
     expected_opf_path = data_path / "v2" / "v2.opf"
 
     # edit v1 base
     dst_opf_path.mkdir(exist_ok=True, parents=True)
-    shutil.copytree(str(src_opf_path / "layers"), str(dst_opf_path / "layers"))
-    shutil.copytree(str(expected_opf_path / "base"), str(dst_opf_path / "base"))
+    shutil.copytree(
+        str(src_opf_path / "layers"), str(dst_opf_path / "layers"), dirs_exist_ok=True
+    )
+    shutil.copy(str(src_opf_path / "index.yml"), str(dst_opf_path / "index.yml"))
+    shutil.copytree(
+        str(expected_opf_path / "base"), str(dst_opf_path / "base"), dirs_exist_ok=True
+    )
 
     pecha = PechaBaseUpdate(src_opf_path, dst_opf_path)
     pecha.update()
 
+    # test annotations layers
     for layer in ["title", "yigchung", "quotes", "tsawa", "sapche"]:
         result_layer, expected_layer = get_layer(layer, "v1_base_edited", "v2")
-        assert is_layer_same(result_layer, expected_layer)
+        is_layer_same(result_layer, expected_layer)
+
+    # test index layer
+    result_index_layer = load_yaml(dst_opf_path / "index.yml")
+    expected_index_layer = load_yaml(expected_opf_path / "index.yml")
+
+    is_index_same(result_index_layer, expected_index_layer)
 
     shutil.rmtree(str(dst_opf_path.parent))
