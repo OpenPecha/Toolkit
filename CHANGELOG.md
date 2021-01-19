@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.6.28 (2021-01-19)
+### Fix
+* Update index layer ([`39f0422`](https://github.com/OpenPecha/openpecha-toolkit/commit/39f04228b6270a5d67c31dfa0aa918b6fa5395f1))
+
 ## v0.6.27 (2021-01-18)
 ### Fix
 * Blupdate testcase and add cli ([`18d5a0c`](https://github.com/OpenPecha/openpecha-toolkit/commit/18d5a0c231608c80e4db904897c18b9314221fd2))
