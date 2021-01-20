@@ -206,7 +206,11 @@ class PechaBaseUpdate:
             )
 
     def load(self, fn):
-        return yaml.safe_load(fn.open())
+        return yaml.safe_load(fn.open(encoding="utf-8"))
+
+    @staticmethod
+    def get_base(opf_path, vol_id):
+        return (opf_path / "base" / f"{vol_id}.txt").read_text(encoding="utf-8")
 
     @staticmethod
     def update_span(ann, updater):
@@ -241,8 +245,8 @@ class PechaBaseUpdate:
             self.dump(layer, layer_fn)
 
     def update_vol(self, vol_id):
-        src_base = (self.src_opf_path / "base" / f"{vol_id}.txt").read_text()
-        dst_base = (self.dst_opf_path / "base" / f"{vol_id}.txt").read_text()
+        src_base = self.get_base(self.src_opf_path, vol_id)
+        dst_base = self.get_base(self.dst_opf_path, vol_id)
         self.update_layers(
             vol_id, Blupdate(src_base, dst_base, context_len=self.context_len)
         )
@@ -250,8 +254,8 @@ class PechaBaseUpdate:
     def update_text_span(self, span):
         for span_vol in span:
             vol_id = span_vol["vol"].split("/")[-1]
-            src_base = (self.src_opf_path / "base" / f"{vol_id}.txt").read_text()
-            dst_base = (self.dst_opf_path / "base" / f"{vol_id}.txt").read_text()
+            src_base = self.get_base(self.src_opf_path, vol_id)
+            dst_base = self.get_base(self.dst_opf_path, vol_id)
             updater = Blupdate(src_base, dst_base, context_len=self.context_len)
             self.update_span(span_vol, updater)
 
