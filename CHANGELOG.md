@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.6.29 (2021-01-20)
+### Fix
+* Missing encoding specification ([`051e2c2`](https://github.com/OpenPecha/openpecha-toolkit/commit/051e2c2e8bde4fe6e376be2ec6621770459a9c38))
+
 ## v0.6.28 (2021-01-19)
 ### Fix
 * Update index layer ([`39f0422`](https://github.com/OpenPecha/openpecha-toolkit/commit/39f04228b6270a5d67c31dfa0aa918b6fa5395f1))
