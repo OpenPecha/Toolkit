@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.6.30 (2021-01-21)
+### Fix
+* **git-utils:** Dpecha with main as default branch ([`9860836`](https://github.com/OpenPecha/openpecha-toolkit/commit/98608367df07f5b1552a02d5cab7833a911492a7))
+
 ## v0.6.29 (2021-01-20)
 ### Fix
 * Missing encoding specification ([`051e2c2`](https://github.com/OpenPecha/openpecha-toolkit/commit/051e2c2e8bde4fe6e376be2ec6621770459a9c38))
