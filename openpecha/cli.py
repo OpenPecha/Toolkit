@@ -99,6 +99,12 @@ def get_pecha(id, batch_path, layers):
     return pecha_list
 
 
+def get_default_branch(repo):
+    if "main" in repo.heads:
+        return "main"
+    return "master"
+
+
 def download_pecha(pecha_id, out_path=None):
     # clone the repo
     pecha_url = f"{config['OP_ORG']}/{pecha_id}.git"
@@ -108,13 +114,15 @@ def download_pecha(pecha_id, out_path=None):
         pecha_path = out_path / pecha_id
     else:
         pecha_path = config["OP_DATA_PATH"] / pecha_id
-        click.echo(pecha_path)
 
     if pecha_path.is_dir():  # if repo is already exits at local then try to pull
         repo = Repo(str(pecha_path))
-        repo.heads["master"].checkout()
+        default_branch = get_default_branch(repo)
+        repo.heads[default_branch].checkout()
+        click.echo(INFO.format(f"Updating {pecha_id} ..."))
         repo.remotes.origin.pull()
     else:
+        click.echo(INFO.format(f"Downloading {pecha_id} ..."))
         Repo.clone_from(pecha_url, str(pecha_path))
     return pecha_path
 
@@ -343,10 +351,9 @@ def update_layers(**kwargs):
     Update all the layers when base has been updated.
     """
     pecha_id = get_pecha_id(kwargs["pecha_number"])
-    click.echo(INFO.format(f"Downloading {pecha_id} ..."))
     src_pecha_path = download_pecha(pecha_id)
 
-    click.echo(INFO.format(f"Updating {pecha_id} ..."))
+    click.echo(INFO.format(f"Updating base of {pecha_id} ..."))
     src_opf_path = src_pecha_path / f"{pecha_id}.opf"
     dst_opf_path = Path(kwargs["pecha_path"]) / f"{pecha_id}.opf"
     pecha = PechaBaseUpdate(src_opf_path, dst_opf_path)
