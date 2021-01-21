@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.6.31 (2021-01-21)
+### Fix
+* Test for old annotations structure ([`f8ea280`](https://github.com/OpenPecha/openpecha-toolkit/commit/f8ea2805881f7a903dbcc64de7bf2307b00e49ac))
+
 ## v0.6.30 (2021-01-21)
 ### Fix
 * **git-utils:** Dpecha with main as default branch ([`9860836`](https://github.com/OpenPecha/openpecha-toolkit/commit/98608367df07f5b1552a02d5cab7833a911492a7))
