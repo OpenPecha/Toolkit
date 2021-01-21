@@ -62,11 +62,11 @@ class Vol2FnManager:
 
 
 def dump_yaml(data, output_fn):
-    with output_fn.open("w") as fn:
+    with output_fn.open("w", encoding="utf-8") as fn:
         yaml.dump(
             data, fn, default_flow_style=False, sort_keys=False, allow_unicode=True
         )
 
 
 def load_yaml(fn):
-    return yaml.safe_load(fn.open())
+    return yaml.safe_load(fn.open(encoding="utf-8"))

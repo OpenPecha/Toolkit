@@ -232,7 +232,7 @@ class PechaBaseUpdate:
         """
         Update individual layer
         """
-        for _, ann in layer["annotations"].items():
+        for ann in layer["annotations"]:
             self.update_span(ann, updater)
 
     def update_layers(self, vol_id, updater):

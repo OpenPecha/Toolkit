@@ -132,10 +132,11 @@ def get_layer(layer_name, result, expected):
 
 
 def is_layer_same(result_layer, expected_layer):
-    for ann_id, result_ann in result_layer["annotations"].items():
-        expected_span = expected_layer["annotations"][ann_id]["span"]
-        assert expected_span["start"] == result_ann["span"]["start"]
-        assert expected_span["end"] == result_ann["span"]["end"]
+    for result_ann, expected_ann in zip(
+        result_layer["annotations"], expected_layer["annotations"]
+    ):
+        assert expected_ann["span"]["start"] == result_ann["span"]["start"]
+        assert expected_ann["span"]["end"] == result_ann["span"]["end"]
 
 
 def is_index_same(result, expected):

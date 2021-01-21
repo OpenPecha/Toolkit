@@ -1,5 +1,5 @@
 annotations:
-  aaa:
+  - id: aaa
     span:
       start: 919
       end: 1073
