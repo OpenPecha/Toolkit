@@ -273,5 +273,7 @@ class PechaBaseUpdate:
 
     def update(self):
         for vol_fn in Path(self.dst_opf_path / "base").iterdir():
+            print(f"\t- Updating {vol_fn.stem} ...")
             self.update_vol(vol_fn.stem)
+        print("[INFO] Updating index ...")
         self.update_index_layer()

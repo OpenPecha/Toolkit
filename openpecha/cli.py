@@ -105,7 +105,7 @@ def get_default_branch(repo):
     return "master"
 
 
-def download_pecha(pecha_id, out_path=None):
+def download_pecha(pecha_id, out_path=None, needs_update=True):
     # clone the repo
     pecha_url = f"{config['OP_ORG']}/{pecha_id}.git"
     if out_path:
@@ -116,6 +116,8 @@ def download_pecha(pecha_id, out_path=None):
         pecha_path = config["OP_DATA_PATH"] / pecha_id
 
     if pecha_path.is_dir():  # if repo is already exits at local then try to pull
+        if not needs_update:
+            return pecha_path
         repo = Repo(str(pecha_path))
         default_branch = get_default_branch(repo)
         repo.heads[default_branch].checkout()
