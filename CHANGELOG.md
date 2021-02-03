@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.6.32 (2021-02-03)
+### Fix
+* Add needs_pecha option while pecha download ([`693086d`](https://github.com/OpenPecha/openpecha-toolkit/commit/693086d7aa5105d99fde68ccf8ce681066b46572))
+
 ## v0.6.31 (2021-01-21)
 ### Fix
 * Test for old annotations structure ([`f8ea280`](https://github.com/OpenPecha/openpecha-toolkit/commit/f8ea2805881f7a903dbcc64de7bf2307b00e49ac))
