@@ -4,11 +4,9 @@ import math
 import re
 from pathlib import Path
 
-import yaml
-
-from ..utils import gzip_str
-from .formatter import BaseFormatter
-from .layers import *
+from openpecha.formatters import BaseFormatter
+from openpecha.formatters.layers import *
+from openpecha.utils import gzip_str
 
 
 class GoogleOCRFormatter(BaseFormatter):
@@ -21,6 +19,7 @@ class GoogleOCRFormatter(BaseFormatter):
         self.n_page_breaker_char = 3
         self.page_break = "\n" * self.n_page_breaker_char
         self.base_text = []
+        self.vols_meta = {}
 
     def text_preprocess(self, text):
 
@@ -222,12 +221,19 @@ class GoogleOCRFormatter(BaseFormatter):
             "source_metadata": {
                 "id": f"bdr:{work_id}",
                 "title": converter.toUnicode(title_tag.text),
-                "volume": "",
+                "volumes": self.vols_meta,
                 "author": converter.toUnicode(author_tag.text) if author_tag else "",
             },
         }
 
         return metadata
+
+    def set_vols_meta(self, src_vol_id, base_file_name):
+        self.vols_meta[self.get_unique_id()] = {
+            "image_group_id": src_vol_id,
+            "title": "",
+            "base_file": base_file_name,
+        }
 
     def create_opf(self, input_path, pecha_id):
         input_path = Path(input_path)
@@ -256,6 +262,8 @@ class GoogleOCRFormatter(BaseFormatter):
                 layer_fn = vol_layer_path / f"{layer}.yml"
                 self.dump(ann, layer_fn)
 
+            self.set_vols_meta(vol_path.name, f"{base_id}.txt")
+
         # create meta.yml
         meta_fn = self.dirs["opf_path"] / "meta.yml"
         self.dump(self.get_metadata(input_path.name), meta_fn)
@@ -265,4 +273,4 @@ class GoogleOCRFormatter(BaseFormatter):
 
 if __name__ == "__main__":
     formatter = GoogleOCRFormatter()
-    formatter.create_opf("./tests/data/formatter/google_ocr/W3CN472", 300)
+    formatter.create_opf("../../Esukhia/img2opf/archive/output/W1PD95844", 300)
