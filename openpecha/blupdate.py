@@ -185,6 +185,30 @@ class Blupdate:
             return self.get_updated_with_dmp(srcblcoord, cctvforcoord[0])
 
 
+def update_span(ann, updater: Blupdate):
+    start = updater.get_updated_coord(ann["span"]["start"])
+    end = updater.get_updated_coord(ann["span"]["end"])
+    if start == -1 and end == -1:
+        ann["span"]["fail_update"] = "both"
+    elif start == -1:
+        ann["span"]["fail_update"] = "start"
+        ann["span"]["end"] == end
+    elif end == -1:
+        ann["span"]["fail_update"] = "end"
+        ann["span"]["start"] == start
+    else:
+        ann["span"]["start"] = start
+        ann["span"]["end"] = end
+
+
+def update_ann_layer(layer, updater: Blupdate):
+    """
+    Update individual layer
+    """
+    for ann in layer["annotations"]:
+        update_span(ann, updater)
+
+
 class PechaBaseUpdate:
     def __init__(self, src_opf_path, dst_opf_path, context_len=10):
         self.src_opf_path = Path(src_opf_path)
@@ -212,36 +236,13 @@ class PechaBaseUpdate:
     def get_base(opf_path, vol_id):
         return (opf_path / "base" / f"{vol_id}.txt").read_text(encoding="utf-8")
 
-    @staticmethod
-    def update_span(ann, updater):
-        start = updater.get_updated_coord(ann["span"]["start"])
-        end = updater.get_updated_coord(ann["span"]["end"])
-        if start == -1 and end == -1:
-            ann["span"]["fail_update"] = "both"
-        elif start == -1:
-            ann["span"]["fail_update"] = "start"
-            ann["span"]["end"] == end
-        elif end == -1:
-            ann["span"]["fail_update"] = "end"
-            ann["span"]["start"] == start
-        else:
-            ann["span"]["start"] = start
-            ann["span"]["end"] = end
-
-    def update_layer(self, layer, updater):
-        """
-        Update individual layer
-        """
-        for ann in layer["annotations"]:
-            self.update_span(ann, updater)
-
     def update_layers(self, vol_id, updater):
         """
         Update all the layer annotations
         """
         for layer_fn in (self.layer_path / vol_id).iterdir():
             layer = self.load(layer_fn)
-            self.update_layer(layer, updater)
+            update_ann_layer(layer, updater)
             self.dump(layer, layer_fn)
 
     def update_vol(self, vol_id):
@@ -257,7 +258,7 @@ class PechaBaseUpdate:
             src_base = self.get_base(self.src_opf_path, vol_id)
             dst_base = self.get_base(self.dst_opf_path, vol_id)
             updater = Blupdate(src_base, dst_base, context_len=self.context_len)
-            self.update_span(span_vol, updater)
+            update_span(span_vol, updater)
 
     def update_index_layer(self):
         layer = self.load(self.index_path)
