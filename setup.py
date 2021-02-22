@@ -30,7 +30,7 @@ setup(
     url="https://github.com/OpenPoti/openpecha-toolkit",
     packages=find_packages(),
     install_requires=[
-        "Click==7.0",
+        "Click==7.1.2",
         "diff-match-patch==20181111",
         "PyYAML>=5.0.0",
         "requests==2.22.0",

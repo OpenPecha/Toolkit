@@ -20,6 +20,7 @@ __all__ = [
     "Sabche",
     "Yigchung",
     "BookTitle",
+    "BookNumber",
     "PotiTitle",
     "Author",
     "Archaic",
@@ -29,9 +30,11 @@ __all__ = [
 
 class AnnType:
     book_title = "BookTitle"
+    book_number = "BookNumber"
     poti_title = "PotiTitle"
     author = "Author"
     chapter = "Chapter"
+    credit_page = "Credit_page"
 
     topic = "Text"
     sub_topic = "SubText"
@@ -45,6 +48,7 @@ class AnnType:
     tsawa = "Tsawa"
     yigchung = "Yigchung"
     archaic = "Archaic"
+    durchen = "Durchen"
 
 
 class _attr_names:
@@ -60,6 +64,13 @@ class _attr_names:
     VOL = "vol"
     START = "start"
     END = "end"
+
+    # Credit page
+    CREDIT_PAGE_IMG_NAME = "credit_page_img_name"
+
+    # Cover title
+    ISCOVER = "iscover"  # Boolean flag to indicate booktitle being on cover page or not
+    IS_SUB_TITLE = "is_sub_title"
 
     # Page
     PAGE_INDEX = "page_index"  # Page number based on Volume specified, type: int
@@ -79,7 +90,7 @@ class _attr_names:
     # Archaic word
     MODERN = "modern"
 
-    # Sabche
+    # Tsawa, Citation
     ISVERSE = "isverse"  # Boolean flag to indicate a sache in verse format or not
 
 
@@ -109,7 +120,11 @@ def CrossVolSpan(vol, start, end):
 SubText = {"work": None, "span": []}  # index of the sub_text  # span of the sub_text
 
 # Text annotation
-Text = {"parts": [], "span": []}  # list of SubText  # list of CrossVolSpan
+Text = {
+    "parts": [],
+    "span": [],
+    "work_id": "",
+}  # list of SubText  # list of CrossVolSpan
 
 # ~~~~~ ANNOTATIONS Layers ~~~~~~
 
@@ -147,8 +162,23 @@ def Peydurma(span, note=None):
     return {_attr_names.NOTE: note, _attr_names.SPAN: span}
 
 
-def BookTitle(span):
+def BookTitle(span, iscover=True, is_sub_title=False):
+    return {
+        _attr_names.SPAN: span,
+        _attr_names.ISCOVER: iscover,
+        _attr_names.IS_SUB_TITLE: is_sub_title,
+    }
+
+
+def BookNumber(span):
     return {_attr_names.SPAN: span}
+
+
+def CreditPage(credit_page_img_name, span):
+    return {
+        _attr_names.CREDIT_PAGE_IMG_NAME: credit_page_img_name,
+        _attr_names.SPAN: span,
+    }
 
 
 def PotiTitle(span):

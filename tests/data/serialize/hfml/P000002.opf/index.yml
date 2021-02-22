@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 id: 8b76f22eda53477dab4e515f489ca240
 annotation_type: index
 revision: '00001'
@@ -67,3 +68,183 @@ annotations:
         vol: 3
         start: 243
         end: 266
+=======
+id: b916cf8578b4465aa901f5fc07815d7d
+annotation_type: index
+revision: '00001'
+annotations:
+  ae9a6b64ada8483a92c32c47ba780d17:
+    parts:
+    - work_id: D1-1
+      span:
+        vol: 1
+        start: 0
+        end: 396713
+    - work_id: D1-2
+      span:
+        vol: 1
+        start: 396713
+        end: 672023
+    - work_id: D1-3
+      span:
+        vol: 1
+        start: 672023
+        end: 717548
+    - work_id: D1-4
+      span:
+        vol: 1
+        start: 717548
+        end: 758921
+    - work_id: D1-5
+      span:
+        vol: 1
+        start: 758921
+        end: 835581
+    - work_id: D1-6
+      span:
+        vol: 1
+        start: 835581
+        end: 934648
+    - work_id: D1-6
+      span:
+        vol: 2
+        start: 0
+        end: 973383
+    - work_id: D1-6
+      span:
+        vol: 3
+        start: 0
+        end: 147197
+    - work_id: D1-7
+      span:
+        vol: 3
+        start: 147197
+        end: 351154
+    - work_id: D1-8
+      span:
+        vol: 3
+        start: 351154
+        end: 378761
+    - work_id: D1-9
+      span:
+        vol: 3
+        start: 378761
+        end: 411126
+    - work_id: D1-10
+      span:
+        vol: 3
+        start: 411126
+        end: 430698
+    - work_id: D1-11
+      span:
+        vol: 3
+        start: 430698
+        end: 509939
+    - work_id: D1-12
+      span:
+        vol: 3
+        start: 509939
+        end: 545668
+    - work_id: D1-13
+      span:
+        vol: 3
+        start: 545668
+        end: 561335
+    - work_id: D1-14
+      span:
+        vol: 3
+        start: 561335
+        end: 576311
+    - work_id: D1-15
+      span:
+        vol: 3
+        start: 576311
+        end: 688455
+    - work_id: D1-16
+      span:
+        vol: 3
+        start: 688455
+        end: 791518
+    - work_id: D1-17
+      span:
+        vol: 3
+        start: 791518
+        end: 906850
+    - work_id: D1-17
+      span:
+        vol: 4
+        start: 0
+        end: 934025
+    - work_id: D1-17
+      span:
+        vol: 5
+        start: 0
+        end: 27
+    span:
+    - vol: 1
+      start: 0
+      end: 934648
+    - vol: 2
+      start: 0
+      end: 973383
+    - vol: 3
+      start: 0
+      end: 906850
+    - vol: 4
+      start: 0
+      end: 934025
+    - vol: 5
+      start: 0
+      end: 27
+    work_id: D1
+  e840505e7bf243ba9d80e81bbf439fac:
+    parts: []
+    span:
+    - vol: 5
+      start: 27
+      end: 60456
+    work_id: D2
+  1dff51da363243ea9426f46632674af9:
+    parts: []
+    span:
+    - vol: 5
+      start: 60456
+      end: 905960
+    - vol: 6
+      start: 0
+      end: 873448
+    - vol: 7
+      start: 0
+      end: 884714
+    - vol: 8
+      start: 0
+      end: 823609
+    - vol: 9
+      start: 0
+      end: 29
+    work_id: D3
+  8a836291c0c14e4e918e57cf43fb8376:
+    parts: []
+    span:
+    - vol: 9
+      start: 29
+      end: 72620
+    work_id: D4
+  5e53af6c4dde4758a38d25b78e8e7833:
+    parts: []
+    span:
+    - vol: 9
+      start: 72620
+      end: 985354
+    - vol: 10
+      start: 0
+      end: 27
+    work_id: D5
+  431730fb3f8844bfa32d90b1ce62fc24:
+    parts: []
+    span:
+    - vol: 10
+      start: 27
+      end: 968903
+    work_id: D6
+>>>>>>> master

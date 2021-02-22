@@ -5,6 +5,8 @@ import io
 import shutil
 from collections import defaultdict
 
+import yaml
+
 from openpecha.github_utils import create_release
 
 
@@ -57,3 +59,14 @@ class Vol2FnManager:
             vol_id = f"v{self.vol_num:03}"
             self.vol2fn[vol_id] = fn
             return vol_id
+
+
+def dump_yaml(data, output_fn):
+    with output_fn.open("w", encoding="utf-8") as fn:
+        yaml.dump(
+            data, fn, default_flow_style=False, sort_keys=False, allow_unicode=True
+        )
+
+
+def load_yaml(fn):
+    return yaml.safe_load(fn.open(encoding="utf-8"))

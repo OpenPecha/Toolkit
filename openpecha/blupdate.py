@@ -1,8 +1,9 @@
-import copy
 import math
+from pathlib import Path
 
 import diff_match_patch as dmp_module
 import yaml
+from git.objects import base
 
 
 class Blupdate:
@@ -183,20 +184,96 @@ class Blupdate:
         else:
             return self.get_updated_with_dmp(srcblcoord, cctvforcoord[0])
 
-    def update_layer(self, layer_fn):
-        """
-        Update individual layer, in format {0: [0, 17], 1: [20, 40], ...}
-        """
-        anns = yaml.safe_load(layer_fn.open())
-        for i, ann in anns.items():
-            start_cc = ann[0]
-            end_cc = ann[1]
-            anns[i] = [self.get_updated_coord(start_cc), self.get_updated_coord(end_cc)]
-        yaml.dump(anns, layer_fn.open("w"), default_flow_style=False)
 
-    def update_annotations(self, opfpath):
+class PechaBaseUpdate:
+    def __init__(self, src_opf_path, dst_opf_path, context_len=10):
+        self.src_opf_path = Path(src_opf_path)
+        self.dst_opf_path = Path(dst_opf_path)
+        self.context_len = context_len
+
+    @property
+    def index_path(self):
+        return self.dst_opf_path / "index.yml"
+
+    @property
+    def layer_path(self):
+        return self.dst_opf_path / "layers"
+
+    def dump(self, data, output_fn):
+        with output_fn.open("w") as fn:
+            yaml.dump(
+                data, fn, default_flow_style=False, sort_keys=False, allow_unicode=True
+            )
+
+    def load(self, fn):
+        return yaml.safe_load(fn.open(encoding="utf-8"))
+
+    @staticmethod
+    def get_base(opf_path, vol_id):
+        return (opf_path / "base" / f"{vol_id}.txt").read_text(encoding="utf-8")
+
+    @staticmethod
+    def update_span(ann, updater):
+        start = updater.get_updated_coord(ann["span"]["start"])
+        end = updater.get_updated_coord(ann["span"]["end"])
+        if start == -1 and end == -1:
+            ann["span"]["fail_update"] = "both"
+        elif start == -1:
+            ann["span"]["fail_update"] = "start"
+            ann["span"]["end"] == end
+        elif end == -1:
+            ann["span"]["fail_update"] = "end"
+            ann["span"]["start"] == start
+        else:
+            ann["span"]["start"] = start
+            ann["span"]["end"] = end
+
+    def update_layer(self, layer, updater):
+        """
+        Update individual layer
+        """
+        for ann in layer["annotations"]:
+            self.update_span(ann, updater)
+
+    def update_layers(self, vol_id, updater):
         """
         Update all the layer annotations
         """
-        for layer_fn in (opfpath / "layers").iterdir():
-            self.update_layer(layer_fn)
+        for layer_fn in (self.layer_path / vol_id).iterdir():
+            layer = self.load(layer_fn)
+            self.update_layer(layer, updater)
+            self.dump(layer, layer_fn)
+
+    def update_vol(self, vol_id):
+        src_base = self.get_base(self.src_opf_path, vol_id)
+        dst_base = self.get_base(self.dst_opf_path, vol_id)
+        self.update_layers(
+            vol_id, Blupdate(src_base, dst_base, context_len=self.context_len)
+        )
+
+    def update_text_span(self, span):
+        for span_vol in span:
+            vol_id = span_vol["vol"].split("/")[-1]
+            src_base = self.get_base(self.src_opf_path, vol_id)
+            dst_base = self.get_base(self.dst_opf_path, vol_id)
+            updater = Blupdate(src_base, dst_base, context_len=self.context_len)
+            self.update_span(span_vol, updater)
+
+    def update_index_layer(self):
+        layer = self.load(self.index_path)
+        for ann in layer["annotations"]:
+            # update text span
+            self.update_text_span(ann["span"])
+
+            # update sub-text span
+            for sub_text in ann["parts"]:
+                self.update_text_span(sub_text["span"])
+
+        self.dump(layer, self.index_path)
+
+    def update(self):
+        for vol_fn in Path(self.dst_opf_path / "base").iterdir():
+            print(f"\t- Updating {vol_fn.stem} ...")
+            self.update_vol(vol_fn.stem)
+        print("[INFO] Updating index ...")
+        self.update_index_layer()

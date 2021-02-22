@@ -44,6 +44,9 @@ class Rdf:
                     bdr[self.lname], bdo["instanceReproductionOf"], bdr["M" + sour[-1]]
                 )
                 self.add_triple(
+                    bdr[self.lname], bdo["contentMethod"], bdr['ContentMethod_OCR']
+                )
+                self.add_triple(
                     bdr["M" + sour[-1]], bdo["instanceHasReproduction"], bdr[self.lname]
                 )
                 self.add_triple(

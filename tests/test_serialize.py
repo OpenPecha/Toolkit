@@ -15,6 +15,7 @@ def opf_path():
 # hfml_opf_path = Path("tests/data/serialize_test/hfml/hfml.opf")
 
 
+@pytest.mark.skip(reason="not important")
 def test_hfml_serializer():
 
     opf_path = "./tests/data/serialize/hfml/P000002.opf/"
@@ -23,7 +24,8 @@ def test_hfml_serializer():
     serializer.serialize(output_path=output_path)
 
 
-def test_hfml_2_tsadra_serializer(opf_path):
+def test_opf_2_tsadra_serializer(opf_path):
     serializer = EpubSerializer(opf_path)
     serializer.apply_layers()
-    serializer.serialize()
+    out_fn = serializer.serialize("output/epub_output/")
+    assert str(out_fn) == "output/epub_output/P000100.epub"

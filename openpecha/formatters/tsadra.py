@@ -7,7 +7,7 @@ from bs4 import BeautifulSoup
 
 from .formatter import BaseFormatter
 from .layers import *
-from .layers import AnnType
+from .layers import AnnType, CreditPage
 
 
 class TsadraTemplate:
@@ -18,12 +18,13 @@ class TsadraTemplate:
         "credits-page_front-page---text-author",
         "credits-page_front-page---text-author1",
     ]
+    credit_page = "credits-page_epub-edition-line"
     titles = [
         "credits-page_front-title",
         "tibetan-book-title",
         "tibetan-book-sub-title",
     ]
-    chapters = ["", "", ""]
+    book_number = "credits-page_front-page---book-number"
     commentaries = {
         "verse": [
             "tibetan-commentary-first-line",
@@ -57,12 +58,14 @@ class TsadraFormatter(BaseFormatter):
     OpenPecha Formatter for Tsadra DarmaCloud ebooks
     """
 
-    def __init__(self, output_path="./output"):
-        super().__init__(output_path=output_path)
+    def __init__(self, output_path="./output", metadata=None):
+        super().__init__(output_path, metadata=metadata)
         self.base_text = ""
         self.cover_image = ""
         self.walker = 0  # The walker to traverse every character in the pecha
         self.book_title = []  # list variable to store book title index
+        self.credit_page = []
+        self.book_number = []
         self.poti_title = []
         self.author = []  # list variable to store author annotion index
         self.chapter = []  # list variable to store chapter annotation index
@@ -92,6 +95,40 @@ class TsadraFormatter(BaseFormatter):
         else:
             return (None, ann(Span(walker, len(tmp_text) - 1 + walker)))
 
+    def parse_book_title(self, p_tag, tmp_text, walker):
+        if p_tag["class"][0] == TsadraTemplate.titles[0]:
+            return (
+                None,
+                BookTitle(
+                    Span(walker, len(tmp_text) - 1 + walker),
+                    iscover=True,
+                    is_sub_title=False,
+                ),
+            )
+        elif p_tag["class"][0] == TsadraTemplate.titles[2]:
+            return (
+                None,
+                BookTitle(
+                    Span(walker, len(tmp_text) - 1 + walker),
+                    iscover=False,
+                    is_sub_title=True,
+                ),
+            )
+        else:
+            return (
+                None,
+                BookTitle(
+                    Span(walker, len(tmp_text) - 1 + walker),
+                    iscover=False,
+                    is_sub_title=False,
+                ),
+            )
+
+    def get_credit_page(self, p_tag):
+        img_tag = p_tag.find("img")
+        credit_page_img_name = img_tag["src"].split("/")[1]
+        return credit_page_img_name
+
     def build_layers(self, html):
         """
         To Build the layer
@@ -113,10 +150,31 @@ class TsadraFormatter(BaseFormatter):
                 book_title_tmp = self.text_preprocess(p.text)
                 if book_title_tmp:
                     self.book_title.append(
-                        self.parse_ann(BookTitle, book_title_tmp, self.walker)
+                        self.parse_book_title(p, book_title_tmp, self.walker)
                     )
                     self.base_text += book_title_tmp + "\n"
                     self.walker += len(book_title_tmp) + 1
+
+            elif p["class"][0] == TsadraTemplate.book_number:
+                book_num = self.text_preprocess(p.text)
+                if book_num:
+                    self.book_number.append(
+                        self.parse_ann(BookNumber, book_num, self.walker)
+                    )
+                    self.base_text += book_num + "\n"
+                    self.walker += len(book_num) + 1
+
+            elif p["class"][0] == TsadraTemplate.credit_page:
+                credit_page = self.get_credit_page(p)
+                if credit_page:
+                    self.credit_page.append(
+                        (
+                            None,
+                            CreditPage(credit_page, Span(self.walker, self.walker + 1)),
+                        )
+                    )
+                    self.base_text += " "
+                    self.walker += 1
 
             elif (
                 p["class"][0] in TsadraTemplate.author
@@ -140,6 +198,7 @@ class TsadraFormatter(BaseFormatter):
                     for s in p.find_all("span"):
                         if "root" in s["class"][0]:
                             root_text_tmp += self.text_preprocess(s.text)
+                        else:
                             self.root_text.append(
                                 self.parse_ann(
                                     Tsawa, root_text_tmp, self.walker, isverse=True
@@ -147,8 +206,15 @@ class TsadraFormatter(BaseFormatter):
                             )
                             self.walker += len(root_text_tmp) + 1
                             root_text_tmp = ""
-                        else:
                             self.walker += len(self.text_preprocess(s.text))
+                    if root_text_tmp:
+                        self.root_text.append(
+                            self.parse_ann(
+                                Tsawa, root_text_tmp, self.walker, isverse=True
+                            )
+                        )
+                        self.walker += len(root_text_tmp) + 1
+                        root_text_tmp = ""
                     self.base_text += self.text_preprocess(p.text) + "\n"
                 else:
                     for s in p.find_all("span"):
@@ -167,11 +233,12 @@ class TsadraFormatter(BaseFormatter):
 
             elif "tibetan-chapter" in p["class"][0]:  # to get chapter title index
                 chapter_title_tmp = self.text_preprocess(p.text)
-                self.chapter.append(
-                    self.parse_ann(Chapter, chapter_title_tmp, self.walker)
-                )
-                self.walker += len(chapter_title_tmp) + 1
-                self.base_text += chapter_title_tmp + "\n"
+                if chapter_title_tmp:
+                    self.chapter.append(
+                        self.parse_ann(Chapter, chapter_title_tmp, self.walker)
+                    )
+                    self.walker += len(chapter_title_tmp) + 1
+                    self.base_text += chapter_title_tmp + "\n"
 
             elif (
                 p["class"][0] in TsadraTemplate.commentaries["verse"]
@@ -360,7 +427,9 @@ class TsadraFormatter(BaseFormatter):
         """
         result = {
             AnnType.book_title: [self.book_title],
+            AnnType.book_number: [self.book_number],
             AnnType.poti_title: [self.poti_title],
+            AnnType.credit_page: [self.credit_page],
             AnnType.author: [self.author],
             AnnType.chapter: [self.chapter],
             AnnType.topic: [self.topic],
@@ -458,6 +527,7 @@ class TsadraFormatter(BaseFormatter):
 
 
 # if __name__ == "__main__":
-#     path = "./P000100/OEBPS/"
-#     formatter = TsadraFormatter(output_path="./test_opf")
-#     formatter.create_opf(path, 1)
+#     ebook_path = "./output/demo/src/tsadra_publication/P000112/OEBPS/"
+#     opfs_path = "./output/demo/output"
+#     formatter = TsadraFormatter(output_path=opfs_path)
+#     formatter.create_opf(ebook_path, 112)

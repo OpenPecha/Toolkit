@@ -20,12 +20,13 @@ class HFMLFormatter(BaseFormatter):
     OpenPecha Formatter for digitized wooden-printed Pecha based on annotation scheme from Esukhia.
     """
 
-    def __init__(self, output_path="./output", is_book=False):
-        super().__init__(output_path=output_path)
+    def __init__(self, output_path=None, metadata=None, is_book=False):
+        super().__init__(output_path, metadata)
         self.is_book = is_book
         self.base_text = ""
         self.vol_walker = 0
         self.book_title = []
+        self.book_number = []
         self.poti_title = []
         self.author = []
         self.chapter_title = []
@@ -50,6 +51,7 @@ class HFMLFormatter(BaseFormatter):
         self.sabche_pattern = []
         self.tsawa_pattern = []
         self.yigchung_pattern = []
+        self.durchen_pattern = []
 
     def text_preprocess(self, text):
         if text[0] == "\ufeff":
@@ -77,6 +79,8 @@ class HFMLFormatter(BaseFormatter):
         return result_text
 
     def _load_metadata(self):
+        if self.metadata:
+            return self.metadata
         meta_fn = self.dirs["opf_path"] / "meta.yml"
         if meta_fn.is_file():
             return self.load(meta_fn)
@@ -87,6 +91,8 @@ class HFMLFormatter(BaseFormatter):
         meta_fn = self.dirs["opf_path"] / "meta.yml"
         if kwargs:
             self.metadata.update(kwargs)
+        if "id" not in self.metadata:
+            self.metadata["id"] = f"opecha:{self.pecha_path.name}"
         self.dump(self.metadata, meta_fn)
 
     def get_input(self, input_path):
@@ -115,6 +121,7 @@ class HFMLFormatter(BaseFormatter):
             "start_sabche_pattern",
             "start_tsawa_pattern",
             "start_yigchung_pattern",
+            "start_durchen_pattern",
         ]:
             if re.search(pat_list[pattern], annotated_line):
                 match_list = re.finditer(
@@ -161,6 +168,7 @@ class HFMLFormatter(BaseFormatter):
             "book_title_pattern",
             "poti_title_pattern",
             "chapter_title_pattern",
+            "book_number_pattern",
         ]:
             title_pattern = re.search(pat_list[pattern], annotated_line)
             if title_pattern:
@@ -174,6 +182,7 @@ class HFMLFormatter(BaseFormatter):
             "end_sabche_pattern",
             "end_tsawa_pattern",
             "end_yigchung_pattern",
+            "end_durchen_pattern",
         ]:
             end_patterns = re.findall(
                 pat_list[pattern], annotated_line
@@ -227,6 +236,7 @@ class HFMLFormatter(BaseFormatter):
             "start_sabche_pattern",
             "start_tsawa_pattern",
             "start_yigchung_pattern",
+            "start_durchen_pattern",
         ]:
             if re.search(pat_list[pp], line):
                 match_list = re.finditer(
@@ -281,6 +291,7 @@ class HFMLFormatter(BaseFormatter):
             "book_title_pattern",
             "poti_title_pattern",
             "chapter_title_pattern",
+            "book_number_pattern",
         ]:
             title_pattern = re.search(pat_list[pp], line)
             if title_pattern:
@@ -295,6 +306,7 @@ class HFMLFormatter(BaseFormatter):
             "end_sabche_pattern",
             "end_tsawa_pattern",
             "end_yigchung_pattern",
+            "end_durchen_pattern",
         ]:
             end_patterns = re.finditer(
                 pat_list[pp], line
@@ -330,6 +342,8 @@ class HFMLFormatter(BaseFormatter):
             "end_tsawa_pattern",
             "start_yigchung_pattern",
             "end_yigchung_pattern",
+            "start_durchen_pattern",
+            "end_durchen_pattern",
         ]:
             base_line = re.sub(pat_list[pattern], "", base_line)
 
@@ -338,6 +352,7 @@ class HFMLFormatter(BaseFormatter):
             "book_title_pattern",
             "poti_title_pattern",
             "chapter_title_pattern",
+            "book_number_pattern",
         ]:
             title_pattern = re.search(pat_list[pattern], annotated_line)
             if title_pattern:
@@ -441,6 +456,7 @@ class HFMLFormatter(BaseFormatter):
 
         author_titles = []
         book_titles = []
+        book_numbers = []
         poti_titles = []
         chapter_titles = []
         start_cit_patterns = (
@@ -467,10 +483,17 @@ class HFMLFormatter(BaseFormatter):
         end_yigchung_pattern = (
             []
         )  # list variable to store index of end yigchung pattern => y)
+        start_durchen_pattern = (
+            []
+        )  # list variable to store index of start durchen pattern => <d
+        end_durchen_pattern = (
+            []
+        )  # list variable to store index of end durchen pattern => d>
 
         pat_list = {
             "author_pattern": r"\<([𰵀-󴉱])?au.+?\>",
             "book_title_pattern": r"\<([𰵀-󴉱])?k1.+?\>",
+            "book_number_pattern": r"\<([𰵀-󴉱])?k4.+?\>",
             "poti_title_pattern": r"\<([𰵀-󴉱])?k2.+?\>",
             "chapter_title_pattern": r"\<([𰵀-󴉱])?k3.+?\>",
             "page_pattern": r"\[([𰵀-󴉱])?[0-9]+[a-z]{1}\]",
@@ -484,6 +507,8 @@ class HFMLFormatter(BaseFormatter):
             "end_tsawa_pattern": r"m\>",
             "start_yigchung_pattern": r"\<([𰵀-󴉱])?y",
             "end_yigchung_pattern": r"y\>",
+            "start_durchen_pattern": r"\<([𰵀-󴉱])?d",
+            "end_durchen_pattern": r"d\>",
             "sub_topic_pattern": r"\{([𰵀-󴉱])?\w+\-\w+\}",
             "error_pattern": r"\<([𰵀-󴉱])?\S+?\,\S+?\>",
             "archaic_word_pattern": r"\{([𰵀-󴉱])?\S+?\,\S+?\}",
@@ -550,6 +575,7 @@ class HFMLFormatter(BaseFormatter):
                 "book_title_pattern",
                 "poti_title_pattern",
                 "chapter_title_pattern",
+                "book_number_pattern",
             ]:
                 title_pattern = re.search(pat_list[pp], line)
                 if title_pattern:
@@ -569,6 +595,8 @@ class HFMLFormatter(BaseFormatter):
                         author_titles.append((local_id, Author(span)))
                     if pp == "book_title_pattern":
                         book_titles.append((local_id, BookTitle(span)))
+                    if pp == "book_number_pattern":
+                        book_numbers.append((local_id, BookNumber(span)))
                     if pp == "poti_title_pattern":
                         poti_titles.append((local_id, PotiTitle(span)))
                         if local_id:
@@ -805,11 +833,25 @@ class HFMLFormatter(BaseFormatter):
                         self.parse_end_ann(end_yigchung, pat_list, char_walker, line)
                     )
 
+            if re.search(pat_list["start_durchen_pattern"], line):
+                start_durchens = re.finditer(pat_list["start_durchen_pattern"], line)
+                for start_durchen in start_durchens:
+                    start_durchen_pattern.append(
+                        self.parse_start_ann(start_durchen, pat_list, char_walker, line)
+                    )
+
+            if re.search(pat_list["end_durchen_pattern"], line):
+                end_durchens = re.finditer(pat_list["end_durchen_pattern"], line)
+                for end_durchen in end_durchens:
+                    end_durchen_pattern.append(
+                        self.parse_end_ann(end_durchen, pat_list, char_walker, line)
+                    )
+
             pat_len_before_ann = self.total_pattern(pat_list, line)
-            if length == pat_len_before_ann:
-                end_line = start_line + length - pat_len_before_ann - 2
-            else:
+            if line:
                 end_line = start_line + length - pat_len_before_ann - 1
+            else:
+                end_line = start_line + length - 1
             char_walker = end_line + 2
             base_line = self.base_extract(pat_list, line) + "\n"
             self.base_text += base_line
@@ -870,6 +912,7 @@ class HFMLFormatter(BaseFormatter):
                 note_id = []
                 self.author.append(author_titles)
                 self.book_title.append(book_titles)
+                self.book_number.append(book_numbers)
                 self.poti_title.append(poti_titles)
                 self.chapter_title.append(chapter_titles)
                 self.vol_walker += 1
@@ -891,6 +934,9 @@ class HFMLFormatter(BaseFormatter):
         self.yigchung_pattern.append(
             self.merge(start_yigchung_pattern, end_yigchung_pattern)
         )  # The starting and ending of  yigchung pattern is merged
+        self.durchen_pattern.append(
+            self.merge(start_durchen_pattern, end_durchen_pattern)
+        )  # The starting and ending of  yigchung pattern is merged
 
     def get_result(self):
 
@@ -901,6 +947,7 @@ class HFMLFormatter(BaseFormatter):
         self.sub_topic = self.__final_sub_topic(self.sub_topic)
         result = {
             AnnType.book_title: self.book_title,
+            AnnType.book_number: self.book_number,
             AnnType.author: self.author,
             AnnType.poti_title: self.poti_title,
             AnnType.chapter: self.chapter_title,
@@ -915,6 +962,7 @@ class HFMLFormatter(BaseFormatter):
             AnnType.error_candidate: self.abs_er_id,
             AnnType.peydurma: self.notes_id,
             AnnType.archaic: self.archaic_word_id,
+            AnnType.durchen: self.durchen_pattern,
         }
 
         return result

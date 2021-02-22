@@ -1,3 +1,4 @@
+import re
 from collections import defaultdict, namedtuple
 from pathlib import Path
 
@@ -22,22 +23,24 @@ class Serialize(object):
     """
 
     def __init__(
-        self, opfpath, text_id=None, vol_ids=None, layers=None, index_layer=None
+        self, opf_path, text_id=None, vol_ids=None, layers=None, index_layer=None
     ):
-        self.opfpath = Path(opfpath)
+        self.opf_path = Path(opf_path)
         self.meta = self.get_meta_data()
         self.text_id = text_id
         self.index_layer = index_layer
+        self.layers = layers
         self.n_char_shifted = []
         self.text_spans = {}
         self.base_layers = {}
         if self.text_id:
             self.text_spans = self.get_text_spans(text_id)
+            self.index_layer = self.get_index_layer(text_id)
             if self.text_spans:
                 self.base_layers = self.get_text_base_layer()
         else:
             if not vol_ids:
-                vol_ids = [vol.stem for vol in (self.opfpath / "base").iterdir()]
+                vol_ids = [vol.stem for vol in (self.opf_path / "base").iterdir()]
             for vol_id in vol_ids:
                 text_spans = {vol_id: {"start": 0, "end": float("inf")}}
                 base_layers = {vol_id: self.get_base_layer(vol_id=vol_id)}
@@ -72,7 +75,6 @@ class Serialize(object):
         self.chars_toapply = defaultdict(dict)
         # layer lists the layers to be applied, in the order of which they should be applied
         # by convention, when it is None, all layers are applied in alphabetical order (?)
-        self.layers = layers
 
     def get_n_char_shitted(self, end):
         n_shifted = 0
@@ -104,7 +106,7 @@ class Serialize(object):
         return adapted_start, adapted_end
 
     def get_meta_data(self):
-        opf_path = self.opfpath
+        opf_path = self.opf_path
         try:
             meta = yaml.safe_load((opf_path / "meta.yml").open())
         except Exception:
@@ -119,26 +121,53 @@ class Serialize(object):
         """
         get spans of text
         """
-        if not self.index_layer:
-            self.index_layer = self.load_layer(self.opfpath / "index.yml")
-        for anno in self.index_layer["annotations"]:
-            if anno["work"] == text_id:
-                text_span = {}
+        text_span = {}
+        index_layer = self.load_layer(self.opf_path / "index.yml")
+        for id, anno in index_layer["annotations"].items():
+            if anno["parts"]:
+                for sub_topic in anno["parts"]:
+                    if sub_topic["work_id"] == text_id:
+                        text_span[f'v{sub_topic["span"]["vol"]:03}'] = sub_topic["span"]
+            if anno["work_id"] == text_id:
                 for span in anno["span"]:
-                    text_span[span["vol"].split("/")[-1]] = span["span"]
-                return text_span
+                    text_span[f'v{span["vol"]:03}'] = span
+        return text_span
+
+    def get_index_layer(self, text_id):
+        index_layer = self.load_layer(self.opf_path / "index.yml")
+        text_index_layer = defaultdict(str)
+        text_index_layer["id"] = index_layer["id"]
+        text_index_layer["annotation_type"] = index_layer["annotation_type"]
+        text_index_layer["revision"] = index_layer["revision"]
+        annotations = defaultdict(str)
+        for id, anno in index_layer["annotations"].items():
+            if anno["work_id"] == text_id:
+                annotations[id] = anno
+            elif anno["parts"]:
+                annotation = {}
+                annotation_span_list = []
+                for sub_topic in anno["parts"]:
+                    if sub_topic["work_id"] == text_id:
+                        annotation["work_id"] = sub_topic["work_id"]
+                        annotation_span_list.append(sub_topic["span"])
+                        annotation["parts"] = []
+                if annotation_span_list:
+                    annotation["span"] = annotation_span_list
+                    annotations[id] = annotation
+        text_index_layer["annotations"] = annotations
+        return text_index_layer
 
     def get_base_layer(self, vol_id=None):
         """
         return text for given span
         """
         if self.text_id:
-            vol_base = (self.opfpath / f"base/{vol_id}.txt").read_text()
+            vol_base = (self.opf_path / f"base/{vol_id}.txt").read_text()
             start = self.text_spans[vol_id]["start"]
             end = self.text_spans[vol_id]["end"]
             return vol_base[start:end]
         else:
-            vol_base = (self.opfpath / f"base/{vol_id}.txt").read_text()
+            vol_base = (self.opf_path / f"base/{vol_id}.txt").read_text()
             return vol_base
 
     def get_text_base_layer(self):
@@ -161,7 +190,7 @@ class Serialize(object):
         This reads the file opfpath/layers/layer_id.yml and applies all the annotations it contains, in the order in which they appear.
         I think it can be implemented in this class by just calling self.apply_annotation on each annotation of the file.
         """
-        layer_fn = self.opfpath / "layers" / vol_id / f"{layer_id}.yml"
+        layer_fn = self.opf_path / "layers" / vol_id / f"{layer_id}.yml"
         if not layer_fn.is_file():
             return
         layer = yaml.safe_load(layer_fn.open())
@@ -179,21 +208,21 @@ class Serialize(object):
                     uuid2localid = ""
                 self.apply_annotation(vol_id, ann, uuid2localid)
 
-    def apply_index(self, index_path):
-        index = yaml.safe_load(index_path.open())
-        for ann_id, topic in index["annotations"].items():
+    def apply_index(self):
+        for ann_id, topic in self.index_layer["annotations"].items():
             topic_ann = defaultdict(str)
             sub_topics = topic["parts"]
-            for sub_topic in sub_topics:
+            for i, sub_topic in enumerate(sub_topics):
                 if sub_topic:
                     vol_id = f"v{sub_topic['span']['vol']:03}"
                     sub_topic["type"] = AnnType.sub_topic
-                    self.apply_annotation(vol_id, sub_topic)
+                    if sub_topic["work_id"] != sub_topics[i - 1]["work_id"]:
+                        self.apply_annotation(vol_id, sub_topic)
             if topic["span"]:
-                vol_id = f"v{topic['span'][0]['span']['vol']:03}"
+                vol_id = f"v{topic['span'][0]['vol']:03}"
                 topic_ann["type"] = AnnType.topic
-                topic_ann["span"] = topic["span"][0]["span"]
-                topic_ann["work_id"] = topic["span"][0]["work_id"]
+                topic_ann["span"] = topic["span"][0]
+                topic_ann["work_id"] = topic["work_id"]
                 self.apply_annotation(vol_id, topic_ann)
 
     def get_all_layer(self, vol_id):
@@ -202,7 +231,7 @@ class Serialize(object):
         """
         return [
             layer.stem
-            for layer in (self.opfpath / "layers" / vol_id).iterdir()
+            for layer in (self.opf_path / "layers" / vol_id).iterdir()
             if layer.suffix == ".yml"
         ]
 
@@ -210,15 +239,22 @@ class Serialize(object):
         """
         This applies all the layers recorded in self.layers. If self.layers is none, it reads all the layers from the layer directory.
         """
-        index_path = self.opfpath / "index.yml"
-        if index_path.is_file():
-            self.apply_index(index_path)
+        if not self.index_layer:
+            index_path = self.opf_path / "index.yml"
+            if index_path.is_file():
+                self.index_layer = self.load_layer(index_path)
+                self.apply_index()
+        else:
+            self.apply_index()
         for vol_id in self.base_layers:
             if not self.layers:
                 self.layers = self.get_all_layer(vol_id)
+            if "Pagination" in self.layers:
+                pagination_index = self.layers.index("Pagination")
+                del self.layers[pagination_index]
+                self.layers.append("Pagination")
             for layer_id in self.layers:
                 self.apply_layer(vol_id, layer_id)
-            self.layers = []
 
     def add_chars(self, vol_id, cc, frombefore, charstoadd):
         """
@@ -249,7 +285,10 @@ class Serialize(object):
     def _assign_line_layer(self, result, vol_id):
         def _get_page_index(line):
             page_index = ""
-            i = 2
+            if re.search("[𰵀-󴉱]", line):
+                i = 2
+            else:
+                i = 1
             while line[i] != "]":
                 page_index += line[i]
                 i += 1
@@ -259,18 +298,16 @@ class Serialize(object):
         page_index = ""
         n_line = 1
         for line in result.split("\n"):
-            if not line:
-                continue
-            if line[0] == "[" and line[1] != vol_id[0]:
+            if re.search(r"\[[𰵀-󴉱]?[0-9]+[a-z]{1}\]", line):
                 page_index = _get_page_index(line)
                 n_line = 1
-            elif line[0] != "[":
+            elif not re.search(r"^\[", line):
                 line = f"[{page_index}.{n_line}]" + line
                 n_line += 1
             result_with_line += line + "\n"
         return result_with_line
 
-    def get_result(self):
+    def get_result(self, line_num=True):
         """
         returns a string which is the base layer where the changes recorded in self.chars_toapply have been applied.
 
@@ -281,8 +318,8 @@ class Serialize(object):
         # see https://waymoot.org/home/python_string/ where method 5 is good
         for vol_id, base_layer in self.base_layers.items():
             cur_vol_result = ""
-            if self.text_id:
-                cur_vol_result += f"\n[{vol_id}]\n"
+            # if self.text_id:
+            #     cur_vol_result += f"\n[{vol_id}]\n"
             i = 0
             for c in base_layer:
                 # UTF bom \ufeff takes the 0th index
@@ -299,7 +336,7 @@ class Serialize(object):
                     cur_vol_result += c
                 i += 1
 
-            if self.layers and "Pagination" in self.layers:
+            if "Pagination" in self.layers:
                 cur_vol_result = self._assign_line_layer(cur_vol_result, vol_id)
             result.update({vol_id: cur_vol_result})
         return result

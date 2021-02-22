@@ -1,20 +1,19 @@
-import csv
 import logging
-import shutil
 from pathlib import Path
 
 import click
-import requests
 from git import Repo
-from github import Github
 from tqdm import tqdm
 
-from openpecha.blupdate import Blupdate
+from openpecha.blupdate import PechaBaseUpdate
 from openpecha.buda.openpecha_manager import OpenpechaManager
+from openpecha.catalog import config as catalog_config
+from openpecha.catalog.filter import is_text_good_quality
+from openpecha.catalog.storage import GithubBucket
 from openpecha.formatters import *
 from openpecha.serializers import *
 
-OP_PATH = Path("./.openpecha")
+OP_PATH = Path.home() / ".openpecha"
 config = {
     # Github
     "OP_CATALOG_URL": "https://raw.githubusercontent.com/OpenPoti/openpecha-catalog/master/data/catalog.csv",
@@ -100,16 +99,34 @@ def get_pecha(id, batch_path, layers):
     return pecha_list
 
 
-def download_pecha(pecha, out):
+def get_default_branch(repo):
+    if "main" in repo.heads:
+        return "main"
+    return "master"
+
+
+def download_pecha(pecha_id, out_path=None, needs_update=True):
     # clone the repo
-    pecha_url = f"{config['OP_ORG']}/{pecha}.git"
-    pecha_path = config["OP_DATA_PATH"] / pecha
+    pecha_url = f"{config['OP_ORG']}/{pecha_id}.git"
+    if out_path:
+        out_path = Path(out_path)
+        out_path.mkdir(exist_ok=True, parents=True)
+        pecha_path = out_path / pecha_id
+    else:
+        pecha_path = config["OP_DATA_PATH"] / pecha_id
+
     if pecha_path.is_dir():  # if repo is already exits at local then try to pull
+        if not needs_update:
+            return pecha_path
         repo = Repo(str(pecha_path))
-        repo.heads["master"].checkout()
+        default_branch = get_default_branch(repo)
+        repo.heads[default_branch].checkout()
+        click.echo(INFO.format(f"Updating {pecha_id} ..."))
         repo.remotes.origin.pull()
     else:
+        click.echo(INFO.format(f"Downloading {pecha_id} ..."))
         Repo.clone_from(pecha_url, str(pecha_path))
+    return pecha_path
 
 
 # Poti Download command
@@ -159,177 +176,6 @@ def download(**kwargs):
     click.echo(INFO.format(msg))
 
 
-# Apply layer command
-layers_name = ["title", "tsawa", "yigchung", "quotes", "sapche"]
-
-
-@cli.command()
-@click.option(
-    "--name", "-n", type=click.Choice(layers_name), help="name of a layer to be applied"
-)
-@click.option(
-    "--list",
-    "-l",
-    help="list of name of layers to applied, \
-                          name of layers should be comma separated",
-)
-@click.argument("work_number")
-@click.argument("out", type=click.File("w"))
-def layer(**kwargs):
-    """
-    Command to apply a single layer, multiple layers or all available layers (by default) and then export to markdown.\n
-    Args:\n
-        - WORK_NUMBER is the work number of the pecha, from which given layer will be applied\n
-        - OUT is the filename to the write the result. Currently support only Markdown file.
-    """
-    work_id = get_pecha_id(kwargs["work_number"])
-    opfpath = config["OP_DATA_PATH"] / work_id / f"{work_id}.opf"
-    serializer = SerializeMd(opfpath)
-    if kwargs["name"]:
-        serializer.apply_layer(kwargs["name"])
-    elif kwargs["list"]:
-        layers = kwargs["list"].split(",")
-        serializer.layers = layers
-        serializer.apply_layers()
-    else:
-        serializer.apply_layers()
-
-    result = serializer.get_result()
-    click.echo(result, file=kwargs["out"])
-
-    # logging
-    msg = f'Output is save at: {kwargs["out"].name}'
-    click.echo(INFO.format(msg))
-
-
-def pecha_list():
-    return [pecha.name for pecha in config["OP_DATA_PATH"].iterdir()]
-
-
-def get_data_path():
-    return Path(config["DATA_CONFIG_PATH"].read_text().strip())
-
-
-def check_edits(w_id):
-    edit_path = get_data_path()
-    data_path = config["OP_DATA_PATH"]
-
-    srcbl = (data_path / f"{w_id}" / f"{w_id}.opf" / "base.txt").read_text()
-    dstbl = (edit_path / f"{w_id}.txt").read_text()
-
-    return srcbl != dstbl, srcbl, dstbl
-
-
-def setup_credential(repo):
-    # setup authentication, if not done
-    if not (config["CONFIG_PATH"] / "credential").is_file():
-        username = click.prompt("Github Username")
-        password = click.prompt("Github Password", hide_input=True)
-        # save credential
-        (config["CONFIG_PATH"] / "credential").write_text(f"{username},{password}")
-
-    if "@" not in repo.remotes.origin.url:
-        # get user credentials
-        credential = (config["CONFIG_PATH"] / "credential").read_text()
-        username, password = [s.strip() for s in credential.split(",")]
-
-        old_url = repo.remotes.origin.url.split("//")
-        repo.remotes.origin.set_url(f"{old_url[0]}//{username}:{password}@{old_url[1]}")
-
-    return repo
-
-
-def github_push(repo, branch_name, msg="made edits"):
-    # credential
-    repo = setup_credential(repo)
-
-    # checkout to edited branch
-    if branch_name in repo.heads:
-        current = repo.heads[branch_name]
-    else:
-        current = repo.create_head(branch_name)
-    current.checkout()
-
-    # Add, commit and push the edited branch
-    if repo.is_dirty():
-        repo.git.add(A=True)
-        repo.git.commit(m=msg)
-        try:
-            repo.git.push("--set-upstream", "origin", current)
-        except Exception as e:
-            print(e)
-            msg = "Authentication failed: Try again later"
-            click.echo(ERROR.format(msg))
-            return False
-
-    # finally checkout to master for apply layer on validated text
-    repo.heads["master"].checkout()
-
-    return True
-
-
-def repo_reset(repo, branch_name):
-    # remove edited branch
-    repo.heads["master"].checkout()
-    repo.delete_head(repo.heads[branch_name], force=True)
-
-    # reset to the origin url
-    url = repo.remotes.origin.url.split("@")
-    protocol = url[0].split("//")[0]
-    repo.remotes.origin.set_url(f"{protocol}//{url[1]}")
-
-
-# Update annotations command
-@cli.command()
-@click.argument("work_number")
-def update(**kwargs):
-    """
-    Command to update the base text with your edits.
-    """
-    work_id = get_pecha_id(kwargs["work_number"])
-    if work_id:
-        if work_id in pecha_list():
-            repo_path = config["OP_DATA_PATH"] / work_id
-            repo = Repo(str(repo_path))
-
-            # if edited branch exists, then to check for changes in edited branch
-            branch_name = "edited"
-            if branch_name in repo.heads:
-                current = repo.heads[branch_name]
-                current.checkout()
-
-            is_changed, srcbl, dstbl = check_edits(work_id)
-            if is_changed:
-                msg = f"Updating {work_id} base text."
-                click.echo(INFO.format(msg))
-
-                # Update layer annotations
-                updater = Blupdate(srcbl, dstbl)
-                opfpath = repo_path / f"{work_id}.opf"
-                updater.update_annotations(opfpath)
-
-                # Update base-text
-                src = get_data_path() / f"{work_id}.txt"
-                dst = opfpath / "base.txt"
-                shutil.copy(str(src), str(dst))
-
-                # Create edited branch and push to Github
-                status = github_push(repo, branch_name)
-
-                # logging
-                if status:
-                    msg = f"Pecha edits {work_id} are uploaded for futher validation"
-                    click.echo(INFO.format(msg))
-                else:
-                    repo_reset(repo, branch_name)
-            else:
-                msg = f"There are no changes in Pecha {work_id}"
-                click.echo(ERROR.format(msg))
-        else:
-            msg = f"{work_id} does not exits, check the work-id"
-            click.echo(ERROR.format(msg))
-
-
 # OpenPecha Formatter
 formatter_types = ["ocr", "hfml(default)", "tsadra"]
 
@@ -353,38 +199,6 @@ def format(**kwargs):
         formatter = HFMLFormatter(kwargs["output_path"])
 
     formatter.create_opf(kwargs["input_path"], kwargs["id"])
-
-
-@cli.command()
-@click.option("--text_id", "-ti", type=str, help="text id of text")
-@click.option("--vol_number", "-vn", type=int, help="vol number")
-@click.argument("pecha_num")
-def edit(**kwargs):
-    """
-    Command to export Pecha for editing work
-    """
-    pecha_id = get_pecha_id(kwargs["pecha_num"])
-    opf_path = f'{config["OP_DATA_PATH"]}/{pecha_id}/{pecha_id}.opf'
-
-    if kwargs["text_id"]:
-        serializer = HFMLSerializer(opf_path, text_id=kwargs["text_id"])
-        out_fn = f'{pecha_id}-{kwargs["text_id"]}.txt'
-    elif kwargs["vol_number"]:
-        vol_id = f'v{kwargs["vol_number"]:03}'
-        serializer = HFMLSerializer(opf_path, vol_id=vol_id)
-        out_fn = f"{pecha_id}-{vol_id}.txt"
-    else:
-        serializer = HFMLSerializer(opf_path)
-        out_fn = f"{pecha_id}-v001.txt"
-
-    serializer.apply_layers()
-
-    result = serializer.get_result()
-    click.echo(result, file=open(out_fn, "w"))
-
-    # logging
-    msg = f"Output is save at: {out_fn}"
-    click.echo(INFO.format(msg))
 
 
 @cli.command()
@@ -465,3 +279,84 @@ def export(**kwargs):
     else:
         serializer = HFMLSerializer(opf_path)
     serializer.serialize(kwargs["output_path"])
+
+
+def _get_bucket(bucket_type, bucket_name, n):
+    if bucket_type == "github":
+        catalog_config.GITHUB_BUCKET_CONFIG["catalog"]["end"] = n
+        return GithubBucket(bucket_name, config=catalog_config.GITHUB_BUCKET_CONFIG)
+
+
+def _get_filter_strategy_caller(filter_strategy):
+    if filter_strategy == "non_words_ratio":
+        try:
+            from bonltk.text_quality import non_words_ratio
+        except Exception:
+            msg = (
+                "bonltk not installed. Install it with `pip install bonltk` "
+                "or from https://github.com/10zinten/bonltk"
+            )
+            raise ImportError(msg)
+        return non_words_ratio
+
+
+def _save_text(text, output_path, parent_path, fn):
+    pecha_path = Path(output_path) / parent_path
+    pecha_path.mkdir(exist_ok=True)
+    vol_path = pecha_path / fn
+    vol_path.write_text(text)
+
+
+@cli.command()
+@click.option("--output_path", "-o", type=click.Path(exists=True), required=True)
+@click.option("--bucket_type", "-bt", type=click.Choice(["github"]), default="github")
+@click.option("--bucket_name", "-bn", type=str, default="OpenPecha")
+@click.option(
+    "--filter_strategy",
+    "-fs",
+    type=click.Choice(["non_words_ratio"]),
+    default="non_words_ratio",
+)
+@click.option(
+    "--threshold",
+    "-th",
+    type=float,
+    default=0.8,
+    help="Determines the quality of the text (1 being the highest and 0 being the lowest)",
+)
+@click.option("-n", type=int, default=1, help="number of pechas to download")
+@click.option("--verbose", "-v", help="verbose", is_flag=True)
+@click.option("--debug", "-d", help="debug", is_flag=True)
+def corpus_download(
+    output_path, bucket_type, bucket_name, filter_strategy, threshold, n, verbose, debug
+):
+    if debug:
+        logging.basicConfig(level=logging.DEBUG)
+    elif verbose:
+        logging.basicConfig(level=logging.INFO)
+
+    bucket = _get_bucket(bucket_type, bucket_name, n)
+    filter_strategy_caller = _get_filter_strategy_caller(filter_strategy)
+    for pecha_id, base in bucket.get_all_pechas_base():
+        for vol_base, vol_fn in base:
+            if is_text_good_quality(
+                vol_base, strategy=filter_strategy_caller, threshold=threshold
+            ):
+                _save_text(vol_base, output_path, pecha_id, vol_fn)
+
+
+@cli.command()
+@click.argument("pecha_number")
+@click.argument("pecha_path")
+def update_layers(**kwargs):
+    """
+    Update all the layers when base has been updated.
+    """
+    pecha_id = get_pecha_id(kwargs["pecha_number"])
+    src_pecha_path = download_pecha(pecha_id)
+
+    click.echo(INFO.format(f"Updating base of {pecha_id} ..."))
+    src_opf_path = src_pecha_path / f"{pecha_id}.opf"
+    dst_opf_path = Path(kwargs["pecha_path"]) / f"{pecha_id}.opf"
+    pecha = PechaBaseUpdate(src_opf_path, dst_opf_path)
+    pecha.update()
