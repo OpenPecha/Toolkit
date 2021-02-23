@@ -27,7 +27,7 @@ class Tsadra_template:
         '<p class = "credits-page_epub-edition-line"><span class="credits-regular">'
     )
     author_SP = '<p class="credits-page_front-page---text-author"><span class="front-page---text-titles">'
-    chapter_SP = '<span class="tibetan-chapter">'
+    chapter_SP = '<span class="tibetan-chapters">'
     tsawa_SP = '<span class="tibetan-root-text">'
     tsawa_verse_SP = '<span class="tibetan-root-text_tibetan-root-text-middle-lines">'
     quatation__verse_SP = (
@@ -163,7 +163,12 @@ class EpubSerializer(Serialize):
         br_flag = False
         for syl_walker, syl in enumerate(syls):
             if br_flag:
-                if "།" in syl:
+                if "༄" in syl:
+                    result.append("<br>")
+                    br_flag = False
+                    walker = 0
+                    result.append(syl)
+                elif "།" in syl:
                     result.append(syl)
                     try:
                         if "།" not in syls[syl_walker + 1]:
@@ -208,6 +213,7 @@ class EpubSerializer(Serialize):
         results = self.get_result()
         for vol_id, result in results.items():
             result = self.update_line_break(result)
+            result = result.replace("<br><br>", "<br>")
             results = (
                 f"<html>\n<head>\n\t<title>{pecha_title}</title>\n</head>\n<body>\n"
             )
@@ -221,7 +227,7 @@ class EpubSerializer(Serialize):
             # click.echo(template.content, file=open('template.css', 'w'))
             # Running ebook-convert command to convert html file to .epub (From calibre)
             # XPath expression to detect chapter titles.
-            chapter_Xpath = "//*[@class='tibetan-chapter']"
+            chapter_Xpath = "//*[@class='tibetan-chapters']"
             book_title_Xpath = "//*[@class='tibetan-book-title']"
             font_family = "Monlam Uni Ouchan2"
             font_size = 15

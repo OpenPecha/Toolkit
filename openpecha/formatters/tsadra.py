@@ -23,6 +23,7 @@ class TsadraTemplate:
         "credits-page_front-title",
         "tibetan-book-title",
         "tibetan-book-sub-title",
+        "credits-page_tibetan-book-title",
     ]
     book_number = "credits-page_front-page---book-number"
     commentaries = {
@@ -396,7 +397,7 @@ class TsadraFormatter(BaseFormatter):
                 ):
                     citation_tmp += self.text_preprocess(p.text) + "\n"
                     self.base_text += self.text_preprocess(p.text) + "\n"
-                elif p["class"][0] == TsadraTemplate.citation_last_line:
+                elif TsadraTemplate.citation_last_line in p["class"][0]:
                     citation_tmp += self.text_preprocess(p.text) + "\n"
                     self.citation.append(
                         self.parse_ann(
