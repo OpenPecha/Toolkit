@@ -29,7 +29,7 @@ class Tsadra_template:
     author_SP = '<p class="credits-page_front-page---text-author"><span class="front-page---text-titles">'
     chapter_SP = '<span class="tibetan-chapter">'
     tsawa_SP = '<span class="tibetan-root-text">'
-    tsawa_verse_SP = '<span class="tibetan-root-text_tibetan-root-text-middle-lines tibetan-root-text">'
+    tsawa_verse_SP = '<span class="tibetan-root-text_tibetan-root-text-middle-lines">'
     quatation__verse_SP = (
         '<span class="tibetan-citations-in-verse_tibetan-citations-middle-lines">'
     )
@@ -154,8 +154,9 @@ class EpubSerializer(Serialize):
         return result
 
     def update_line_break(self, result_text):
-        result_text = result_text.replace("།\n", "། ")
-        result_text = result_text.replace("\n", "")
+        # result_text = result_text.replace("།\n", "། ")
+        # result_text = result_text.replace("\n", "")
+        result_text = result_text.replace("\n", "<br>\n")
         syls = self.get_syls(result_text)
         walker = 0
         result = []
