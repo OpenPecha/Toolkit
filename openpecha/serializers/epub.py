@@ -85,7 +85,7 @@ class EpubSerializer(Serialize):
             only_start_ann = True
         elif ann["type"] == AnnType.credit_page:
             credit_page_ann = ann["credit_page_img_name"]
-            start_payload = f'{Tsadra_template.credit_page_SP}<img src="{self.opf_path}/asset/image/{credit_page_ann}"/></span></p>'
+            start_payload = f'{Tsadra_template.credit_page_SP}<img src="{self.opf_path}/asset/image/{credit_page_ann}"/></span></p>\n'
             only_start_ann = True
         elif ann["type"] == AnnType.error_candidate:
             start_payload = "["
@@ -153,40 +153,76 @@ class EpubSerializer(Serialize):
                 cur_syl = ""
         return result
 
-    def update_line_break(self, result_text):
-        # result_text = result_text.replace("།\n", "། ")
-        # result_text = result_text.replace("\n", "")
-        result_text = result_text.replace("\n", "<br>\n")
-        syls = self.get_syls(result_text)
-        walker = 0
-        result = []
-        br_flag = False
-        for syl_walker, syl in enumerate(syls):
-            if br_flag:
-                if "༄" in syl:
-                    result.append("<br>")
-                    br_flag = False
-                    walker = 0
-                    result.append(syl)
-                elif "།" in syl:
-                    result.append(syl)
-                    try:
-                        if "།" not in syls[syl_walker + 1]:
-                            result.append("<br>")
-                            br_flag = False
-                            walker = 0
-                    except Exception:
-                        result.append("<br>")
-                        br_flag = False
-                        walker = 0
+    def p_tag_adder(self, body_text):
+        new_body_text = ""
+        paras = body_text.split("\n")
+        para_flag = False
+        cur_para = ""
+        for para in paras:
+            if "<p" not in para:
+                if re.search("<span.+?</span>", para):
+                    new_body_text += f"<p>{para}</p>"
+                elif "<span" in para and not para_flag:
+                    cur_para += f"<p>{para}<br>"
+                    para_flag = True
+                elif para_flag and "</span>" not in para:
+                    cur_para += f"{para}</br>"
+                elif "</span>" in para:
+                    cur_para += f"{para}</p>"
+                    new_body_text += cur_para
+                    cur_para = ""
+                    para_flag = False
                 else:
-                    result.append(syl)
+                    new_body_text += f"<p>{para}</p>"
             else:
-                if walker == 499:
-                    br_flag = True
-                result.append(syl)
-            walker += 1
-        return "".join(result)
+                new_body_text += para
+        return new_body_text
+
+    def is_title(self, p_tag):
+        if "title" in p_tag or "chapter" in p_tag:
+            return True
+        else:
+            return False
+
+    def rm_indentation(self, p_tag):
+        p_tag = re.sub(
+            "<p>", '<p class="tibetan-commentary-non-indent" "front-title">', p_tag
+        )
+        return p_tag
+
+    def is_annotated_p_tag(self, p_tag):
+        if re.search("<p.*?><span.*?>.+?</span></p>", p_tag):
+            return True
+        else:
+            return False
+
+    def get_p_tags(self, body_text):
+        p_tags = re.split("(<p.*?>.+?</p>)", body_text)
+        return p_tags[1::2]
+
+    def indentation_adjustment(self, body_text):
+        p_tags = self.get_p_tags(body_text)
+
+        prev_p_tag = p_tags[0]
+        body_text = prev_p_tag
+        for p_tag in p_tags[1:]:
+            cur_p_tag = ""
+            if self.is_annotated_p_tag(prev_p_tag):
+                if not self.is_title(p_tag) and len(p_tag) > 60:
+                    cur_p_tag = self.rm_indentation(p_tag)
+                else:
+                    cur_p_tag = p_tag
+            else:
+                if self.is_annotated_p_tag(p_tag):
+                    if not self.is_title(p_tag) and len(p_tag) > 60:
+                        cur_p_tag = self.rm_indentation(p_tag)
+                    else:
+                        cur_p_tag = p_tag
+                else:
+                    cur_p_tag = p_tag
+            body_text += cur_p_tag
+            prev_p_tag = cur_p_tag
+        return body_text
 
     def serialize(self, output_path="./output/epub_output"):
         """ This module serialize .opf file to other format such as .epub etc. In case of epub,
@@ -212,8 +248,8 @@ class EpubSerializer(Serialize):
         self.layers = [layer for layer in self.layers if layer != "Pagination"]
         results = self.get_result()
         for vol_id, result in results.items():
-            result = self.update_line_break(result)
-            result = result.replace("<br><br>", "<br>")
+            result = self.p_tag_adder(result)
+            result = self.indentation_adjustment(result)
             results = (
                 f"<html>\n<head>\n\t<title>{pecha_title}</title>\n</head>\n<body>\n"
             )
