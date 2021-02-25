@@ -155,6 +155,7 @@ class EpubSerializer(Serialize):
 
     def p_tag_adder(self, body_text):
         new_body_text = ""
+        body_text = re.sub(r"\n</span>", "\n</span>\n", body_text)
         paras = body_text.split("\n")
         para_flag = False
         cur_para = ""
@@ -185,9 +186,11 @@ class EpubSerializer(Serialize):
             return False
 
     def rm_indentation(self, p_tag):
-        p_tag = re.sub(
-            "<p>", '<p class="tibetan-commentary-non-indent" "front-title">', p_tag
-        )
+        p_tag = re.sub("<p>", '<p class="tibetan-commentary-non-indent">', p_tag)
+        return p_tag
+
+    def add_indentation(self, p_tag):
+        p_tag = re.sub("<p>", '<p class="tibetan-regular-indented">', p_tag)
         return p_tag
 
     def is_annotated_p_tag(self, p_tag):
@@ -208,18 +211,18 @@ class EpubSerializer(Serialize):
         for p_tag in p_tags[1:]:
             cur_p_tag = ""
             if self.is_annotated_p_tag(prev_p_tag):
-                if not self.is_title(p_tag) and len(p_tag) > 60:
+                if not self.is_title(p_tag):
                     cur_p_tag = self.rm_indentation(p_tag)
                 else:
-                    cur_p_tag = p_tag
+                    cur_p_tag = self.add_indentation(p_tag)
             else:
                 if self.is_annotated_p_tag(p_tag):
-                    if not self.is_title(p_tag) and len(p_tag) > 60:
+                    if not self.is_title(p_tag):
                         cur_p_tag = self.rm_indentation(p_tag)
                     else:
-                        cur_p_tag = p_tag
+                        cur_p_tag = self.add_indentation(p_tag)
                 else:
-                    cur_p_tag = p_tag
+                    cur_p_tag = self.add_indentation(p_tag)
             body_text += cur_p_tag
             prev_p_tag = cur_p_tag
         return body_text
