@@ -36,6 +36,7 @@ class TsadraTemplate:
             "tibetan-commentary-non-indent1",
             "tibetan-commentary-non-indent",
             "tibetan-regular-indented",
+            "tibetan-regular-indented1",
         ],
     }
     citation_base = "tibetan-citations-in-verse_tibetan-citations"
@@ -51,7 +52,11 @@ class TsadraTemplate:
     tsawa_oneliner = [f"{tsawa_base}-1-line-only", ""]
     tsawa_inline = "tibetan-root-text"
     sabches = ["tibetan-sabche", "tibetan-sabche1"]
-    yigchung = "tibetan-commentary-small"
+    yigchung = [
+        "tibetan-commentary-small",
+        "tibetan-commentary-small-text",
+        "tibetan-external-citations-small-letter",
+    ]
 
 
 class TsadraFormatter(BaseFormatter):
@@ -147,6 +152,8 @@ class TsadraFormatter(BaseFormatter):
             self.cover_image = cover
         ps = soup.find_all("p")
         for p in ps:
+            if "།སྨོན་ནས་མཁྱེན་པའི་ཏིང་ངེ་འཛིན་ཡིན་ཕྱིར།" in p.text:
+                print("check")
             if p["class"][0] in TsadraTemplate.titles:  # to get the book title index
                 book_title_tmp = self.text_preprocess(p.text)
                 if book_title_tmp:
@@ -264,7 +271,7 @@ class TsadraFormatter(BaseFormatter):
                             continue
 
                         if (
-                            s["class"][0] == TsadraTemplate.yigchung
+                            s["class"][0] in TsadraTemplate.yigchung
                         ):  # checking for yigchung annotation
                             if citation_tmp:
                                 # citation_tmp += citation_tmp
