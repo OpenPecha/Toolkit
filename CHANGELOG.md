@@ -2,6 +2,11 @@
 
 <!--next-version-placeholder-->
 
+## v0.6.35 (2021-03-01)
+### Fix
+* Madd pydantic in dependencies ([`16f6ed0`](https://github.com/OpenPecha/openpecha-toolkit/commit/16f6ed0ed2dd613d5805598bc84ecbf4a96eda03))
+* Add create opf for ebook ([`efe8bf8`](https://github.com/OpenPecha/openpecha-toolkit/commit/efe8bf8328b8d5c61c3cf221b0c1a6908c1ab2fe))
+
 ## v0.6.34 (2021-02-16)
 ### Fix
 * Make methods to module funcs ([`7fec0d6`](https://github.com/OpenPecha/openpecha-toolkit/commit/7fec0d6af4a10efe4259e479641f5e5749911aa0))
