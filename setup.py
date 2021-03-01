@@ -40,6 +40,7 @@ setup(
         "bs4",
         "pyewts",
         "rdflib==5.0.0",
+        "pydantic==1.7.3",
     ],
     python_requires=">=3.6",
     tests_require=["pytest"],
