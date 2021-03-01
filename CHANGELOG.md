@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.7.2 (2021-03-01)
+### Fix
+* Ireturn empty string instead of None for source meta access ([`b2390f9`](https://github.com/OpenPecha/openpecha-toolkit/commit/b2390f9013853a327651255668adea0a2e55d98f))
+
 ## v0.7.1 (2021-03-01)
 ### Fix
 * Make output_path optional ([`5b67259`](https://github.com/OpenPecha/openpecha-toolkit/commit/5b67259ece9c6434fd7a099f2e278dfeb83c5a53))
