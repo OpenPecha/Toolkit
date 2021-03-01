@@ -152,8 +152,6 @@ class TsadraFormatter(BaseFormatter):
             self.cover_image = cover
         ps = soup.find_all("p")
         for p in ps:
-            if "།སྨོན་ནས་མཁྱེན་པའི་ཏིང་ངེ་འཛིན་ཡིན་ཕྱིར།" in p.text:
-                print("check")
             if p["class"][0] in TsadraTemplate.titles:  # to get the book title index
                 book_title_tmp = self.text_preprocess(p.text)
                 if book_title_tmp:

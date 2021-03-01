@@ -140,19 +140,6 @@ class EpubSerializer(Serialize):
         if not only_start_ann:
             self.add_chars(vol_id, end_cc, False, end_payload)
 
-    def get_syls(self, vol_text):
-        result = []
-        cur_syl = ""
-        syls = re.split("(་|།)", vol_text)
-        for i, syl in enumerate(syls):
-            if i % 2 == 0:
-                cur_syl += syl
-            else:
-                cur_syl += syl
-                result.append(cur_syl)
-                cur_syl = ""
-        return result
-
     def p_tag_adder(self, body_text):
         new_body_text = ""
         body_text = re.sub(r"\n</span>", "\n</span>\n", body_text)
@@ -186,7 +173,10 @@ class EpubSerializer(Serialize):
             return False
 
     def rm_indentation(self, p_tag):
-        p_tag = re.sub("<p>", '<p class="tibetan-commentary-non-indent">', p_tag)
+        if len(self.get_p_text(p_tag)) > 50:
+            p_tag = re.sub("<p>", '<p class="tibetan-commentary-non-indent">', p_tag)
+        else:
+            p_tag = p_tag.replace("<p>", '<p class="tibetan-regular-indented">')
         return p_tag
 
     def add_indentation(self, p_tag):
@@ -199,9 +189,30 @@ class EpubSerializer(Serialize):
         else:
             return False
 
+    def get_p_text(self, p_tag):
+        para_tag = re.search(r"<p.*?>(<span.*?>)?(.+?)(</span>)?</p>", p_tag)
+        para_text = para_tag.group(2)
+        return para_text
+
     def get_p_tags(self, body_text):
         p_tags = re.split("(<p.*?>.+?</p>)", body_text)
         return p_tags[1::2]
+
+    def add_page_break(self, prev_p_tag, body_text):
+        if not self.is_title(prev_p_tag) and (
+            len(self.get_p_text(prev_p_tag)) > 500 or "small" in prev_p_tag
+        ):
+            new_prev_p_tag = prev_p_tag.replace(
+                '<p class="tibetan-commentary-non-indent">',
+                '<p class="tibetan-commentary-non-indent1">',
+            )
+            new_prev_p_tag = new_prev_p_tag.replace(
+                '<p class="tibetan-regular-indented">',
+                '<p class="tibetan-commentary-non-indent1">',
+            )
+        else:
+            new_prev_p_tag = prev_p_tag
+        return body_text.replace(prev_p_tag, new_prev_p_tag)
 
     def indentation_adjustment(self, body_text):
         p_tags = self.get_p_tags(body_text)
@@ -214,15 +225,25 @@ class EpubSerializer(Serialize):
                 if not self.is_title(p_tag):
                     cur_p_tag = self.rm_indentation(p_tag)
                 else:
+                    body_text = self.add_page_break(prev_p_tag, body_text)
                     cur_p_tag = self.add_indentation(p_tag)
             else:
                 if self.is_annotated_p_tag(p_tag):
                     if not self.is_title(p_tag):
                         cur_p_tag = self.rm_indentation(p_tag)
                     else:
+                        body_text = self.add_page_break(prev_p_tag, body_text)
                         cur_p_tag = self.add_indentation(p_tag)
                 else:
-                    cur_p_tag = self.add_indentation(p_tag)
+                    if (
+                        len(self.get_p_text(prev_p_tag)) < 50
+                        and len(self.get_p_text(p_tag)) > 300
+                    ):
+                        cur_p_tag = p_tag.replace(
+                            "<p>", '<p class="tibetan-commentary-non-indent">'
+                        )
+                    else:
+                        cur_p_tag = self.add_indentation(p_tag)
             body_text += cur_p_tag
             prev_p_tag = cur_p_tag
         return body_text
@@ -274,7 +295,7 @@ class EpubSerializer(Serialize):
             cover_path = self.opf_path / f"asset/image/{cover_image}"
             out_epub_fn = output_path / f"{pecha_id}.epub"
             os.system(
-                f'ebook-convert {out_html_fn} {out_epub_fn} --extra-css=./template.css --chapter={chapter_Xpath} --page-breaks-before="{book_title_Xpath}" --base-font-size={font_size} --embed-font-family="{font_family}" --cover={cover_path} --flow-size=0'
+                f'ebook-convert {out_html_fn} {out_epub_fn} --extra-css=./template.css --page-breaks-before="{book_title_Xpath}" --base-font-size={font_size} --embed-font-family="{font_family}" --cover={cover_path} --flow-size=0'
             )
             # Removing html file and template file
             os.system(f"rm {out_html_fn}")
