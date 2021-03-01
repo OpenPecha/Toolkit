@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.7.1 (2021-03-01)
+### Fix
+* Make output_path optional ([`5b67259`](https://github.com/OpenPecha/openpecha-toolkit/commit/5b67259ece9c6434fd7a099f2e278dfeb83c5a53))
+
 ## v0.7.0 (2021-03-01)
 ### Feature
 * Create empty ebook opf ([`cfb180d`](https://github.com/OpenPecha/openpecha-toolkit/commit/cfb180dfe92ec995d72ca8b7b6880291b5ac5795))
