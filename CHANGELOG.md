@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.7.3 (2021-03-01)
+### Fix
+* Create review branch for opf ([`0bd7911`](https://github.com/OpenPecha/openpecha-toolkit/commit/0bd7911f0579cf9e766a74dace5bf223ac1df5dc))
+
 ## v0.7.2 (2021-03-01)
 ### Fix
 * Ireturn empty string instead of None for source meta access ([`b2390f9`](https://github.com/OpenPecha/openpecha-toolkit/commit/b2390f9013853a327651255668adea0a2e55d98f))
