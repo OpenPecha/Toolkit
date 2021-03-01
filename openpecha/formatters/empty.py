@@ -8,7 +8,7 @@ from .. import config
 
 
 class EmptyEbook:
-    def __init__(self, output_path, metadata={}, assets={}) -> None:
+    def __init__(self, output_path=None, metadata={}, assets={}) -> None:
         self.output_path = Path(output_path if output_path else config.PECHAS_PATH)
         self.metadata = metadata
         self.meta_fn = None
