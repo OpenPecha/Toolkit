@@ -1,12 +1,12 @@
 from enum import Enum
-from typing import Dict
+from typing import Dict, Optional
 
 from pydantic import BaseModel, validator
 
 from .utils import get_unique_id
 
 
-class LayerEnum(str, Enum):
+class LayerEnum(Enum):
     book_title = "BookTitle"
     book_number = "BookNumber"
     poti_title = "PotiTitle"
@@ -28,6 +28,12 @@ class LayerEnum(str, Enum):
     durchen = "Durchen"
 
 
+class InitialCreationEnum(Enum):
+    ocr = "ocr"
+    ebook = "ebook"
+    input = "input"
+
+
 class Layer(BaseModel):
     id: str = None
     annotation_type: LayerEnum
@@ -42,3 +48,9 @@ class Layer(BaseModel):
     def revision_must_int_parsible(cls, v):
         assert v.isdigit(), "must integer parsible like `00002`"
         return v
+
+
+class MetaData(BaseModel):
+    id: str
+    initial_creation_type: InitialCreationEnum
+    source_metadata: Optional[Dict] = {}

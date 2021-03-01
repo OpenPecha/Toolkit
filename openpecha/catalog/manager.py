@@ -124,6 +124,9 @@ class CatalogManager:
     def add_hfml_item(self, path):
         self._process(path, "ocr_result_input")
 
+    def add_empty_item(self, text):
+        self._process(text, "ocr_result_input")
+
     def _process(self, path, input_method, release_method=None):
         print("[INFO] Getting input")
         raw_pecha_path = self.pipes["input"][input_method](path)
