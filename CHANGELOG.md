@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.6.34 (2021-02-16)
+### Fix
+* Make methods to module funcs ([`7fec0d6`](https://github.com/OpenPecha/openpecha-toolkit/commit/7fec0d6af4a10efe4259e479641f5e5749911aa0))
+
 ## v0.6.33 (2021-02-09)
 ### Fix
 * Csave src volumn id to base file in meta ([`50e2717`](https://github.com/OpenPecha/openpecha-toolkit/commit/50e271723ef148cfd092f1f5ddf35cdccb2b6bbd))
