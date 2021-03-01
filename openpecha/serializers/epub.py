@@ -167,7 +167,7 @@ class EpubSerializer(Serialize):
         return "".join(result)
 
     def serialize(self, output_path="./output/epub_output"):
-        """ This module serialize .opf file to other format such as .epub etc. In case of epub,
+        """This module serialize .opf file to other format such as .epub etc. In case of epub,
         we are using calibre ebook-convert command to do the conversion by passing our custom css template
         and embedding our custom font. The converted output will be then saved in current directory
         as {pecha_id}.epub.
@@ -208,7 +208,7 @@ class EpubSerializer(Serialize):
             font_family = "Monlam Uni Ouchan2"
             font_size = 15
             chapter_mark = "pagebreak"
-            cover_path = self.opf_path / f"asset/image/{cover_image}"
+            cover_path = self.opf_path / f"assets/image/{cover_image}"
             out_epub_fn = output_path / f"{pecha_id}.epub"
             os.system(
                 f'ebook-convert {out_html_fn} {out_epub_fn} --extra-css=./template.css --chapter={chapter_Xpath} --chapter-mark="{chapter_mark}" --base-font-size={font_size} --embed-font-family="{font_family}" --cover={cover_path}'

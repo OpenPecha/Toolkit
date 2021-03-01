@@ -8,11 +8,12 @@ from .. import config
 
 
 class EmptyEbook:
-    def __init__(self, output_path, metadata={}) -> None:
+    def __init__(self, output_path, metadata={}, assets={}) -> None:
         self.output_path = Path(output_path if output_path else config.PECHAS_PATH)
         self.metadata = metadata
         self.meta_fn = None
         self.pecha_path = None
+        self.assets = assets
         self.layers = [
             LayerEnum.book_title,
             LayerEnum.author,
@@ -41,6 +42,7 @@ class EmptyEbook:
                 initial_creation_type=InitialCreationEnum.ebook,
                 source_metadata=self.metadata,
             ),
+            assets=self.assets,
         )
 
         openpecha.save(self.output_path)

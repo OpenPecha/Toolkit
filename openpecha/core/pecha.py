@@ -1,4 +1,4 @@
-from os import register_at_fork, stat
+import shutil
 from pathlib import Path
 from typing import Dict, Union
 
@@ -39,6 +39,10 @@ class OpenPechaFS:
     def index_fn(self):
         return self.opf_path / "index.yml"
 
+    @property
+    def assets_path(self):
+        return self.opf_path / "assets"
+
     def save_meta(self, meta: MetaData):
         dump_yaml(eval(meta.json()), self.meta_fn)
 
@@ -61,6 +65,15 @@ class OpenPechaFS:
             return
         dump_yaml(index, self.index_fn)
 
+    def save_assets(self, assets):
+        for assets_type, content in assets.items():
+            assets_type_dir = self.assets_path / assets_type
+            assets_type_dir.mkdir(parents=True, exist_ok=True)
+            for asset_fn in content:
+                asset_fn = Path(asset_fn)
+                dest_fn = assets_type_dir / asset_fn.name
+                shutil.copyfile(str(asset_fn), str(dest_fn))
+
 
 class OpenPecha:
     def __init__(
@@ -70,12 +83,14 @@ class OpenPecha:
         index: Dict = {},
         meta: MetaData = None,
         opf_path: Path = None,
+        assets: Dict = {},
     ):
         self._pecha_id = None
         self.base = base
         self.layers = layers
         self._meta = meta
         self.index = index
+        self.assets = assets
         self.opfs = OpenPechaFS(opf_path)
 
     @property
@@ -115,4 +130,5 @@ class OpenPecha:
         self.opfs.save_layers(self.layers)
         self.opfs.save_index(self.index)
         self.opfs.save_meta(self.meta)
+        self.opfs.save_assets(self.assets)
         return self.opfs.opf_path

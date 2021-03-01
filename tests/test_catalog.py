@@ -1,6 +1,7 @@
+import tempfile
+
 import pytest
 
-from openpecha import catalog
 from openpecha.catalog.manager import CatalogManager
 from openpecha.formatters import *
 
@@ -34,13 +35,20 @@ def test_hfml_with_metadata():
     catalog.update()
 
 
+def get_fake_img():
+    return tempfile.NamedTemporaryFile(delete=False, suffix=".png").name
+
+
 @pytest.mark.skip(reason="creating github repo")
 def test_create_emtpy_item():
+    assets = {"image": [get_fake_img()]}
     catalog = CatalogManager(
-        formatter=EmptyEbook(output_path="./output", metadata=metadata["source_metadata"]),
+        formatter=EmptyEbook(
+            output_path="./output", metadata=metadata["source_metadata"], assets=assets
+        ),
     )
     catalog.add_empty_item("this is text only")
 
 
 if __name__ == "__main__":
-    test_hfml_with_metadata()
+    test_create_emtpy_item()
