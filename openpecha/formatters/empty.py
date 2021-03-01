@@ -9,7 +9,7 @@ from .. import config
 
 class EmptyEbook:
     def __init__(self, output_path, metadata={}) -> None:
-        self.output_path = Path(output_path if output_path else config.OPF_OUTPUT_PATH)
+        self.output_path = Path(output_path if output_path else config.PECHAS_PATH)
         self.metadata = metadata
         self.meta_fn = None
         self.pecha_path = None

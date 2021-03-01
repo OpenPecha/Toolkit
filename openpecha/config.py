@@ -10,7 +10,7 @@ def _mkdir(path):
 
 # Path
 BASE_PATH = _mkdir(Path.home() / ".openpecha")
-OPF_OUTPUT_PATH = _mkdir(BASE_PATH / "opfs")
+PECHAS_PATH = _mkdir(BASE_PATH / "pechas")
 
 # Pecha
 PECHA_PREFIX = "P"

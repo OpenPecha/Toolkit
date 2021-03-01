@@ -5,6 +5,7 @@ import click
 from git import Repo
 from tqdm import tqdm
 
+from openpecha import config
 from openpecha.blupdate import PechaBaseUpdate
 from openpecha.buda.openpecha_manager import OpenpechaManager
 from openpecha.catalog import config as catalog_config
@@ -13,13 +14,14 @@ from openpecha.catalog.storage import GithubBucket
 from openpecha.formatters import *
 from openpecha.serializers import *
 
-OP_PATH = Path.home() / ".openpecha"
+OP_PATH = config.BASE_PATH
 config = {
     # Github
     "OP_CATALOG_URL": "https://raw.githubusercontent.com/OpenPoti/openpecha-catalog/master/data/catalog.csv",
     "OP_ORG": "https://github.com/OpenPecha",
     # Local
     "OP_DATA_PATH": (OP_PATH / "data").resolve(),
+    "OP_PECHAS_PATH": config.PECHAS_PATH.resolve(),
     "OP_CATALOG_PATH": (OP_PATH / "data" / "catalog.csv").resolve(),
     "CONFIG_PATH": (OP_PATH / "config").resolve(),
     "DATA_CONFIG_PATH": (OP_PATH / "config" / "data_config").resolve(),
@@ -113,7 +115,7 @@ def download_pecha(pecha_id, out_path=None, needs_update=True):
         out_path.mkdir(exist_ok=True, parents=True)
         pecha_path = out_path / pecha_id
     else:
-        pecha_path = config["OP_DATA_PATH"] / pecha_id
+        pecha_path = config["OP_PECHAS_PATH"] / pecha_id
 
     if pecha_path.is_dir():  # if repo is already exits at local then try to pull
         if not needs_update:
@@ -144,7 +146,7 @@ def download_pecha(pecha_id, out_path=None, needs_update=True):
     help="filter pecha by layer availability, specify \
                                      layer names in comma separated, eg: title,yigchung,..",
 )
-@click.option("--out", "-o", default="./pecha", help="directory to store all the pecha")
+@click.option("--out", "-o", help="directory to store all the pecha")
 def download(**kwargs):
     """
     Command to download pecha.
@@ -155,9 +157,6 @@ def download(**kwargs):
     # create config dirs
     create_config_dirs()
 
-    # configure the data_path
-    config["data"] = Path(kwargs["out"]).resolve()
-
     # get pecha
     # pechas = get_pecha(work_id, kwargs['batch'], kwargs['filter'])
     pechas = [pecha_id]
@@ -165,11 +164,6 @@ def download(**kwargs):
     # download the repo
     for pecha in tqdm(pechas):
         download_pecha(pecha, kwargs["out"])
-
-    # save data_path in data_config
-    config_path = config["DATA_CONFIG_PATH"]
-    if not config_path.is_file():
-        config_path.write_text(str(config["data"].resolve()))
 
     # print location of data
     msg = f"Downloaded {pecha_id} ... ok"
@@ -272,7 +266,7 @@ def export(**kwargs):
     opf_path = kwargs["opf_path"]
     output_path = kwargs["output_path"]
     if not opf_path:
-        opf_path = f'{config["OP_DATA_PATH"]}/{pecha_id}/{pecha_id}.opf'
+        opf_path = f'{config["OP_PECHAS_PATH"]}/{pecha_id}/{pecha_id}.opf'
 
     if kwargs["name"] == "epub":
         serializer = EpubSerializer(opf_path)
