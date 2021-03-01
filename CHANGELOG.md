@@ -2,6 +2,13 @@
 
 <!--next-version-placeholder-->
 
+## v0.7.0 (2021-03-01)
+### Feature
+* Create empty ebook opf ([`cfb180d`](https://github.com/OpenPecha/openpecha-toolkit/commit/cfb180dfe92ec995d72ca8b7b6880291b5ac5795))
+
+### Fix
+* Cconfig for default pechas path ([`b92c3b7`](https://github.com/OpenPecha/openpecha-toolkit/commit/b92c3b7f5657ced29328d03333f226d4d421f166))
+
 ## v0.6.35 (2021-03-01)
 ### Fix
 * Madd pydantic in dependencies ([`16f6ed0`](https://github.com/OpenPecha/openpecha-toolkit/commit/16f6ed0ed2dd613d5805598bc84ecbf4a96eda03))
