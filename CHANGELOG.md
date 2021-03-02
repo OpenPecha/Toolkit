@@ -2,6 +2,9 @@
 
 <!--next-version-placeholder-->
 
+## v0.7.4 (2021-03-02)
+
+
 ## v0.7.3 (2021-03-01)
 ### Fix
 * Create review branch for opf ([`0bd7911`](https://github.com/OpenPecha/openpecha-toolkit/commit/0bd7911f0579cf9e766a74dace5bf223ac1df5dc))
