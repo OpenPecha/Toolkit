@@ -205,7 +205,7 @@ def update_ann_layer(layer, updater: Blupdate):
     """
     Update individual layer
     """
-    for ann in layer["annotations"]:
+    for _, ann in layer["annotations"].items():
         update_span(ann, updater)
 
 
