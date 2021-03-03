@@ -5,7 +5,7 @@ from openpecha.cli import download_pecha
 
 @pytest.mark.skip
 def test_download_pecha():
-    pecha_path = download_pecha("P000792")
+    pecha_path = download_pecha("P000800", branch="review")
     print(pecha_path)
 
 
