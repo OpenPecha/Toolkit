@@ -1,13 +1,10 @@
 import os
 import re
-from os import stat
 from pathlib import Path
 
 import requests
-from bs4 import BeautifulSoup
 
 from openpecha.formatters.layers import AnnType
-from openpecha.formatters.tsadra import TsadraTemplate
 
 from .serialize import Serialize
 
@@ -177,16 +174,11 @@ class EpubSerializer(Serialize):
 
         """
         output_path = Path(output_path)
-        pecha_id = self.opf_path.name.split(".")[0]
-        out_html_fn = f"{pecha_id}.html"
-        try:
-            pecha_title = self.meta["ebook_metadata"]["title"]
-        except KeyError:
-            pecha_title = ""
-        try:
-            cover_image = self.meta["ebook_metadata"]["cover"]
-        except KeyError:
-            cover_image = ""
+        out_html_fn = f"{self.meta['id']}.html"
+        pecha_title = self.meta["source_metadata"].get("title", "")
+        cover_image = self.meta["source_metadata"].get("cover", "")
+
+        self.apply_layers()
         self.layers = [layer for layer in self.layers if layer != "Pagination"]
         results = self.get_result()
         for vol_id, result in results.items():
@@ -209,7 +201,7 @@ class EpubSerializer(Serialize):
             font_size = 15
             chapter_mark = "pagebreak"
             cover_path = self.opf_path / f"assets/image/{cover_image}"
-            out_epub_fn = output_path / f"{pecha_id}.epub"
+            out_epub_fn = output_path / f"{self.meta['id']}.epub"
             os.system(
                 f'ebook-convert {out_html_fn} {out_epub_fn} --extra-css=./template.css --chapter={chapter_Xpath} --chapter-mark="{chapter_mark}" --base-font-size={font_size} --embed-font-family="{font_family}" --cover={cover_path}'
             )
