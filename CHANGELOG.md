@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.7.5 (2021-03-03)
+### Fix
+*  blupdate test ([`2875e86`](https://github.com/OpenPecha/openpecha-toolkit/commit/2875e861b714e7d229609d75d6318af0b3f9abca))
+*  download pecha with specific branch ([`4f4c9b7`](https://github.com/OpenPecha/openpecha-toolkit/commit/4f4c9b7c59452d6886c3eb5fccdb203d1cd55f25))
+* Layer annotations are in dict ([`de625ff`](https://github.com/OpenPecha/openpecha-toolkit/commit/de625ff68efc17b5ddf122efb5662418bf2e2684))
+
 ## v0.7.4 (2021-03-02)
 
 
