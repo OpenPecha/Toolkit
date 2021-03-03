@@ -184,7 +184,9 @@ class EpubSerializer(Serialize):
         return p_tag
 
     def is_annotated_p_tag(self, p_tag):
-        if re.search("<p.*?><span.*?>.+?</span></p>", p_tag):
+        if re.search("<p><span.*?>.+?</span></p>", p_tag) or re.search(
+            '<p class=".+"><span class=".+">.+?</span></p>', p_tag
+        ):
             return True
         else:
             return False
@@ -208,7 +210,7 @@ class EpubSerializer(Serialize):
             )
             new_prev_p_tag = new_prev_p_tag.replace(
                 '<p class="tibetan-regular-indented">',
-                '<p class="tibetan-commentary-non-indent1">',
+                '<p class="tibetan-regular-indented1">',
             )
         else:
             new_prev_p_tag = prev_p_tag
