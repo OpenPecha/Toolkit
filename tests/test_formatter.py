@@ -305,18 +305,8 @@ class TestTsadraFormatter:
         result = formatter.get_result()
 
         expected_result = {
-            AnnType.book_title: [
-                [
-                    (
-                        None,
-                        {
-                            "iscover": True,
-                            "is_sub_title": False,
-                            "span": {"start": 0, "end": 84},
-                        },
-                    )
-                ]
-            ],
+            AnnType.book_title: [[(None, {"span": {"start": 0, "end": 84}})]],
+            AnnType.sub_title: [[]],
             AnnType.credit_page: [[]],
             AnnType.book_number: [[]],
             AnnType.poti_title: [[]],

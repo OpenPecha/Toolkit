@@ -20,16 +20,19 @@ __all__ = [
     "Sabche",
     "Yigchung",
     "BookTitle",
+    "SubTitle",
     "BookNumber",
     "PotiTitle",
     "Author",
     "Archaic",
     "Span",
+    "CreditPage",
 ]
 
 
 class AnnType:
     book_title = "BookTitle"
+    sub_title = "SubTitle"
     book_number = "BookNumber"
     poti_title = "PotiTitle"
     author = "Author"
@@ -162,12 +165,12 @@ def Peydurma(span, note=None):
     return {_attr_names.NOTE: note, _attr_names.SPAN: span}
 
 
-def BookTitle(span, iscover=True, is_sub_title=False):
-    return {
-        _attr_names.SPAN: span,
-        _attr_names.ISCOVER: iscover,
-        _attr_names.IS_SUB_TITLE: is_sub_title,
-    }
+def BookTitle(span):
+    return {_attr_names.SPAN: span}
+
+
+def SubTitle(span):
+    return {_attr_names.SPAN: span}
 
 
 def BookNumber(span):

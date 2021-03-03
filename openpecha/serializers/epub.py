@@ -72,6 +72,7 @@ class EpubSerializer(Serialize):
 
         """
         only_start_ann = False
+        is_cover_title = True
         start_payload = "("
         end_payload = ")"
         # if ann["type"] == AnnType.pagination:
@@ -91,15 +92,14 @@ class EpubSerializer(Serialize):
             start_payload = "["
             end_payload = "]"
         elif ann["type"] == AnnType.book_title:
-            try:
-                if ann["iscover"]:
-                    start_payload = Tsadra_template.cover_page_book_title_SP
-                elif ann["is_sub_title"]:
-                    start_payload = Tsadra_template.sub_title_SP
-                else:
-                    start_payload = Tsadra_template.book_title_SP
-            except Exception:
+            if is_cover_title:
+                start_payload = Tsadra_template.cover_page_book_title_SP
+                is_cover_title = False
+            else:
                 start_payload = Tsadra_template.book_title_SP
+            end_payload = Tsadra_template.span_EP
+        elif ann["type"] == AnnType.sub_title:
+            start_payload = Tsadra_template.sub_title_SP
             end_payload = Tsadra_template.span_EP
         elif ann["type"] == AnnType.book_number:
             start_payload = Tsadra_template.book_number_SP

@@ -2,6 +2,7 @@ import os
 from copy import deepcopy
 from functools import partial
 from pathlib import Path
+from re import sub
 
 from bs4 import BeautifulSoup
 
@@ -19,12 +20,12 @@ class TsadraTemplate:
         "credits-page_front-page---text-author1",
     ]
     credit_page = "credits-page_epub-edition-line"
-    titles = [
+    book_titles = [
         "credits-page_front-title",
         "tibetan-book-title",
-        "tibetan-book-sub-title",
         "credits-page_tibetan-book-title",
     ]
+    sub_title = "tibetan-book-sub-title"
     book_number = "credits-page_front-page---book-number"
     commentaries = {
         "verse": [
@@ -70,6 +71,7 @@ class TsadraFormatter(BaseFormatter):
         self.cover_image = ""
         self.walker = 0  # The walker to traverse every character in the pecha
         self.book_title = []  # list variable to store book title index
+        self.sub_title = []
         self.credit_page = []
         self.book_number = []
         self.poti_title = []
@@ -101,35 +103,6 @@ class TsadraFormatter(BaseFormatter):
         else:
             return (None, ann(Span(walker, len(tmp_text) - 1 + walker)))
 
-    def parse_book_title(self, p_tag, tmp_text, walker):
-        if p_tag["class"][0] == TsadraTemplate.titles[0]:
-            return (
-                None,
-                BookTitle(
-                    Span(walker, len(tmp_text) - 1 + walker),
-                    iscover=True,
-                    is_sub_title=False,
-                ),
-            )
-        elif p_tag["class"][0] == TsadraTemplate.titles[2]:
-            return (
-                None,
-                BookTitle(
-                    Span(walker, len(tmp_text) - 1 + walker),
-                    iscover=False,
-                    is_sub_title=True,
-                ),
-            )
-        else:
-            return (
-                None,
-                BookTitle(
-                    Span(walker, len(tmp_text) - 1 + walker),
-                    iscover=False,
-                    is_sub_title=False,
-                ),
-            )
-
     def get_credit_page(self, p_tag):
         img_tag = p_tag.find("img")
         credit_page_img_name = img_tag["src"].split("/")[1]
@@ -141,6 +114,7 @@ class TsadraFormatter(BaseFormatter):
         """
         soup = BeautifulSoup(html, "html.parser")
         book_title_tmp = ""
+        sub_title_tmp = ""
         author_tmp = ""
         chapter_title_tmp = ""
         root_text_tmp = ""
@@ -152,14 +126,25 @@ class TsadraFormatter(BaseFormatter):
             self.cover_image = cover
         ps = soup.find_all("p")
         for p in ps:
-            if p["class"][0] in TsadraTemplate.titles:  # to get the book title index
+            if (
+                p["class"][0] in TsadraTemplate.book_titles
+            ):  # to get the book title index
                 book_title_tmp = self.text_preprocess(p.text)
                 if book_title_tmp:
                     self.book_title.append(
-                        self.parse_book_title(p, book_title_tmp, self.walker)
+                        self.parse_ann(BookTitle, book_title_tmp, self.walker)
                     )
                     self.base_text += book_title_tmp + "\n"
                     self.walker += len(book_title_tmp) + 1
+
+            elif p["class"][0] == TsadraTemplate.sub_title:
+                sub_title_tmp = self.text_preprocess(p.text)
+                if sub_title_tmp:
+                    self.sub_title.append(
+                        self.parse_ann(SubTitle, sub_title_tmp, self.walker)
+                    )
+                    self.base_text += sub_title_tmp + "\n"
+                    self.walker += len(sub_title_tmp) + 1
 
             elif p["class"][0] == TsadraTemplate.book_number:
                 book_num = self.text_preprocess(p.text)
@@ -433,6 +418,7 @@ class TsadraFormatter(BaseFormatter):
         """
         result = {
             AnnType.book_title: [self.book_title],
+            AnnType.sub_title: [self.sub_title],
             AnnType.book_number: [self.book_number],
             AnnType.poti_title: [self.poti_title],
             AnnType.credit_page: [self.credit_page],
