@@ -4,6 +4,8 @@ import gzip
 import io
 import shutil
 from collections import defaultdict
+from pathlib import Path
+from typing import Dict
 
 import yaml
 
@@ -61,12 +63,13 @@ class Vol2FnManager:
             return vol_id
 
 
-def dump_yaml(data, output_fn):
+def dump_yaml(data: Dict, output_fn: Path) -> Path:
     with output_fn.open("w", encoding="utf-8") as fn:
         yaml.dump(
             data, fn, default_flow_style=False, sort_keys=False, allow_unicode=True
         )
+    return output_fn
 
 
-def load_yaml(fn):
+def load_yaml(fn: Path) -> None:
     return yaml.safe_load(fn.open(encoding="utf-8"))

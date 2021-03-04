@@ -6,7 +6,9 @@ from pydantic import BaseModel, validator
 from .utils import get_unique_id
 
 
-class LayerEnum(Enum):
+class LayersEnum(Enum):
+    index = "index"
+
     book_title = "BookTitle"
     book_number = "BookNumber"
     poti_title = "PotiTitle"
@@ -36,7 +38,7 @@ class InitialCreationEnum(Enum):
 
 class Layer(BaseModel):
     id: str = None
-    annotation_type: LayerEnum
+    annotation_type: LayersEnum
     revision: str
     annotations: Dict
 

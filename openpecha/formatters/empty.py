@@ -1,27 +1,27 @@
 from pathlib import Path
 
 from openpecha.catalog.utils import create_pecha_id
-from openpecha.core.layer import InitialCreationEnum, Layer, LayerEnum, MetaData
-from openpecha.core.pecha import OpenPecha
+from openpecha.core.layer import InitialCreationEnum, Layer, LayersEnum, MetaData
+from openpecha.core.pecha import OpenPechaFS
 
 from .. import config
 
 
 class EmptyEbook:
-    def __init__(self, output_path=None, metadata={}, assets={}) -> None:
+    def __init__(self, output_path=config.PECHAS_PATH, metadata={}, assets={}) -> None:
         self.output_path = Path(output_path if output_path else config.PECHAS_PATH)
         self.metadata = metadata
         self.meta_fn = None
         self.pecha_path = None
         self.assets = assets
         self.layers = [
-            LayerEnum.book_title,
-            LayerEnum.author,
-            LayerEnum.chapter,
-            LayerEnum.citation,
-            LayerEnum.tsawa,
-            LayerEnum.sabche,
-            LayerEnum.yigchung,
+            LayersEnum.book_title,
+            LayersEnum.author,
+            LayersEnum.chapter,
+            LayersEnum.citation,
+            LayersEnum.tsawa,
+            LayersEnum.sabche,
+            LayersEnum.yigchung,
         ]
 
     def get_dummy_layers(self):
@@ -34,7 +34,7 @@ class EmptyEbook:
 
     def create_opf(self, text, id_):
         pecha_id = create_pecha_id(id_)
-        openpecha = OpenPecha(
+        openpecha = OpenPechaFS(
             base={"v001": text},
             layers={"v001": self.get_dummy_layers()},
             meta=MetaData(
@@ -45,6 +45,6 @@ class EmptyEbook:
             assets=self.assets,
         )
 
-        openpecha.save(self.output_path)
-        self.meta_fn = openpecha.opfs.meta_fn
-        self.pecha_path = openpecha.opfs.opf_path.parent
+        openpecha.save(output_path=self.output_path)
+        self.meta_fn = openpecha.meta_fn
+        self.pecha_path = openpecha.opf_path.parent

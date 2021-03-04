@@ -1,23 +1,72 @@
+import json
 import shutil
+from collections import defaultdict
 from pathlib import Path
-from typing import Dict, Union
+from typing import Dict, List, Union
 
-from openpecha.core.layer import Layer, MetaData
-from openpecha.utils import dump_yaml
+from openpecha import config
+from openpecha.core.layer import Layer, LayersEnum, MetaData
+from openpecha.utils import dump_yaml, load_yaml
 
 
-class OpenPechaFS:
-    def __init__(self, opf_path):
-        self.base_path = "base"
-        self.layers_path = "layers"
-        self.pecha_id = None
-        self._opf_path = opf_path
+class OpenPecha:
+    def __init__(
+        self,
+        base: Dict = {},
+        layers: Dict[str, Dict[LayersEnum, Layer]] = defaultdict(dict),
+        index: Layer = None,
+        meta: MetaData = None,
+        assets: Dict[str, List[Union[str, Path]]] = {},
+    ):
+        self._pecha_id = None
+        self.base = base
+        self.layers = layers
+        self._meta = meta
+        self._index = index
+        self.assets = assets
+
+    @property
+    def pecha_id(self):
+        if self._pecha_id:
+            return self._pecha_id
+        self._pecha_id = self.meta.id
+        return self._pecha_id
+
+    @property
+    def meta(self):
+        if self._meta:
+            return self._meta
+        self._meta = MetaData.parse_obj(self.read_meta_file())
+        return self._meta
+
+    @property
+    def index(self):
+        if self._index:
+            return self._index
+        self._index = Layer.parse_obj(self.read_index_file())
+        return self._index
+
+    def get_base(self, basename):
+        if basename in self.base:
+            return self.base[basename]
+        self.base[basename] = self.read_base_file(basename)
+        return self.base[basename]
+
+    def get_layer(self, basename, layername):
+        if basename in self.layers and layername in self.layers[basename]:
+            return self.layers[basename][layername]
+
+        self.layers[basename][layername] = Layer.parse_obj(
+            self.read_layers_file(basename, layername.value)
+        )
+        return self.layers[basename][layername]
+
+
+class OpenPechaFS(OpenPecha):
+    def __init__(self, opf_path=None, **kwargs):
+        self._opf_path = Path(opf_path) if opf_path else opf_path
         self.output_dir = None
-
-    def prepare_save(self, pecha_id, output_dir):
-        self.pecha_id = pecha_id
-        self.output_dir = output_dir
-        self._opf_path = None
+        super().__init__(**kwargs)
 
     @staticmethod
     def _mkdir(path: Path):
@@ -32,41 +81,63 @@ class OpenPechaFS:
         return self._opf_path
 
     @property
+    def base_path(self):
+        return self.opf_path / "base"
+
+    @property
+    def layers_path(self):
+        return self.opf_path / "layers"
+
+    @property
     def meta_fn(self):
         return self.opf_path / "meta.yml"
 
     @property
     def index_fn(self):
-        return self.opf_path / "index.yml"
+        return self.opf_path / f"{LayersEnum.index.value}.yml"
 
     @property
     def assets_path(self):
         return self.opf_path / "assets"
 
-    def save_meta(self, meta: MetaData):
-        dump_yaml(eval(meta.json()), self.meta_fn)
+    def read_base_file(self, basename):
+        return (self.base_path / f"{basename}.txt").read_text(encoding="utf-8")
 
-    def save_base(self, base: Dict[str, str]):
-        for basename, content in base.items():
-            base_fn = self._mkdir(self.opf_path / self.base_path) / f"{basename}.txt"
+    def read_layers_file(self, basename, layername):
+        return load_yaml(self.layers_path / basename / f"{layername}.yml")
+
+    def read_meta_file(self):
+        return load_yaml(self.meta_fn)
+
+    def read_index_file(self):
+        if not self.index_fn.is_file():
+            raise FileNotFoundError
+        return load_yaml(self.index_fn)
+
+    def save_meta(self):
+        dump_yaml(json.loads(self.meta.json()), self.meta_fn)
+
+    def save_base(self):
+        for basename, content in self.base.items():
+            base_fn = self._mkdir(self.base_path) / f"{basename}.txt"
             base_fn.write_text(content)
 
-    def save_layers(self, layers: Dict[str, Layer]):
-        for basename, base_layers in layers.items():
+    def save_layers(self):
+        for basename, base_layers in self.layers.items():
             for layername, layer in base_layers.items():
                 layer_fn = (
-                    self._mkdir(self.opf_path / self.layers_path / basename)
-                    / f"{layername.value}.yml"
+                    self._mkdir(self.layers_path / basename) / f"{layername.value}.yml"
                 )
-                dump_yaml(eval(layer.json()), layer_fn)
+                dump_yaml(json.loads(layer.json()), layer_fn)
 
-    def save_index(self, index):
-        if not index:
-            return
-        dump_yaml(index, self.index_fn)
+    def save_index(self):
+        try:
+            dump_yaml(json.loads(self.index.json()), self.index_fn)
+        except FileNotFoundError:
+            pass
 
-    def save_assets(self, assets):
-        for assets_type, content in assets.items():
+    def save_assets(self):
+        for assets_type, content in self.assets.items():
             assets_type_dir = self.assets_path / assets_type
             assets_type_dir.mkdir(parents=True, exist_ok=True)
             for asset_fn in content:
@@ -74,61 +145,13 @@ class OpenPechaFS:
                 dest_fn = assets_type_dir / asset_fn.name
                 shutil.copyfile(str(asset_fn), str(dest_fn))
 
+    def save(self, output_path: Union[str, Path] = config.PECHAS_PATH):
+        self.output_dir = Path(output_path)
+        self._opf_path = None
 
-class OpenPecha:
-    def __init__(
-        self,
-        base: Dict = {},
-        layers: Dict[str, Layer] = {},
-        index: Dict = {},
-        meta: MetaData = None,
-        opf_path: Path = None,
-        assets: Dict = {},
-    ):
-        self._pecha_id = None
-        self.base = base
-        self.layers = layers
-        self._meta = meta
-        self.index = index
-        self.assets = assets
-        self.opfs = OpenPechaFS(opf_path)
-
-    @property
-    def id(self):
-        if self._pecha_id:
-            return self._pecha_id
-        self._pecha_id = self.meta.id
-        return self._pecha_id
-
-    @property
-    def meta(self):
-        if self._meta:
-            return self._meta
-        self._meta = self.opf.read_meta()
-        return self._meta
-
-    def get_base(self, basename):
-        if basename in self.base:
-            return self.base[basename]
-        self.base[basename] = self.opfs.get_base(basename)
-        return self.base[basename]
-
-    def get_layer(self, basename, layername):
-        if basename in self.layers and layername in self.layers[basename]:
-            return self.layers[basename][layername]
-
-        self.base[basename] = self.opfs.get_base(basename)
-        return self.base[basename]
-
-    @classmethod
-    def from_dir(cls, path: Union[str, Path]):
-        return cls(opf_path=Path(path))
-
-    def save(self, output_path: Union[str, Path]):
-        self.opfs.prepare_save(self.id, Path(output_path))
-        self.opfs.save_base(self.base)
-        self.opfs.save_layers(self.layers)
-        self.opfs.save_index(self.index)
-        self.opfs.save_meta(self.meta)
-        self.opfs.save_assets(self.assets)
-        return self.opfs.opf_path
+        self.save_base()
+        self.save_layers()
+        self.save_index()
+        self.save_meta()
+        self.save_assets()
+        return self.opf_path
