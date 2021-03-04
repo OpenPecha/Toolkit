@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.7.6 (2021-03-03)
+### Fix
+* Iread pecha id from metadata ([`d9f008e`](https://github.com/OpenPecha/openpecha-toolkit/commit/d9f008ed52a66a0a3e4da0dd67d112a1625c5166))
+
 ## v0.7.5 (2021-03-03)
 ### Fix
 *  blupdate test ([`2875e86`](https://github.com/OpenPecha/openpecha-toolkit/commit/2875e861b714e7d229609d75d6318af0b3f9abca))
