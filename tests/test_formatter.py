@@ -340,6 +340,7 @@ class TestTsadraFormatter:
                 ]
             ],
             AnnType.yigchung: [[(None, {"span": {"start": 7273, "end": 7311}})]],
+            AnnType.footnote: [[]],
         }
 
         for layer in result:

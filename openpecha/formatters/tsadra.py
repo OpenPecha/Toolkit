@@ -58,6 +58,11 @@ class TsadraTemplate:
         "tibetan-commentary-small-text",
         "tibetan-external-citations-small-letter",
     ]
+    footnotes = [
+        "tibetan-footnote-reference",
+        "tibetan-footnote-reference1",
+        "tibetan-footnote",
+    ]
 
 
 class TsadraFormatter(BaseFormatter):
@@ -84,6 +89,9 @@ class TsadraFormatter(BaseFormatter):
         self.citation = []  # list variable to store citation index
         self.sabche = []  # list variable to store sabche index
         self.yigchung = []  # list variable to store yigchung index
+        self.footnote_marker = []
+        self.footnote_reference = []
+        self.footnote = []
 
     def text_preprocess(self, text):
         return text
@@ -108,6 +116,10 @@ class TsadraFormatter(BaseFormatter):
         credit_page_img_name = img_tag["src"].split("/")[1]
         return credit_page_img_name
 
+    def get_footnote_ann(self):
+        for marker, ref in zip(self.footnote_marker, self.footnote_reference):
+            self.footnote.append((None, Footnote(Span(marker[0], marker[1] - 1), ref)))
+
     def build_layers(self, html):
         """
         To Build the layer
@@ -121,14 +133,14 @@ class TsadraFormatter(BaseFormatter):
         sabche_tmp = ""
         commentary_tmp = ""
         citation_tmp = ""
+        footnote_reference = ""
+        footnote_marker = ""
         cover = self.get_cover_image(soup)
         if cover:
             self.cover_image = cover
         ps = soup.find_all("p")
         for p in ps:
-            if (
-                p["class"][0] in TsadraTemplate.book_titles
-            ):  # to get the book title index
+            if p["class"][0] in TsadraTemplate.book_titles:
                 book_title_tmp = self.text_preprocess(p.text)
                 if book_title_tmp:
                     self.book_title.append(
@@ -283,6 +295,19 @@ class TsadraFormatter(BaseFormatter):
                         ):  # checking for citation annotation
                             citation_tmp += self.text_preprocess(s.text)
 
+                        elif s["class"][0] in TsadraTemplate.footnotes:
+                            if len(s.text) < 4 and len(s.text) > 1:
+                                footnote_marker = self.text_preprocess(s.text)
+                                self.footnote_marker.append(
+                                    (p_walker, p_walker + len(footnote_marker))
+                                )
+                                p_walker += len(footnote_marker)
+                            elif len(s.text) > 4:
+                                footnote_reference = self.text_preprocess(s.text)
+                                if len(footnote_reference) < 100:
+                                    self.footnote_reference.append(footnote_reference)
+                                p_walker += len(footnote_reference)
+
                         elif (
                             "sabche" in s["class"][0]
                         ):  # checking for citation annotation
@@ -343,6 +368,27 @@ class TsadraFormatter(BaseFormatter):
                     self.walker += len(commentary_tmp)
                     commentary_tmp = ""
                     p_walker = 0
+
+            elif p["class"][0] in TsadraTemplate.footnotes:
+                p_walker = self.walker
+                for s in p.find_all("span"):
+                    if s["class"][0] in TsadraTemplate.footnotes:
+                        if len(s.text) < 4 and len(s.text) > 1:
+                            footnote_marker = self.text_preprocess(s.text)
+                            self.footnote_marker.append(
+                                (p_walker, p_walker + len(footnote_marker))
+                            )
+                            p_walker += len(footnote_marker)
+                        elif len(s.text) > 4:
+                            footnote_reference = self.text_preprocess(s.text)
+                            if len(footnote_reference) < 100:
+                                self.footnote_reference.append(footnote_reference)
+                            p_walker += len(footnote_reference)
+                    else:
+                        p_walker += len(self.text_preprocess(s.text))
+                p_tmp = self.text_preprocess(p.text) + "\n"
+                self.base_text += self.text_preprocess(p_tmp)
+                self.walker += len(p_tmp)
 
             elif (
                 p["class"][0] in TsadraTemplate.sabches
@@ -416,6 +462,7 @@ class TsadraFormatter(BaseFormatter):
         """
         To return all the result
         """
+        self.get_footnote_ann()
         result = {
             AnnType.book_title: [self.book_title],
             AnnType.sub_title: [self.sub_title],
@@ -431,10 +478,11 @@ class TsadraFormatter(BaseFormatter):
             AnnType.citation: [self.citation],
             AnnType.sabche: [self.sabche],
             AnnType.yigchung: [self.yigchung],
+            AnnType.footnote: [self.footnote],
         }
         return result
 
-    def _get_meta_data(ann):
+    def _get_meta_data(self, ann):
         return ",".join([self.base_text[a[0] : a[1] + 1] for a in ann])
 
     def get_base_text(self):

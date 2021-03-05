@@ -4,6 +4,7 @@ from os import stat
 from pathlib import Path
 
 import requests
+import yaml
 from bs4 import BeautifulSoup
 
 from openpecha.formatters.layers import AnnType
@@ -36,6 +37,9 @@ class Tsadra_template:
     quatation__SP = '<span class="tibetan-external-citations">'
     sabche_SP = '<span class="tibetan-sabche1">'
     yigchung_SP = '<span class="tibetan-commentary-small">'
+    footnote_marker_SP = '<span class="tibetan-footnote-marker"'
+    footnote_EP = "</span></a>"
+    footnote_reference_SP = '<span class="tibetan-footnote-reference"'
 
 
 class EpubSerializer(Serialize):
@@ -73,6 +77,7 @@ class EpubSerializer(Serialize):
         """
         only_start_ann = False
         is_cover_title = True
+        footnote_walker = 1
         start_payload = "("
         end_payload = ")"
         # if ann["type"] == AnnType.pagination:
@@ -134,6 +139,9 @@ class EpubSerializer(Serialize):
         elif ann["type"] == AnnType.yigchung:
             start_payload = Tsadra_template.yigchung_SP
             end_payload = Tsadra_template.span_EP
+        elif ann["type"] == AnnType.footnote:
+            start_payload = f'<a href="#fr{ann["id"]}">{Tsadra_template.footnote_marker_SP} id="fm{ann["id"]}">'
+            end_payload = Tsadra_template.footnote_EP
 
         start_cc, end_cc = self.__get_adapted_span(ann["span"], vol_id)
         self.add_chars(vol_id, start_cc, True, start_payload)
@@ -239,7 +247,7 @@ class EpubSerializer(Serialize):
                 else:
                     if (
                         len(self.get_p_text(prev_p_tag)) < 50
-                        and len(self.get_p_text(p_tag)) > 300
+                        and len(self.get_p_text(p_tag)) > 150
                     ):
                         cur_p_tag = p_tag.replace(
                             "<p>", '<p class="tibetan-commentary-non-indent">'
@@ -249,6 +257,13 @@ class EpubSerializer(Serialize):
             body_text += cur_p_tag
             prev_p_tag = cur_p_tag
         return body_text
+
+    def get_footnote_references(self, footnotes):
+        footnote_references = ""
+        p_tag = '<p class = "tibetan-commentary-non-indent">'
+        for footnote_id, footnote in footnotes.items():
+            footnote_references += f'{p_tag}<a href="#fm{footnote_id}">{Tsadra_template.footnote_reference_SP} id="fr{footnote_id}">{footnote["footnote_ref"]}</span></a></p>'
+        return footnote_references
 
     def serialize(self, output_path="./output/epub_output"):
         """ This module serialize .opf file to other format such as .epub etc. In case of epub,
@@ -272,14 +287,22 @@ class EpubSerializer(Serialize):
         except KeyError:
             cover_image = ""
         self.layers = [layer for layer in self.layers if layer != "Pagination"]
+
         results = self.get_result()
         for vol_id, result in results.items():
+            footnote_ref_tag = ""
+            if "Footnote" in self.layers:
+                footnote_fn = self.opf_path / "layers" / vol_id / "Footnote.yml"
+                footnote_layer = yaml.safe_load(footnote_fn.open())
+                footnote_ref_tag = self.get_footnote_references(
+                    footnote_layer["annotations"]
+                )
             result = self.p_tag_adder(result)
             result = self.indentation_adjustment(result)
             results = (
                 f"<html>\n<head>\n\t<title>{pecha_title}</title>\n</head>\n<body>\n"
             )
-            results += f"{result}</body>\n</html>"
+            results += f"{result}{footnote_ref_tag}</body>\n</html>"
             Path(out_html_fn).write_text(results)
             # Downloading css template file from ebook template repo and saving it
             template = requests.get(
@@ -300,7 +323,7 @@ class EpubSerializer(Serialize):
                 f'ebook-convert {out_html_fn} {out_epub_fn} --extra-css=./template.css --page-breaks-before="{book_title_Xpath}" --base-font-size={font_size} --embed-font-family="{font_family}" --cover={cover_path} --flow-size=0'
             )
             # Removing html file and template file
-            os.system(f"rm {out_html_fn}")
+            # os.system(f"rm {out_html_fn}")
             os.system("rm template.css")
 
             return out_epub_fn

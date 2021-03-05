@@ -27,6 +27,7 @@ __all__ = [
     "Archaic",
     "Span",
     "CreditPage",
+    "Footnote",
 ]
 
 
@@ -52,6 +53,7 @@ class AnnType:
     yigchung = "Yigchung"
     archaic = "Archaic"
     durchen = "Durchen"
+    footnote = "Footnote"
 
 
 class _attr_names:
@@ -70,10 +72,6 @@ class _attr_names:
 
     # Credit page
     CREDIT_PAGE_IMG_NAME = "credit_page_img_name"
-
-    # Cover title
-    ISCOVER = "iscover"  # Boolean flag to indicate booktitle being on cover page or not
-    IS_SUB_TITLE = "is_sub_title"
 
     # Page
     PAGE_INDEX = "page_index"  # Page number based on Volume specified, type: int
@@ -95,6 +93,9 @@ class _attr_names:
 
     # Tsawa, Citation
     ISVERSE = "isverse"  # Boolean flag to indicate a sache in verse format or not
+
+    # Footnote
+    FOOTNOTE_REF = "footnote_ref"
 
 
 def Layer(id_, type_, rev=f"{1:05}"):
@@ -210,3 +211,7 @@ def Sabche(span, isverse=False):
 
 def Yigchung(span):
     return {_attr_names.SPAN: span}
+
+
+def Footnote(span, footnote_ref):
+    return {_attr_names.SPAN: span, _attr_names.FOOTNOTE_REF: footnote_ref}
