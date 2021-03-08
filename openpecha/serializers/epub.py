@@ -23,9 +23,9 @@ class Tsadra_template:
     cover_page_book_title_SP = '<span class="credits-page_front-title">'
     book_title_SP = '<span class="tibetan-book-title">'
     sub_title_SP = '<span class="tibetan-book-sub-title">'
-    book_number_SP = f'<p class = "credits-page_front-page---book-number">{ft}'
+    book_number_SP = f'<p class="credits-page_front-page---book-number">{ft}'
     credit_page_SP = (
-        '<p class = "credits-page_epub-edition-line"><span class="credits-regular">'
+        '<p class="credits-page_epub-edition-line"><span class="credits-regular">'
     )
     author_SP = '<p class="credits-page_front-page---text-author"><span class="front-page---text-titles">'
     chapter_SP = '<span class="tibetan-chapters">'
@@ -76,8 +76,6 @@ class EpubSerializer(Serialize):
 
         """
         only_start_ann = False
-        is_cover_title = True
-        footnote_walker = 1
         start_payload = "("
         end_payload = ")"
         # if ann["type"] == AnnType.pagination:
@@ -97,11 +95,7 @@ class EpubSerializer(Serialize):
             start_payload = "["
             end_payload = "]"
         elif ann["type"] == AnnType.book_title:
-            if is_cover_title:
-                start_payload = Tsadra_template.cover_page_book_title_SP
-                is_cover_title = False
-            else:
-                start_payload = Tsadra_template.book_title_SP
+            start_payload = Tsadra_template.book_title_SP
             end_payload = Tsadra_template.span_EP
         elif ann["type"] == AnnType.sub_title:
             start_payload = Tsadra_template.sub_title_SP
@@ -175,7 +169,7 @@ class EpubSerializer(Serialize):
         return new_body_text
 
     def is_title(self, p_tag):
-        if "title" in p_tag or "chapter" in p_tag:
+        if "title" in p_tag or "chapter" in p_tag or "number" in p_tag:
             return True
         else:
             return False
@@ -208,9 +202,15 @@ class EpubSerializer(Serialize):
         p_tags = re.split("(<p.*?>.+?</p>)", body_text)
         return p_tags[1::2]
 
+    def has_yigchung(self, prev_p_tag):
+        if Tsadra_template.yigchung_SP in prev_p_tag:
+            return True
+        else:
+            return False
+
     def add_page_break(self, prev_p_tag, body_text):
         if not self.is_title(prev_p_tag) and (
-            len(self.get_p_text(prev_p_tag)) > 500 or "small" in prev_p_tag
+            len(self.get_p_text(prev_p_tag)) > 500 or self.has_yigchung(prev_p_tag)
         ):
             new_prev_p_tag = prev_p_tag.replace(
                 '<p class="tibetan-commentary-non-indent">',
@@ -309,10 +309,10 @@ class EpubSerializer(Serialize):
                 "https://raw.githubusercontent.com/OpenPecha/ebook-template/master/tsadra_template.css"
             )
             Path("template.css").write_bytes(template.content)
-            # click.echo(template.content, file=open('template.css', 'w'))
             # Running ebook-convert command to convert html file to .epub (From calibre)
             # XPath expression to detect chapter titles.
             chapter_Xpath = "//*[@class='tibetan-chapters']"
+            book_number_Xpath = "//*[@class='credits-page_front-page---book-number']"
             book_title_Xpath = "//*[@class='tibetan-book-title']"
             font_family = "Monlam Uni Ouchan2"
             font_size = 15
@@ -320,10 +320,10 @@ class EpubSerializer(Serialize):
             cover_path = self.opf_path / f"asset/image/{cover_image}"
             out_epub_fn = output_path / f"{pecha_id}.epub"
             os.system(
-                f'ebook-convert {out_html_fn} {out_epub_fn} --extra-css=./template.css --page-breaks-before="{book_title_Xpath}" --base-font-size={font_size} --embed-font-family="{font_family}" --cover={cover_path} --flow-size=0'
+                f'ebook-convert {out_html_fn} {out_epub_fn} --extra-css=./template.css --page-breaks-before="{book_title_Xpath}" --base-font-size={font_size} --embed-font-family="{font_family}" --cover={cover_path} --flow-size=0 --level1-toc="{book_number_Xpath}" --level2-toc="{book_title_Xpath}" --level3-toc="{chapter_Xpath}" --use-auto-toc'
             )
             # Removing html file and template file
-            # os.system(f"rm {out_html_fn}")
+            os.system(f"rm {out_html_fn}")
             os.system("rm template.css")
 
             return out_epub_fn
