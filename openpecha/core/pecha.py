@@ -17,6 +17,7 @@ class OpenPecha:
         index: Layer = None,
         meta: MetaData = None,
         assets: Dict[str, List[Union[str, Path]]] = {},
+        components: Dict[str, List[Layer]] = {},
     ):
         self._pecha_id = None
         self.base = base
@@ -24,6 +25,7 @@ class OpenPecha:
         self._meta = meta
         self._index = index
         self.assets = assets
+        self._components = components
 
     @property
     def pecha_id(self):
@@ -45,6 +47,13 @@ class OpenPecha:
             return self._index
         self._index = Layer.parse_obj(self.read_index_file())
         return self._index
+
+    @property
+    def components(self):
+        if self._components:
+            return self._components
+        self._components = self._read_components()
+        return self._components
 
     def get_base(self, basename):
         if basename in self.base:
@@ -113,6 +122,14 @@ class OpenPechaFS(OpenPecha):
         if not self.index_fn.is_file():
             raise FileNotFoundError
         return load_yaml(self.index_fn)
+
+    def _read_components(self):
+        res = {}
+        for vol_dir in self.layers_path.iterdir():
+            res[vol_dir.name] = list(
+                map(lambda fn: LayersEnum(fn.stem), vol_dir.iterdir())
+            )
+        return res
 
     def save_meta(self):
         dump_yaml(json.loads(self.meta.json()), self.meta_fn)

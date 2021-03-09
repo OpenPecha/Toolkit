@@ -29,6 +29,7 @@ def test_load_openpecha():
     assert openpecha.index
     assert openpecha.get_base("v001")
     assert openpecha.get_layer("v001", LayersEnum.citation)
+    assert openpecha.components
 
     with tempfile.TemporaryDirectory() as tmpdirname:
         openpecha.save(tmpdirname)
