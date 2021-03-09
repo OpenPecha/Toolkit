@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.7.7 (2021-03-04)
+### Fix
+* Save pecha ([`9634fa9`](https://github.com/OpenPecha/openpecha-toolkit/commit/9634fa968215ff7cdb7cb12a95c561cc0ae51d4a))
+
 ## v0.7.6 (2021-03-03)
 ### Fix
 * Iread pecha id from metadata ([`d9f008e`](https://github.com/OpenPecha/openpecha-toolkit/commit/d9f008ed52a66a0a3e4da0dd67d112a1625c5166))
