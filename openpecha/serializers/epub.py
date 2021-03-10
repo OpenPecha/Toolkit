@@ -23,17 +23,15 @@ class Tsadra_template:
     cover_page_book_title_SP = '<span class="credits-page_front-title">'
     book_title_SP = '<span class="tibetan-book-title">'
     sub_title_SP = '<span class="tibetan-book-sub-title">'
-    book_number_SP = f'<p class="credits-page_front-page---book-number">{ft}'
+    book_number_SP = f'<p class="tibetan-book-number">{ft}'
     credit_page_SP = (
         '<p class="credits-page_epub-edition-line"><span class="credits-regular">'
     )
-    author_SP = '<p class="credits-page_front-page---text-author"><span class="front-page---text-titles">'
+    author_SP = '<p class="text-author"><span class="front-page---text-titles">'
     chapter_SP = '<span class="tibetan-chapters">'
     tsawa_SP = '<span class="tibetan-root-text">'
-    tsawa_verse_SP = '<span class="tibetan-root-text_tibetan-root-text-middle-lines">'
-    quatation__verse_SP = (
-        '<span class="tibetan-citations-in-verse_tibetan-citations-middle-lines">'
-    )
+    tsawa_verse_SP = '<span class="tibetan-root-text-in-verse">'
+    quatation__verse_SP = '<span class="tibetan-citations-in-verse">'
     quatation__SP = '<span class="tibetan-external-citations">'
     sabche_SP = '<span class="tibetan-sabche1">'
     yigchung_SP = '<span class="tibetan-commentary-small">'
@@ -174,7 +172,17 @@ class EpubSerializer(Serialize):
         else:
             return False
 
+    def is_sabche_only(self, p_tag):
+        if re.search('<p><span class="tibetan-sabche1">', p_tag):
+            return True
+        else:
+            return False
+
     def rm_indentation(self, p_tag):
+        if self.is_sabche_only(p_tag):
+            p_tag = p_tag.replace(
+                '<p><span class="tibetan-sabche1">', '<p><span class="tibetan-sabche">'
+            )
         if len(self.get_p_text(p_tag)) > 50:
             p_tag = re.sub("<p>", '<p class="tibetan-commentary-non-indent">', p_tag)
         else:
@@ -312,15 +320,16 @@ class EpubSerializer(Serialize):
             # Running ebook-convert command to convert html file to .epub (From calibre)
             # XPath expression to detect chapter titles.
             chapter_Xpath = "//*[@class='tibetan-chapters']"
-            book_number_Xpath = "//*[@class='credits-page_front-page---book-number']"
+            book_number_Xpath = "//*[@class='tibetan-book-number']"
             book_title_Xpath = "//*[@class='tibetan-book-title']"
+            sabche_Xpath = "//*[@class='tibetan-sabche1' or @class='tibetan-sabche']"
             font_family = "Monlam Uni Ouchan2"
             font_size = 15
             chapter_mark = "pagebreak"
             cover_path = self.opf_path / f"asset/image/{cover_image}"
             out_epub_fn = output_path / f"{pecha_id}.epub"
             os.system(
-                f'ebook-convert {out_html_fn} {out_epub_fn} --extra-css=./template.css --page-breaks-before="{book_title_Xpath}" --base-font-size={font_size} --embed-font-family="{font_family}" --cover={cover_path} --flow-size=0 --level1-toc="{book_number_Xpath}" --level2-toc="{book_title_Xpath}" --level3-toc="{chapter_Xpath}" --use-auto-toc'
+                f'ebook-convert {out_html_fn} {out_epub_fn} --extra-css=./template.css --page-breaks-before="{book_title_Xpath}" --base-font-size={font_size} --embed-font-family="{font_family}" --cover={cover_path} --flow-size=0 --level1-toc="{book_number_Xpath}" --level2-toc="{chapter_Xpath}" --level3-toc="{sabche_Xpath}" --use-auto-toc'
             )
             # Removing html file and template file
             os.system(f"rm {out_html_fn}")
