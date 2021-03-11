@@ -33,3 +33,16 @@ def test_load_openpecha():
 
     with tempfile.TemporaryDirectory() as tmpdirname:
         openpecha.save(tmpdirname)
+
+
+def test_save_layer():
+    openpecha = OpenPechaFS("tests/data/serialize/tsadra/P000100.opf")
+    openpecha.save_layer(
+        "v002",
+        "test_layer",
+        Layer(
+            annotation_type=LayersEnum.citation,
+            revision="00001",
+            annotations={},
+        ),
+    )

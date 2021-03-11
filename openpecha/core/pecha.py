@@ -139,6 +139,10 @@ class OpenPechaFS(OpenPecha):
             base_fn = self._mkdir(self.base_path) / f"{basename}.txt"
             base_fn.write_text(content)
 
+    def save_layer(self, basename, layername, layer):
+        layer_fn = self._mkdir(self.layers_path / basename) / f"{layername}.yml"
+        dump_yaml(json.loads(layer.json()), layer_fn)
+
     def save_layers(self):
         for basename, base_layers in self.layers.items():
             for layername, layer in base_layers.items():
