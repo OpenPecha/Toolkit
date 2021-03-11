@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.7.8 (2021-03-09)
+### Fix
+* Pecha has components list (base + layer names) ([`bb1d206`](https://github.com/OpenPecha/openpecha-toolkit/commit/bb1d206edba9e205184957255e875acea61b9e8f))
+
 ## v0.7.7 (2021-03-04)
 ### Fix
 * Save pecha ([`9634fa9`](https://github.com/OpenPecha/openpecha-toolkit/commit/9634fa968215ff7cdb7cb12a95c561cc0ae51d4a))
