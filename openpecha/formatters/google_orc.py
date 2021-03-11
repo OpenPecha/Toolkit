@@ -202,13 +202,13 @@ class GoogleOCRFormatter(BaseFormatter):
             root = ET.fromstring(r.content.decode("utf-8"))
         except Exception:
             metadata = {
-                "id": f"opecha:{self.pecha_id}",
+                "id": self.pecha_id,
                 "initial_creation_type": "ocr",
                 "source_metadata": {
                     "id": f"{work_id}",
                     "title": "",
-                    "volume": "",
                     "author": "",
+                    "volume": {},
                 },
             }
             return metadata
