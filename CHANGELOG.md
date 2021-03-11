@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.7.9 (2021-03-11)
+### Fix
+* Remove 'opecha' from pecha id ([`064abab`](https://github.com/OpenPecha/openpecha-toolkit/commit/064ababcc64c823e7a849d250f2a8948dae187e1))
+
 ## v0.7.8 (2021-03-09)
 ### Fix
 * Pecha has components list (base + layer names) ([`bb1d206`](https://github.com/OpenPecha/openpecha-toolkit/commit/bb1d206edba9e205184957255e875acea61b9e8f))
