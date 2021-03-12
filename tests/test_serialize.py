@@ -1,3 +1,4 @@
+from os import F_TLOCK
 from pathlib import Path
 
 import pytest
@@ -27,5 +28,6 @@ def test_hfml_serializer():
 def test_opf_2_tsadra_serializer(opf_path):
     serializer = EpubSerializer(opf_path)
     serializer.apply_layers()
-    out_fn = serializer.serialize("output/epub_output/")
+    toc_levels = {}
+    out_fn = serializer.serialize(toc_levels, output_path="output/epub_output/")
     assert str(out_fn) == "output/epub_output/P000100.epub"

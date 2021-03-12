@@ -273,7 +273,7 @@ class EpubSerializer(Serialize):
             footnote_references += f'{p_tag}<a href="#fm{footnote_id}">{Tsadra_template.footnote_reference_SP} id="fr{footnote_id}">{footnote["footnote_ref"]}</span></a></p>'
         return footnote_references
 
-    def serialize(self, output_path="./output/epub_output"):
+    def serialize(self, toc_levels, output_path="./output/epub_output"):
         """ This module serialize .opf file to other format such as .epub etc. In case of epub,
         we are using calibre ebook-convert command to do the conversion by passing our custom css template
         and embedding our custom font. The converted output will be then saved in current directory
@@ -319,17 +319,20 @@ class EpubSerializer(Serialize):
             Path("template.css").write_bytes(template.content)
             # Running ebook-convert command to convert html file to .epub (From calibre)
             # XPath expression to detect chapter titles.
-            chapter_Xpath = "//*[@class='tibetan-chapters']"
-            book_number_Xpath = "//*[@class='tibetan-book-number']"
+            try:
+                level1_toc_Xpath = toc_levels["1"]
+                level2_toc_Xpath = toc_levels["2"]
+                level3_toc_Xpath = toc_levels["3"]
+            except Exception:
+                level1_toc_Xpath = ""
+                level2_toc_Xpath = ""
+                level3_toc_Xpath = ""
             book_title_Xpath = "//*[@class='tibetan-book-title']"
-            sabche_Xpath = "//*[@class='tibetan-sabche1' or @class='tibetan-sabche']"
-            font_family = "Monlam Uni Ouchan2"
-            font_size = 15
-            chapter_mark = "pagebreak"
             cover_path = self.opf_path / f"asset/image/{cover_image}"
             out_epub_fn = output_path / f"{pecha_id}.epub"
+            font_family = "Monlam Uni Ouchan2"
             os.system(
-                f'ebook-convert {out_html_fn} {out_epub_fn} --extra-css=./template.css --page-breaks-before="{book_title_Xpath}" --base-font-size={font_size} --embed-font-family="{font_family}" --cover={cover_path} --flow-size=0 --level1-toc="{book_number_Xpath}" --level2-toc="{chapter_Xpath}" --level3-toc="{sabche_Xpath}" --use-auto-toc'
+                f'ebook-convert {out_html_fn} {out_epub_fn} --extra-css=./template.css --embed-font-family="{font_family}" --page-breaks-before="{book_title_Xpath}" --cover={cover_path} --flow-size=0 --level1-toc="{level1_toc_Xpath}" --level2-toc="{level2_toc_Xpath}" --level3-toc="{level3_toc_Xpath}" --use-auto-toc --disable-font-rescaling'
             )
             # Removing html file and template file
             os.system(f"rm {out_html_fn}")

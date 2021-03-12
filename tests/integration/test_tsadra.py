@@ -13,7 +13,7 @@ if __name__ == "__main__":
     # pecha_id = 111
     # pecha_name = f"P{pecha_id:06}"
 
-    pecha_id = 114
+    pecha_id = 112
     pecha_name = f"P{pecha_id:06}"
     ebook_path = f"./output/demo/src/tsadra_publication/{pecha_name}/OEBPS/"
     opfs_path = "./output/demo/output"
@@ -34,6 +34,16 @@ if __name__ == "__main__":
     # formatter.create_opf(f"{hfml_path}/{pecha_name}", pecha_id)
 
     # 4. Convert OPF to Ebook
+    # toc_levels = {
+    #     '1': "//*[@class='tibetan-chapters']",
+    #     '2': "//*[@class='tibetan-sabche1' or @class='tibetan-sabche']",
+    #     '3': ""
+    # }
+    toc_levels = {
+        "1": "//*[@class='tibetan-book-number']",
+        "2": "//*[@class='tibetan-chapters']",
+        "3": "//*[@class='tibetan-sabche1' or @class='tibetan-sabche']",
+    }
     serializer = EpubSerializer(Path(opf_path))
     serializer.apply_layers()
-    serializer.serialize(ebook_output_path)
+    serializer.serialize(toc_levels, ebook_output_path)
