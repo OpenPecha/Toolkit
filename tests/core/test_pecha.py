@@ -39,7 +39,7 @@ def test_save_layer():
     openpecha = OpenPechaFS("tests/data/serialize/tsadra/P000100.opf")
     openpecha.save_layer(
         "v002",
-        "test_layer",
+        LayersEnum.citation.value,
         Layer(
             annotation_type=LayersEnum.citation,
             revision="00001",
