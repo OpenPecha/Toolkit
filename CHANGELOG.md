@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.7.10 (2021-03-11)
+### Fix
+* Add save_layer method ([`fd2b8a8`](https://github.com/OpenPecha/openpecha-toolkit/commit/fd2b8a8a1b7c7de9e26dea6f552830c9f2c06384))
+
 ## v0.7.9 (2021-03-11)
 ### Fix
 * Remove 'opecha' from pecha id ([`064abab`](https://github.com/OpenPecha/openpecha-toolkit/commit/064ababcc64c823e7a849d250f2a8948dae187e1))
