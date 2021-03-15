@@ -45,5 +45,4 @@ if __name__ == "__main__":
         "3": "//*[@class='tibetan-sabche1' or @class='tibetan-sabche']",
     }
     serializer = EpubSerializer(Path(opf_path))
-    serializer.apply_layers()
     serializer.serialize(toc_levels, ebook_output_path)

@@ -1,7 +1,18 @@
+import tempfile
+
 import pytest
 
 from openpecha.catalog.manager import CatalogManager
 from openpecha.formatters import *
+
+metadata = {
+    "source_metadata": {
+        "title": "example-title",
+        "subtitle": "v001",
+        "author": "authors",
+        "id": "2323",
+    }
+}
 
 
 @pytest.mark.skip(reason="no urgent")
@@ -15,14 +26,6 @@ def test_googleocr():
 
 @pytest.mark.skip(reason="no urgent")
 def test_hfml_with_metadata():
-    metadata = {
-        "source_metadata": {
-            "title": "example-title",
-            "subtitle": "v001",
-            "author": "authors",
-            "id": "2323",
-        }
-    }
     layers = ["Citation", "BookTitle", "Author"]
     catalog = CatalogManager(
         formatter=HFMLFormatter(output_path="./output", metadata=metadata),
@@ -32,5 +35,20 @@ def test_hfml_with_metadata():
     catalog.update()
 
 
+def get_fake_img():
+    return tempfile.NamedTemporaryFile(delete=False, suffix=".png").name
+
+
+@pytest.mark.skip(reason="creating github repo")
+def test_create_emtpy_item():
+    assets = {"image": [get_fake_img()]}
+    catalog = CatalogManager(
+        formatter=EmptyEbook(
+            output_path="./output", metadata=metadata["source_metadata"], assets=assets
+        ),
+    )
+    catalog.add_empty_item("this is text only")
+
+
 if __name__ == "__main__":
-    test_hfml_with_metadata()
+    test_create_emtpy_item()

@@ -96,10 +96,10 @@ class CatalogManager:
         metadata = yaml.safe_load(meta_fn.open())
         catalog_metadata = [
             metadata["id"].split(":")[-1],
-            metadata["source_metadata"].get("title"),
-            metadata["source_metadata"].get("subtitle"),
-            metadata["source_metadata"].get("author"),
-            metadata["source_metadata"].get("id"),
+            metadata["source_metadata"].get("title", ""),
+            metadata["source_metadata"].get("subtitle", ""),
+            metadata["source_metadata"].get("author", ""),
+            metadata["source_metadata"].get("id", ""),
         ]
         self.batch.append(catalog_metadata)
         create_readme(metadata["source_metadata"], self.formatter.pecha_path)
@@ -123,6 +123,9 @@ class CatalogManager:
 
     def add_hfml_item(self, path):
         self._process(path, "ocr_result_input")
+
+    def add_empty_item(self, text):
+        self._process(text, "ocr_result_input")
 
     def _process(self, path, input_method, release_method=None):
         print("[INFO] Getting input")

@@ -1,14 +1,11 @@
 import os
 import re
-from os import stat
 from pathlib import Path
 
 import requests
 import yaml
-from bs4 import BeautifulSoup
 
 from openpecha.formatters.layers import AnnType
-from openpecha.formatters.tsadra import TsadraTemplate
 
 from .serialize import Serialize
 
@@ -273,7 +270,7 @@ class EpubSerializer(Serialize):
             footnote_references += f'{p_tag}<a href="#fm{footnote_id}">{Tsadra_template.footnote_reference_SP} id="fr{footnote_id}">{footnote["footnote_ref"]}</span></a></p>'
         return footnote_references
 
-    def serialize(self, toc_levels, output_path="./output/epub_output"):
+    def serialize(self, toc_levels={}, output_path="./output/epub_output"):
         """ This module serialize .opf file to other format such as .epub etc. In case of epub,
         we are using calibre ebook-convert command to do the conversion by passing our custom css template
         and embedding our custom font. The converted output will be then saved in current directory
@@ -284,16 +281,11 @@ class EpubSerializer(Serialize):
 
         """
         output_path = Path(output_path)
-        pecha_id = self.opf_path.name.split(".")[0]
-        out_html_fn = f"{pecha_id}.html"
-        try:
-            pecha_title = self.meta["ebook_metadata"]["title"]
-        except KeyError:
-            pecha_title = ""
-        try:
-            cover_image = self.meta["ebook_metadata"]["cover"]
-        except KeyError:
-            cover_image = ""
+        out_html_fn = f"{self.meta['id']}.html"
+        pecha_title = self.meta["source_metadata"].get("title", "")
+        cover_image = self.meta["source_metadata"].get("cover", "")
+
+        self.apply_layers()
         self.layers = [layer for layer in self.layers if layer != "Pagination"]
 
         results = self.get_result()
@@ -329,7 +321,7 @@ class EpubSerializer(Serialize):
                 level3_toc_Xpath = ""
             book_title_Xpath = "//*[@class='tibetan-book-title']"
             cover_path = self.opf_path / f"asset/image/{cover_image}"
-            out_epub_fn = output_path / f"{pecha_id}.epub"
+            out_epub_fn = output_path / f"{self.meta['id']}.epub"
             font_family = "Monlam Uni Ouchan2"
             os.system(
                 f'ebook-convert {out_html_fn} {out_epub_fn} --extra-css=./template.css --embed-font-family="{font_family}" --page-breaks-before="{book_title_Xpath}" --cover={cover_path} --flow-size=0 --level1-toc="{level1_toc_Xpath}" --level2-toc="{level2_toc_Xpath}" --level3-toc="{level3_toc_Xpath}" --use-auto-toc --disable-font-rescaling'

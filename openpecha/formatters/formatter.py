@@ -113,7 +113,7 @@ class BaseFormatter:
     """
 
     def __init__(self, output_path, metadata):
-        self.output_path = Path(output_path if output_path else config.OPF_OUTPUT_PATH)
+        self.output_path = Path(output_path if output_path else config.PECHAS_PATH)
         self.metadata = metadata
 
     def get_unique_id(self):

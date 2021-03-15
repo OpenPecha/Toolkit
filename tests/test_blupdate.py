@@ -132,8 +132,8 @@ def get_layer(layer_name, result, expected):
 
 
 def is_layer_same(result_layer, expected_layer):
-    for result_ann, expected_ann in zip(
-        result_layer["annotations"], expected_layer["annotations"]
+    for (_, result_ann), (_, expected_ann) in zip(
+        result_layer["annotations"].items(), expected_layer["annotations"].items()
     ):
         assert expected_ann["span"]["start"] == result_ann["span"]["start"]
         assert expected_ann["span"]["end"] == result_ann["span"]["end"]

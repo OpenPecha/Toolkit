@@ -106,6 +106,8 @@ def github_publish(
     remote_repo_url = create_github_repo(path, org, token)
     local_repo = create_local_repo(path, remote_repo_url, org, token)
     commit(local_repo, message, not_includes)
+    local_repo.git.checkout("-b", "review")
+    local_repo.git.push("origin", "review")
 
     for layer in layers:
         create_orphan_branch(local_repo, layer)

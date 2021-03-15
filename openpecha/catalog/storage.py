@@ -1,6 +1,5 @@
 import base64
 import logging
-import os
 from abc import ABC, abstractclassmethod
 
 import requests
@@ -53,7 +52,7 @@ class GithubBucket(Bucket):
     @staticmethod
     def decode_bas64_blob(base64_blob):
         """
-         Decode the base64 encoded blob into UTF-8
+        Decode the base64 encoded blob into UTF-8
         """
         decoded_list_data = base64.b64decode(base64_blob).decode("utf-8")
         return decoded_list_data

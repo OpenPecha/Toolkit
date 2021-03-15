@@ -2,6 +2,59 @@
 
 <!--next-version-placeholder-->
 
+## v0.7.10 (2021-03-11)
+### Fix
+* Add save_layer method ([`fd2b8a8`](https://github.com/OpenPecha/openpecha-toolkit/commit/fd2b8a8a1b7c7de9e26dea6f552830c9f2c06384))
+
+## v0.7.9 (2021-03-11)
+### Fix
+* Remove 'opecha' from pecha id ([`064abab`](https://github.com/OpenPecha/openpecha-toolkit/commit/064ababcc64c823e7a849d250f2a8948dae187e1))
+
+## v0.7.8 (2021-03-09)
+### Fix
+* Pecha has components list (base + layer names) ([`bb1d206`](https://github.com/OpenPecha/openpecha-toolkit/commit/bb1d206edba9e205184957255e875acea61b9e8f))
+
+## v0.7.7 (2021-03-04)
+### Fix
+* Save pecha ([`9634fa9`](https://github.com/OpenPecha/openpecha-toolkit/commit/9634fa968215ff7cdb7cb12a95c561cc0ae51d4a))
+
+## v0.7.6 (2021-03-03)
+### Fix
+* Iread pecha id from metadata ([`d9f008e`](https://github.com/OpenPecha/openpecha-toolkit/commit/d9f008ed52a66a0a3e4da0dd67d112a1625c5166))
+
+## v0.7.5 (2021-03-03)
+### Fix
+*  blupdate test ([`2875e86`](https://github.com/OpenPecha/openpecha-toolkit/commit/2875e861b714e7d229609d75d6318af0b3f9abca))
+*  download pecha with specific branch ([`4f4c9b7`](https://github.com/OpenPecha/openpecha-toolkit/commit/4f4c9b7c59452d6886c3eb5fccdb203d1cd55f25))
+* Layer annotations are in dict ([`de625ff`](https://github.com/OpenPecha/openpecha-toolkit/commit/de625ff68efc17b5ddf122efb5662418bf2e2684))
+
+## v0.7.4 (2021-03-02)
+
+
+## v0.7.3 (2021-03-01)
+### Fix
+* Create review branch for opf ([`0bd7911`](https://github.com/OpenPecha/openpecha-toolkit/commit/0bd7911f0579cf9e766a74dace5bf223ac1df5dc))
+
+## v0.7.2 (2021-03-01)
+### Fix
+* Ireturn empty string instead of None for source meta access ([`b2390f9`](https://github.com/OpenPecha/openpecha-toolkit/commit/b2390f9013853a327651255668adea0a2e55d98f))
+
+## v0.7.1 (2021-03-01)
+### Fix
+* Make output_path optional ([`5b67259`](https://github.com/OpenPecha/openpecha-toolkit/commit/5b67259ece9c6434fd7a099f2e278dfeb83c5a53))
+
+## v0.7.0 (2021-03-01)
+### Feature
+* Create empty ebook opf ([`cfb180d`](https://github.com/OpenPecha/openpecha-toolkit/commit/cfb180dfe92ec995d72ca8b7b6880291b5ac5795))
+
+### Fix
+* Cconfig for default pechas path ([`b92c3b7`](https://github.com/OpenPecha/openpecha-toolkit/commit/b92c3b7f5657ced29328d03333f226d4d421f166))
+
+## v0.6.35 (2021-03-01)
+### Fix
+* Madd pydantic in dependencies ([`16f6ed0`](https://github.com/OpenPecha/openpecha-toolkit/commit/16f6ed0ed2dd613d5805598bc84ecbf4a96eda03))
+* Add create opf for ebook ([`efe8bf8`](https://github.com/OpenPecha/openpecha-toolkit/commit/efe8bf8328b8d5c61c3cf221b0c1a6908c1ab2fe))
+
 ## v0.6.34 (2021-02-16)
 ### Fix
 * Make methods to module funcs ([`7fec0d6`](https://github.com/OpenPecha/openpecha-toolkit/commit/7fec0d6af4a10efe4259e479641f5e5749911aa0))
