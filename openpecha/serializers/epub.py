@@ -318,9 +318,15 @@ class EpubSerializer(Serialize):
             Path("template.css").write_bytes(template.content)
             # Running ebook-convert command to convert html file to .epub (From calibre)
             # XPath expression to detect chapter titles.
-            level1_toc_Xpath = Tsadra_template.toc_xpaths.get(toc_levels["1"], "")
-            level2_toc_Xpath = Tsadra_template.toc_xpaths.get(toc_levels["2"], "")
-            level3_toc_Xpath = Tsadra_template.toc_xpaths.get(toc_levels["3"], "")
+            level1_toc_Xpath = Tsadra_template.toc_xpaths.get(
+                toc_levels.get("1", ""), ""
+            )
+            level2_toc_Xpath = Tsadra_template.toc_xpaths.get(
+                toc_levels.get("2", ""), ""
+            )
+            level3_toc_Xpath = Tsadra_template.toc_xpaths.get(
+                toc_levels.get("3", ""), ""
+            )
 
             cover_path = self.opf_path / f"assets/image/{cover_image}"
             out_epub_fn = output_path / f"{self.meta['id']}.epub"
