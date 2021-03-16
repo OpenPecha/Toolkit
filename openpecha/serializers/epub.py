@@ -36,6 +36,13 @@ class Tsadra_template:
     footnote_EP = "</span></a>"
     footnote_reference_SP = '<span class="tibetan-footnote-reference"'
 
+    toc_xpaths = {
+        "book-number": "//*[@class='tibetan-book-number']",
+        "chapter": "//*[@class='tibetan-chapters']",
+        "sabche": "//*[@class='tibetan-sabche1' or @class='tibetan-sabche']",
+    }
+    book_title_Xpath = "//*[@class='tibetan-book-title']"
+
 
 class EpubSerializer(Serialize):
     """Epub serializer class for OpenPecha."""
@@ -311,20 +318,15 @@ class EpubSerializer(Serialize):
             Path("template.css").write_bytes(template.content)
             # Running ebook-convert command to convert html file to .epub (From calibre)
             # XPath expression to detect chapter titles.
-            try:
-                level1_toc_Xpath = toc_levels["1"]
-                level2_toc_Xpath = toc_levels["2"]
-                level3_toc_Xpath = toc_levels["3"]
-            except Exception:
-                level1_toc_Xpath = ""
-                level2_toc_Xpath = ""
-                level3_toc_Xpath = ""
-            book_title_Xpath = "//*[@class='tibetan-book-title']"
+            level1_toc_Xpath = Tsadra_template.toc_xpaths.get(toc_levels["1"], "")
+            level2_toc_Xpath = Tsadra_template.toc_xpaths.get(toc_levels["2"], "")
+            level3_toc_Xpath = Tsadra_template.toc_xpaths.get(toc_levels["3"], "")
+
             cover_path = self.opf_path / f"assets/image/{cover_image}"
             out_epub_fn = output_path / f"{self.meta['id']}.epub"
             font_family = "Monlam Uni Ouchan2"
             os.system(
-                f'ebook-convert {out_html_fn} {out_epub_fn} --extra-css=./template.css --embed-font-family="{font_family}" --page-breaks-before="{book_title_Xpath}" --cover={cover_path} --flow-size=0 --level1-toc="{level1_toc_Xpath}" --level2-toc="{level2_toc_Xpath}" --level3-toc="{level3_toc_Xpath}" --use-auto-toc --disable-font-rescaling'
+                f'ebook-convert {out_html_fn} {out_epub_fn} --extra-css=./template.css --embed-font-family="{font_family}" --page-breaks-before="{Tsadra_template.book_title_Xpath}" --cover={cover_path} --flow-size=0 --level1-toc="{level1_toc_Xpath}" --level2-toc="{level2_toc_Xpath}" --level3-toc="{level3_toc_Xpath}" --use-auto-toc --disable-font-rescaling'
             )
             # Removing html file and template file
             os.system(f"rm {out_html_fn}")

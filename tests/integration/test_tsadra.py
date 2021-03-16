@@ -5,21 +5,13 @@ from openpecha.serializers import EpubSerializer, HFMLSerializer
 
 if __name__ == "__main__":
 
-    # ebook_path = "./output/demo/src/P000111/OEBPS/"
-    # opfs_path = "./output/demo/output"
-    # opf_path = "./output/demo/output/P000111/P000111.opf/"
-    # hfml_path = "./output/demo/output/P000111_hfml/"
-    # ebook_output_path = "./output/demo/output/ebooks"
-    # pecha_id = 111
-    # pecha_name = f"P{pecha_id:06}"
-
     pecha_id = 112
     pecha_name = f"P{pecha_id:06}"
-    ebook_path = f"./output/demo/src/tsadra_publication/{pecha_name}/OEBPS/"
-    opfs_path = "./output/demo/output"
-    opf_path = f"./output/demo/output/{pecha_name}/{pecha_name}.opf/"
+    ebook_path = f"./tests/data/serialize/tsadra/src/{pecha_name}/OEBPS/"
+    opfs_path = "./tests/data/serialize/tsadra"
+    opf_path = f"./tests/data/serialize/tsadra/{pecha_name}.opf/"
     hfml_path = "./output/demo/output/P000113_hfml/"
-    ebook_output_path = "./output/demo/output/ebooks"
+    ebook_output_path = "./tests/data/serialize/tsadra/ebook"
 
     # 1. Format Tsadra Ebook to OPF (OpenPecha Format)
     # formatter = TsadraFormatter(output_path=opfs_path)
@@ -39,10 +31,6 @@ if __name__ == "__main__":
     #     '2': "//*[@class='tibetan-sabche1' or @class='tibetan-sabche']",
     #     '3': ""
     # }
-    toc_levels = {
-        "1": "//*[@class='tibetan-book-number']",
-        "2": "//*[@class='tibetan-chapters']",
-        "3": "//*[@class='tibetan-sabche1' or @class='tibetan-sabche']",
-    }
+    toc_levels = {"1": "book-number", "2": "chapter", "3": "sabche"}
     serializer = EpubSerializer(Path(opf_path))
     serializer.serialize(toc_levels, ebook_output_path)
