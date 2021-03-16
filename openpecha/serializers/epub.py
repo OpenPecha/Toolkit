@@ -84,7 +84,7 @@ class EpubSerializer(Serialize):
             only_start_ann = True
         elif ann["type"] == AnnType.credit_page:
             credit_page_ann = ann["credit_page_img_name"]
-            start_payload = f'{Tsadra_template.credit_page_SP}<img src="{self.opf_path}/asset/image/{credit_page_ann}"/></span></p>\n'
+            start_payload = f'{Tsadra_template.credit_page_SP}<img src="{self.opf_path}/assets/image/{credit_page_ann}"/></span></p>\n'
             only_start_ann = True
         elif ann["type"] == AnnType.error_candidate:
             start_payload = "["
@@ -271,7 +271,7 @@ class EpubSerializer(Serialize):
         return footnote_references
 
     def serialize(self, toc_levels={}, output_path="./output/epub_output"):
-        """ This module serialize .opf file to other format such as .epub etc. In case of epub,
+        """This module serialize .opf file to other format such as .epub etc. In case of epub,
         we are using calibre ebook-convert command to do the conversion by passing our custom css template
         and embedding our custom font. The converted output will be then saved in current directory
         as {pecha_id}.epub.
@@ -320,7 +320,7 @@ class EpubSerializer(Serialize):
                 level2_toc_Xpath = ""
                 level3_toc_Xpath = ""
             book_title_Xpath = "//*[@class='tibetan-book-title']"
-            cover_path = self.opf_path / f"asset/image/{cover_image}"
+            cover_path = self.opf_path / f"assets/image/{cover_image}"
             out_epub_fn = output_path / f"{self.meta['id']}.epub"
             font_family = "Monlam Uni Ouchan2"
             os.system(

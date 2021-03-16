@@ -24,16 +24,15 @@ if __name__ == "__main__":
         repo.delete()
         print(f"[INFO] {repo_name} deleted")
     elif args.start and args.end:
-        for repo in org.get_repos("all"):
-            if repo.name.startswith(args.prefix):
-                repo_num = int(repo.name[len(args.prefix) :])
-                if args.start <= repo_num >= args.end:
-                    repo.delete()
-                    print(f"[INFO] {repo} deleted.")
+        for i in range(args.start, args.end + 1):
+            repo_name = f"{args.prefix}{i:06}"
+            repo = org.get_repo(repo_name)
+            repo.delete()
+            print(f"[INFO] {repo_name} deleted")
 
-            # else:
-            #     if repo.created_at > delete_from_date:
-            #         repo.delete()
-            #         print(
-            #             f"[INFO] Deleting {repo.name} created at {str(repo.created_at)}"
-            #         )
+    # else:
+    #     if repo.created_at > delete_from_date:
+    #         repo.delete()
+    #         print(
+    #             f"[INFO] Deleting {repo.name} created at {str(repo.created_at)}"
+    #         )
