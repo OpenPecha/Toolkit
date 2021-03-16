@@ -2,6 +2,22 @@
 
 <!--next-version-placeholder-->
 
+## v0.7.11 (2021-03-16)
+### Fix
+* **epub-serializer:** Disabled font rescaling ([`1b63245`](https://github.com/OpenPecha/openpecha-toolkit/commit/1b6324512e751ad461c8a9d5a20783e505b208c0))
+* **epub-serializer:** Margin given to sabche, citation and tsawa which are not inline ([`4cc8637`](https://github.com/OpenPecha/openpecha-toolkit/commit/4cc8637ba5abcf09c06ecf2a98040a86e23b5929))
+* **epub-serializer:** Auto generation of TOC added ([`1db097c`](https://github.com/OpenPecha/openpecha-toolkit/commit/1db097c676a7be1514d0e694062713ec79d861de))
+* **epub-serializer:** Footnote marker and reference serializer added ([`1446879`](https://github.com/OpenPecha/openpecha-toolkit/commit/14468792d780c38e5964a033261bc780a3099842))
+* **epub-serializer:** Replace regular_indented1 of para before chapter title to regular_indented1 ([`fc243a6`](https://github.com/OpenPecha/openpecha-toolkit/commit/fc243a61bfa9eb225608710be9719ce53c3f170c))
+* **tsadra-formatter:** Removed is_cover and is_subtitle. created new annotation sub title ([`7f0967a`](https://github.com/OpenPecha/openpecha-toolkit/commit/7f0967aace94d14bd4904fa45e853d619fdc015a))
+* **epub-serializer:** Page break after chapter tag included ([`b481d59`](https://github.com/OpenPecha/openpecha-toolkit/commit/b481d59994f1aa04389db4e1d32999040f2a1dcd))
+* **tsadra-formatter:** Yigchung formatter updated as corner case detected ([`870f198`](https://github.com/OpenPecha/openpecha-toolkit/commit/870f1980a1f695bae2cac081bf997621a94072da))
+* **epub-serializer:** Intentation adjustment bug fix ([`018b5de`](https://github.com/OpenPecha/openpecha-toolkit/commit/018b5de92a75a24777d66fa6e53c423d4a1dad03))
+* **epub-serializer:** Indentation bug fixed ([`ab405d5`](https://github.com/OpenPecha/openpecha-toolkit/commit/ab405d5456369d95b8488facf311cdb965d6d806))
+* **epub-serializer:** Break within title bug are fixed by inserting break before title ([`fc3b8fa`](https://github.com/OpenPecha/openpecha-toolkit/commit/fc3b8fa995564ce64b8a94c7e8f41b2d2dcb75c6))
+* **epub-serializer:** Indentation bug fixed for verse component ([`819c292`](https://github.com/OpenPecha/openpecha-toolkit/commit/819c292234c5c30c9e22fe866075f35a02703055))
+* **tsadra-parser:** Credit page parser added ([`61c3648`](https://github.com/OpenPecha/openpecha-toolkit/commit/61c36480b2409278c3ba8a6a56906eebce3173b7))
+
 ## v0.7.10 (2021-03-11)
 ### Fix
 * Add save_layer method ([`fd2b8a8`](https://github.com/OpenPecha/openpecha-toolkit/commit/fd2b8a8a1b7c7de9e26dea6f552830c9f2c06384))
