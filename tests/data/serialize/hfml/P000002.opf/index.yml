@@ -1,3 +1,74 @@
+<<<<<<< HEAD
+id: 8b76f22eda53477dab4e515f489ca240
+annotation_type: index
+revision: '00001'
+annotations:
+  7cf1493473aa48acac3fb90ef347dbcf:
+    parts:
+    - work_id: T1-1
+      span:
+        vol: 1
+        start: 27
+        end: 1352
+    - work_id: T1-2
+      span:
+        vol: 1
+        start: 1352
+        end: 1496
+    - work_id: T1-6
+      span:
+        vol: 1
+        start: 1496
+        end: 2046
+    span:
+    - work_id: T1
+      span:
+        vol: 1
+        start: 27
+        end: 2046
+  72f0d9d0359149599de6d9dcbf445364:
+    parts: []
+    span:
+    - work_id: t2
+      span:
+        vol: 1
+        start: 2046
+        end: 2173
+  703296ff734f44f3b9e8f1788e83e315:
+    parts:
+    - work_id: T1-8
+      span:
+        vol: 2
+        start: 26
+        end: 140
+    - work_id: T1-9
+      span:
+        vol: 2
+        start: 140
+        end: 266
+    span:
+    - work_id: T2
+      span:
+        vol: 2
+        start: 26
+        end: 266
+  2b384980682e4470afe7b2241bf78a54:
+    parts: []
+    span:
+    - work_id: T3
+      span:
+        vol: 3
+        start: 26
+        end: 243
+  962abda899dd4f3fa8e70021068f64ee:
+    parts: []
+    span:
+    - work_id: t4
+      span:
+        vol: 3
+        start: 243
+        end: 266
+=======
 id: b916cf8578b4465aa901f5fc07815d7d
 annotation_type: index
 revision: '00001'
@@ -176,3 +247,4 @@ annotations:
       start: 27
       end: 968903
     work_id: D6
+>>>>>>> master

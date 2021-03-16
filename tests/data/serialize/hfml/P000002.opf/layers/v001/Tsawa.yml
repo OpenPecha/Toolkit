@@ -1,0 +1,10 @@
+id: 3593925cab75484b94c3b395c6a8c4c4
+annotation_type: Tsawa
+revision: '00001'
+annotations:
+  3622931715d346289ab8252491c97130:
+    span:
+      start: 420
+      end: 739
+local_ids:
+  3622931715d346289ab8252491c97130: 200000

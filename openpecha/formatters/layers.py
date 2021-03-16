@@ -20,20 +20,25 @@ __all__ = [
     "Sabche",
     "Yigchung",
     "BookTitle",
+    "SubTitle",
     "BookNumber",
     "PotiTitle",
     "Author",
     "Archaic",
     "Span",
+    "CreditPage",
+    "Footnote",
 ]
 
 
 class AnnType:
     book_title = "BookTitle"
+    sub_title = "SubTitle"
     book_number = "BookNumber"
     poti_title = "PotiTitle"
     author = "Author"
     chapter = "Chapter"
+    credit_page = "Credit_page"
 
     topic = "Text"
     sub_topic = "SubText"
@@ -48,6 +53,7 @@ class AnnType:
     yigchung = "Yigchung"
     archaic = "Archaic"
     durchen = "Durchen"
+    footnote = "Footnote"
 
 
 class _attr_names:
@@ -64,8 +70,8 @@ class _attr_names:
     START = "start"
     END = "end"
 
-    # Cover title
-    ISCOVER = "iscover"  # Boolean flag to indicate booktitle being on cover page or not
+    # Credit page
+    CREDIT_PAGE_IMG_NAME = "credit_page_img_name"
 
     # Page
     PAGE_INDEX = "page_index"  # Page number based on Volume specified, type: int
@@ -87,6 +93,9 @@ class _attr_names:
 
     # Tsawa, Citation
     ISVERSE = "isverse"  # Boolean flag to indicate a sache in verse format or not
+
+    # Footnote
+    FOOTNOTE_REF = "footnote_ref"
 
 
 def Layer(id_, type_, rev=f"{1:05}"):
@@ -157,12 +166,23 @@ def Peydurma(span, note=None):
     return {_attr_names.NOTE: note, _attr_names.SPAN: span}
 
 
-def BookTitle(span, iscover=True):
-    return {_attr_names.SPAN: span, _attr_names.ISCOVER: iscover}
+def BookTitle(span):
+    return {_attr_names.SPAN: span}
+
+
+def SubTitle(span):
+    return {_attr_names.SPAN: span}
 
 
 def BookNumber(span):
     return {_attr_names.SPAN: span}
+
+
+def CreditPage(credit_page_img_name, span):
+    return {
+        _attr_names.CREDIT_PAGE_IMG_NAME: credit_page_img_name,
+        _attr_names.SPAN: span,
+    }
 
 
 def PotiTitle(span):
@@ -191,3 +211,7 @@ def Sabche(span, isverse=False):
 
 def Yigchung(span):
     return {_attr_names.SPAN: span}
+
+
+def Footnote(span, footnote_ref):
+    return {_attr_names.SPAN: span, _attr_names.FOOTNOTE_REF: footnote_ref}

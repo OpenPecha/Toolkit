@@ -3,6 +3,7 @@ import re
 from pathlib import Path
 
 import requests
+import yaml
 
 from openpecha.formatters.layers import AnnType
 
@@ -18,17 +19,22 @@ class Tsadra_template:
     ft = '<span class="front-title">'
     cover_page_book_title_SP = '<span class="credits-page_front-title">'
     book_title_SP = '<span class="tibetan-book-title">'
-    book_number_SP = f'<p class = "credits-page_front-page---book-number">{ft}'
-    author_SP = '<p class="credits-page_front-page---text-author"><span class="front-page---text-titles">'
-    chapter_SP = '<span class="tibetan-chapter">'
-    tsawa_SP = '<span class="tibetan-root-text">'
-    tsawa_verse_SP = '<span class="tibetan-root-text_tibetan-root-text-middle-lines tibetan-root-text">'
-    quatation__verse_SP = (
-        '<span class="tibetan-citations-in-verse_tibetan-citations-middle-lines">'
+    sub_title_SP = '<span class="tibetan-book-sub-title">'
+    book_number_SP = f'<p class="tibetan-book-number">{ft}'
+    credit_page_SP = (
+        '<p class="credits-page_epub-edition-line"><span class="credits-regular">'
     )
+    author_SP = '<p class="text-author"><span class="front-page---text-titles">'
+    chapter_SP = '<span class="tibetan-chapters">'
+    tsawa_SP = '<span class="tibetan-root-text">'
+    tsawa_verse_SP = '<span class="tibetan-root-text-in-verse">'
+    quatation__verse_SP = '<span class="tibetan-citations-in-verse">'
     quatation__SP = '<span class="tibetan-external-citations">'
     sabche_SP = '<span class="tibetan-sabche1">'
     yigchung_SP = '<span class="tibetan-commentary-small">'
+    footnote_marker_SP = '<span class="tibetan-footnote-marker"'
+    footnote_EP = "</span></a>"
+    footnote_reference_SP = '<span class="tibetan-footnote-reference"'
 
 
 class EpubSerializer(Serialize):
@@ -76,17 +82,18 @@ class EpubSerializer(Serialize):
         elif ann["type"] == AnnType.peydurma:
             start_payload = "#"
             only_start_ann = True
+        elif ann["type"] == AnnType.credit_page:
+            credit_page_ann = ann["credit_page_img_name"]
+            start_payload = f'{Tsadra_template.credit_page_SP}<img src="{self.opf_path}/asset/image/{credit_page_ann}"/></span></p>\n'
+            only_start_ann = True
         elif ann["type"] == AnnType.error_candidate:
             start_payload = "["
             end_payload = "]"
         elif ann["type"] == AnnType.book_title:
-            try:
-                if ann["iscover"]:
-                    start_payload = Tsadra_template.cover_page_book_title_SP
-                else:
-                    start_payload = Tsadra_template.book_title_SP
-            except Exception:
-                start_payload = Tsadra_template.book_title_SP
+            start_payload = Tsadra_template.book_title_SP
+            end_payload = Tsadra_template.span_EP
+        elif ann["type"] == AnnType.sub_title:
+            start_payload = Tsadra_template.sub_title_SP
             end_payload = Tsadra_template.span_EP
         elif ann["type"] == AnnType.book_number:
             start_payload = Tsadra_template.book_number_SP
@@ -121,50 +128,150 @@ class EpubSerializer(Serialize):
         elif ann["type"] == AnnType.yigchung:
             start_payload = Tsadra_template.yigchung_SP
             end_payload = Tsadra_template.span_EP
+        elif ann["type"] == AnnType.footnote:
+            start_payload = f'<a href="#fr{ann["id"]}">{Tsadra_template.footnote_marker_SP} id="fm{ann["id"]}">'
+            end_payload = Tsadra_template.footnote_EP
 
         start_cc, end_cc = self.__get_adapted_span(ann["span"], vol_id)
         self.add_chars(vol_id, start_cc, True, start_payload)
         if not only_start_ann:
             self.add_chars(vol_id, end_cc, False, end_payload)
 
-    def get_syls(self, vol_text):
-        result = []
-        cur_syl = ""
-        syls = re.split("(་|།)", vol_text)
-        for i, syl in enumerate(syls):
-            if i % 2 == 0:
-                cur_syl += syl
-            else:
-                cur_syl += syl
-                result.append(cur_syl)
-                cur_syl = ""
-        return result
-
-    def update_line_break(self, result_text):
-        result_text = result_text.replace("།\n", "། ")
-        result_text = result_text.replace("\n", "")
-        syls = self.get_syls(result_text)
-        walker = 0
-        result = []
-        br_flag = False
-        for syl in syls:
-            if br_flag:
-                if "།" in syl:
-                    result.append(syl)
-                    result.append("<br>")
-                    br_flag = False
-                    walker = 0
+    def p_tag_adder(self, body_text):
+        new_body_text = ""
+        body_text = re.sub(r"\n</span>", "\n</span>\n", body_text)
+        paras = body_text.split("\n")
+        para_flag = False
+        cur_para = ""
+        for para in paras:
+            if "<p" not in para:
+                if re.search("<span.+?</span>", para):
+                    new_body_text += f"<p>{para}</p>"
+                elif "<span" in para and not para_flag:
+                    cur_para += f"<p>{para}<br>"
+                    para_flag = True
+                elif para_flag and "</span>" not in para:
+                    cur_para += f"{para}</br>"
+                elif "</span>" in para:
+                    cur_para += f"{para}</p>"
+                    new_body_text += cur_para
+                    cur_para = ""
+                    para_flag = False
                 else:
-                    result.append(syl)
+                    new_body_text += f"<p>{para}</p>"
             else:
-                if walker == 499:
-                    br_flag = True
-                result.append(syl)
-            walker += 1
-        return "".join(result)
+                new_body_text += para
+        return new_body_text
 
-    def serialize(self, output_path="./output/epub_output"):
-        """This module serialize .opf file to other format such as .epub etc. In case of epub,
+    def is_title(self, p_tag):
+        if "title" in p_tag or "chapter" in p_tag or "number" in p_tag:
+            return True
+        else:
+            return False
+
+    def is_sabche_only(self, p_tag):
+        if re.search('<p><span class="tibetan-sabche1">', p_tag):
+            return True
+        else:
+            return False
+
+    def rm_indentation(self, p_tag):
+        if self.is_sabche_only(p_tag):
+            p_tag = p_tag.replace(
+                '<p><span class="tibetan-sabche1">', '<p><span class="tibetan-sabche">'
+            )
+        if len(self.get_p_text(p_tag)) > 50:
+            p_tag = re.sub("<p>", '<p class="tibetan-commentary-non-indent">', p_tag)
+        else:
+            p_tag = p_tag.replace("<p>", '<p class="tibetan-regular-indented">')
+        return p_tag
+
+    def add_indentation(self, p_tag):
+        p_tag = re.sub("<p>", '<p class="tibetan-regular-indented">', p_tag)
+        return p_tag
+
+    def is_annotated_p_tag(self, p_tag):
+        if re.search("<p><span.*?>.+?</span></p>", p_tag) or re.search(
+            '<p class=".+"><span class=".+">.+?</span></p>', p_tag
+        ):
+            return True
+        else:
+            return False
+
+    def get_p_text(self, p_tag):
+        para_tag = re.search(r"<p.*?>(<span.*?>)?(.+?)(</span>)?</p>", p_tag)
+        para_text = para_tag.group(2)
+        return para_text
+
+    def get_p_tags(self, body_text):
+        p_tags = re.split("(<p.*?>.+?</p>)", body_text)
+        return p_tags[1::2]
+
+    def has_yigchung(self, prev_p_tag):
+        if Tsadra_template.yigchung_SP in prev_p_tag:
+            return True
+        else:
+            return False
+
+    def add_page_break(self, prev_p_tag, body_text):
+        if not self.is_title(prev_p_tag) and (
+            len(self.get_p_text(prev_p_tag)) > 500 or self.has_yigchung(prev_p_tag)
+        ):
+            new_prev_p_tag = prev_p_tag.replace(
+                '<p class="tibetan-commentary-non-indent">',
+                '<p class="tibetan-commentary-non-indent1">',
+            )
+            new_prev_p_tag = new_prev_p_tag.replace(
+                '<p class="tibetan-regular-indented">',
+                '<p class="tibetan-regular-indented1">',
+            )
+        else:
+            new_prev_p_tag = prev_p_tag
+        return body_text.replace(prev_p_tag, new_prev_p_tag)
+
+    def indentation_adjustment(self, body_text):
+        p_tags = self.get_p_tags(body_text)
+
+        prev_p_tag = p_tags[0]
+        body_text = prev_p_tag
+        for p_tag in p_tags[1:]:
+            cur_p_tag = ""
+            if self.is_annotated_p_tag(prev_p_tag):
+                if not self.is_title(p_tag):
+                    cur_p_tag = self.rm_indentation(p_tag)
+                else:
+                    body_text = self.add_page_break(prev_p_tag, body_text)
+                    cur_p_tag = self.add_indentation(p_tag)
+            else:
+                if self.is_annotated_p_tag(p_tag):
+                    if not self.is_title(p_tag):
+                        cur_p_tag = self.rm_indentation(p_tag)
+                    else:
+                        body_text = self.add_page_break(prev_p_tag, body_text)
+                        cur_p_tag = self.add_indentation(p_tag)
+                else:
+                    if (
+                        len(self.get_p_text(prev_p_tag)) < 50
+                        and len(self.get_p_text(p_tag)) > 150
+                    ):
+                        cur_p_tag = p_tag.replace(
+                            "<p>", '<p class="tibetan-commentary-non-indent">'
+                        )
+                    else:
+                        cur_p_tag = self.add_indentation(p_tag)
+            body_text += cur_p_tag
+            prev_p_tag = cur_p_tag
+        return body_text
+
+    def get_footnote_references(self, footnotes):
+        footnote_references = ""
+        p_tag = '<p class = "tibetan-commentary-non-indent">'
+        for footnote_id, footnote in footnotes.items():
+            footnote_references += f'{p_tag}<a href="#fm{footnote_id}">{Tsadra_template.footnote_reference_SP} id="fr{footnote_id}">{footnote["footnote_ref"]}</span></a></p>'
+        return footnote_references
+
+    def serialize(self, toc_levels={}, output_path="./output/epub_output"):
+        """ This module serialize .opf file to other format such as .epub etc. In case of epub,
         we are using calibre ebook-convert command to do the conversion by passing our custom css template
         and embedding our custom font. The converted output will be then saved in current directory
         as {pecha_id}.epub.
@@ -180,30 +287,44 @@ class EpubSerializer(Serialize):
 
         self.apply_layers()
         self.layers = [layer for layer in self.layers if layer != "Pagination"]
+
         results = self.get_result()
         for vol_id, result in results.items():
-            result = self.update_line_break(result)
+            footnote_ref_tag = ""
+            if "Footnote" in self.layers:
+                footnote_fn = self.opf_path / "layers" / vol_id / "Footnote.yml"
+                footnote_layer = yaml.safe_load(footnote_fn.open())
+                footnote_ref_tag = self.get_footnote_references(
+                    footnote_layer["annotations"]
+                )
+            result = self.p_tag_adder(result)
+            result = self.indentation_adjustment(result)
             results = (
                 f"<html>\n<head>\n\t<title>{pecha_title}</title>\n</head>\n<body>\n"
             )
-            results += f"{result}</body>\n</html>"
+            results += f"{result}{footnote_ref_tag}</body>\n</html>"
             Path(out_html_fn).write_text(results)
             # Downloading css template file from ebook template repo and saving it
             template = requests.get(
                 "https://raw.githubusercontent.com/OpenPecha/ebook-template/master/tsadra_template.css"
             )
             Path("template.css").write_bytes(template.content)
-            # click.echo(template.content, file=open('template.css', 'w'))
             # Running ebook-convert command to convert html file to .epub (From calibre)
             # XPath expression to detect chapter titles.
-            chapter_Xpath = "//*[@class='tibetan-chapter']"
-            font_family = "Monlam Uni Ouchan2"
-            font_size = 15
-            chapter_mark = "pagebreak"
-            cover_path = self.opf_path / f"assets/image/{cover_image}"
+            try:
+                level1_toc_Xpath = toc_levels["1"]
+                level2_toc_Xpath = toc_levels["2"]
+                level3_toc_Xpath = toc_levels["3"]
+            except Exception:
+                level1_toc_Xpath = ""
+                level2_toc_Xpath = ""
+                level3_toc_Xpath = ""
+            book_title_Xpath = "//*[@class='tibetan-book-title']"
+            cover_path = self.opf_path / f"asset/image/{cover_image}"
             out_epub_fn = output_path / f"{self.meta['id']}.epub"
+            font_family = "Monlam Uni Ouchan2"
             os.system(
-                f'ebook-convert {out_html_fn} {out_epub_fn} --extra-css=./template.css --chapter={chapter_Xpath} --chapter-mark="{chapter_mark}" --base-font-size={font_size} --embed-font-family="{font_family}" --cover={cover_path}'
+                f'ebook-convert {out_html_fn} {out_epub_fn} --extra-css=./template.css --embed-font-family="{font_family}" --page-breaks-before="{book_title_Xpath}" --cover={cover_path} --flow-size=0 --level1-toc="{level1_toc_Xpath}" --level2-toc="{level2_toc_Xpath}" --level3-toc="{level3_toc_Xpath}" --use-auto-toc --disable-font-rescaling'
             )
             # Removing html file and template file
             os.system(f"rm {out_html_fn}")

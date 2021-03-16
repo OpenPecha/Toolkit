@@ -1,3 +1,16 @@
+<<<<<<< HEAD
+id: 528804bea260470b8cb90b7c884d7637
+annotation_type: Correction
+revision: '00001'
+annotations:
+  5a6f0e4431d04f5e908f86b86a8a8abc:
+    correction: མཆིའོ་
+    span:
+      start: 1838
+      end: 1843
+local_ids:
+  5a6f0e4431d04f5e908f86b86a8a8abc: 200000
+=======
 id: ce09ffa6ce1f47eeb5402c2424a26885
 annotation_type: Correction
 revision: '00001'
@@ -99,3 +112,4 @@ local_ids:
   d9adccb87c25430097d20026cf9a504d: 200013
   1e856a57826341d482a53f9f9a75f11c: 200014
   1b248ae6d4f74fc48de48afe3f1cc53a: 200015
+>>>>>>> master

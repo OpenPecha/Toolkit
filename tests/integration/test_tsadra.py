@@ -13,14 +13,13 @@ if __name__ == "__main__":
     # pecha_id = 111
     # pecha_name = f"P{pecha_id:06}"
 
-    ebook_path = "./output/demo/src/tsadra_publication/RDI-TOK-06-1/OEBPS/"
-    opfs_path = "./output/demo/output"
-    # opf_path = "./output/demo/output/P000101/P000101.opf/"
-    opf_path = "./output/demo/output/P008259/P008259.opf/"
-    hfml_path = "./output/demo/output/P000101_hfml/"
-    ebook_output_path = "./output/demo/output/ebooks"
-    pecha_id = 101
+    pecha_id = 112
     pecha_name = f"P{pecha_id:06}"
+    ebook_path = f"./output/demo/src/tsadra_publication/{pecha_name}/OEBPS/"
+    opfs_path = "./output/demo/output"
+    opf_path = f"./output/demo/output/{pecha_name}/{pecha_name}.opf/"
+    hfml_path = "./output/demo/output/P000113_hfml/"
+    ebook_output_path = "./output/demo/output/ebooks"
 
     # 1. Format Tsadra Ebook to OPF (OpenPecha Format)
     # formatter = TsadraFormatter(output_path=opfs_path)
@@ -35,6 +34,15 @@ if __name__ == "__main__":
     # formatter.create_opf(f"{hfml_path}/{pecha_name}", pecha_id)
 
     # 4. Convert OPF to Ebook
+    # toc_levels = {
+    #     '1': "//*[@class='tibetan-chapters']",
+    #     '2': "//*[@class='tibetan-sabche1' or @class='tibetan-sabche']",
+    #     '3': ""
+    # }
+    toc_levels = {
+        "1": "//*[@class='tibetan-book-number']",
+        "2": "//*[@class='tibetan-chapters']",
+        "3": "//*[@class='tibetan-sabche1' or @class='tibetan-sabche']",
+    }
     serializer = EpubSerializer(Path(opf_path))
-    serializer.apply_layers()
-    serializer.serialize(ebook_output_path)
+    serializer.serialize(toc_levels, ebook_output_path)

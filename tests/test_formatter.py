@@ -305,9 +305,9 @@ class TestTsadraFormatter:
         result = formatter.get_result()
 
         expected_result = {
-            AnnType.book_title: [
-                [(None, {"iscover": True, "span": {"start": 0, "end": 84}})]
-            ],
+            AnnType.book_title: [[(None, {"span": {"start": 0, "end": 84}})]],
+            AnnType.sub_title: [[]],
+            AnnType.credit_page: [[]],
             AnnType.book_number: [[]],
             AnnType.poti_title: [[]],
             AnnType.author: [
@@ -340,6 +340,7 @@ class TestTsadraFormatter:
                 ]
             ],
             AnnType.yigchung: [[(None, {"span": {"start": 7273, "end": 7311}})]],
+            AnnType.footnote: [[]],
         }
 
         for layer in result:
