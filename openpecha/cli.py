@@ -101,12 +101,6 @@ def get_pecha(id, batch_path, layers):
     return pecha_list
 
 
-def get_branch(repo, branch):
-    if branch in repo.heads:
-        return branch
-    return "master"
-
-
 def download_pecha(pecha_id, out_path=None, needs_update=True, branch="main"):
     # clone the repo
     pecha_url = f"{config['OP_ORG']}/{pecha_id}.git"
@@ -118,19 +112,16 @@ def download_pecha(pecha_id, out_path=None, needs_update=True, branch="main"):
         pecha_path = config["OP_PECHAS_PATH"] / pecha_id
 
     if pecha_path.is_dir():  # if repo is already exits at local then try to pull
-        if not needs_update:
-            return pecha_path
         repo = Repo(str(pecha_path))
-        branch_to_pull = get_branch(repo, branch)
-        repo.heads[branch_to_pull].checkout()
-        click.echo(INFO.format(f"Updating {pecha_id} ..."))
-        repo.git.pull("origin", branch_to_pull)
+        repo.git.checkout(branch)
+        if needs_update:
+            click.echo(INFO.format(f"Updating {pecha_id} ..."))
+            repo.git.pull("origin", branch)
     else:
         click.echo(INFO.format(f"Downloading {pecha_id} ..."))
         Repo.clone_from(pecha_url, str(pecha_path))
         repo = Repo(str(pecha_path))
-        branch_to_pull = get_branch(repo, branch)
-        repo.git.checkout(branch_to_pull)
+        repo.git.checkout(branch)
     return pecha_path
 
 
