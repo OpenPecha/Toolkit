@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.7.12 (2021-03-16)
+### Fix
+* Assets path ([`6a602b6`](https://github.com/OpenPecha/openpecha-toolkit/commit/6a602b62e647002aab780bb3142a5085b895b6f6))
+
 ## v0.7.11 (2021-03-16)
 ### Fix
 * **epub-serializer:** Disabled font rescaling ([`1b63245`](https://github.com/OpenPecha/openpecha-toolkit/commit/1b6324512e751ad461c8a9d5a20783e505b208c0))
