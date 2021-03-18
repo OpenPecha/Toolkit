@@ -89,10 +89,6 @@ class EpubSerializer(Serialize):
         elif ann["type"] == AnnType.peydurma:
             start_payload = "#"
             only_start_ann = True
-        elif ann["type"] == AnnType.credit_page:
-            credit_page_ann = ann["credit_page_img_name"]
-            start_payload = f'{Tsadra_template.credit_page_SP}<img src="{self.opf_path}/assets/image/{credit_page_ann}"/></span></p>\n'
-            only_start_ann = True
         elif ann["type"] == AnnType.error_candidate:
             start_payload = "["
             end_payload = "]"
@@ -277,6 +273,14 @@ class EpubSerializer(Serialize):
             footnote_references += f'{p_tag}<a href="#fm{footnote_id}">{Tsadra_template.footnote_reference_SP} id="fr{footnote_id}">{footnote["footnote_ref"]}</span></a></p>'
         return footnote_references
 
+    def add_credit_page(self, result):
+        author_pat = re.search('<p class="text-author">.+</p>', result)
+        credit_pg_name = self.meta["source_metadata"].get("credit", "")
+        if credit_pg_name:
+            credit_page_pat = f'{author_pat[0]}\n{Tsadra_template.credit_page_SP}<img src="{self.opf_path}/assets/image/{credit_pg_name}"/></span></p>\n'
+            result = re.sub(author_pat[0], credit_page_pat, result, 1)
+        return result
+
     def serialize(self, toc_levels={}, output_path="./output/epub_output"):
         """This module serialize .opf file to other format such as .epub etc. In case of epub,
         we are using calibre ebook-convert command to do the conversion by passing our custom css template
@@ -297,6 +301,7 @@ class EpubSerializer(Serialize):
 
         results = self.get_result()
         for vol_id, result in results.items():
+            result = self.add_credit_page(result)
             footnote_ref_tag = ""
             if "Footnote" in self.layers:
                 footnote_fn = self.opf_path / "layers" / vol_id / "Footnote.yml"

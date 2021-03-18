@@ -9,7 +9,7 @@ if __name__ == "__main__":
     pecha_name = f"P{pecha_id:06}"
     ebook_path = f"./tests/data/serialize/tsadra/src/{pecha_name}/OEBPS/"
     opfs_path = "./tests/data/serialize/tsadra"
-    opf_path = f"./tests/data/serialize/tsadra/{pecha_name}.opf/"
+    opf_path = f"./tests/data/serialize/tsadra/{pecha_name}/{pecha_name}.opf/"
     hfml_path = "./output/demo/output/P000113_hfml/"
     ebook_output_path = "./tests/data/serialize/tsadra/ebook"
 
