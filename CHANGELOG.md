@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.7.13 (2021-03-17)
+### Fix
+* Cbranch checkout in pecha download ([`d89c607`](https://github.com/OpenPecha/openpecha-toolkit/commit/d89c607f5d78d92975833b1ec9bb92cefe99da7b))
+
 ## v0.7.12 (2021-03-16)
 ### Fix
 * Assets path ([`6a602b6`](https://github.com/OpenPecha/openpecha-toolkit/commit/6a602b62e647002aab780bb3142a5085b895b6f6))
