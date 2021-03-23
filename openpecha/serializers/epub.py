@@ -36,6 +36,13 @@ class Tsadra_template:
     footnote_EP = "</span></a>"
     footnote_reference_SP = '<span class="tibetan-footnote-reference"'
 
+    toc_xpaths = {
+        "book-number": "//*[@class='tibetan-book-number']",
+        "chapter": "//*[@class='tibetan-chapters']",
+        "sabche": "//*[@class='tibetan-sabche1' or @class='tibetan-sabche']",
+    }
+    book_title_Xpath = "//*[@class='tibetan-book-title']"
+
 
 class EpubSerializer(Serialize):
     """Epub serializer class for OpenPecha."""
@@ -81,10 +88,6 @@ class EpubSerializer(Serialize):
             end_payload = f',{ann["correction"]})'
         elif ann["type"] == AnnType.peydurma:
             start_payload = "#"
-            only_start_ann = True
-        elif ann["type"] == AnnType.credit_page:
-            credit_page_ann = ann["credit_page_img_name"]
-            start_payload = f'{Tsadra_template.credit_page_SP}<img src="{self.opf_path}/assets/image/{credit_page_ann}"/></span></p>\n'
             only_start_ann = True
         elif ann["type"] == AnnType.error_candidate:
             start_payload = "["
@@ -270,6 +273,14 @@ class EpubSerializer(Serialize):
             footnote_references += f'{p_tag}<a href="#fm{footnote_id}">{Tsadra_template.footnote_reference_SP} id="fr{footnote_id}">{footnote["footnote_ref"]}</span></a></p>'
         return footnote_references
 
+    def add_credit_page(self, result):
+        author_pat = re.search('<p class="text-author">.+</p>', result)
+        credit_pg_name = self.meta["source_metadata"].get("credit", "")
+        if credit_pg_name:
+            credit_page_pat = f'{author_pat[0]}\n{Tsadra_template.credit_page_SP}<img src="{self.opf_path}/assets/image/{credit_pg_name}"/></span></p>\n'
+            result = re.sub(author_pat[0], credit_page_pat, result, 1)
+        return result
+
     def serialize(self, toc_levels={}, output_path="./output/epub_output"):
         """This module serialize .opf file to other format such as .epub etc. In case of epub,
         we are using calibre ebook-convert command to do the conversion by passing our custom css template
@@ -290,6 +301,7 @@ class EpubSerializer(Serialize):
 
         results = self.get_result()
         for vol_id, result in results.items():
+            result = self.add_credit_page(result)
             footnote_ref_tag = ""
             if "Footnote" in self.layers:
                 footnote_fn = self.opf_path / "layers" / vol_id / "Footnote.yml"
@@ -311,20 +323,21 @@ class EpubSerializer(Serialize):
             Path("template.css").write_bytes(template.content)
             # Running ebook-convert command to convert html file to .epub (From calibre)
             # XPath expression to detect chapter titles.
-            try:
-                level1_toc_Xpath = toc_levels["1"]
-                level2_toc_Xpath = toc_levels["2"]
-                level3_toc_Xpath = toc_levels["3"]
-            except Exception:
-                level1_toc_Xpath = ""
-                level2_toc_Xpath = ""
-                level3_toc_Xpath = ""
-            book_title_Xpath = "//*[@class='tibetan-book-title']"
+            level1_toc_Xpath = Tsadra_template.toc_xpaths.get(
+                toc_levels.get("1", ""), ""
+            )
+            level2_toc_Xpath = Tsadra_template.toc_xpaths.get(
+                toc_levels.get("2", ""), ""
+            )
+            level3_toc_Xpath = Tsadra_template.toc_xpaths.get(
+                toc_levels.get("3", ""), ""
+            )
+
             cover_path = self.opf_path / f"assets/image/{cover_image}"
             out_epub_fn = output_path / f"{self.meta['id']}.epub"
             font_family = "Monlam Uni Ouchan2"
             os.system(
-                f'ebook-convert {out_html_fn} {out_epub_fn} --extra-css=./template.css --embed-font-family="{font_family}" --page-breaks-before="{book_title_Xpath}" --cover={cover_path} --flow-size=0 --level1-toc="{level1_toc_Xpath}" --level2-toc="{level2_toc_Xpath}" --level3-toc="{level3_toc_Xpath}" --use-auto-toc --disable-font-rescaling'
+                f'ebook-convert {out_html_fn} {out_epub_fn} --extra-css=./template.css --embed-font-family="{font_family}" --page-breaks-before="{Tsadra_template.book_title_Xpath}" --cover={cover_path} --flow-size=0 --level1-toc="{level1_toc_Xpath}" --level2-toc="{level2_toc_Xpath}" --level3-toc="{level3_toc_Xpath}" --use-auto-toc --disable-font-rescaling'
             )
             # Removing html file and template file
             os.system(f"rm {out_html_fn}")

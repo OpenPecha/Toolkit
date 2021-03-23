@@ -8,7 +8,7 @@ from bs4 import BeautifulSoup
 
 from .formatter import BaseFormatter
 from .layers import *
-from .layers import AnnType, CreditPage
+from .layers import AnnType
 
 
 class TsadraTemplate:
@@ -19,7 +19,6 @@ class TsadraTemplate:
         "credits-page_front-page---text-author",
         "credits-page_front-page---text-author1",
     ]
-    credit_page = "credits-page_epub-edition-line"
     book_titles = [
         "credits-page_front-title",
         "tibetan-book-title",
@@ -77,7 +76,6 @@ class TsadraFormatter(BaseFormatter):
         self.walker = 0  # The walker to traverse every character in the pecha
         self.book_title = []  # list variable to store book title index
         self.sub_title = []
-        self.credit_page = []
         self.book_number = []
         self.poti_title = []
         self.author = []  # list variable to store author annotion index
@@ -166,18 +164,6 @@ class TsadraFormatter(BaseFormatter):
                     )
                     self.base_text += book_num + "\n"
                     self.walker += len(book_num) + 1
-
-            elif p["class"][0] == TsadraTemplate.credit_page:
-                credit_page = self.get_credit_page(p)
-                if credit_page:
-                    self.credit_page.append(
-                        (
-                            None,
-                            CreditPage(credit_page, Span(self.walker, self.walker + 1)),
-                        )
-                    )
-                    self.base_text += " "
-                    self.walker += 1
 
             elif (
                 p["class"][0] in TsadraTemplate.author
@@ -468,7 +454,6 @@ class TsadraFormatter(BaseFormatter):
             AnnType.sub_title: [self.sub_title],
             AnnType.book_number: [self.book_number],
             AnnType.poti_title: [self.poti_title],
-            AnnType.credit_page: [self.credit_page],
             AnnType.author: [self.author],
             AnnType.chapter: [self.chapter],
             AnnType.topic: [self.topic],
@@ -537,8 +522,8 @@ class TsadraFormatter(BaseFormatter):
 
         # cover image path
         image_path = input_path / "image"
-        (self.dirs["opf_path"] / "asset").mkdir(exist_ok=True)
-        os.system(f"cp -R {image_path} {self.dirs['opf_path']}/asset")
+        (self.dirs["opf_path"] / "assets").mkdir(exist_ok=True)
+        os.system(f"cp -R {image_path} {self.dirs['opf_path']}/assets")
 
         # parse layers
         for html in self.get_input(input_path):

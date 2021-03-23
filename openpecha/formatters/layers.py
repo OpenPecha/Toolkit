@@ -26,7 +26,6 @@ __all__ = [
     "Author",
     "Archaic",
     "Span",
-    "CreditPage",
     "Footnote",
 ]
 
@@ -38,7 +37,6 @@ class AnnType:
     poti_title = "PotiTitle"
     author = "Author"
     chapter = "Chapter"
-    credit_page = "Credit_page"
 
     topic = "Text"
     sub_topic = "SubText"
@@ -69,9 +67,6 @@ class _attr_names:
     VOL = "vol"
     START = "start"
     END = "end"
-
-    # Credit page
-    CREDIT_PAGE_IMG_NAME = "credit_page_img_name"
 
     # Page
     PAGE_INDEX = "page_index"  # Page number based on Volume specified, type: int
@@ -176,13 +171,6 @@ def SubTitle(span):
 
 def BookNumber(span):
     return {_attr_names.SPAN: span}
-
-
-def CreditPage(credit_page_img_name, span):
-    return {
-        _attr_names.CREDIT_PAGE_IMG_NAME: credit_page_img_name,
-        _attr_names.SPAN: span,
-    }
 
 
 def PotiTitle(span):
