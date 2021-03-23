@@ -10,6 +10,8 @@ def test_layer_model():
     )
     assert layer.annotation_type.value == "BookTitle"
     assert layer.revision == "00001"
+    layer.bump_revision()
+    assert layer.revision == "00002"
 
 
 def test_not_supported_layer():

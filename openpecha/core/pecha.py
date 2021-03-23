@@ -27,6 +27,10 @@ class OpenPecha:
         self.assets = assets
         self._components = components
 
+    def reset_base_and_layers(self):
+        self.base = {}
+        self.layers = defaultdict(dict)
+
     @property
     def pecha_id(self):
         if self._pecha_id:
@@ -55,20 +59,20 @@ class OpenPecha:
         self._components = self._read_components()
         return self._components
 
-    def get_base(self, basename):
-        if basename in self.base:
-            return self.base[basename]
-        self.base[basename] = self.read_base_file(basename)
-        return self.base[basename]
+    def get_base(self, base_name):
+        if base_name in self.base:
+            return self.base[base_name]
+        self.base[base_name] = self.read_base_file(base_name)
+        return self.base[base_name]
 
-    def get_layer(self, basename, layername):
-        if basename in self.layers and layername in self.layers[basename]:
-            return self.layers[basename][layername]
+    def get_layer(self, base_name, layer_name):
+        if base_name in self.layers and layer_name in self.layers[base_name]:
+            return self.layers[base_name][layer_name]
 
-        self.layers[basename][layername] = Layer.parse_obj(
-            self.read_layers_file(basename, layername.value)
+        self.layers[base_name][layer_name] = Layer.parse_obj(
+            self.read_layers_file(base_name, layer_name.value)
         )
-        return self.layers[basename][layername]
+        return self.layers[base_name][layer_name]
 
 
 class OpenPechaFS(OpenPecha):
@@ -109,11 +113,11 @@ class OpenPechaFS(OpenPecha):
     def assets_path(self):
         return self.opf_path / "assets"
 
-    def read_base_file(self, basename):
-        return (self.base_path / f"{basename}.txt").read_text(encoding="utf-8")
+    def read_base_file(self, base_name):
+        return (self.base_path / f"{base_name}.txt").read_text(encoding="utf-8")
 
-    def read_layers_file(self, basename, layername):
-        return load_yaml(self.layers_path / basename / f"{layername}.yml")
+    def read_layers_file(self, base_name, layer_name):
+        return load_yaml(self.layers_path / base_name / f"{layer_name}.yml")
 
     def read_meta_file(self):
         return load_yaml(self.meta_fn)
@@ -134,22 +138,22 @@ class OpenPechaFS(OpenPecha):
     def save_meta(self):
         dump_yaml(json.loads(self.meta.json()), self.meta_fn)
 
-    def save_base(self):
-        for basename, content in self.base.items():
-            base_fn = self._mkdir(self.base_path) / f"{basename}.txt"
-            base_fn.write_text(content)
+    def save_single_base(self, base_name, content):
+        base_fn = self._mkdir(self.base_path) / f"{base_name}.txt"
+        base_fn.write_text(content)
 
-    def save_layer(self, basename, layername, layer):
-        layer_fn = self._mkdir(self.layers_path / basename) / f"{layername}.yml"
+    def save_base(self):
+        for base_name, content in self.base.items():
+            self.save_single_base(base_name, content)
+
+    def save_layer(self, base_name, layer_name, layer):
+        layer_fn = self._mkdir(self.layers_path / base_name) / f"{layer_name.value}.yml"
         dump_yaml(json.loads(layer.json()), layer_fn)
 
     def save_layers(self):
-        for basename, base_layers in self.layers.items():
-            for layername, layer in base_layers.items():
-                layer_fn = (
-                    self._mkdir(self.layers_path / basename) / f"{layername.value}.yml"
-                )
-                dump_yaml(json.loads(layer.json()), layer_fn)
+        for base_name, base_layers in self.layers.items():
+            for layer_name, layer in base_layers.items():
+                self.save_layer(base_name, layer_name, layer)
 
     def save_index(self):
         try:
@@ -176,3 +180,12 @@ class OpenPechaFS(OpenPecha):
         self.save_meta()
         self.save_assets()
         return self.opf_path
+
+    def update_base(self, base_name, content):
+        self.save_single_base(base_name, content)
+
+    def update_layer(self, base_name, layer_name, layer):
+        old_layer = self.get_layer(base_name, layer_name)
+        old_layer.bump_revision()
+        old_layer.annotations = layer.annotations
+        self.save_layer(base_name, layer_name, old_layer)
