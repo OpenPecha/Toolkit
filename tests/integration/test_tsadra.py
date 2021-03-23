@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from openpecha.formatters import HFMLFormatter, TsadraFormatter
-from openpecha.serializers import EpubSerializer, HFMLSerializer
+from openpecha.serializers import EditorSerializer, EpubSerializer, HFMLSerializer
 
 if __name__ == "__main__":
 
@@ -46,3 +46,7 @@ if __name__ == "__main__":
     }
     serializer = EpubSerializer(Path(opf_path))
     serializer.serialize(toc_levels, ebook_output_path)
+
+    # Editor serializer
+    # serializer = EditorSerializer(Path(opf_path))
+    # serializer.serialize(ebook_output_path)
