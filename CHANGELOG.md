@@ -2,6 +2,13 @@
 
 <!--next-version-placeholder-->
 
+## v0.7.14 (2021-03-23)
+### Fix
+* **epub-serializer:** Removed credit page layer n added credit page img tag after first author ([`0342a17`](https://github.com/OpenPecha/openpecha-toolkit/commit/0342a179862aa663fe38059290bf67332bb3f1e8))
+* **epub-serializer:** Removed credit page layer n added credit page img tag after first author ([`044e119`](https://github.com/OpenPecha/openpecha-toolkit/commit/044e119ecdc8638b243128e15788d51307636f19))
+* Toc level variable changed ([`c5c07af`](https://github.com/OpenPecha/openpecha-toolkit/commit/c5c07af6d5425c7c2640a2102874c22ad4b1a1e5))
+* Toc level variable changed ([`3734339`](https://github.com/OpenPecha/openpecha-toolkit/commit/3734339fee49d463211f0ca67dfb316d3f30181d))
+
 ## v0.7.13 (2021-03-17)
 ### Fix
 * Cbranch checkout in pecha download ([`d89c607`](https://github.com/OpenPecha/openpecha-toolkit/commit/d89c607f5d78d92975833b1ec9bb92cefe99da7b))

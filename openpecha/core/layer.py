@@ -51,6 +51,9 @@ class Layer(BaseModel):
         assert v.isdigit(), "must integer parsible like `00002`"
         return v
 
+    def bump_revision(self):
+        self.revision = f"{int(self.revision)+1:05}"
+
 
 class MetaData(BaseModel):
     id: str

@@ -4,6 +4,7 @@ from pathlib import Path
 import pytest
 
 from openpecha.formatters import GoogleOCRFormatter, HFMLFormatter, TsadraFormatter
+from openpecha.formatters.editor import EditorParser
 from openpecha.formatters.formatter import LocalIdManager
 from openpecha.formatters.layers import AnnType
 
@@ -307,7 +308,6 @@ class TestTsadraFormatter:
         expected_result = {
             AnnType.book_title: [[(None, {"span": {"start": 0, "end": 84}})]],
             AnnType.sub_title: [[]],
-            AnnType.credit_page: [[]],
             AnnType.book_number: [[]],
             AnnType.poti_title: [[]],
             AnnType.author: [
@@ -374,3 +374,11 @@ if __name__ == "__main__":
     # formatter = TsadraFormatter()
     # formatter.create_opf(path, 9)
     TestTsadraFormatter().test_tsadra_formatter()
+
+
+def test_parser_editor_output():
+    html = Path("tests/data/formatter/editor/editor_output.html").open()
+    parser = EditorParser()
+    parser.parse("v001", html)
+    print(parser.base)
+    print(parser.layers)

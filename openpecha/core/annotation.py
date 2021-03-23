@@ -18,5 +18,5 @@ class Span(BaseModel):
         return v
 
 
-class AnnBase(BaseModel):
+class Ann(BaseModel):
     span: Span
