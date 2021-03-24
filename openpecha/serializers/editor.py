@@ -135,11 +135,11 @@ class EditorSerializer(Serialize):
                 new_body_text += para
         return new_body_text
 
-    def serialize(self, output_path="./"):
+    def serialize(self):
         self.apply_layers()
         self.layers = [layer for layer in self.layers if layer != "Pagination"]
 
         results = self.get_result()
-        for vol_id, result in results.items():
+        for base_name, result in results.items():
             result = self.p_tag_adder(result)
-            Path(f"{output_path}/{vol_id}.txt").write_text(result, encoding="utf-8")
+            yield base_name, result
