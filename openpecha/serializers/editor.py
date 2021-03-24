@@ -16,7 +16,7 @@ class AnnotationTemplate:
     book_title_SP = '<p><span class="book-title"'
     sub_title_SP = '<p><span class="sub-title"'
     book_number_SP = '<p><span class="book-number"'
-    author_SP = '<p><span class="text-author"'
+    author_SP = '<p><span class="author"'
     chapter_SP = '<p><span class="chapter"'
     tsawa_SP = '<span class="root-text"'
     quatation__SP = '<span class="citation"'
