@@ -2,6 +2,11 @@
 
 <!--next-version-placeholder-->
 
+## v0.7.15 (2021-03-23)
+### Fix
+* Aupdate base and layers ([`96c95b8`](https://github.com/OpenPecha/openpecha-toolkit/commit/96c95b8c3db9d002121806b957a20380b8bba155))
+* Add editor outpur parser ([`ef85a5f`](https://github.com/OpenPecha/openpecha-toolkit/commit/ef85a5f1e8bebe19ec0cf6eb05ef394f2f783dd2))
+
 ## v0.7.14 (2021-03-23)
 ### Fix
 * **epub-serializer:** Removed credit page layer n added credit page img tag after first author ([`0342a17`](https://github.com/OpenPecha/openpecha-toolkit/commit/0342a179862aa663fe38059290bf67332bb3f1e8))
