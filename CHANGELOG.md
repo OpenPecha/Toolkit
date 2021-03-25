@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.7.18 (2021-03-25)
+### Fix
+* Editor parser span ([`9242571`](https://github.com/OpenPecha/openpecha-toolkit/commit/9242571a9f86f1f8860ac3e3367cf052be1a298f))
+
 ## v0.7.17 (2021-03-25)
 ### Fix
 * Radd missing layers and improve test ([`f336aef`](https://github.com/OpenPecha/openpecha-toolkit/commit/f336aef99808242a1a69bd9c61abb6940c2b4bb1))
