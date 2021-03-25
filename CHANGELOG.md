@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.7.17 (2021-03-25)
+### Fix
+* Radd missing layers and improve test ([`f336aef`](https://github.com/OpenPecha/openpecha-toolkit/commit/f336aef99808242a1a69bd9c61abb6940c2b4bb1))
+
 ## v0.7.16 (2021-03-24)
 ### Fix
 * Return output from editor serializer instead of saving ([`c6297c0`](https://github.com/OpenPecha/openpecha-toolkit/commit/c6297c056203e932af31edf915ef33a0f1357321))
