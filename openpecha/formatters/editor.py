@@ -14,15 +14,19 @@ class EditorParser:
     def _reset(self):
         self.layers: Dict[str, Dict[str, Layer]] = defaultdict(dict)
         self.base: Dict[str, str] = {}
-        self.cur_base_char_idx = 0
+        self.last_base_char_idx = -1
 
     def _add_base(self, root, base_name):
         self.base[base_name] = root.text
 
+    def _get_content_span(self, text):
+        start = self.last_base_char_idx + 1
+        end = start + len(text) - 1
+        self.last_base_char_idx = end
+        return start, end
+
     def _get_ann(self, tag):
-        start = self.cur_base_char_idx
-        end = start + len(tag.text)
-        self.cur_base_char_idx = end
+        start, end = self._get_content_span(tag.text)
         span = Span(start=start, end=end)
         return Ann(span=span), tag["id"]
 
@@ -41,7 +45,7 @@ class EditorParser:
         layer.annotations[id_] = ann
 
     def __handle_non_ann(self, text):
-        self.cur_base_char_idx += len(text)
+        start, end = self._get_content_span(text)
 
     def _parse_p_tag(self, base_name, p):
         for child in p.children:
@@ -70,7 +74,7 @@ class EditorParser:
                 self._add_ann(base_name, LayersEnum.yigchung, child)
 
         # newline at the end of every p tag
-        self.cur_base_char_idx += 1
+        self.last_base_char_idx += 1
 
     def parse(self, base_name, html):
         self._reset()

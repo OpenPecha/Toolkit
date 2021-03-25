@@ -387,6 +387,6 @@ def test_parser_editor_output():
         for layer_name, layer in layers.items():
             for ann_id, ann in layer.annotations.items():
                 assert (
-                    parser.base[base_name][ann.span.start : ann.span.end]
+                    parser.base[base_name][ann.span.start : ann.span.end + 1]
                     == f"{layer_name.value} {ann_id}"
                 )

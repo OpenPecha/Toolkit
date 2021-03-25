@@ -16,7 +16,7 @@ class AnnotationTemplate:
     tsawa_SP = '<span class="root-text"'
     quatation__SP = '<span class="citation"'
     sabche_SP = '<span class="sabche"'
-    yigchung_SP = '<span class="yigchung">'
+    yigchung_SP = '<span class="yigchung"'
     footnote_marker_SP = '<span class="tibetan-footnote-marker"'
     footnote_EP = "</span></a>"
     footnote_reference_SP = '<span class="tibetan-footnote-reference"'
@@ -54,8 +54,8 @@ class EditorSerializer(Serialize):
 
         """
         only_start_ann = False
-        start_payload = "("
-        end_payload = ")"
+        start_payload = ""
+        end_payload = ""
         ann_id = ann["id"]
         if ann["type"] == LayersEnum.correction.value:
             start_payload = "("
@@ -108,6 +108,7 @@ class EditorSerializer(Serialize):
         paras = body_text.split("\n")
         para_flag = False
         cur_para = ""
+        cur_span_payload = ""
         for para in paras:
             if "<p" not in para:
                 if re.search("<span.+?</span>", para):
