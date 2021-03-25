@@ -1,5 +1,7 @@
 from pathlib import Path
 
+from pydantic.errors import SubclassError
+
 from openpecha.catalog.utils import create_pecha_id
 from openpecha.core.layer import InitialCreationEnum, Layer, LayersEnum, MetaData
 from openpecha.core.pecha import OpenPechaFS
@@ -16,6 +18,8 @@ class EmptyEbook:
         self.assets = assets
         self.layers = [
             LayersEnum.book_title,
+            LayersEnum.sub_title,
+            LayersEnum.book_number,
             LayersEnum.author,
             LayersEnum.chapter,
             LayersEnum.citation,

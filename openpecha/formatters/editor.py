@@ -52,6 +52,10 @@ class EditorParser:
             tag_class = child["class"]
             if "book-title" in tag_class:
                 self._add_ann(base_name, LayersEnum.book_title, child)
+            elif "sub-title" in tag_class:
+                self._add_ann(base_name, LayersEnum.sub_title, child)
+            elif "book-number" in tag_class:
+                self._add_ann(base_name, LayersEnum.book_number, child)
             elif "author" in tag_class:
                 self._add_ann(base_name, LayersEnum.author, child)
             elif "chapter" in tag_class:
@@ -62,8 +66,10 @@ class EditorParser:
                 self._add_ann(base_name, LayersEnum.tsawa, child)
             elif "sabche" in tag_class:
                 self._add_ann(base_name, LayersEnum.sabche, child)
+            elif "yigchung" in tag_class:
+                self._add_ann(base_name, LayersEnum.yigchung, child)
 
-        # newline for p tag
+        # newline at the end of every p tag
         self.cur_base_char_idx += 1
 
     def parse(self, base_name, html):

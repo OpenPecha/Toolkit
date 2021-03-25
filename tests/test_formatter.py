@@ -377,8 +377,16 @@ if __name__ == "__main__":
 
 
 def test_parser_editor_output():
-    html = Path("tests/data/formatter/editor/editor_output.html").open()
+    html = Path("tests/data/formatter/editor/editor_output.html").read_text()
     parser = EditorParser()
     parser.parse("v001", html)
     print(parser.base)
     print(parser.layers)
+
+    for base_name, layers in parser.layers.items():
+        for layer_name, layer in layers.items():
+            for ann_id, ann in layer.annotations.items():
+                assert (
+                    parser.base[base_name][ann.span.start : ann.span.end]
+                    == f"{layer_name.value} {ann_id}"
+                )
