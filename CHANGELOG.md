@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.7.20 (2021-03-26)
+### Fix
+* **test_serializer:** Testcase added for editor serializer ([`2c4d653`](https://github.com/OpenPecha/openpecha-toolkit/commit/2c4d653c0e61e4830d997de449cc7742092badbc))
+* **editor-serializer:** P tag introduced to verse components ([`7d4800f`](https://github.com/OpenPecha/openpecha-toolkit/commit/7d4800f9674cd7d18bbae089085f783248e63253))
+* **editor-serializer:** Footnote serialization enabled ([`53149e3`](https://github.com/OpenPecha/openpecha-toolkit/commit/53149e37c2fbc76c00f7baad787e7afd6abdee53))
+
 ## v0.7.19 (2021-03-26)
 ### Fix
 * Grouping root-text and find verse ([`a1a2484`](https://github.com/OpenPecha/openpecha-toolkit/commit/a1a248452f29b5dc38fbfb6614bc7149e0c859d2))
