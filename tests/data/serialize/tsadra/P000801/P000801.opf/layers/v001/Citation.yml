@@ -1,0 +1,14 @@
+id: 97d8138551e64ae99f759e17ddbe0991
+annotation_type: Citation
+revision: '00015'
+annotations:
+  e54f06a0254e4e1f9f72552c514841b3:
+    span:
+      start: 111
+      end: 152
+    is_verse: false
+  a3cacfe626734376b5a45ade275de779:
+    span:
+      start: 188
+      end: 227
+    is_verse: false

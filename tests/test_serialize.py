@@ -2,6 +2,7 @@ import tempfile
 from pathlib import Path
 
 import pytest
+from yaml import serialize
 
 from openpecha.serializers import EditorSerializer, EpubSerializer, HFMLSerializer
 
@@ -31,8 +32,12 @@ def test_hfml_2_tsadra_serializer(opf_path):
         assert Path(out_fn).name == "P000100.epub"
 
 
-def test_editor_serializer(opf_path):
+def test_editor_serializer():
+    opf_path = "./tests/data/serialize/tsadra/P000801/P000801.opf"
+    expected_output = Path(
+        "./tests/data/serialize/tsadra/editor_serializer_output.html"
+    ).read_text(encoding="utf-8")
     serializer = EditorSerializer(opf_path)
     for base_name, result in serializer.serialize():
         assert base_name
-        assert result
+        assert result == expected_output

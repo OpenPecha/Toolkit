@@ -1,5 +1,7 @@
 import re
 
+import yaml
+
 from openpecha.core.layer import LayersEnum
 
 from .serialize import Serialize
@@ -17,9 +19,9 @@ class AnnotationTemplate:
     quatation__SP = '<span class="citation"'
     sabche_SP = '<span class="sabche"'
     yigchung_SP = '<span class="yigchung"'
-    footnote_marker_SP = '<span class="tibetan-footnote-marker"'
+    footnote_marker_SP = '<span class="footnote-marker"'
     footnote_EP = "</span></a>"
-    footnote_reference_SP = '<span class="tibetan-footnote-reference"'
+    footnote_reference_SP = '<span class="footnote-reference"'
 
 
 class EditorSerializer(Serialize):
@@ -102,12 +104,19 @@ class EditorSerializer(Serialize):
         if not only_start_ann:
             self.add_chars(vol_id, end_cc, False, end_payload)
 
+    def get_footnote_references(self, footnotes):
+        footnote_references = ""
+        for footnote_id, footnote in footnotes.items():
+            footnote_references += f'<p><a href="#fm{footnote_id}">{AnnotationTemplate.footnote_reference_SP} id="fr{footnote_id}">{footnote["footnote_ref"]}</span></a></p>'
+        return footnote_references
+
     def p_tag_adder(self, body_text):
         new_body_text = ""
         body_text = re.sub(r"\n</span>", "\n</span>\n", body_text)
         paras = body_text.split("\n")
         para_flag = False
         cur_para = ""
+        id_walker = 1
         cur_span_payload = ""
         for para in paras:
             if "<p" not in para:
@@ -115,16 +124,20 @@ class EditorSerializer(Serialize):
                     new_body_text += f"<p>{para}</p>"
                 elif "<span" in para and not para_flag:
                     cur_span_payload = re.search("<span .+>", para)[0]
-                    cur_para += f"<p>{para}<br>"
+                    cur_para += f"<p>{para}</span></p>"
                     para_flag = True
                 elif para_flag and "</span>" not in para:
-                    cur_para += f"{cur_span_payload}{para}</br>"
+                    cur_para += (
+                        f'<p>{cur_span_payload[:-2]}{id_walker}">{para}</span></p>'
+                    )
+                    id_walker += 1
                 elif "</span>" in para:
-                    cur_para += f"{cur_span_payload}{para}</p>"
+                    cur_para += f'<p>{cur_span_payload[:-2]}{id_walker}">{para}</p>'
                     new_body_text += cur_para
                     cur_para = ""
                     para_flag = False
                     cur_span_payload = ""
+                    id_walker = 1
                 else:
                     new_body_text += f"<p>{para}</p>"
             else:
@@ -137,5 +150,13 @@ class EditorSerializer(Serialize):
 
         results = self.get_result()
         for base_name, result in results.items():
+            footnote_ref_tag = ""
+            if "Footnote" in self.layers:
+                footnote_fn = self.opf_path / "layers" / base_name / "Footnote.yml"
+                footnote_layer = yaml.safe_load(footnote_fn.open())
+                footnote_ref_tag = self.get_footnote_references(
+                    footnote_layer["annotations"]
+                )
             result = self.p_tag_adder(result)
+            result = f"<html>\n<head>\n<title></title>\n</head>\n<body>\n{result}{footnote_ref_tag}</body>\n</html>"
             yield base_name, result
