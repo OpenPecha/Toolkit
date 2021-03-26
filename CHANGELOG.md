@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.7.21 (2021-03-26)
+### Fix
+* **verse-annotation:** Isverse attribute of verse type annotation changed to is_verse ([`4173c1a`](https://github.com/OpenPecha/openpecha-toolkit/commit/4173c1a66d9c3f68dbc7a38fdb6e1c3b56d99d69))
+
 ## v0.7.20 (2021-03-26)
 ### Fix
 * **test_serializer:** Testcase added for editor serializer ([`2c4d653`](https://github.com/OpenPecha/openpecha-toolkit/commit/2c4d653c0e61e4830d997de449cc7742092badbc))
