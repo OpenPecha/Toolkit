@@ -108,21 +108,15 @@ class EpubSerializer(Serialize):
             start_payload = Tsadra_template.chapter_SP
             end_payload = Tsadra_template.span_EP
         elif ann["type"] == AnnType.tsawa:
-            try:
-                if ann["isverse"]:
-                    start_payload = Tsadra_template.tsawa_verse_SP
-                else:
-                    start_payload = Tsadra_template.tsawa_SP
-            except Exception:
+            if "is_verse" in ann and ann["is_verse"]:
+                start_payload = Tsadra_template.tsawa_verse_SP
+            else:
                 start_payload = Tsadra_template.tsawa_SP
             end_payload = Tsadra_template.span_EP
         elif ann["type"] == AnnType.citation:
-            try:
-                if ann["isverse"]:
-                    start_payload = Tsadra_template.quatation__verse_SP
-                else:
-                    start_payload = Tsadra_template.quatation__SP
-            except Exception:
+            if "is_verse" in ann and ann["is_verse"]:
+                start_payload = Tsadra_template.quatation__verse_SP
+            else:
                 start_payload = Tsadra_template.quatation__SP
             end_payload = Tsadra_template.span_EP
         elif ann["type"] == AnnType.sabche:
