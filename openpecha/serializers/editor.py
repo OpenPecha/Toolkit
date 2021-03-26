@@ -128,11 +128,11 @@ class EditorSerializer(Serialize):
                     para_flag = True
                 elif para_flag and "</span>" not in para:
                     cur_para += (
-                        f'<p>{cur_span_payload}[:-2]{id_walker}">{para}</span></p>'
+                        f'<p>{cur_span_payload[:-2]}{id_walker}">{para}</span></p>'
                     )
                     id_walker += 1
                 elif "</span>" in para:
-                    cur_para += f'<p>{cur_span_payload}[:-2]{id_walker}">{para}</p>'
+                    cur_para += f'<p>{cur_span_payload[:-2]}{id_walker}">{para}</p>'
                     new_body_text += cur_para
                     cur_para = ""
                     para_flag = False
@@ -158,5 +158,5 @@ class EditorSerializer(Serialize):
                     footnote_layer["annotations"]
                 )
             result = self.p_tag_adder(result)
-            result = f"<html>\n<head>\n\t<title></title>\n</head>\n<body>\n{result}{footnote_ref_tag}</body>\n</html>"
+            result = f"<html>\n<head>\n<title></title>\n</head>\n<body>\n{result}{footnote_ref_tag}</body>\n</html>"
             yield base_name, result
