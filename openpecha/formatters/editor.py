@@ -3,7 +3,7 @@ from typing import Dict
 
 from bs4 import BeautifulSoup
 
-from openpecha.core.annotation import Ann, Span
+from openpecha.core.annotation import Ann, Span, VerseTypeAnn
 from openpecha.core.layer import Layer, LayersEnum
 
 
@@ -76,7 +76,47 @@ class EditorParser:
         # newline at the end of every p tag
         self.last_base_char_idx += 1
 
-    def parse(self, base_name, html):
+    def _group_anns(self, base_name, layer_name):
+        def _create_ann(start, end, is_verse):
+            return VerseTypeAnn(span=Span(start=start, end=end), is_verse=is_verse)
+
+        layer = self.layers[base_name][layer_name]
+        grouped_anns = {}
+        anns = list(layer.annotations.items())
+        true_id = anns[0][0]
+        true_start = anns[0][1].span.start
+        true_end = anns[0][1].span.end
+        is_verse = False
+        for i, (id_, ann) in enumerate(anns[1:], start=2):
+
+            # find the last element of the group
+            if ann.span.start == (true_end + 2):
+                true_end = ann.span.end
+                is_verse = True
+                if i == len(anns):
+                    grouped_anns[true_id] = _create_ann(true_start, true_end, is_verse)
+
+            # create the group
+            elif i == len(anns) or ann.span.start > (true_end + 2):
+                grouped_anns[true_id] = _create_ann(true_start, true_end, is_verse)
+
+                # start next group with first element
+                true_id = id_
+                true_start = ann.span.start
+                true_end = ann.span.end
+                is_verse = False
+
+                # single last ann
+                if i == len(anns):
+                    grouped_anns[true_id] = _create_ann(true_start, true_end, is_verse)
+
+        layer.annotations = grouped_anns
+
+    def _group_verse_citation(self, base_name):
+        layer = self.layers[base_name][LayersEnum("Citation")]
+        pass
+
+    def parse(self, base_name, html, group=True):
         self._reset()
 
         root = BeautifulSoup(html, "html.parser")
@@ -84,3 +124,7 @@ class EditorParser:
 
         for p in root.find_all("p"):
             self._parse_p_tag(base_name, p)
+
+        if group:
+            self._group_anns(base_name, LayersEnum("Tsawa"))
+            self._group_anns(base_name, LayersEnum("Citation"))
