@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.7.19 (2021-03-26)
+### Fix
+* Grouping root-text and find verse ([`a1a2484`](https://github.com/OpenPecha/openpecha-toolkit/commit/a1a248452f29b5dc38fbfb6614bc7149e0c859d2))
+
 ## v0.7.18 (2021-03-25)
 ### Fix
 * Editor parser span ([`9242571`](https://github.com/OpenPecha/openpecha-toolkit/commit/9242571a9f86f1f8860ac3e3367cf052be1a298f))
