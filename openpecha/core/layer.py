@@ -10,6 +10,7 @@ class LayersEnum(Enum):
     index = "index"
 
     book_title = "BookTitle"
+    sub_title = "SubTitle"
     book_number = "BookNumber"
     poti_title = "PotiTitle"
     author = "Author"
@@ -28,6 +29,7 @@ class LayersEnum(Enum):
     yigchung = "Yigchung"
     archaic = "Archaic"
     durchen = "Durchen"
+    footnote = "Footnote"
 
 
 class InitialCreationEnum(Enum):

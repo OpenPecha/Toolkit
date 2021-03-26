@@ -20,3 +20,7 @@ class Span(BaseModel):
 
 class Ann(BaseModel):
     span: Span
+
+
+class VerseTypeAnn(Ann):
+    is_verse: bool = False

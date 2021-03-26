@@ -2,6 +2,18 @@
 
 <!--next-version-placeholder-->
 
+## v0.7.19 (2021-03-26)
+### Fix
+* Grouping root-text and find verse ([`a1a2484`](https://github.com/OpenPecha/openpecha-toolkit/commit/a1a248452f29b5dc38fbfb6614bc7149e0c859d2))
+
+## v0.7.18 (2021-03-25)
+### Fix
+* Editor parser span ([`9242571`](https://github.com/OpenPecha/openpecha-toolkit/commit/9242571a9f86f1f8860ac3e3367cf052be1a298f))
+
+## v0.7.17 (2021-03-25)
+### Fix
+* Radd missing layers and improve test ([`f336aef`](https://github.com/OpenPecha/openpecha-toolkit/commit/f336aef99808242a1a69bd9c61abb6940c2b4bb1))
+
 ## v0.7.16 (2021-03-24)
 ### Fix
 * Return output from editor serializer instead of saving ([`c6297c0`](https://github.com/OpenPecha/openpecha-toolkit/commit/c6297c056203e932af31edf915ef33a0f1357321))

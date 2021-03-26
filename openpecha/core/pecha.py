@@ -12,7 +12,7 @@ from openpecha.utils import dump_yaml, load_yaml
 class OpenPecha:
     def __init__(
         self,
-        base: Dict = {},
+        base: Dict[str, str] = {},
         layers: Dict[str, Dict[LayersEnum, Layer]] = defaultdict(dict),
         index: Layer = None,
         meta: MetaData = None,
