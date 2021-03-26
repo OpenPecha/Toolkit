@@ -1,8 +1,5 @@
-import os
 import re
-from pathlib import Path
 
-import requests
 import yaml
 
 from openpecha.formatters.layers import AnnType
@@ -21,7 +18,7 @@ class AnnotationTemplate:
     tsawa_SP = '<span class="root-text"'
     quatation__SP = '<span class="citation"'
     sabche_SP = '<span class="sabche"'
-    yigchung_SP = '<span class="yigchung">'
+    yigchung_SP = '<span class="yigchung"'
     footnote_marker_SP = '<span class="footnote-marker"'
     footnote_EP = "</span></a>"
     footnote_reference_SP = '<span class="footnote-reference"'
@@ -119,41 +116,46 @@ class EditorSerializer(Serialize):
         paras = body_text.split("\n")
         para_flag = False
         cur_para = ""
+        id_walker = 1
         for para in paras:
             if "<p" not in para:
                 if re.search("<span.+?</span>", para):
                     new_body_text += f"<p>{para}</p>"
                 elif "<span" in para and not para_flag:
                     cur_span_payload = re.search("<span .+>", para)[0]
-                    cur_para += f"<p>{para}<br>"
+                    cur_para += f"<p>{para}</span></p>"
                     para_flag = True
                 elif para_flag and "</span>" not in para:
-                    cur_para += f"{cur_span_payload}{para}</br>"
+                    cur_para += (
+                        f'<p>{cur_span_payload}[:-2]{id_walker}">{para}</span></p>'
+                    )
+                    id_walker += 1
                 elif "</span>" in para:
-                    cur_para += f"{cur_span_payload}{para}</p>"
+                    cur_para += f'<p>{cur_span_payload}[:-2]{id_walker}">{para}</p>'
                     new_body_text += cur_para
                     cur_para = ""
                     para_flag = False
                     cur_span_payload = ""
+                    id_walker = 1
                 else:
                     new_body_text += f"<p>{para}</p>"
             else:
                 new_body_text += para
         return new_body_text
 
-    def serialize(self, output_path="./"):
+    def serialize(self):
         self.apply_layers()
         self.layers = [layer for layer in self.layers if layer != "Pagination"]
 
         results = self.get_result()
-        for vol_id, result in results.items():
+        for base_name, result in results.items():
             footnote_ref_tag = ""
             if "Footnote" in self.layers:
-                footnote_fn = self.opf_path / "layers" / vol_id / "Footnote.yml"
+                footnote_fn = self.opf_path / "layers" / base_name / "Footnote.yml"
                 footnote_layer = yaml.safe_load(footnote_fn.open())
                 footnote_ref_tag = self.get_footnote_references(
                     footnote_layer["annotations"]
                 )
             result = self.p_tag_adder(result)
             result = f"<html>\n<head>\n\t<title></title>\n</head>\n<body>\n{result}{footnote_ref_tag}</body>\n</html>"
-            Path(f"{output_path}/{vol_id}.txt").write_text(result, encoding="utf-8")
+            yield base_name, result

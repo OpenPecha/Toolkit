@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.7.16 (2021-03-24)
+### Fix
+* Return output from editor serializer instead of saving ([`c6297c0`](https://github.com/OpenPecha/openpecha-toolkit/commit/c6297c056203e932af31edf915ef33a0f1357321))
+* Author css class ([`583d688`](https://github.com/OpenPecha/openpecha-toolkit/commit/583d6885a1714fdc9c3fa2c71978149b4070f9ee))
+* **editor-serializer:** Added special serializer for editor ([`0de0dbf`](https://github.com/OpenPecha/openpecha-toolkit/commit/0de0dbf4667e78e3e3d39f70cbcf51f21d51c00a))
+
 ## v0.7.15 (2021-03-23)
 ### Fix
 * Aupdate base and layers ([`96c95b8`](https://github.com/OpenPecha/openpecha-toolkit/commit/96c95b8c3db9d002121806b957a20380b8bba155))
