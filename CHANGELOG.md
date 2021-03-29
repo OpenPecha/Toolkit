@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.7.22 (2021-03-29)
+### Fix
+* Create layer if doesn't exist ([`af3ab83`](https://github.com/OpenPecha/openpecha-toolkit/commit/af3ab83833f36198308389184ac368d84b9fcffc))
+
 ## v0.7.21 (2021-03-26)
 ### Fix
 * **verse-annotation:** Isverse attribute of verse type annotation changed to is_verse ([`4173c1a`](https://github.com/OpenPecha/openpecha-toolkit/commit/4173c1a66d9c3f68dbc7a38fdb6e1c3b56d99d69))
