@@ -69,10 +69,13 @@ class OpenPecha:
         if base_name in self.layers and layer_name in self.layers[base_name]:
             return self.layers[base_name][layer_name]
 
-        self.layers[base_name][layer_name] = Layer.parse_obj(
-            self.read_layers_file(base_name, layer_name.value)
-        )
-        return self.layers[base_name][layer_name]
+        layer_dict = self.read_layers_file(base_name, layer_name.value)
+        if layer_dict:
+            layer = Layer.parse_obj(layer_dict)
+        else:
+            layer = Layer(annotation_type=layer_name)
+        self.layers[base_name][layer_name] = layer
+        return layer
 
 
 class OpenPechaFS(OpenPecha):
@@ -116,8 +119,10 @@ class OpenPechaFS(OpenPecha):
     def read_base_file(self, base_name):
         return (self.base_path / f"{base_name}.txt").read_text(encoding="utf-8")
 
-    def read_layers_file(self, base_name, layer_name):
-        return load_yaml(self.layers_path / base_name / f"{layer_name}.yml")
+    def read_layers_file(self, base_name, layer_name) -> Union[Layer, None]:
+        layer_fn = self.layers_path / base_name / f"{layer_name}.yml"
+        if layer_fn.is_file():
+            return load_yaml(layer_fn)
 
     def read_meta_file(self):
         return load_yaml(self.meta_fn)

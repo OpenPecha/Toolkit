@@ -74,3 +74,11 @@ def test_pecha_update():
             openpecha.get_layer("v001", LayersEnum.citation).annotations["1"]
             == "update annotation"
         )
+
+
+def test_create_empty_layer():
+    pecha = OpenPechaFS("tests/data/serialize/tsadra/P000100.opf")
+    layer = pecha.get_layer("v001", LayersEnum("BookNumber"))
+    assert layer.annotation_type == LayersEnum("BookNumber")
+    assert layer.revision == "00001"
+    assert layer.annotations == {}

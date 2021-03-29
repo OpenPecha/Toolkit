@@ -112,10 +112,6 @@ class EditorParser:
 
         layer.annotations = grouped_anns
 
-    def _group_verse_citation(self, base_name):
-        layer = self.layers[base_name][LayersEnum("Citation")]
-        pass
-
     def parse(self, base_name, html, group=True):
         self._reset()
 

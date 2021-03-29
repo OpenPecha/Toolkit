@@ -41,8 +41,8 @@ class InitialCreationEnum(Enum):
 class Layer(BaseModel):
     id: str = None
     annotation_type: LayersEnum
-    revision: str
-    annotations: Dict
+    revision: str = "00001"
+    annotations: Dict = {}
 
     @validator("id", pre=True, always=True)
     def set_id(cls, v):
