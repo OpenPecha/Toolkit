@@ -41,6 +41,7 @@ class Tsadra_template:
         "chapter": "//*[@class='tibetan-chapters']",
         "sabche": "//*[@class='tibetan-sabche1' or @class='tibetan-sabche']",
     }
+    toc_levels = {"1": "book-number", "2": "chapter", "3": "sabche"}
     book_title_Xpath = "//*[@class='tibetan-book-title']"
 
 
@@ -275,6 +276,16 @@ class EpubSerializer(Serialize):
             result = re.sub(author_pat[0], credit_page_pat, result, 1)
         return result
 
+    def set_toc_level(self, toc_levels, serialized_html):
+        new_toc_levels = {}
+        walker = 1
+        for level, annotation_name in toc_levels.items():
+            annotation_xpath = Tsadra_template.toc_xpaths.get(annotation_name, "")
+            if annotation_xpath and annotation_name in serialized_html:
+                new_toc_levels[walker] = annotation_xpath
+                walker += 1
+        return new_toc_levels
+
     def serialize(self, toc_levels={}, output_path="./output/epub_output"):
         """This module serialize .opf file to other format such as .epub etc. In case of epub,
         we are using calibre ebook-convert command to do the conversion by passing our custom css template
@@ -317,15 +328,12 @@ class EpubSerializer(Serialize):
             Path("template.css").write_bytes(template.content)
             # Running ebook-convert command to convert html file to .epub (From calibre)
             # XPath expression to detect chapter titles.
-            level1_toc_Xpath = Tsadra_template.toc_xpaths.get(
-                toc_levels.get("1", ""), ""
-            )
-            level2_toc_Xpath = Tsadra_template.toc_xpaths.get(
-                toc_levels.get("2", ""), ""
-            )
-            level3_toc_Xpath = Tsadra_template.toc_xpaths.get(
-                toc_levels.get("3", ""), ""
-            )
+            if not toc_levels:
+                toc_levels = Tsadra_template.toc_levels
+            toc_levels = self.set_toc_level(toc_levels, results)
+            level1_toc_Xpath = toc_levels.get(1, "")
+            level2_toc_Xpath = toc_levels.get(2, "")
+            level3_toc_Xpath = toc_levels.get(3, "")
 
             cover_path = self.opf_path / f"assets/image/{cover_image}"
             out_epub_fn = output_path / f"{self.meta['id']}.epub"
