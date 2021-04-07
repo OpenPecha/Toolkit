@@ -5,6 +5,7 @@ import click
 from git import Repo
 from tqdm import tqdm
 
+import openpecha
 from openpecha import config
 from openpecha.blupdate import PechaBaseUpdate
 from openpecha.buda.openpecha_manager import OpenpechaManager
@@ -36,6 +37,7 @@ def get_pecha_id(n):
 
 
 @click.group()
+@click.version_option(version=openpecha.__version__)
 def cli():
     pass
 
