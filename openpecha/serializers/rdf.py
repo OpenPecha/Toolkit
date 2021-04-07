@@ -43,7 +43,6 @@ class Rdf:
         for vol in volumes.values():
             if "base_file" in vol:
                 res[vol["base_file"]] = vol
-        print(res)
         self.bl_volinfo = res
         return res
 

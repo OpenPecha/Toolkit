@@ -1,0 +1,68 @@
+@prefix : <http://purl.bdrc.io/ontology/core/> .
+@prefix adm: <http://purl.bdrc.io/ontology/admin/> .
+@prefix bda: <http://purl.bdrc.io/admindata/> .
+@prefix bdg: <http://purl.bdrc.io/graph/> .
+@prefix bdr: <http://purl.bdrc.io/resource/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+bda:IE0OPP0RDF001 a adm:AdminData ;
+    adm:access bda:AccessOpen ;
+    adm:adminAbout bdr:IE0OPP0RDF001 ;
+    adm:gitRevision "None" ;
+    adm:graphId bdg:IE0OPP0RDF001 ;
+    adm:metadataLegal bda:LD_BDRC_CC0 ;
+    adm:status bda:StatusReleased ;
+    adm:syncAgent bdr:SAOPT .
+
+bdr:EP593707e7f94740c1862a1fd17e6b80e1 a :EtextPage ;
+    :seqNum 3 ;
+    :sliceEndChar 40 ;
+    :sliceStartChar 0 .
+
+bdr:EP7c5a348d9bed4f8bba7fcd9193b6a394 a :EtextPage ;
+    :seqNum 1 ;
+    :sliceEndChar 40 ;
+    :sliceStartChar 0 .
+
+bdr:ERIE0OPP0RDF001_v001 a :EtextRef ;
+    :eTextResource bdr:UTIE0OPP0RDF001_v001 ;
+    :seqNum 1 .
+
+bdr:ERIE0OPP0RDF001_v004 a :EtextRef ;
+    :eTextResource bdr:UTIE0OPP0RDF001_v004 ;
+    :seqNum 1 .
+
+bdr:MW4CZ45313 :instanceHasReproduction bdr:IE0OPP0RDF001 .
+
+bdr:UTIE0OPP0RDF001_v001 a :Etext ;
+    :eTextForImageGroup bdr:I4CZ75258 ;
+    :eTextHasPage bdr:EP7c5a348d9bed4f8bba7fcd9193b6a394 ;
+    :eTextInInstance bdr:IE0OPP0RDF001 ;
+    :eTextIsVolume 2 ;
+    rdfs:seeAlso "https://github.com/OpenPecha/P0RDF001/"^^xsd:anyURI .
+
+bdr:UTIE0OPP0RDF001_v004 a :Etext ;
+    :eTextHasPage bdr:EP593707e7f94740c1862a1fd17e6b80e1 ;
+    :eTextInInstance bdr:IE0OPP0RDF001 ;
+    :eTextIsVolume 4 ;
+    rdfs:seeAlso "https://github.com/OpenPecha/P0RDF001/"^^xsd:anyURI .
+
+bdr:VLIE0OPP0RDF001_v001 a :VolumeEtextAsset ;
+    :volumeHasEtext bdr:ERIE0OPP0RDF001_v001 ;
+    :volumeNumber 2 ;
+    :volumeOf bdr:IE0OPP0RDF001 .
+
+bdr:VLIE0OPP0RDF001_v004 a :VolumeEtextAsset ;
+    :volumeHasEtext bdr:ERIE0OPP0RDF001_v004 ;
+    :volumeNumber 4 ;
+    :volumeOf bdr:IE0OPP0RDF001 .
+
+bdr:W4CZ45313 :instanceHasReproduction bdr:IE0OPP0RDF001 .
+
+bdr:IE0OPP0RDF001 a :EtextInstance ;
+    :contentMethod bdr:ContentMethod_OCR ;
+    :instanceHasVolume bdr:VLIE0OPP0RDF001_v001,
+        bdr:VLIE0OPP0RDF001_v004 ;
+    :instanceReproductionOf bdr:MW4CZ45313,
+        bdr:W4CZ45313 .
