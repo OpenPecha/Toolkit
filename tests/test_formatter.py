@@ -261,38 +261,6 @@ class TestHFMLFormatter:
         local_id2uuid.add("tsawa", "v001", 1231232)
 
 
-class TestGoogleOCRFormatter:
-    @pytest.fixture(scope="class")
-    def get_resources(self):
-        data_path = Path("tests/data/formatter/google_ocr/W0001/v001")
-        responses = [
-            (json.load(fn.open()), fn.stem)
-            for fn in sorted(list((data_path).iterdir()))
-        ]
-        formatter = GoogleOCRFormatter()
-        return formatter, data_path, responses
-
-    def test_get_base_text(self, get_resources):
-        formatter, data_path, responses = get_resources
-        formatter.build_layers(responses, "")
-
-        result = formatter.get_base_text()
-
-        # TODO: create base-text
-        # expected = (data_path/'v001.txt').read_text()
-        # assert result == expected
-
-    def test_build_layers(self, get_resources):
-        formatter, data_path, responses = get_resources
-
-        result = formatter.build_layers(responses, "")
-
-        expected = {"pages": [(0, 19), (24, 888), (893, 1607), (1612, 1809)]}
-
-        for result_page, expected_page in zip(result["pages"], expected["pages"]):
-            assert result_page[:2] == expected_page
-
-
 class TestTsadraFormatter:
     def test_tsadra_formatter(self):
         m_text_01 = Path("tests/data/formatter/tsadra/htmls/cover.xhtml").read_text()
