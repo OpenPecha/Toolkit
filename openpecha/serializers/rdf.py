@@ -77,6 +77,9 @@ class Rdf:
 
     def get_base_volumes(self):
         for volume_name in self.openpecha.list_base():
+            volume_string = self.openpecha.get_base(volume_name)
+            if len(volume_string) < 2:
+                continue
             self.set_etext_asset(volume_name)
             self.add_triple(
                 bdr[self.lname],
