@@ -8,9 +8,10 @@ the catalog. Functonalities includes:
 
 import os
 
-import requests
 import yaml
+from git import util
 
+from openpecha.core.utils import get_unique_id
 from openpecha.formatters import *
 from openpecha.github_utils import create_file, create_readme, github_publish
 from openpecha.utils import *
@@ -32,25 +33,16 @@ class CatalogManager:
         org="OpenPecha",
         token=os.environ.get("GITHUB_TOKEN"),
         not_include_files=["releases"],
-        last_id_fn="last_id",
     ):
         self.org = org
         self.token = token
         self.repo_name = "catalog"
         self.batch_path = "data/batch.csv"
-        self.last_id_path = f"data/{last_id_fn}"
         self.batch = []
-        self.last_id = self._get_last_id()
         self.formatter = formatter
         self.layers = layers
         self.not_include_files = not_include_files
         self.pipes = pipes if pipes else buildin_pipes
-
-    def _get_last_id(self):
-        """returns the id assigin to last opf pecha"""
-        last_id_url = f"https://raw.githubusercontent.com/{self.org}/{self.repo_name}/master/{self.last_id_path}"
-        r = requests.get(last_id_url)
-        return int(r.content.decode("utf-8").strip()[1:])
 
     def _add_id_url(self, row):
         id = row[0]
@@ -59,22 +51,6 @@ class CatalogManager:
 
     def update(self):
         """Updates the catalog csv to have new opf-pechas metadata"""
-        # update last_id
-        content = self.batch[-1][0].strip()
-        create_file(
-            self.repo_name,
-            self.last_id_path,
-            content,
-            "update last id of Pecha",
-            update=True,
-            org=self.org,
-            token=self.token,
-        )
-
-        # update last_id
-        self.last_id = int(content[1:])
-
-        # create batch.csv
         content = (
             "\n".join([",".join(row) for row in map(self._add_id_url, self.batch)])
             + "\n"
@@ -106,8 +82,7 @@ class CatalogManager:
 
     def format_and_publish(self, path):
         """Convert input pecha to opf-pecha with id assigined"""
-        self.last_id += 1
-        self.formatter.create_opf(path, self.last_id)
+        self.formatter.create_opf(path, get_unique_id())
         self._get_catalog_metadata(self.formatter.meta_fn)
         github_publish(
             self.formatter.pecha_path,

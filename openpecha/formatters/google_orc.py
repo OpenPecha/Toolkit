@@ -14,7 +14,7 @@ class GoogleOCRFormatter(BaseFormatter):
     OpenPecha Formatter for Google OCR JSON output of scanned pecha.
     """
 
-    def __init__(self, output_path="./output", metadata=None):
+    def __init__(self, output_path=None, metadata=None):
         super().__init__(output_path, metadata)
         self.n_page_breaker_char = 3
         self.page_break = "\n" * self.n_page_breaker_char
@@ -33,7 +33,10 @@ class GoogleOCRFormatter(BaseFormatter):
             if fn.name.split(".")[0] == "info":
                 continue
             try:
-                yield json.load(gzip.open(str(fn), "rb")), fn.name.split(".")[0]
+                if fn.suffix == ".gzip":
+                    yield json.load(gzip.open(str(fn), "rb")), fn.name.split(".")[0]
+                else:
+                    yield json.load(fn.open()), fn.name.split(".")[0]
             except GeneratorExit:
                 return None, None
             except Exception:

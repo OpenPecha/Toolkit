@@ -37,12 +37,10 @@ class EmptyEbook:
         return layers
 
     def create_opf(self, text, id_):
-        pecha_id = create_pecha_id(id_)
         openpecha = OpenPechaFS(
             base={"v001": text},
             layers={"v001": self.get_dummy_layers()},
             meta=MetaData(
-                id=pecha_id,
                 initial_creation_type=InitialCreationEnum.ebook,
                 source_metadata=self.metadata,
             ),
