@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.7.23 (2021-04-07)
+### Fix
+* **google-ocr:** Add imgnum to page ann ([`76ccc8d`](https://github.com/OpenPecha/openpecha-toolkit/commit/76ccc8dbb7f08fd67bea1c6ad16459d96e64bd50))
+
 ## v0.7.22 (2021-03-29)
 ### Fix
 * Create layer if doesn't exist ([`af3ab83`](https://github.com/OpenPecha/openpecha-toolkit/commit/af3ab83833f36198308389184ac368d84b9fcffc))
