@@ -117,13 +117,21 @@ class Rdf:
             player = player["pagination"]
         if "annotations" not in player:
             return
-        for annotation in player["annotations"]:
-            self.set_etext_page(annotation, volume_name)
+        if isinstance(player["annotations"], dict):
+            for annotation_id, annotation in player["annotations"].items():
+                self.set_etext_page(annotation_id, annotation, volume_name)
+        elif isinstance(player["annotations"], list):
+            for annotation in player["annotations"]:
+                self.set_etext_page(annotation["id"], annotation, volume_name)
 
-    def set_etext_page(self, annotation, volume_name):
+    def set_etext_page(self, annotation_id, annotation, volume_name):
         volume_basename = f"{self.lname}_{volume_name}"
-        subject = bdr[f'EP{annotation["id"]}']
-        sequence = self.get_sequence(annotation["page_index"])
+        subject = bdr[f'EP{annotation_id}']
+        sequence = 0
+        if "imgnum" in annotation:
+            sequence = annotation["imgnum"]
+        elif "page_index" in annotation:
+            sequence = self.get_sequence(annotation["page_index"])
         start = annotation["span"]["start"]
         end = annotation["span"]["end"]
         self.add_triple(subject, rdf.type, bdo["EtextPage"])
