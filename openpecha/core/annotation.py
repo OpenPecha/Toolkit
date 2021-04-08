@@ -29,7 +29,7 @@ class VerseTypeAnn(AnnBase):
 
 
 class Page(AnnBase):
-    page_info: Optional[str] = ""  # page payload
+    page_info: Optional[str] = None # page payload
     imgnum: Optional[
         int
     ] = None  # image sequence no. from bdrc api, http://iiifpres.bdrc.io/il/v:bdr:I0888

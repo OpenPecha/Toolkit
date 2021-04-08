@@ -19,7 +19,7 @@ class LayersEnum(Enum):
     topic = "Text"
     sub_topic = "SubText"
 
-    pagination = "Pagination"
+    pagination = "pagination"
     citation = "Citation"
     correction = "Correction"
     error_candidate = "ErrorCandidate"

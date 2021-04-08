@@ -51,10 +51,10 @@ class GoogleOCRFormatter(BaseFormatter):
             uuid = self.get_unique_id()
             span = Span(start=start, end=end)
             page = Page(span=span, imgnum=n_pg, reference=page_ref)
-            anns[uuid] = json.loads(page.json())
+            anns[uuid] = page
 
-        layer = Layer(annotation_type=LayersEnum("Pagination"), annotations=anns)
-        result = {"pagination": json.loads(layer.json())}
+        layer = Layer(annotation_type=LayersEnum("pagination"), annotations=anns)
+        result = {"pagination": json.loads(layer.json(exclude_none=True))}
 
         return result
 
