@@ -80,6 +80,9 @@ class EditorParser:
         def _create_ann(start, end, is_verse):
             return VerseTypeAnn(span=Span(start=start, end=end), is_verse=is_verse)
 
+        if layer_name not in self.layers[base_name]:
+            return
+
         layer = self.layers[base_name][layer_name]
         grouped_anns = {}
         anns = list(layer.annotations.items())
