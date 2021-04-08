@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.7.25 (2021-04-08)
+### Fix
+* **editor-formatter:** Skip grouping if layer is empty ([`bd651cd`](https://github.com/OpenPecha/openpecha-toolkit/commit/bd651cd04cd51540a81f484db2663d6a36606cc9))
+
 ## v0.7.24 (2021-04-08)
 ### Fix
 * Exlude alll ann attrs with value none ([`c2408e4`](https://github.com/OpenPecha/openpecha-toolkit/commit/c2408e4e6f9ff7b1bb15dfa448006fe4773d97ea))
