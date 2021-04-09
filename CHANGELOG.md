@@ -2,6 +2,11 @@
 
 <!--next-version-placeholder-->
 
+## v0.7.26 (2021-04-09)
+### Fix
+* **epub-serialize:** Added front page generator using meta data ([`6f48523`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/6f48523feb34686229f2ebbff2f58e21126fc2e0))
+* **epub:** Set default toc level if exist in serialized html ([`d475e15`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/d475e15f4cd0daa0ead7e3ff049f2ea92c2d6c03))
+
 ## v0.7.25 (2021-04-08)
 ### Fix
 * **editor-formatter:** Skip grouping if layer is empty ([`bd651cd`](https://github.com/OpenPecha/openpecha-toolkit/commit/bd651cd04cd51540a81f484db2663d6a36606cc9))
