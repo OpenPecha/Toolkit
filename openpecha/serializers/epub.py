@@ -371,7 +371,7 @@ class EpubSerializer(Serialize):
         return body_text
 
     def get_footnote_references(self, footnotes):
-        """Generate footnot references using footnote layer
+        """Generate footnote references using footnote layer
 
         Args:
             footnotes (dict): footnote annotation information
@@ -386,6 +386,15 @@ class EpubSerializer(Serialize):
         return footnote_references
 
     def set_toc_level(self, toc_levels, serialized_html):
+        """Return toc outline by checking presences of title type annotations and sabche
+
+        Args:
+            toc_levels (dict): toc level outline given by user
+            serialized_html (str): final serialize html of the opf
+
+        Returns:
+            dict: toc outline created using existing title type annotations or sabche
+        """
         new_toc_levels = {}
         walker = 1
         for level, annotation_name in toc_levels.items():
