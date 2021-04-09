@@ -105,12 +105,28 @@ class EditorSerializer(Serialize):
             self.add_chars(vol_id, end_cc, False, end_payload)
 
     def get_footnote_references(self, footnotes):
+        """Generate footnote references using footnote layer
+
+        Args:
+            footnotes (dict): footnote annotation information
+
+        Returns:
+            str: footnote references p tags
+        """
         footnote_references = ""
         for footnote_id, footnote in footnotes.items():
             footnote_references += f'<p><a href="#fm{footnote_id}">{AnnotationTemplate.footnote_reference_SP} id="fr{footnote_id}">{footnote["footnote_ref"]}</span></a></p>'
         return footnote_references
 
     def p_tag_adder(self, body_text):
+        """Add p tag to lines where it is missing
+
+        Args:
+            body_text (str): body tag of editor after layers are applied
+
+        Returns:
+            str: body tag with proper p tags
+        """
         new_body_text = ""
         body_text = re.sub(r"\n</span>", "\n</span>\n", body_text)
         paras = body_text.split("\n")
@@ -145,6 +161,11 @@ class EditorSerializer(Serialize):
         return new_body_text
 
     def serialize(self):
+        """Opf is serialize to html format in order to present it in editor workspace
+
+        Yields:
+            str, str: base file name, serialized html of that base file
+        """
         self.apply_layers()
         self.layers = [layer for layer in self.layers if layer != "Pagination"]
 
