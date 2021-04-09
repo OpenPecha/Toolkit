@@ -19,7 +19,7 @@ class LayersEnum(Enum):
     topic = "Text"
     sub_topic = "SubText"
 
-    pagination = "Pagination"
+    pagination = "pagination"
     citation = "Citation"
     correction = "Correction"
     error_candidate = "ErrorCandidate"
@@ -58,6 +58,10 @@ class Layer(BaseModel):
 
 
 class MetaData(BaseModel):
-    id: str
+    id: str = None
     initial_creation_type: InitialCreationEnum
     source_metadata: Optional[Dict] = {}
+
+    @validator("id", pre=True, always=True)
+    def set_id(cls, v):
+        return v or get_unique_id()

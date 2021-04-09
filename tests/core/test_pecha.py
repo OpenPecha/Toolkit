@@ -16,11 +16,14 @@ def test_create_pecha():
                 )
             }
         },
-        meta=MetaData(id="P000001", initial_creation_type=InitialCreationEnum.ebook),
+        meta=MetaData(initial_creation_type=InitialCreationEnum.ebook),
     )
     assert openpecha.meta.id
     assert openpecha.get_base("v001")
     assert openpecha.get_layer("v001", LayersEnum.citation)
+
+    with tempfile.TemporaryDirectory() as tmpdirname:
+        assert openpecha.save(tmpdirname)
 
 
 def test_load_openpecha():

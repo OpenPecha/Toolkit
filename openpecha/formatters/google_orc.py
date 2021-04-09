@@ -4,8 +4,11 @@ import math
 import re
 from pathlib import Path
 
+import requests
+
+from openpecha.core.annotation import Page, Span
+from openpecha.core.layer import Layer, LayersEnum
 from openpecha.formatters import BaseFormatter
-from openpecha.formatters.layers import *
 from openpecha.utils import gzip_str
 
 
@@ -14,7 +17,7 @@ class GoogleOCRFormatter(BaseFormatter):
     OpenPecha Formatter for Google OCR JSON output of scanned pecha.
     """
 
-    def __init__(self, output_path="./output", metadata=None):
+    def __init__(self, output_path=None, metadata=None):
         super().__init__(output_path, metadata)
         self.n_page_breaker_char = 3
         self.page_break = "\n" * self.n_page_breaker_char
@@ -33,31 +36,25 @@ class GoogleOCRFormatter(BaseFormatter):
             if fn.name.split(".")[0] == "info":
                 continue
             try:
-                yield json.load(gzip.open(str(fn), "rb")), fn.name.split(".")[0]
+                if fn.suffix == ".gz":
+                    yield json.load(gzip.open(str(fn), "rb")), fn.stem.split(".")[0]
+                else:
+                    yield json.load(fn.open()), fn.stem
             except GeneratorExit:
                 return None, None
             except Exception:
                 yield None, None
 
-    def _get_page_index(self, n):
-        page_sides = "ab"
-        div = n / 2
-        page_num = math.ceil(div)
-        if div.is_integer():
-            return f"{page_num}{page_sides[1]}"
-        else:
-            return f"{page_num}{page_sides[0]}"
-
     def format_layer(self, layers, base_id):
-        # Format page annotation
-        Pagination = Layer(self.get_unique_id(), "pagination")
-        for pg, page_ref in zip(layers["pages"], layers["pages_ref"]):
+        anns = {}
+        for (start, end, n_pg), page_ref in zip(layers["pages"], layers["pages_ref"]):
             uuid = self.get_unique_id()
-            span = Span(pg[0], pg[1])
-            page = Page(span, page_index=self._get_page_index(pg[2]), page_ref=page_ref)
-            Pagination["annotations"][uuid] = page
+            span = Span(start=start, end=end)
+            page = Page(span=span, imgnum=n_pg, reference=page_ref)
+            anns[uuid] = page
 
-        result = {"pagination": Pagination}
+        layer = Layer(annotation_type=LayersEnum("pagination"), annotations=anns)
+        result = {"pagination": json.loads(layer.json(exclude_none=True))}
 
         return result
 
@@ -79,14 +76,14 @@ class GoogleOCRFormatter(BaseFormatter):
 
         return text, None  # self._get_coord(vertices)
 
-    def _get_lines(self, text, last_pg_end_idx, first_pg):
+    def _get_lines(self, text, last_pg_end_idx, is_first_pg):
         lines = []
         line_breaks = [m.start() for m in re.finditer("\n", text)]
 
         start = last_pg_end_idx
 
         # increase the start idx with page_breaker_char for page greater than frist page.
-        if not first_pg:
+        if not is_first_pg:
             start += self.n_page_breaker_char + 1
             line_breaks = list(map(lambda x: x + start, line_breaks))
 
@@ -121,6 +118,15 @@ class GoogleOCRFormatter(BaseFormatter):
         if low_conf_chars:
             path.write_bytes(gzip_str(low_conf_chars))
 
+    @staticmethod
+    def _get_imagelist_meta(vol_name):
+        r = requests.get(f"http://iiifpres.bdrc.io/il/v:bdr:{vol_name}")
+        img2seq = {}
+        for i, img in enumerate(r.json(), start=1):
+            name, ext = img["filename"].split(".")
+            img2seq[name] = {"num": i, "ext": ext}
+        return img2seq
+
     def build_layers(self, responses, vol_name, base_id=None):
         if base_id:
             bounding_poly_vol_path = (
@@ -135,20 +141,9 @@ class GoogleOCRFormatter(BaseFormatter):
         pages = []
         pages_ref = []
         last_pg_end_idx = 0
+        img2seq = self._get_imagelist_meta(vol_name)
         for response, page_ref in responses:
-            # extract page number, eg: I1PD901350083 -> 83
-            n_pg_str = page_ref[len(vol_name) :]
-            if "-" in page_ref:
-                n_pg_str = page_ref.split("-")[-1]
-
-            if n_pg_str and n_pg_str[-1].isalpha():
-                n_pg_str = n_pg_str[:-1]
-
-            try:
-                n_pg = int(n_pg_str)
-            except Exception:
-                # TODO: fix later, collection all the cases as of now
-                n_pg = 0  # dummy value
+            n_pg = img2seq[page_ref]["num"]
 
             # extract annotation
             if not response:
@@ -162,7 +157,7 @@ class GoogleOCRFormatter(BaseFormatter):
                 continue
             lines, last_pg_end_idx = self._get_lines(text, last_pg_end_idx, n_pg == 1)
             pages.append((lines[0][0], lines[-1][1], n_pg))
-            pages_ref.append(response.get("image_link", page_ref))
+            pages_ref.append(f"{page_ref}.{img2seq[page_ref]['ext']}")
 
             # create base_text
             self.base_text.append(text)
@@ -216,7 +211,7 @@ class GoogleOCRFormatter(BaseFormatter):
         title_tag = root[0]
         author_tag = root.find("{http://www.tbrc.org/models/work#}creator")
         metadata = {
-            "id": f"opecha:{self.pecha_id}",
+            "id": self.pecha_id,
             "initial_creation_type": "ocr",
             "source_metadata": {
                 "id": f"bdr:{work_id}",

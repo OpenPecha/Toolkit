@@ -1,4 +1,6 @@
-from pydantic import BaseModel, validator
+from typing import Optional
+
+from pydantic import BaseModel, FilePath, validator
 
 
 class Span(BaseModel):
@@ -18,9 +20,17 @@ class Span(BaseModel):
         return v
 
 
-class Ann(BaseModel):
+class AnnBase(BaseModel):
     span: Span
 
 
-class VerseTypeAnn(Ann):
-    is_verse: bool = False
+class VerseTypeAnn(AnnBase):
+    is_verse: bool = False  # whether ann in verse format
+
+
+class Page(AnnBase):
+    page_info: Optional[str] = None # page payload
+    imgnum: Optional[
+        int
+    ] = None  # image sequence no. from bdrc api, http://iiifpres.bdrc.io/il/v:bdr:I0888
+    reference: Optional[str] = None  # image filename from bdrc

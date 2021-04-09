@@ -17,11 +17,9 @@ metadata = {
 
 @pytest.mark.skip(reason="no urgent")
 def test_googleocr():
-    catalog = CatalogManager(
-        formatter=GoogleOCRFormatter(), last_id_fn="ocr-machine-08_last_id"
-    )
-    catalog.ocr_to_opf("./tests/data/formatter/google_ocr/W00001")
-    catalog.update_catalog()
+    catalog = CatalogManager(formatter=GoogleOCRFormatter())
+    catalog.add_ocr_item("./tests/data/formatter/google_ocr/W0001")
+    # catalog.update()
 
 
 @pytest.mark.skip(reason="no urgent")
@@ -32,7 +30,7 @@ def test_hfml_with_metadata():
         layers=layers,
     )
     catalog.add_hfml_item("./tests/data/formatter/hfml/P0001")
-    catalog.update()
+    # catalog.update()
 
 
 def get_fake_img():

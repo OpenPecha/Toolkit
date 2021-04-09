@@ -3,7 +3,7 @@ from typing import Dict
 
 from bs4 import BeautifulSoup
 
-from openpecha.core.annotation import Ann, Span, VerseTypeAnn
+from openpecha.core.annotation import AnnBase, Span, VerseTypeAnn
 from openpecha.core.layer import Layer, LayersEnum
 
 
@@ -28,7 +28,7 @@ class EditorParser:
     def _get_ann(self, tag):
         start, end = self._get_content_span(tag.text)
         span = Span(start=start, end=end)
-        return Ann(span=span), tag["id"]
+        return AnnBase(span=span), tag["id"]
 
     @staticmethod
     def _get_empty_layer(layerEnum):
@@ -79,6 +79,9 @@ class EditorParser:
     def _group_anns(self, base_name, layer_name):
         def _create_ann(start, end, is_verse):
             return VerseTypeAnn(span=Span(start=start, end=end), is_verse=is_verse)
+
+        if layer_name not in self.layers[base_name]:
+            return
 
         layer = self.layers[base_name][layer_name]
         grouped_anns = {}

@@ -2,6 +2,18 @@
 
 <!--next-version-placeholder-->
 
+## v0.7.25 (2021-04-08)
+### Fix
+* **editor-formatter:** Skip grouping if layer is empty ([`bd651cd`](https://github.com/OpenPecha/openpecha-toolkit/commit/bd651cd04cd51540a81f484db2663d6a36606cc9))
+
+## v0.7.24 (2021-04-08)
+### Fix
+* Exlude alll ann attrs with value none ([`c2408e4`](https://github.com/OpenPecha/openpecha-toolkit/commit/c2408e4e6f9ff7b1bb15dfa448006fe4773d97ea))
+
+## v0.7.23 (2021-04-07)
+### Fix
+* **google-ocr:** Add imgnum to page ann ([`76ccc8d`](https://github.com/OpenPecha/openpecha-toolkit/commit/76ccc8dbb7f08fd67bea1c6ad16459d96e64bd50))
+
 ## v0.7.22 (2021-03-29)
 ### Fix
 * Create layer if doesn't exist ([`af3ab83`](https://github.com/OpenPecha/openpecha-toolkit/commit/af3ab83833f36198308389184ac368d84b9fcffc))
