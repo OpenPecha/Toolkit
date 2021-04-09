@@ -64,7 +64,7 @@ class Openpecha:
     def get_layer(self, basename, layername):
         if basename in self.layers and layername in self.layers[basename]:
             return self.layers[basename][layername]
-        if basename not in self.components["base"]:
+        if basename not in self.components["base"] or basename not in self.components["layers"]:
             return None
         if layername not in self.components["layers"][basename]:
             return None

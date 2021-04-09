@@ -22,6 +22,7 @@ class Rdf:
         self.lod_g = self.lod_ds.graph(self.graph_r)
         self.lod_g.namespace_manager = nsm
         self.openpecha = openpecha
+        self.bl_volinfo = None
 
     def add_triple(self, rdf_subject, rdf_predicate, rdf_object):
         self.lod_g.add((rdf_subject, rdf_predicate, rdf_object))
@@ -29,6 +30,21 @@ class Rdf:
     def get_graph(self):
         self.set_instance()
         return self.lod_g
+
+    def get_bl_volinfo(self):
+        if self.bl_volinfo is not None:
+            return self.bl_volinfo
+        meta = self.openpecha.get_meta()
+        if meta is None or "source_metadata" not in meta or "volumes" not in meta["source_metadata"]:
+            self.bl_volinfo = {}
+            return {}
+        volumes = meta["source_metadata"]["volumes"]
+        res = {}
+        for vol in volumes.values():
+            if "base_file" in vol:
+                res[vol["base_file"]] = vol
+        self.bl_volinfo = res
+        return res
 
     """
     Entry point to build the RDF graph
@@ -60,6 +76,9 @@ class Rdf:
 
     def get_base_volumes(self):
         for volume_name in self.openpecha.list_base():
+            volume_string = self.openpecha.get_base(volume_name)
+            if len(volume_string) < 2:
+                continue
             self.set_etext_asset(volume_name)
             self.add_triple(
                 bdr[self.lname],
@@ -72,6 +91,11 @@ class Rdf:
     def set_etext_asset(self, volume_name):
         volume_basename = f"{self.lname}_{volume_name}"
         volume_number = int(re.search(r"\d+", volume_name).group())
+        bl_volinfo = self.get_bl_volinfo()
+        if volume_name+".txt" in bl_volinfo:
+            vinfo = bl_volinfo[volume_name+".txt"]
+            if "volume_number" in vinfo:
+                volume_number = vinfo["volume_number"]
         subject = bdr[f"VL{volume_basename}"]
 
         self.add_triple(subject, rdf.type, bdo["VolumeEtextAsset"])
@@ -92,6 +116,14 @@ class Rdf:
     def set_etext(self, volume_name):
         volume_basename = f"{self.lname}_{volume_name}"
         volume_number = int(re.search(r"\d+", volume_name).group())
+        volume_ig = None
+        bl_volinfo = self.get_bl_volinfo()
+        if volume_name+".txt" in bl_volinfo:
+            vinfo = bl_volinfo[volume_name+".txt"]
+            if "volume_number" in vinfo:
+                volume_number = vinfo["volume_number"]
+            if "image_group_id" in vinfo:
+                volume_ig = bdr[vinfo["image_group_id"]]
         subject = bdr[f"UT{volume_basename}"]
 
         self.add_triple(subject, rdf.type, bdo["Etext"])
@@ -99,6 +131,8 @@ class Rdf:
         self.add_triple(
             subject, bdo["eTextIsVolume"], Literal(volume_number, datatype=XSD.integer)
         )
+        if volume_ig is not None:
+            self.add_triple(subject, bdo["eTextForImageGroup"], volume_ig)
         self.add_triple(
             subject,
             rdfs.seeAlso,
@@ -117,13 +151,21 @@ class Rdf:
             player = player["pagination"]
         if "annotations" not in player:
             return
-        for annotation in player["annotations"]:
-            self.set_etext_page(annotation, volume_name)
+        if isinstance(player["annotations"], dict):
+            for annotation_id, annotation in player["annotations"].items():
+                self.set_etext_page(annotation_id, annotation, volume_name)
+        elif isinstance(player["annotations"], list):
+            for annotation in player["annotations"]:
+                self.set_etext_page(annotation["id"], annotation, volume_name)
 
-    def set_etext_page(self, annotation, volume_name):
+    def set_etext_page(self, annotation_id, annotation, volume_name):
         volume_basename = f"{self.lname}_{volume_name}"
-        subject = bdr[f'EP{annotation["id"]}']
-        sequence = self.get_sequence(annotation["page_index"])
+        subject = bdr[f'EP{annotation_id}']
+        sequence = 0
+        if "imgnum" in annotation:
+            sequence = annotation["imgnum"]
+        elif "page_index" in annotation:
+            sequence = self.get_sequence(annotation["page_index"])
         start = annotation["span"]["start"]
         end = annotation["span"]["end"]
         self.add_triple(subject, rdf.type, bdo["EtextPage"])

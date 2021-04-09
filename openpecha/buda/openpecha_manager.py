@@ -195,14 +195,19 @@ class OpenpechaManager:
         ttlstr = model.serialize(format="turtle")
         headers = {"Content-Type": "text/turtle"}
         params = {"graph": graphuri}
-        r = requests.put(storeurl, data=ttlstr, headers=headers, params=params)
-        sc = r.status_code
-        if (
-            sc != requests.codes.ok
-            and sc != requests.codes.created
-            and sc != requests.codes.accepted
-        ):
-            Error("store", "The request to Fuseki returned code " + str(r.status_code))
+        try:
+            r = requests.put(storeurl, data=ttlstr, headers=headers, params=params)
+            sc = r.status_code
+            if (
+                sc != requests.codes.ok
+                and sc != requests.codes.created
+                and sc != requests.codes.accepted
+            ):
+                Error("store", "The request to Fuseki returned code " + str(r.status_code) + " for " + graphuri)
+        except:
+            Error("store", "The request to Fuseki had an exception for " + graphuri)
+        
+        
 
     @staticmethod
     def write_model_debug(model, graphuri):
