@@ -136,6 +136,14 @@ class EpubSerializer(Serialize):
             self.add_chars(vol_id, end_cc, False, end_payload)
 
     def p_tag_adder(self, body_text):
+        """Add p tag to lines where it is missing
+
+        Args:
+            body_text (str): body tag of ebook after layers are applied
+
+        Returns:
+            str: body tag with proper p tags
+        """
         new_body_text = ""
         body_text = re.sub(r"\n</span>", "\n</span>\n", body_text)
         paras = body_text.split("\n")
@@ -162,18 +170,42 @@ class EpubSerializer(Serialize):
         return new_body_text
 
     def is_title(self, p_tag):
+        """Check if a p tag is title type annotation such as title, subtitle, chapter or book-number
+
+        Args:
+            p_tag (str): p tag of a body text
+
+        Returns:
+            boolean: True if p tag is title type annotation else False
+        """
         if "title" in p_tag or "chapter" in p_tag or "number" in p_tag:
             return True
         else:
             return False
 
     def is_sabche_only(self, p_tag):
+        """Check if p tag is non inline sabche or not
+
+        Args:
+            p_tag (str): p tag of a body text
+
+        Returns:
+            boolean: True if p tag is non inline sache else False
+        """
         if re.search('<p><span class="tibetan-sabche1">', p_tag):
             return True
         else:
             return False
 
     def rm_indentation(self, p_tag):
+        """Return p tag with non indented style
+
+        Args:
+            p_tag (str): p tag of a body text
+
+        Returns:
+            str: p tag with non indented style
+        """
         if self.is_sabche_only(p_tag):
             p_tag = p_tag.replace(
                 '<p><span class="tibetan-sabche1">', '<p><span class="tibetan-sabche">'
@@ -185,10 +217,26 @@ class EpubSerializer(Serialize):
         return p_tag
 
     def add_indentation(self, p_tag):
+        """Add indentation style to p tag
+
+        Args:
+            p_tag (str): p tag of boody text
+
+        Returns:
+            str: p tag with indentation style
+        """
         p_tag = re.sub("<p>", '<p class="tibetan-regular-indented">', p_tag)
         return p_tag
 
     def is_annotated_p_tag(self, p_tag):
+        """Check a p tag is annotated p tag or not
+
+        Args:
+            p_tag (str): p tag of a body text
+
+        Returns:
+            boolean: True if p tag is annotated else False
+        """
         if re.search("<p><span.*?>.+?</span></p>", p_tag) or re.search(
             '<p class=".+"><span class=".+">.+?</span></p>', p_tag
         ):
@@ -197,21 +245,74 @@ class EpubSerializer(Serialize):
             return False
 
     def get_p_text(self, p_tag):
+        """Return text included in p tag
+
+        Args:
+            p_tag (str): p tag of body text
+
+        Returns:
+            str: text of p tag
+        """
         para_tag = re.search(r"<p.*?>(<span.*?>)?(.+?)(</span>)?</p>", p_tag)
         para_text = para_tag.group(2)
         return para_text
 
     def get_p_tags(self, body_text):
+        """Return all the p tags in body text
+
+        Args:
+            body_text (str): body text of the ebook
+
+        Returns:
+            list: p tags in body text
+        """
         p_tags = re.split("(<p.*?>.+?</p>)", body_text)
         return p_tags[1::2]
 
-    def has_yigchung(self, prev_p_tag):
-        if Tsadra_template.yigchung_SP in prev_p_tag:
+    def has_yigchung(self, p_tag):
+        """Check if p tag contains yigchung or not
+
+        Args:
+            p_tag (str): p tag of a body
+
+        Returns:
+            boolean: True of yigchung exist in p tag else False
+        """
+        if Tsadra_template.yigchung_SP in p_tag:
             return True
         else:
             return False
 
+    def get_front_page(self):
+        """Construct the front page of the book including title, subtitle, authors and credit page
+
+        Returns:
+            str: front page content
+        """
+        front_page = ""
+        source_metadata = self.meta.get("source_metadata", {})
+        credit_pg_name = source_metadata.get("credit", "")
+        credit_pg_path = self.opf_path / f"assets/image/{credit_pg_name}"
+        book_title_tag = f'<p>{Tsadra_template.cover_page_book_title_SP}{source_metadata.get("title", "")}</span></p>\n'
+        sub_title_tag = f'<p>{Tsadra_template.sub_title_SP}{source_metadata.get("subtitle", "")}</span></p>\n'
+        authors = source_metadata.get("authors", [])
+        front_page += f"{book_title_tag}{sub_title_tag}"
+        for author in authors:
+            front_page += f"{Tsadra_template.author_SP}{author}</span></p>\n"
+        if credit_pg_path.is_file():
+            front_page += f'{Tsadra_template.credit_page_SP}<img src="{self.opf_path}/assets/image/{credit_pg_name}"/></span></p>\n'
+        return front_page
+
     def add_page_break(self, prev_p_tag, body_text):
+        """Add page break before title annotation type p tag
+
+        Args:
+            prev_p_tag (str): prev tag of the title type p tag
+            body_text (str): body text of ebook
+
+        Returns:
+            str: body text with page break before title type p tag
+        """
         if not self.is_title(prev_p_tag) and (
             len(self.get_p_text(prev_p_tag)) > 500 or self.has_yigchung(prev_p_tag)
         ):
@@ -228,6 +329,14 @@ class EpubSerializer(Serialize):
         return body_text.replace(prev_p_tag, new_prev_p_tag)
 
     def indentation_adjustment(self, body_text):
+        """Add required indentation styles to body text's p tags
+
+        Args:
+            body_text (str): body of the ebook
+
+        Returns:
+            str: body text having p tags with expected indentation styles
+        """
         p_tags = self.get_p_tags(body_text)
 
         prev_p_tag = p_tags[0]
@@ -262,19 +371,19 @@ class EpubSerializer(Serialize):
         return body_text
 
     def get_footnote_references(self, footnotes):
+        """Generate footnot references using footnote layer
+
+        Args:
+            footnotes (dict): footnote annotation information
+
+        Returns:
+            str: footnote references p tags
+        """
         footnote_references = ""
         p_tag = '<p class = "tibetan-commentary-non-indent">'
         for footnote_id, footnote in footnotes.items():
             footnote_references += f'{p_tag}<a href="#fm{footnote_id}">{Tsadra_template.footnote_reference_SP} id="fr{footnote_id}">{footnote["footnote_ref"]}</span></a></p>'
         return footnote_references
-
-    def add_credit_page(self, result):
-        author_pat = re.search('<p class="text-author">.+</p>', result)
-        credit_pg_name = self.meta["source_metadata"].get("credit", "")
-        if credit_pg_name:
-            credit_page_pat = f'{author_pat[0]}\n{Tsadra_template.credit_page_SP}<img src="{self.opf_path}/assets/image/{credit_pg_name}"/></span></p>\n'
-            result = re.sub(author_pat[0], credit_page_pat, result, 1)
-        return result
 
     def set_toc_level(self, toc_levels, serialized_html):
         new_toc_levels = {}
@@ -306,7 +415,7 @@ class EpubSerializer(Serialize):
 
         results = self.get_result()
         for vol_id, result in results.items():
-            result = self.add_credit_page(result)
+            result = f"{self.get_front_page()}{result}"
             footnote_ref_tag = ""
             if "Footnote" in self.layers:
                 footnote_fn = self.opf_path / "layers" / vol_id / "Footnote.yml"
@@ -338,9 +447,14 @@ class EpubSerializer(Serialize):
             cover_path = self.opf_path / f"assets/image/{cover_image}"
             out_epub_fn = output_path / f"{self.meta['id']}.epub"
             font_family = "Monlam Uni Ouchan2"
-            os.system(
-                f'ebook-convert {out_html_fn} {out_epub_fn} --extra-css=./template.css --embed-font-family="{font_family}" --page-breaks-before="{Tsadra_template.book_title_Xpath}" --cover={cover_path} --flow-size=0 --level1-toc="{level1_toc_Xpath}" --level2-toc="{level2_toc_Xpath}" --level3-toc="{level3_toc_Xpath}" --use-auto-toc --disable-font-rescaling'
-            )
+            if cover_path.is_file():
+                os.system(
+                    f'ebook-convert {out_html_fn} {out_epub_fn} --extra-css=./template.css --embed-font-family="{font_family}" --page-breaks-before="{Tsadra_template.book_title_Xpath}" --cover={cover_path} --flow-size=0 --level1-toc="{level1_toc_Xpath}" --level2-toc="{level2_toc_Xpath}" --level3-toc="{level3_toc_Xpath}" --use-auto-toc --disable-font-rescaling'
+                )
+            else:
+                os.system(
+                    f'ebook-convert {out_html_fn} {out_epub_fn} --extra-css=./template.css --embed-font-family="{font_family}" --page-breaks-before="{Tsadra_template.book_title_Xpath}" --flow-size=0 --level1-toc="{level1_toc_Xpath}" --level2-toc="{level2_toc_Xpath}" --level3-toc="{level3_toc_Xpath}" --use-auto-toc --disable-font-rescaling'
+                )
             # Removing html file and template file
             os.system(f"rm {out_html_fn}")
             os.system("rm template.css")
