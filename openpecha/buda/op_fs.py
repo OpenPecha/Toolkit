@@ -18,8 +18,8 @@ class OpenpechaFS(Openpecha):
     """
 
     def __init__(self, lname, path_to_opf):
-        Openpecha.__init__(self, lname)
         self.path = path_to_opf
+        Openpecha.__init__(self, lname)
 
     def get_rev(self):
         return None
