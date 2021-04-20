@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.7.29 (2021-04-20)
+### Fix
+* Ann start ([`aa0cc38`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/aa0cc389507037590e654e99bf31240109bbfba0))
+
 ## v0.7.28 (2021-04-20)
 ### Fix
 * Ncreate  single ann as a group ([`b78bcf0`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/b78bcf0c53b9e5b2c34d436688f0d950c616c7d2))
