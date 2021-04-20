@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.7.28 (2021-04-20)
+### Fix
+* Ncreate  single ann as a group ([`b78bcf0`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/b78bcf0c53b9e5b2c34d436688f0d950c616c7d2))
+
 ## v0.7.27 (2021-04-10)
 ### Fix
 * Specify upper and lower bound for deps ([`cb2a629`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/cb2a629c86b954d990b1a063b4c4d86d1ec7fa08))
