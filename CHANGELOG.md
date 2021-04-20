@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.7.27 (2021-04-10)
+### Fix
+* Specify upper and lower bound for deps ([`cb2a629`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/cb2a629c86b954d990b1a063b4c4d86d1ec7fa08))
+
 ## v0.7.26 (2021-04-09)
 ### Fix
 * **epub-serialize:** Added front page generator using meta data ([`6f48523`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/6f48523feb34686229f2ebbff2f58e21126fc2e0))

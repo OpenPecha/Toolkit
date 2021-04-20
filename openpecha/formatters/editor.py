@@ -92,7 +92,7 @@ class EditorParser:
         true_start = anns[0][1].span.start
         true_end = anns[0][1].span.end
         is_verse = False
-        grouped_anns[true_id] = _create_ann(true_end, true_end, is_verse)
+        grouped_anns[true_id] = _create_ann(true_start, true_end, is_verse)
 
         for i, (id_, ann) in enumerate(anns[1:], start=2):
 
