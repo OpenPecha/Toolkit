@@ -85,11 +85,15 @@ class EditorParser:
 
         layer = self.layers[base_name][layer_name]
         grouped_anns = {}
+
+        # init with first ann
         anns = list(layer.annotations.items())
         true_id = anns[0][0]
         true_start = anns[0][1].span.start
         true_end = anns[0][1].span.end
         is_verse = False
+        grouped_anns[true_id] = _create_ann(true_end, true_end, is_verse)
+
         for i, (id_, ann) in enumerate(anns[1:], start=2):
 
             # find the last element of the group
