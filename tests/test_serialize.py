@@ -17,7 +17,7 @@ def opf_path():
 # hfml_opf_path = Path("tests/data/serialize_test/hfml/hfml.opf")
 
 
-@pytest.mark.skip(reason="not important")
+# @pytest.mark.skip(reason="not important")
 def test_hfml_serializer():
     opf_path = "./tests/data/serialize/hfml/P000002.opf/"
     output_path = "./output/P000002_hfml/"
