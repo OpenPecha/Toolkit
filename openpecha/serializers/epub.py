@@ -29,7 +29,7 @@ class Tsadra_template:
     tsawa_SP = '<span class="tibetan-root-text">'
     tsawa_verse_SP = '<span class="tibetan-root-text-in-verse">'
     quatation__verse_SP = '<span class="tibetan-citations-in-verse">'
-    quatation__SP = '<span class="tibetan-external-citations">'
+    quatation__SP = '<span class="tibetan-citations">'
     sabche_SP = '<span class="tibetan-sabche1">'
     yigchung_SP = '<span class="tibetan-commentary-small">'
     footnote_marker_SP = '<span class="tibetan-footnote-marker"'
@@ -148,21 +148,26 @@ class EpubSerializer(Serialize):
         body_text = re.sub(r"\n</span>", "\n</span>\n", body_text)
         paras = body_text.split("\n")
         para_flag = False
+        cur_span_payload = ""
         cur_para = ""
         for para in paras:
             if "<p" not in para:
                 if re.search("<span.+?</span>", para):
                     new_body_text += f"<p>{para}</p>"
                 elif "<span" in para and not para_flag:
-                    cur_para += f"<p>{para}<br>"
+                    cur_span_payload = re.search("<span .+>", para)[0]
+                    cur_para += f"<p>{para}</span></p>"
                     para_flag = True
                 elif para_flag and "</span>" not in para:
-                    cur_para += f"{para}</br>"
+                    cur_para += (
+                        f'<p>{cur_span_payload[:-2]}-middle-line">{para}</span></p>'
+                    )
                 elif "</span>" in para:
-                    cur_para += f"{para}</p>"
+                    cur_para += f'<p>{cur_span_payload[:-2]}-last-line">{para}</p>'
                     new_body_text += cur_para
                     cur_para = ""
                     para_flag = False
+                    cur_span_payload = ""
                 else:
                     new_body_text += f"<p>{para}</p>"
             else:
