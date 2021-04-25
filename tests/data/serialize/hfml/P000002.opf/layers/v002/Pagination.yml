@@ -1,50 +1,50 @@
-id: e82e66dcf64f4f8ca2dfb1903d569981
+id: e966d112acd849f392cd9eb3b297f1f2
 annotation_type: Pagination
 revision: '00001'
 annotations:
-  b7727a2e92444cfcace094fc9b16b712:
+  67660054b8fb483ab699f46c0926136e:
     page_index: 1a
     page_info: ''
     reference: null
     span:
       start: 0
       end: 57
-  74299fe60d6c42c9a3e0ab375e37e802:
+  1548ece390064800ab5349b1ac587610:
     page_index: 1b
     page_info: ''
     reference: null
     span:
       start: 60
       end: 116
-  4c0845a406874fea92f69c1057e02d11:
+  cd2222d95f9d4be4b41025ed811ec1e0:
     page_index: 2a
     page_info: ''
     reference: null
     span:
       start: 119
       end: 166
-  583c25e62af945088f3d0c5cb8453b72:
+  0c60ba8ae84f4b478b73c3fb4665df7e:
     page_index: 2b
     page_info: ''
     reference: null
     span:
       start: 169
       end: 215
-  7fc61ca2e21545f3af321b0d518b26f2:
+  3ef64fa53a5e49298da14142bc38e50e:
     page_index: 3a
     page_info: ''
     reference: null
     span:
       start: 218
       end: 281
-  af41fea023db4ceeafdf6532748b7657:
+  e32b553de58542a9b8560ff06a1180eb:
     page_index: 3b
     page_info: ''
     reference: null
     span:
       start: 284
       end: 334
-  440debbc235b43a0be8366752e9b119d:
+  d05d3718d3c14426939d64792c7f56cd:
     page_index: 4a
     page_info: ''
     reference: null
@@ -52,10 +52,10 @@ annotations:
       start: 337
       end: 382
 local_ids:
-  b7727a2e92444cfcace094fc9b16b712: 200000
-  74299fe60d6c42c9a3e0ab375e37e802: 200001
-  4c0845a406874fea92f69c1057e02d11: 200002
-  583c25e62af945088f3d0c5cb8453b72: 200003
-  7fc61ca2e21545f3af321b0d518b26f2: 200004
-  af41fea023db4ceeafdf6532748b7657: 200005
-  440debbc235b43a0be8366752e9b119d: 200006
+  67660054b8fb483ab699f46c0926136e: 200000
+  1548ece390064800ab5349b1ac587610: 200001
+  cd2222d95f9d4be4b41025ed811ec1e0: 200002
+  0c60ba8ae84f4b478b73c3fb4665df7e: 200003
+  3ef64fa53a5e49298da14142bc38e50e: 200004
+  e32b553de58542a9b8560ff06a1180eb: 200005
+  d05d3718d3c14426939d64792c7f56cd: 200006

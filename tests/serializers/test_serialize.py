@@ -20,9 +20,14 @@ def opf_path():
 @pytest.mark.skip(reason="not important")
 def test_hfml_serializer():
     opf_path = "./tests/data/serialize/hfml/P000002.opf/"
-    output_path = "./output/P000002_hfml/"
     serializer = HFMLSerializer(opf_path)
-    serializer.serialize(output_path=output_path)
+    serializer.apply_layers()
+    hfml_results = serializer.get_result()
+    expected_hfml_paths = list(Path('./tests/data/serialize/hfml/P000002/').iterdir())
+    expected_hfml_paths.sort()
+    expected_hfmls = [expected_hfml for expected_hfml in expected_hfml_paths]
+    for hfml_result, expected_hfml in zip(hfml_results.values(), expected_hfmls):
+        assert hfml_result == expected_hfml
 
 
 def test_hfml_2_tsadra_serializer(opf_path):
