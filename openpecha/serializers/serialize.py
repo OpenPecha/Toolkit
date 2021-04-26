@@ -310,6 +310,14 @@ class Serialize(object):
         return result_with_line
     
     def _clip_extra_newline(self, cur_vol_result):
+        """An extra line found in pages are removed.
+
+        Args:
+            cur_vol_result (str): serialized result without line annotation
+
+        Returns:
+            str: clean serialize results
+        """
         clean_result = ''
         pages_and_anns = re.split(r"(\[[𰵀-󴉱]?[0-9]+[a-z]{1}\])", cur_vol_result)
         for page_and_ann in pages_and_anns:
