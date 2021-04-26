@@ -34,8 +34,8 @@ class Serialize(object):
         self.text_spans = {}
         self.base_layers = {}
         if self.text_id:
-            self.text_spans = self.get_text_spans(text_id)
-            self.index_layer = self.get_index_layer(text_id)
+            self.text_spans = self.get_text_spans(text_id, index_layer)
+            self.index_layer = self.get_index_layer(text_id, index_layer)
             if self.text_spans:
                 self.base_layers = self.get_text_base_layer()
         else:
@@ -117,12 +117,13 @@ class Serialize(object):
     def load_layer(self, fn):
         return yaml.safe_load(fn.open())
 
-    def get_text_spans(self, text_id):
+    def get_text_spans(self, text_id, index_layer):
         """
         get spans of text
         """
         text_span = {}
-        index_layer = self.load_layer(self.opf_path / "index.yml")
+        if not index_layer:
+            index_layer = self.load_layer(self.opf_path / "index.yml")
         for id, anno in index_layer["annotations"].items():
             if anno["parts"]:
                 for sub_topic in anno["parts"]:
@@ -133,8 +134,9 @@ class Serialize(object):
                     text_span[f'v{span["vol"]:03}'] = span
         return text_span
 
-    def get_index_layer(self, text_id):
-        index_layer = self.load_layer(self.opf_path / "index.yml")
+    def get_index_layer(self, text_id, index_layer):
+        if not index_layer:
+            index_layer = self.load_layer(self.opf_path / "index.yml")
         text_index_layer = defaultdict(str)
         text_index_layer["id"] = index_layer["id"]
         text_index_layer["annotation_type"] = index_layer["annotation_type"]
@@ -306,6 +308,20 @@ class Serialize(object):
                 n_line += 1
             result_with_line += line + "\n"
         return result_with_line
+    
+    def _clip_extra_newline(self, cur_vol_result):
+        clean_result = ''
+        pages_and_anns = re.split(r"(\[[𰵀-󴉱]?[0-9]+[a-z]{1}\])", cur_vol_result)
+        for page_and_ann in pages_and_anns:
+            if page_and_ann:
+                if re.search(r"\[([𰵀-󴉱])?[0-9]+[a-z]{1}\]", page_and_ann):
+                    clean_result += page_and_ann
+                else:
+                    if page_and_ann[-1] == '\n':
+                        clean_result += page_and_ann[:-1]
+                    else:
+                        clean_result += page_and_ann
+        return clean_result
 
     def get_result(self, line_num=True):
         """
@@ -337,6 +353,7 @@ class Serialize(object):
                 i += 1
 
             if "Pagination" in self.layers:
+                cur_vol_result = self._clip_extra_newline(cur_vol_result)
                 cur_vol_result = self._assign_line_layer(cur_vol_result, vol_id)
             result.update({vol_id: cur_vol_result})
         return result

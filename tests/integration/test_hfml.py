@@ -5,11 +5,11 @@ from openpecha.formatters import HFMLFormatter
 from openpecha.serializers import HFMLSerializer
 
 if __name__ == "__main__":
-    hfml_text = "./output/P000008_hfml/P000008"
-    opfs_path = Path("./output/")
-    opf_path = "./output/tengyur/P000792.opf/"
-    hfml_path = "./output/tengyur/pedurma/"
-    pecha_id = 1
+    hfml_text = "./tests/data/formatter/hfml/P000002/"
+    opfs_path = Path("./output/opfs")
+    opf_path = "./tests/data/serialize/hfml/P000002.opf/"
+    hfml_path = "./output/"
+    pecha_id = "P000002"
 
     # Converts HFML to OPF
     # formatter = HFMLFormatter(output_path=opfs_path)
@@ -19,5 +19,5 @@ if __name__ == "__main__":
     # text_list = Path("./output/tengyur/text_list.txt").read_text()
     # texts = text_list.splitlines()
     # for text in texts:
-    serializer = HFMLSerializer(opf_path, text_id="D1118")
+    serializer = HFMLSerializer(opf_path)
     serializer.serialize(output_path=hfml_path)
