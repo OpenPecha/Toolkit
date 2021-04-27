@@ -17,7 +17,7 @@ def opf_path():
 # hfml_opf_path = Path("tests/data/serialize_test/hfml/hfml.opf")
 
 
-@pytest.mark.skip(reason="not important")
+# @pytest.mark.skip(reason="not important")
 def test_hfml_serializer():
     opf_path = "./tests/data/serialize/hfml/P000002.opf/"
     serializer = HFMLSerializer(opf_path)
@@ -25,7 +25,7 @@ def test_hfml_serializer():
     hfml_results = serializer.get_result()
     expected_hfml_paths = list(Path('./tests/data/serialize/hfml/P000002/').iterdir())
     expected_hfml_paths.sort()
-    expected_hfmls = [expected_hfml for expected_hfml in expected_hfml_paths]
+    expected_hfmls = [expected_hfml.read_text(encoding='utf-8') for expected_hfml in expected_hfml_paths]
     for hfml_result, expected_hfml in zip(hfml_results.values(), expected_hfmls):
         assert hfml_result == expected_hfml
 
