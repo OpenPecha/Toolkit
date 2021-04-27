@@ -1,0 +1,10 @@
+id: 1bf8b04b599f4586bd5ff34a2f6bc391
+annotation_type: Sabche
+revision: '00001'
+annotations:
+  5bd5505c887149eeb4fd049f6ad5a46f:
+    span:
+      start: 63
+      end: 102
+local_ids:
+  5bd5505c887149eeb4fd049f6ad5a46f: 200000
