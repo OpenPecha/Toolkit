@@ -21,7 +21,6 @@ def opf_path():
 def test_hfml_serializer():
     opf_path = "./tests/data/serialize/hfml/opf/P000003.opf/"
     serializer = HFMLSerializer(opf_path)
-    serializer.layers = []
     serializer.apply_layers()
     hfml_results = serializer.get_result()
     expected_hfml_vol1 = Path('./tests/data/serialize/hfml/expected_hfml/P000003/v001.txt').read_text(encoding='utf-8')
