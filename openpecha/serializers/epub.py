@@ -305,7 +305,7 @@ class EpubSerializer(Serialize):
         for author in authors:
             front_page += f"{Tsadra_template.author_SP}{author}</span></p>\n"
         if credit_pg_path.is_file():
-            front_page += f'{Tsadra_template.credit_page_SP}<img src="{self.opf_path}/assets/image/{credit_pg_name}"/></span></p>\n'
+            front_page += f'{Tsadra_template.credit_page_SP}<img src="{self.opf_path}/assets/image/{credit_pg_name}" alt="credit image not found"/></span></p>\n'
         return front_page
 
     def add_page_break(self, prev_p_tag, body_text):
