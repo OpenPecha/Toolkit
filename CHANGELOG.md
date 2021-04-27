@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.7.30 (2021-04-27)
+### Fix
+* New release ([`e16260c`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/e16260c6f9c024ab78661c3810581e33a1297254))
+* **serializer:** Index layer passed as parameter in order to avoid multiple loading of it ([`61a53ae`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/61a53aed4721e03421dd26eb46c2d06898843b9a))
+* **hfml-serializer:** Extra line at the end of pages bug resolved ([`395ec95`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/395ec95ab0f29be7b665654ffc2187c873e2bf89))
+
 ## v0.7.29 (2021-04-20)
 ### Fix
 * Ann start ([`aa0cc38`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/aa0cc389507037590e654e99bf31240109bbfba0))
