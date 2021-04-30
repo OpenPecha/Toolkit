@@ -23,7 +23,10 @@ class HFMLSerializer(Serialize):
         side = "ab"
         local_id = self.get_local_id(ann, uuid2localid)
         if ann["type"] == AnnType.pagination:
-            if ann["page_index"] == "0b":
+            pg_idx = ann.get("page_index", "")
+            if not pg_idx:
+                pg_idx = ann.get("imgnum", "")
+            if pg_idx == "0b":
                 pg_n = ann["reference"][5:-1]
                 pg_side = ann["reference"][-1]
                 if "-" in pg_n:
@@ -37,12 +40,12 @@ class HFMLSerializer(Serialize):
                         pg_side = ""
                     start_payload = f"[{local_id}{pg_n}{pg_side}]"
             else:
-                start_payload = f'[{local_id}{ann["page_index"]}]'
+                start_payload = f'[{local_id}{pg_idx}]'
 
-            if ann["page_info"]:
+            if ann.get("page_info", ""):
                 start_payload += f' {ann["page_info"]}\n'
-            # elif ann["reference"]:
-            #     start_payload += f' {ann["reference"]}\n'
+            if ann.get("reference", ""):
+                start_payload += f' {ann["reference"]}\n'
             else:
                 start_payload += "\n"
             only_start_ann = True
