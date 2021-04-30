@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.7.31 (2021-04-30)
+### Fix
+* **hfml-serializer:** Page index changed to imgnum ([`d83a86d`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/d83a86de12a0bdb6325a9a6ae4ce5ba9531c0706))
+
 ## v0.7.30 (2021-04-27)
 ### Fix
 * New release ([`e16260c`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/e16260c6f9c024ab78661c3810581e33a1297254))
