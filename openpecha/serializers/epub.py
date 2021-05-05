@@ -552,5 +552,6 @@ class EpubSerializer(Serialize):
             # Removing html file and template file
             os.system(f"rm {out_html_fn}")
             os.system("rm template.css")
-            self.embed_ibook_specific_font(out_epub_fn)
+            if out_epub_fn.is_file():
+                self.embed_ibook_specific_font(out_epub_fn)
             return out_epub_fn
