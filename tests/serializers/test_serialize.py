@@ -29,13 +29,12 @@ def test_hfml_serializer():
     assert hfml_results['v002'] == expected_hfml_vol2
 
 
-def test_hfml_2_tsadra_serializer(opf_path):
-    # with tempfile.TemporaryDirectory() as tmpdirname:
-    tmpdirname = './'
-    serializer = EpubSerializer(opf_path)
-    out_fn = serializer.serialize(output_path=tmpdirname)
-    assert Path(out_fn).name == "P000100.epub"
-    Path('./P000100.epub').unlink()
+def test_hfml_2_tsadra_serializer():
+    opf_path = Path("./tests/data/serialize/tsadra/P000801/P000801.opf")
+    with tempfile.TemporaryDirectory() as tmpdirname:
+        serializer = EpubSerializer(opf_path)
+        out_fn = serializer.serialize(output_path=tmpdirname)
+        assert Path(out_fn).name == "P000801.epub"
 
 
 def test_editor_serializer():
