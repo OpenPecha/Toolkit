@@ -467,8 +467,9 @@ class EpubSerializer(Serialize):
         """
         pecha_id = epub_path.stem
         #rename to zip
-        epub_path.rename(epub_path.with_suffix('.zip'))
         zip_path = epub_path.parent / f'{pecha_id}.zip'
+        os.rename(str(epub_path), str(zip_path))
+        # epub_path.rename(epub_path.with_suffix('.zip'))
         epub_folder = str(epub_path.parent / f'{pecha_id}')
         with zipfile.ZipFile(zip_path, 'r') as zip_ref:
             zip_ref.extractall(epub_folder)
@@ -483,7 +484,9 @@ class EpubSerializer(Serialize):
         os.system(f'rm -r {epub_folder}')
         print('INFO: file zipped..')
         new_zip_path = Path(new_zip_path)
-        new_zip_path.rename(new_zip_path.with_suffix('.epub'))
+        new_epub_path = f'{epub_folder}.epub'
+        os.rename(str(new_zip_path), new_epub_path)
+        # new_zip_path.rename(new_zip_path.with_suffix('.epub'))
         print('INFO: Epub ready...')
 
     def serialize(self, toc_levels={}, output_path="./output/epub_output"):
