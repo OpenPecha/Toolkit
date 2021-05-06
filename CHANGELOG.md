@@ -2,6 +2,17 @@
 
 <!--next-version-placeholder-->
 
+## v0.7.33 (2021-05-06)
+### Fix
+* **serializer:** Line annotation removed ([`e3af107`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/e3af107c777b8967260a14723a37cf4ee36dfafa))
+
+## v0.7.32 (2021-05-05)
+### Fix
+* **epub-serialise:** Skip embedding ibook specification if epub doesnt exist ([`07b4acc`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/07b4acc747556fb39b7eb37cc6a05c817cf048e3))
+* **epub-serializer:** Renaming approch changed ([`ec620f4`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/ec620f4e53f48a22a2dc749ace4396c39becaf44))
+* **test-serialize:** Epub serializer updated ([`d117d86`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/d117d867d87dc3771412d442a6463370ba7380c2))
+* **epub-serializer:** Ibook specification for proper font embedding included ([`107cb69`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/107cb691e03ef9a93c08e4ed5c13dc2279cb24ac))
+
 ## v0.7.31 (2021-04-30)
 ### Fix
 * **hfml-serializer:** Page index changed to imgnum ([`d83a86d`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/d83a86de12a0bdb6325a9a6ae4ce5ba9531c0706))
