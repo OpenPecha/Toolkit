@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.7.33 (2021-05-06)
+### Fix
+* **serializer:** Line annotation removed ([`e3af107`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/e3af107c777b8967260a14723a37cf4ee36dfafa))
+
 ## v0.7.32 (2021-05-05)
 ### Fix
 * **epub-serialise:** Skip embedding ibook specification if epub doesnt exist ([`07b4acc`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/07b4acc747556fb39b7eb37cc6a05c817cf048e3))
