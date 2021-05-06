@@ -362,6 +362,5 @@ class Serialize(object):
 
             if "Pagination" in self.layers:
                 cur_vol_result = self._clip_extra_newline(cur_vol_result)
-                cur_vol_result = self._assign_line_layer(cur_vol_result, vol_id)
             result.update({vol_id: cur_vol_result})
         return result
