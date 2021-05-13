@@ -129,14 +129,14 @@ class TestHFMLFormatter:
                         1000014,
                         {
                             "work_id": "t2",
-                            "span": {"vol": 1, "start": 2046, "end": 2174},
+                            "span": {"vol": 1, "start": 2046, "end": 2173},
                         },
                     )
                 ],
                 [
                     (
                         1000017,
-                        {"work_id": "T2", "span": {"vol": 2, "start": 26, "end": 267}},
+                        {"work_id": "T2", "span": {"vol": 2, "start": 26, "end": 266}},
                     )
                 ],
                 [
@@ -148,7 +148,7 @@ class TestHFMLFormatter:
                 [
                     (
                         1000026,
-                        {"work_id": "t4", "span": {"vol": 3, "start": 243, "end": 267}},
+                        {"work_id": "t4", "span": {"vol": 3, "start": 243, "end": 266}},
                     )
                 ],
             ],

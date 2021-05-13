@@ -886,7 +886,7 @@ class HFMLFormatter(BaseFormatter):
                             {
                                 "work_id": self.topic_info[-1],
                                 "span": CrossVolSpan(
-                                    self.vol_walker + 1, start_topic, char_walker - 1
+                                    self.vol_walker + 1, start_topic, char_walker - 2
                                 ),
                             },
                         )
