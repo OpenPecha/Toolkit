@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.7.34 (2021-05-13)
+### Fix
+* **serialize:** Text span bug fix ([`29ae052`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/29ae052deb27b14d707f266367ad9b5b3b4434e5))
+* **hfml-formatter:** Topic end span for last page changed ([`a1d36de`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/a1d36de32e8c426ef78421379e5825c82f0f18db))
+* **text-formatter:** Text-formatter added ([`b78698f`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/b78698fa71487bc44f01c8468010717626a140b0))
+
 ## v0.7.33 (2021-05-06)
 ### Fix
 * **serializer:** Line annotation removed ([`e3af107`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/e3af107c777b8967260a14723a37cf4ee36dfafa))
