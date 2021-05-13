@@ -167,7 +167,7 @@ class Serialize(object):
             vol_base = (self.opf_path / f"base/{vol_id}.txt").read_text()
             start = self.text_spans[vol_id]["start"]
             end = self.text_spans[vol_id]["end"]
-            return vol_base[start:end]
+            return vol_base[start:end+1]
         else:
             vol_base = (self.opf_path / f"base/{vol_id}.txt").read_text()
             return vol_base
