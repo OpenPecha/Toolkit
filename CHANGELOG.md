@@ -2,6 +2,13 @@
 
 <!--next-version-placeholder-->
 
+## v0.7.35 (2021-05-20)
+### Fix
+* **test:** Test for serializers are separated ([`0ed687a`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/0ed687a0d8295de89144c68b173460370bdbbc69))
+* **editor:** Chapter serialize correctly in editor ([`cd2572a`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/cd2572ab7f73e61ddabb00d70f32f6d5d6c8c170))
+* **epub-serializer:** Alt option added for img tag of credit page ([`540c6fa`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/540c6faf86745ae0e1f369126a74b616feff815c))
+* **epub-serializer:** Verse type annotation style changed ([`788ecab`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/788ecab70cd108fc65dc64da8fd9774e24568f6f))
+
 ## v0.7.34 (2021-05-13)
 ### Fix
 * **serialize:** Text span bug fix ([`29ae052`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/29ae052deb27b14d707f266367ad9b5b3b4434e5))
