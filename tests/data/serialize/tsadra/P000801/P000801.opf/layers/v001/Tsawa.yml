@@ -9,6 +9,6 @@ annotations:
     is_verse: true
   de30c1c91ce44217a6e0cacdcab6a404:
     span:
-      start: 571
-      end: 596
+      start: 677
+      end: 702
     is_verse: false

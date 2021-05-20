@@ -12,3 +12,8 @@ annotations:
       start: 188
       end: 227
     is_verse: false
+  a3cacfe626734376b5a45ade275de789:
+    span:
+      start: 466
+      end: 570
+    is_verse: true
