@@ -524,11 +524,11 @@ class EpubSerializer(Serialize):
                 )
             result = self.p_tag_adder(result)
             result = self.indentation_adjustment(result)
-            results = (
+            serialized_html = (
                 f"<html>\n<head>\n\t<title>{pecha_title}</title>\n</head>\n<body>\n"
             )
-            results += f"{result}{footnote_ref_tag}</body>\n</html>"
-            Path(out_html_fn).write_text(results)
+            serialized_html += f"{result}{footnote_ref_tag}</body>\n</html>"
+            Path(out_html_fn).write_text(serialized_html)
             # Downloading css template file from ebook template repo and saving it
             template = requests.get(
                 "https://raw.githubusercontent.com/OpenPecha/ebook-template/master/tsadra_template.css"
@@ -538,7 +538,7 @@ class EpubSerializer(Serialize):
             # XPath expression to detect chapter titles.
             if not toc_levels:
                 toc_levels = Tsadra_template.toc_levels
-            toc_levels = self.set_toc_level(toc_levels, results)
+            toc_levels = self.set_toc_level(toc_levels, serialized_html)
             level1_toc_Xpath = toc_levels.get(1, "")
             level2_toc_Xpath = toc_levels.get(2, "")
             level3_toc_Xpath = toc_levels.get(3, "")
