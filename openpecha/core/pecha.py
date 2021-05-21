@@ -67,7 +67,9 @@ class OpenPecha:
 
     def get_layer(self, base_name: str, layer_name: LayerEnum) -> Layer:
         if base_name in self.layers and layer_name in self.layers[base_name]:
-            return self.layers[base_name][layer_name]
+            layer = self.layers[base_name][layer_name]
+            if layer:
+                return layer
 
         layer_dict = self.read_layers_file(base_name, layer_name.value)
         if layer_dict:
@@ -196,3 +198,17 @@ class OpenPechaFS(OpenPecha):
         old_layer.bump_revision()
         old_layer.annotations = layer.annotations
         self.save_layer(base_name, layer_name, old_layer)
+
+    def reset_layer(self, base_name: str, layer_name: LayerEnum):
+        print("reset->", layer_name.value)
+        layer = self.get_layer(base_name, layer_name)
+        layer.reset()
+        self.save_layer(base_name, layer_name, layer)
+        self.layers[base_name][layer_name] = None
+
+    def reset_layers(self, base_name: str, exclude: List[LayerEnum] = []):
+        for layer_name in self.layers[base_name]:
+            if layer_name in exclude:
+                print("skipped->", layer_name.value)
+                continue
+            self.reset_layer(base_name, layer_name)

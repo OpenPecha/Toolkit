@@ -22,3 +22,14 @@ def test_not_supported_layer():
 def test_revision_should_be_int_parsible():
     with pytest.raises(ValidationError):
         Layer(annotation_type=LayerEnum.book_title, revision="1aaa", annotations={})
+
+
+def test_layer_reset():
+    layer = Layer(
+        annotation_type=LayerEnum.book_title, revision="00003", annotations={"1": "ann"}
+    )
+    assert layer.revision == "00003"
+    assert layer.annotations
+    layer.reset()
+    assert layer.revision == "00001"
+    assert layer.annotations == {}

@@ -56,6 +56,10 @@ class Layer(BaseModel):
     def bump_revision(self):
         self.revision = f"{int(self.revision)+1:05}"
 
+    def reset(self):
+        self.revision = "00001"
+        self.annotations = {}
+
 
 class MetaData(BaseModel):
     id: str = None
