@@ -1,0 +1,20 @@
+id: P000100
+initial_creation_type: ebook
+source_metadata:
+  title:
+    ༄༅། །ཕྱག་ཆེན་སྔོན་འགྲོ་བཞི་སྦྱོར་དང་དངོས་གཞིའི་ཁྲིད་རིམ་མདོར་བསྡུས་ངེས་དོན་སྒྲོན་མེ་ཞེས་བྱ་བ་བཞུགས་སོ།
+    །
+  authors:
+    - མཛད་པ་པོ། འཇམ་མགོན་ཀོང་སྤྲུལ་བློ་གྲོས་མཐའ་ཡས། །
+  sku: P000101
+  cover: LEK-PHI-001.jpg
+  layers:
+    - BookTitle
+    - PotiTitle
+    - Author
+    - Chapter
+    - Pagination
+    - Tsawa
+    - Citation
+    - Sabche
+    - Yigchung
