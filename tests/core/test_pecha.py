@@ -1,6 +1,6 @@
 import tempfile
 
-from openpecha.core.layer import InitialCreationEnum, Layer, LayersEnum, MetaData
+from openpecha.core.layer import InitialCreationEnum, Layer, LayerEnum, MetaData
 from openpecha.core.pecha import OpenPechaFS
 
 
@@ -9,8 +9,8 @@ def test_create_pecha():
         base={"v001": "this is base"},
         layers={
             "v001": {
-                LayersEnum.citation: Layer(
-                    annotation_type=LayersEnum.citation,
+                LayerEnum.citation: Layer(
+                    annotation_type=LayerEnum.citation,
                     revision="00001",
                     annotations={},
                 )
@@ -20,7 +20,7 @@ def test_create_pecha():
     )
     assert openpecha.meta.id
     assert openpecha.get_base("v001")
-    assert openpecha.get_layer("v001", LayersEnum.citation)
+    assert openpecha.get_layer("v001", LayerEnum.citation)
 
     with tempfile.TemporaryDirectory() as tmpdirname:
         assert openpecha.save(tmpdirname)
@@ -31,7 +31,7 @@ def test_load_openpecha():
     assert openpecha.meta.id
     assert openpecha.index
     assert openpecha.get_base("v001")
-    assert openpecha.get_layer("v001", LayersEnum.citation)
+    assert openpecha.get_layer("v001", LayerEnum.citation)
     assert openpecha.components
 
     with tempfile.TemporaryDirectory() as tmpdirname:
@@ -42,9 +42,9 @@ def test_save_layer():
     openpecha = OpenPechaFS("tests/data/serialize/tsadra/P000100.opf")
     openpecha.save_layer(
         "v002",
-        LayersEnum.citation,
+        LayerEnum.citation,
         Layer(
-            annotation_type=LayersEnum.citation,
+            annotation_type=LayerEnum.citation,
             revision="00001",
             annotations={},
         ),
@@ -57,15 +57,15 @@ def test_pecha_update():
     with tempfile.TemporaryDirectory() as tmpdirname:
         openpecha.meta.id
         openpecha.get_base("v001")
-        openpecha.get_layer("v001", LayersEnum.citation)
+        openpecha.get_layer("v001", LayerEnum.citation)
         openpecha.save(tmpdirname)
 
         openpecha.update_base("v001", "update base")
         openpecha.update_layer(
             "v001",
-            LayersEnum.citation,
+            LayerEnum.citation,
             Layer(
-                annotation_type=LayersEnum.citation,
+                annotation_type=LayerEnum.citation,
                 revision="00001",
                 annotations={"1": "update annotation"},
             ),
@@ -74,14 +74,14 @@ def test_pecha_update():
         openpecha.reset_base_and_layers()
         assert openpecha.get_base("v001") == "update base"
         assert (
-            openpecha.get_layer("v001", LayersEnum.citation).annotations["1"]
+            openpecha.get_layer("v001", LayerEnum.citation).annotations["1"]
             == "update annotation"
         )
 
 
 def test_create_empty_layer():
     pecha = OpenPechaFS("tests/data/serialize/tsadra/P000100.opf")
-    layer = pecha.get_layer("v001", LayersEnum("BookNumber"))
-    assert layer.annotation_type == LayersEnum("BookNumber")
+    layer = pecha.get_layer("v001", LayerEnum("BookNumber"))
+    assert layer.annotation_type == LayerEnum("BookNumber")
     assert layer.revision == "00001"
     assert layer.annotations == {}

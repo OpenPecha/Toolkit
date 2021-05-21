@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Dict, List, Union
 
 from openpecha import config
-from openpecha.core.layer import Layer, LayersEnum, MetaData
+from openpecha.core.layer import Layer, LayerEnum, MetaData
 from openpecha.utils import dump_yaml, load_yaml
 
 
@@ -13,7 +13,7 @@ class OpenPecha:
     def __init__(
         self,
         base: Dict[str, str] = {},
-        layers: Dict[str, Dict[LayersEnum, Layer]] = defaultdict(dict),
+        layers: Dict[str, Dict[LayerEnum, Layer]] = defaultdict(dict),
         index: Layer = None,
         meta: MetaData = None,
         assets: Dict[str, List[Union[str, Path]]] = {},
@@ -53,7 +53,7 @@ class OpenPecha:
         return self._index
 
     @property
-    def components(self) -> Dict[str, List[LayersEnum]]:
+    def components(self) -> Dict[str, List[LayerEnum]]:
         if self._components:
             return self._components
         self._components = self._read_components()
@@ -65,7 +65,7 @@ class OpenPecha:
         self.base[base_name] = self.read_base_file(base_name)
         return self.base[base_name]
 
-    def get_layer(self, base_name: str, layer_name: LayersEnum) -> Layer:
+    def get_layer(self, base_name: str, layer_name: LayerEnum) -> Layer:
         if base_name in self.layers and layer_name in self.layers[base_name]:
             return self.layers[base_name][layer_name]
 
@@ -110,7 +110,7 @@ class OpenPechaFS(OpenPecha):
 
     @property
     def index_fn(self) -> Path:
-        return self.opf_path / f"{LayersEnum.index.value}.yml"
+        return self.opf_path / f"{LayerEnum.index.value}.yml"
 
     @property
     def assets_path(self) -> Path:
@@ -120,7 +120,7 @@ class OpenPechaFS(OpenPecha):
         return (self.base_path / f"{base_name}.txt").read_text(encoding="utf-8")
 
     def read_layers_file(
-        self, base_name: str, layer_name: LayersEnum
+        self, base_name: str, layer_name: LayerEnum
     ) -> Union[Dict, None]:
         layer_fn = self.layers_path / base_name / f"{layer_name}.yml"
         if layer_fn.is_file():
@@ -138,7 +138,7 @@ class OpenPechaFS(OpenPecha):
         res = {}
         for vol_dir in self.layers_path.iterdir():
             res[vol_dir.name] = list(
-                map(lambda fn: LayersEnum(fn.stem), vol_dir.iterdir())
+                map(lambda fn: LayerEnum(fn.stem), vol_dir.iterdir())
             )
         return res
 
@@ -153,7 +153,7 @@ class OpenPechaFS(OpenPecha):
         for base_name, content in self.base.items():
             self.save_single_base(base_name, content)
 
-    def save_layer(self, base_name: str, layer_name: LayersEnum, layer: Layer):
+    def save_layer(self, base_name: str, layer_name: LayerEnum, layer: Layer):
         layer_fn = self._mkdir(self.layers_path / base_name) / f"{layer_name.value}.yml"
         dump_yaml(json.loads(layer.json()), layer_fn)
 
@@ -191,7 +191,7 @@ class OpenPechaFS(OpenPecha):
     def update_base(self, base_name: str, content: str):
         self.save_single_base(base_name, content)
 
-    def update_layer(self, base_name: str, layer_name: LayersEnum, layer: Layer):
+    def update_layer(self, base_name: str, layer_name: LayerEnum, layer: Layer):
         old_layer = self.get_layer(base_name, layer_name)
         old_layer.bump_revision()
         old_layer.annotations = layer.annotations

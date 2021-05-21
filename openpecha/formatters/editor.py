@@ -4,7 +4,7 @@ from typing import Dict
 from bs4 import BeautifulSoup
 
 from openpecha.core.annotation import AnnBase, Span, VerseTypeAnn
-from openpecha.core.layer import Layer, LayersEnum
+from openpecha.core.layer import Layer, LayerEnum
 
 
 class EditorParser:
@@ -55,23 +55,23 @@ class EditorParser:
 
             tag_class = child["class"]
             if "book-title" in tag_class:
-                self._add_ann(base_name, LayersEnum.book_title, child)
+                self._add_ann(base_name, LayerEnum.book_title, child)
             elif "sub-title" in tag_class:
-                self._add_ann(base_name, LayersEnum.sub_title, child)
+                self._add_ann(base_name, LayerEnum.sub_title, child)
             elif "book-number" in tag_class:
-                self._add_ann(base_name, LayersEnum.book_number, child)
+                self._add_ann(base_name, LayerEnum.book_number, child)
             elif "author" in tag_class:
-                self._add_ann(base_name, LayersEnum.author, child)
+                self._add_ann(base_name, LayerEnum.author, child)
             elif "chapter" in tag_class:
-                self._add_ann(base_name, LayersEnum.chapter, child)
+                self._add_ann(base_name, LayerEnum.chapter, child)
             elif "citation" in tag_class:
-                self._add_ann(base_name, LayersEnum.citation, child)
+                self._add_ann(base_name, LayerEnum.citation, child)
             elif "root-text" in tag_class:
-                self._add_ann(base_name, LayersEnum.tsawa, child)
+                self._add_ann(base_name, LayerEnum.tsawa, child)
             elif "sabche" in tag_class:
-                self._add_ann(base_name, LayersEnum.sabche, child)
+                self._add_ann(base_name, LayerEnum.sabche, child)
             elif "yigchung" in tag_class:
-                self._add_ann(base_name, LayersEnum.yigchung, child)
+                self._add_ann(base_name, LayerEnum.yigchung, child)
 
         # newline at the end of every p tag
         self.last_base_char_idx += 1
@@ -129,5 +129,5 @@ class EditorParser:
             self._parse_p_tag(base_name, p)
 
         if group:
-            self._group_anns(base_name, LayersEnum("Tsawa"))
-            self._group_anns(base_name, LayersEnum("Citation"))
+            self._group_anns(base_name, LayerEnum("Tsawa"))
+            self._group_anns(base_name, LayerEnum("Citation"))

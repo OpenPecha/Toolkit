@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pytest
 
-from openpecha.core.layer import LayersEnum
+from openpecha.core.layer import LayerEnum
 from openpecha.formatters import GoogleOCRFormatter, HFMLFormatter, TsadraFormatter
 from openpecha.formatters.editor import EditorParser
 from openpecha.formatters.formatter import LocalIdManager
@@ -365,7 +365,7 @@ def test_parser_editor_content_no_grouping(editor_content):
 
 
 def assert_ann(parser, base_name, layer_name, id_, excepted, is_verse):
-    layer = parser.layers[base_name][LayersEnum(layer_name)]
+    layer = parser.layers[base_name][LayerEnum(layer_name)]
     ann = layer.annotations[id_]
     assert parser.base[base_name][ann.span.start : ann.span.end + 1] == excepted
     assert ann.is_verse == is_verse

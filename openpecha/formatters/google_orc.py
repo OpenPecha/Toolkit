@@ -7,7 +7,7 @@ from pathlib import Path
 import requests
 
 from openpecha.core.annotation import Page, Span
-from openpecha.core.layer import Layer, LayersEnum
+from openpecha.core.layer import Layer, LayerEnum
 from openpecha.formatters import BaseFormatter
 from openpecha.utils import gzip_str
 
@@ -53,7 +53,7 @@ class GoogleOCRFormatter(BaseFormatter):
             page = Page(span=span, imgnum=n_pg, reference=page_ref)
             anns[uuid] = page
 
-        layer = Layer(annotation_type=LayersEnum("pagination"), annotations=anns)
+        layer = Layer(annotation_type=LayerEnum("pagination"), annotations=anns)
         result = {"pagination": json.loads(layer.json(exclude_none=True))}
 
         return result
