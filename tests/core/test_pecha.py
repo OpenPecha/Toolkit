@@ -1,7 +1,14 @@
 import tempfile
 
+import pytest
+
 from openpecha.core.layer import InitialCreationEnum, Layer, LayerEnum, MetaData
 from openpecha.core.pecha import OpenPechaFS
+
+
+@pytest.fixture(scope="module")
+def pecha():
+    return OpenPechaFS("tests/data/pechas/P000100.opf")
 
 
 def test_create_pecha():
@@ -26,21 +33,19 @@ def test_create_pecha():
         assert openpecha.save(tmpdirname)
 
 
-def test_load_openpecha():
-    openpecha = OpenPechaFS("tests/data/serialize/tsadra/P000100.opf")
-    assert openpecha.meta.id
-    assert openpecha.index
-    assert openpecha.get_base("v001")
-    assert openpecha.get_layer("v001", LayerEnum.citation)
-    assert openpecha.components
+def test_load_openpecha(pecha):
+    assert pecha.meta.id
+    assert pecha.index
+    assert pecha.get_base("v001")
+    assert pecha.get_layer("v001", LayerEnum.citation)
+    assert pecha.components
 
     with tempfile.TemporaryDirectory() as tmpdirname:
-        openpecha.save(tmpdirname)
+        pecha.save(tmpdirname)
 
 
-def test_save_layer():
-    openpecha = OpenPechaFS("tests/data/serialize/tsadra/P000100.opf")
-    openpecha.save_layer(
+def test_save_layer(pecha):
+    pecha.save_layer(
         "v002",
         LayerEnum.citation,
         Layer(
@@ -51,17 +56,15 @@ def test_save_layer():
     )
 
 
-def test_pecha_update():
-    openpecha = OpenPechaFS("tests/data/serialize/tsadra/P000100.opf")
-
+def test_pecha_update(pecha):
     with tempfile.TemporaryDirectory() as tmpdirname:
-        openpecha.meta.id
-        openpecha.get_base("v001")
-        openpecha.get_layer("v001", LayerEnum.citation)
-        openpecha.save(tmpdirname)
+        pecha.meta.id
+        pecha.get_base("v001")
+        pecha.get_layer("v001", LayerEnum.citation)
+        pecha.save(tmpdirname)
 
-        openpecha.update_base("v001", "update base")
-        openpecha.update_layer(
+        pecha.update_base("v001", "update base")
+        pecha.update_layer(
             "v001",
             LayerEnum.citation,
             Layer(
@@ -71,16 +74,15 @@ def test_pecha_update():
             ),
         )
 
-        openpecha.reset_base_and_layers()
-        assert openpecha.get_base("v001") == "update base"
+        pecha.reset_base_and_layers()
+        assert pecha.get_base("v001") == "update base"
         assert (
-            openpecha.get_layer("v001", LayerEnum.citation).annotations["1"]
+            pecha.get_layer("v001", LayerEnum.citation).annotations["1"]
             == "update annotation"
         )
 
 
-def test_create_empty_layer():
-    pecha = OpenPechaFS("tests/data/serialize/tsadra/P000100.opf")
+def test_create_empty_layer(pecha):
     layer = pecha.get_layer("v001", LayerEnum("BookNumber"))
     assert layer.annotation_type == LayerEnum("BookNumber")
     assert layer.revision == "00001"
