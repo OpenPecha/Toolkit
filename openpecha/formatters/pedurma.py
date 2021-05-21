@@ -14,12 +14,26 @@ class PedurmaFormatter(BaseFormatter):
     Pedurma formatter is to format preview of reconstructed pedurma.
     """
 
-    def __init__(self, output_path, metadata):
+    def __init__(self, output_path, metadata=None):
         super().__init__(output_path, metadata)
         self.page = []
         self.durchen = []
         self.base_text = ""
     
+    def text_preprocess(self, text):
+        if text[0] == "\ufeff":
+            text = text[1:]
+        return text
+
+    def _load_metadata(self):
+        if self.metadata:
+            return self.metadata
+        meta_fn = self.dirs["opf_path"] / "meta.yml"
+        if meta_fn.is_file():
+            return self.load(meta_fn)
+        else:
+            return {}
+
     def _save_metadata(self, **kwargs):
         meta_fn = self.dirs["opf_path"] / "meta.yml"
         if kwargs:
@@ -66,11 +80,38 @@ class PedurmaFormatter(BaseFormatter):
             'span':{
                 'vol': vol_num,
                 'start': walker,
-                'end': walker + page_pat.start() - pat_len_before
+                'end': walker + page_pat.start() - pat_len_before -1
             }
         }
 
         return page_ann
+
+    def get_pub_wise_note(self, note):
+        pub_mapping = {
+            '«པེ་»': 'pe',
+            '«སྣར་»': 'nar',
+            '«སྡེ»': 'der',
+            '«ཅོ་»': 'co'
+        }
+        reformat_notes = {
+            'pe': '',
+            'nar': '',
+            'der': '',
+            'co': ''
+        }
+        note_parts = re.split('(«.+?»)', note)
+        pubs = note_parts[1::2]
+        notes = note_parts[2::2]
+        for walker, (pub, note_part) in enumerate(zip(pubs, notes)):
+            if note_part:
+                reformat_notes[pub_mapping[pub]] = note_part.replace('>', '')
+            else:
+                if notes[walker+1]:
+                    reformat_notes[pub_mapping[pub]] = notes[walker+1].replace('>', '')
+                else:
+                    reformat_notes[pub_mapping[pub]] = notes[walker+2].replace('>', '')
+                
+        return reformat_notes
 
     def parse_note(self, note, walker, page_content):
         note_ann = {}
@@ -80,10 +121,10 @@ class PedurmaFormatter(BaseFormatter):
             ann_start = note_pat.start() + walker 
             ann_end = ann_start + len(note_pat.group(1))
         else:
-            if note_pat := re.search(f'\S+་(\S+་?){note}', page_content):
+            if note_pat := re.search(f'\S+་([^#]\S+་?){note}', page_content):
                 grp_1_loc = page_content.find(note_pat.group(1))
             else:
-                note_pat = re.search(f'(\S+་?){note}', page_content)
+                note_pat = re.search(f'([^#]\S+་?){note}', page_content)
                 grp_1_loc = note_pat.start()
             ann_start = grp_1_loc + walker 
             if note_pat.group(1):
@@ -93,9 +134,9 @@ class PedurmaFormatter(BaseFormatter):
         note_ann = {
             'span':{
                 'start':ann_start,
-                'end': ann_end
+                'end': ann_end-1
             },
-            'note': note
+            'note': self.get_pub_wise_note(note)
         }
         page_content = re.sub(note, '', page_content, 1)
         return note_ann, page_content
@@ -105,18 +146,18 @@ class PedurmaFormatter(BaseFormatter):
         notes = re.findall(r'\<.*?\>', page_content)
         for note in notes:
             if 'p' in note:
-                cur_vol_pages.append(self.parse_pagination(char_walker, page))
+                cur_vol_pages.append(('',self.parse_pagination(char_walker, page)))
             else:
                 note_info, page_content = self.parse_note(note, char_walker, page_content)
-                cur_vol_notes.append(note_info)
+                cur_vol_notes.append(('',note_info))
         new_page = re.sub('<.*?>', '', page)
+        return new_page
 
     def base_extract(self, text):
         return re.sub('<.*?>', '', text)
 
     def build_layers(self, text):
         char_walker = 0
-        layers = {}
         cur_vol_notes = []
         cur_vol_pages = []
         pages = self.get_pages(text)
@@ -125,10 +166,16 @@ class PedurmaFormatter(BaseFormatter):
             char_walker += len(new_page)
         self.page.append(cur_vol_pages)
         self.durchen.append(cur_vol_notes)
-        return layers
+        self.base_text = self.base_extract(text)
     
     def get_result(self):
-        pass
+        result = {
+            AnnType.topic: [],
+            AnnType.sub_topic: [],
+            AnnType.pagination: self.page,
+            AnnType.pedurma_note: self.durchen
+        }
+        return result
 
     def get_base_text(self):
         base_text = self.base_text.strip()
@@ -144,7 +191,7 @@ class PedurmaFormatter(BaseFormatter):
         for m_text, vol_name, n_vol in self.get_input(input_path):
             vol_id = vol2fn_manager.get_vol_id(vol_name)
             print(f"[INFO] parsing Vol {vol_name} ...")
-            self.build_layers(m_text, n_vol)
+            self.build_layers(m_text)
             if "is_text" in kwargs:
                 if kwargs["is_text"]:
                     continue

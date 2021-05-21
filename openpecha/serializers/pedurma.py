@@ -53,8 +53,8 @@ class PedurmaSerializer(Serialize):
             start_payload = ''
             end_payload = f'<p{ann["span"]["vol"]}-{ann["page_num"]}>'
         elif ann["type"] == AnnType.pedurma_note:
-            start_payload = "("
-            end_payload = f',{ann["note"]})'
+            start_payload = ":"
+            end_payload = f'{ann["note"]}'
         
 
         start_cc, end_cc = self.__get_adapted_span(ann["span"], vol_id)
@@ -68,5 +68,6 @@ class PedurmaSerializer(Serialize):
         self.apply_layers()
         results = self.get_result()
         for vol_id, result in results.items():
+            result = result.replace('::',":")
             (output_path / vol_id).write_text(result, encoding='utf-8')
         print('Serialize complete...')
