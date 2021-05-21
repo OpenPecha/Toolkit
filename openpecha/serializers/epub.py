@@ -1,5 +1,8 @@
 import os
 import re
+import shutil
+import zipfile
+from bs4 import BeautifulSoup
 from pathlib import Path
 
 import requests
@@ -29,7 +32,7 @@ class Tsadra_template:
     tsawa_SP = '<span class="tibetan-root-text">'
     tsawa_verse_SP = '<span class="tibetan-root-text-in-verse">'
     quatation__verse_SP = '<span class="tibetan-citations-in-verse">'
-    quatation__SP = '<span class="tibetan-external-citations">'
+    quatation__SP = '<span class="tibetan-citations">'
     sabche_SP = '<span class="tibetan-sabche1">'
     yigchung_SP = '<span class="tibetan-commentary-small">'
     footnote_marker_SP = '<span class="tibetan-footnote-marker"'
@@ -148,21 +151,26 @@ class EpubSerializer(Serialize):
         body_text = re.sub(r"\n</span>", "\n</span>\n", body_text)
         paras = body_text.split("\n")
         para_flag = False
+        cur_span_payload = ""
         cur_para = ""
         for para in paras:
             if "<p" not in para:
                 if re.search("<span.+?</span>", para):
                     new_body_text += f"<p>{para}</p>"
                 elif "<span" in para and not para_flag:
-                    cur_para += f"<p>{para}<br>"
+                    cur_span_payload = re.search("<span .+>", para)[0]
+                    cur_para += f"<p>{para}</span></p>"
                     para_flag = True
                 elif para_flag and "</span>" not in para:
-                    cur_para += f"{para}</br>"
+                    cur_para += (
+                        f'<p>{cur_span_payload[:-2]}-middle-line">{para}</span></p>'
+                    )
                 elif "</span>" in para:
-                    cur_para += f"{para}</p>"
+                    cur_para += f'<p>{cur_span_payload[:-2]}-last-line">{para}</p>'
                     new_body_text += cur_para
                     cur_para = ""
                     para_flag = False
+                    cur_span_payload = ""
                 else:
                     new_body_text += f"<p>{para}</p>"
             else:
@@ -300,7 +308,7 @@ class EpubSerializer(Serialize):
         for author in authors:
             front_page += f"{Tsadra_template.author_SP}{author}</span></p>\n"
         if credit_pg_path.is_file():
-            front_page += f'{Tsadra_template.credit_page_SP}<img src="{self.opf_path}/assets/image/{credit_pg_name}"/></span></p>\n'
+            front_page += f'{Tsadra_template.credit_page_SP}<img src="{self.opf_path}/assets/image/{credit_pg_name}" alt="credit image not found"/></span></p>\n'
         return front_page
 
     def add_page_break(self, prev_p_tag, body_text):
@@ -403,6 +411,88 @@ class EpubSerializer(Serialize):
                 new_toc_levels[walker] = annotation_xpath
                 walker += 1
         return new_toc_levels
+    
+    def get_new_metadata(self, soup, meta_data):
+        """Update meta data of opf
+
+        Args:
+            soup (bs4-tag): beautiful soup tag of whole opf
+            meta_data (bs4-tag): beautiful soup tag of metadata
+
+        Returns:
+            bs4-tag: new metadata
+        """
+        ibook_meta = soup.new_tag('meta')
+        ibook_meta.attrs['property'] = "ibooks:specified-fonts"
+        ibook_meta.append('true')
+        meta_data.append(ibook_meta)
+        return meta_data
+
+    def get_new_manifest(self, soup, manifest):
+        """Update manifest of opf
+
+        Args:
+            soup (bs4-tag): beautiful soup tag of whole opf
+            manifest (bs4-tag): beautiful soup tag of manifest
+
+        Returns:
+            bs4-tag: new manifest
+        """
+        new_item = soup.new_tag('item')
+        new_item.attrs['href'] = "font/MonlamUniOuChan2.ttf"
+        new_item.attrs['id'] = "MonlamUniOuChan2.ttf"
+        new_item.attrs['media-type'] = "application/x-font-ttf"
+        manifest.append(new_item)
+        return manifest
+
+    def get_new_opf(self, opf):
+        """Updating opf content of epub with ibook specifications
+
+        Args:
+            opf (str): opf content of epub produced by calibre
+
+        Returns:
+            str: new opf content
+        """
+        soup = BeautifulSoup(opf, "html.parser")
+        soup.package.attrs['prefix'] = "ibooks: http://vocabulary.itunes.apple.com/rdf/ibooks/vocabulary-extensions-1.0/"
+        old_meta = soup.find('metadata')
+        old_manifest = soup.find('manifest')
+        new_meta = self.get_new_metadata(soup, old_meta)
+        new_manifest = self.get_new_manifest(soup, old_manifest)
+        soup.metadata.replaceWith(new_meta)
+        soup.manifest.replaceWith(new_manifest)
+        return str(soup)
+
+    def embed_ibook_specific_font(self, epub_path):
+        """Include ibook specification for proper font embedding and recompiling the ebook.
+
+        Args:
+            epub_path (path_obj): path of epub produced by calibre
+        """
+        pecha_id = epub_path.stem
+        #rename to zip
+        zip_path = epub_path.parent / f'{pecha_id}.zip'
+        os.rename(str(epub_path), str(zip_path))
+        # epub_path.rename(epub_path.with_suffix('.zip'))
+        epub_folder = str(epub_path.parent / f'{pecha_id}')
+        with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+            zip_ref.extractall(epub_folder)
+        print('INFO: Unzip epub..')
+        zip_path.unlink()
+        opf_path = Path(epub_folder) / 'content.opf'
+        opf_content = opf_path.read_text(encoding='utf-8')
+        new_opf_content = self.get_new_opf(opf_content)
+        opf_path.write_text(new_opf_content, encoding='utf-8')
+        print('INFO: OPF content updated..')
+        new_zip_path = shutil.make_archive(epub_folder, 'zip', epub_folder)
+        os.system(f'rm -r {epub_folder}')
+        print('INFO: file zipped..')
+        new_zip_path = Path(new_zip_path)
+        new_epub_path = f'{epub_folder}.epub'
+        os.rename(str(new_zip_path), new_epub_path)
+        # new_zip_path.rename(new_zip_path.with_suffix('.epub'))
+        print('INFO: Epub ready...')
 
     def serialize(self, toc_levels={}, output_path="./output/epub_output"):
         """This module serialize .opf file to other format such as .epub etc. In case of epub,
@@ -434,11 +524,11 @@ class EpubSerializer(Serialize):
                 )
             result = self.p_tag_adder(result)
             result = self.indentation_adjustment(result)
-            results = (
+            serialized_html = (
                 f"<html>\n<head>\n\t<title>{pecha_title}</title>\n</head>\n<body>\n"
             )
-            results += f"{result}{footnote_ref_tag}</body>\n</html>"
-            Path(out_html_fn).write_text(results)
+            serialized_html += f"{result}{footnote_ref_tag}</body>\n</html>"
+            Path(out_html_fn).write_text(serialized_html)
             # Downloading css template file from ebook template repo and saving it
             template = requests.get(
                 "https://raw.githubusercontent.com/OpenPecha/ebook-template/master/tsadra_template.css"
@@ -448,7 +538,7 @@ class EpubSerializer(Serialize):
             # XPath expression to detect chapter titles.
             if not toc_levels:
                 toc_levels = Tsadra_template.toc_levels
-            toc_levels = self.set_toc_level(toc_levels, results)
+            toc_levels = self.set_toc_level(toc_levels, serialized_html)
             level1_toc_Xpath = toc_levels.get(1, "")
             level2_toc_Xpath = toc_levels.get(2, "")
             level3_toc_Xpath = toc_levels.get(3, "")
@@ -467,5 +557,6 @@ class EpubSerializer(Serialize):
             # Removing html file and template file
             os.system(f"rm {out_html_fn}")
             os.system("rm template.css")
-
+            if out_epub_fn.is_file():
+                self.embed_ibook_specific_font(out_epub_fn)
             return out_epub_fn

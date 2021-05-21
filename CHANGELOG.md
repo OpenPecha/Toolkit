@@ -2,6 +2,40 @@
 
 <!--next-version-placeholder-->
 
+## v0.7.35 (2021-05-20)
+### Fix
+* **test:** Test for serializers are separated ([`0ed687a`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/0ed687a0d8295de89144c68b173460370bdbbc69))
+* **editor:** Chapter serialize correctly in editor ([`cd2572a`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/cd2572ab7f73e61ddabb00d70f32f6d5d6c8c170))
+* **epub-serializer:** Alt option added for img tag of credit page ([`540c6fa`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/540c6faf86745ae0e1f369126a74b616feff815c))
+* **epub-serializer:** Verse type annotation style changed ([`788ecab`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/788ecab70cd108fc65dc64da8fd9774e24568f6f))
+
+## v0.7.34 (2021-05-13)
+### Fix
+* **serialize:** Text span bug fix ([`29ae052`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/29ae052deb27b14d707f266367ad9b5b3b4434e5))
+* **hfml-formatter:** Topic end span for last page changed ([`a1d36de`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/a1d36de32e8c426ef78421379e5825c82f0f18db))
+* **text-formatter:** Text-formatter added ([`b78698f`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/b78698fa71487bc44f01c8468010717626a140b0))
+
+## v0.7.33 (2021-05-06)
+### Fix
+* **serializer:** Line annotation removed ([`e3af107`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/e3af107c777b8967260a14723a37cf4ee36dfafa))
+
+## v0.7.32 (2021-05-05)
+### Fix
+* **epub-serialise:** Skip embedding ibook specification if epub doesnt exist ([`07b4acc`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/07b4acc747556fb39b7eb37cc6a05c817cf048e3))
+* **epub-serializer:** Renaming approch changed ([`ec620f4`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/ec620f4e53f48a22a2dc749ace4396c39becaf44))
+* **test-serialize:** Epub serializer updated ([`d117d86`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/d117d867d87dc3771412d442a6463370ba7380c2))
+* **epub-serializer:** Ibook specification for proper font embedding included ([`107cb69`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/107cb691e03ef9a93c08e4ed5c13dc2279cb24ac))
+
+## v0.7.31 (2021-04-30)
+### Fix
+* **hfml-serializer:** Page index changed to imgnum ([`d83a86d`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/d83a86de12a0bdb6325a9a6ae4ce5ba9531c0706))
+
+## v0.7.30 (2021-04-27)
+### Fix
+* New release ([`e16260c`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/e16260c6f9c024ab78661c3810581e33a1297254))
+* **serializer:** Index layer passed as parameter in order to avoid multiple loading of it ([`61a53ae`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/61a53aed4721e03421dd26eb46c2d06898843b9a))
+* **hfml-serializer:** Extra line at the end of pages bug resolved ([`395ec95`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/395ec95ab0f29be7b665654ffc2187c873e2bf89))
+
 ## v0.7.29 (2021-04-20)
 ### Fix
 * Ann start ([`aa0cc38`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/aa0cc389507037590e654e99bf31240109bbfba0))

@@ -80,7 +80,7 @@ class EditorSerializer(Serialize):
         elif ann["type"] == LayerEnum.author.value:
             start_payload = f'{AnnotationTemplate.author_SP} id="{ann_id}">'
             end_payload = AnnotationTemplate.span_EP + AnnotationTemplate.para_EP
-        elif ann["type"] == LayerEnum.chapter:
+        elif ann["type"] == LayerEnum.chapter.value:
             start_payload = f'{AnnotationTemplate.chapter_SP} id="{ann_id}">'
             end_payload = AnnotationTemplate.span_EP + AnnotationTemplate.para_EP
         elif ann["type"] == LayerEnum.tsawa.value:

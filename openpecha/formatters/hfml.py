@@ -4,6 +4,7 @@ Formatter for HFML annotations in the text
 This module implements all classes necessary to format HFML annotation to OpenPecha format.
 HFML (Human Friendly Markup Language) contains tagset used for structuring and annotating the text.
 """
+from json import encoder
 import re
 from pathlib import Path
 
@@ -1048,171 +1049,80 @@ class HFMLFormatter(BaseFormatter):
 
 
 class HFMLTextFromatter(HFMLFormatter):
-    def __init_(self, output_path="./output", is_book=False):
+
+    def __init_(self, output_path="./output", is_book=False, text_id=None):
         super().__init__(output_path=output_path, is_book=is_book)
-        self.text_id = None
+        self.text_id = text_id
 
-    def get_input(self, input_path):
-        mtext = input_path.read_text()
-        if self.is_book:
-            return (self.text_preprocess(mtext), "Book", 1)
+    def from_yaml(self, yml_path):
+        return yaml.safe_load(yml_path.read_text(encoding="utf-8"))
 
-        vol_pattern = r"\[v\d{3}\]"
-        cur_vol_text = ""
-        vol_text = []
-        vol_info = []
-        vol_walker = 0
-        lines = mtext.splitlines()
-        n_line = len(lines)
-        self.text_id = re.search(r"\{\w+\}", mtext)[0]
-        for idx, line in enumerate(lines):
-            vol_pat = re.search(vol_pattern, line)
-            if vol_pat:
-                vol_info.append(vol_pat[0][1:-1])
-                if vol_walker > 0:
-                    vol_text.append(cur_vol_text)
-                    cur_vol_text = ""
-                vol_walker += 1
-            else:
-                cur_vol_text += line + "\n"
-            if idx == n_line - 1:
-                vol_text.append(cur_vol_text)
-                cur_vol_text = ""
+    def get_offset(self, index_layer, text_id):
+        offset = {}
+        for text_uuid, text in index_layer['annotations'].items():
+            if text['work_id'] == text_id:
+                for span in text['span']:
+                    offset[span['vol']] = span['start']
+                return offset
+        return offset
 
-        result = []
-        for i, vol_id in enumerate(vol_info):
-            result.append((self.text_preprocess(vol_text[i]), vol_id, vol_walker))
-        return result
+    def get_text_vol_ids(self, text_opf_path):
+        base_layers = list((text_opf_path / "base").iterdir())
+        base_layers.sort()
+        text_vol_ids = [text_id.stem for text_id in base_layers]
+        return text_vol_ids
 
-    def __adapt_span_to_vol(self, extra, vol_walker):
-        """ It adapts the index of parse output of serilized hfml file of a particular text id.
+    def get_old_text_base(pecha_idx, pecha_base_text, text_id, text_vol_id):
+        vol_num = int(text_vol_id[1:])
+        for text_uuid, text in pecha_idx['annotations'].items():
+            if text['word_id'] == text_id:
+                for vol_span in text['span']:
+                    if vol_span['vol'] == vol_num:
+                        return pecha_base_text[vol_span['start']:vol_span['end']]
+        return pecha_base_text
 
-        Agrs:
-            extra (int): start of text Id span which needs to be added to all the index of annotation present in that text id.
-            vol_walker (int): Adapts all the annotation which contains volume information.
-        """
+    def update_base_text(self, pecha_opf_path, text_opf_path, pecha_idx, text_id):
+        text_vol_ids = self.get_text_vol_ids(text_opf_path)
+        for text_vol_id in text_vol_ids:
+            pecha_base_text = (pecha_opf_path / f"base/{text_vol_id}.txt").read_text(encoding='utf-8')
+            old_text_base = self.get_old_base_text(pecha_idx, pecha_base_text, text_id, text_vol_id)
+            new_text_base = (text_opf_path / f"base/{text_vol_id}.txt").read_text(encoding='utf-8')
+            new_base_text = pecha_base_text.replace(old_text_base, new_base_text)
+            yield text_vol_id, new_base_text
+            (pecha_opf_path / f"base/{text_vol_id}.txt").write_text(new_base_text, encoding='utf-8')
+        print('INFO: base text updated')
 
-        first_vol = []
-        if self.poti_title[0]:
-            start = self.poti_title[0][0] + extra
-            end = self.poti_title[0][1] + extra
-            first_vol.append((start, end))
-            first_vol.append(self.poti_title[1:])
-            self.poti_title = first_vol
-            first_vol = []
-        if self.chapter_title[0]:
-            start = self.chapter_title[0][0] + extra
-            end = self.chapter_title[0][1] + extra
-            first_vol.append((start, end))
-            first_vol.append(self.chapter_title[1:])
-            self.poti_title = first_vol
-            first_vol = []
-        if self.citation_pattern[0]:
-            for cit in self.citation_pattern[0]:
-                start = cit[0] + extra
-                end = cit[1] + extra
-                first_vol.append((start, end))
-            self.citation_pattern[0] = first_vol
-            first_vol = []
-        if self.sabche_pattern[0]:
-            for sabche in self.sabche_pattern[0]:
-                start = sabche[0] + extra
-                end = sabche[1] + extra
-                first_vol.append((start, end))
-            self.sabche_pattern[0] = first_vol
-            first_vol = []
-        if self.yigchung_pattern[0]:
-            for yig in self.yigchung_pattern[0]:
-                start = yig[0] + extra
-                end = yig[1] + extra
-                first_vol.append((start, end))
-            self.yigchung_pattern[0] = first_vol
-            first_vol = []
-        if self.tsawa_pattern[0]:
-            for tsawa in self.tsawa_pattern[0]:
-                start = tsawa[0] + extra
-                end = tsawa[1] + extra
-                first_vol.append((start, end))
-            self.tsawa_pattern[0] = first_vol
-            first_vol = []
-        if self.error_id[0]:
-            for cor in self.error_id[0]:
-                start = cor[0] + extra
-                end = cor[1] + extra
-                first_vol.append((start, end, cor[2]))
-            self.error_id[0] = first_vol
-            first_vol = []
-        if self.notes_id[0]:
-            for cor in self.notes_id[0]:
-                start = cor[0] + extra
-                first_vol.append(start)
-            self.notes_id[0] = first_vol
-            first_vol = []
-        if self.abs_er_id[0]:
-            for er in self.abs_er_id[0]:
-                start = er[0] + extra
-                end = er[1] + extra
-                first_vol.append((start, end))
-            self.abs_er_id[0] = first_vol
-            first_vol = []
-        if self.page[0]:
-            for pg in self.page[0]:
-                start = pg[0] + extra
-                end = pg[1] + extra
-                first_vol.append((start, end, pg[2], pg[3]))
-            self.page[0] = first_vol
-            first_vol = []
+    def get_new_ann(self, cur_pecha_ann, cur_text_ann, cur_vol_offset):
+        cur_pecha_ann['span']['start'] = cur_text_ann['span']['start'] + cur_vol_offset
+        cur_pecha_ann['span']['end'] = cur_text_ann['span']['end'] + cur_vol_offset
+        return cur_pecha_ann
 
-        if self.topic_id:
-            cur_top = []
-            for cur_vol_top in self.topic_id[0]:
-                start = cur_vol_top[0]
-                end = cur_vol_top[1]
-                if cur_vol_top[2] == 1:
-                    start += extra
-                    end += extra
-                cur_top.append(
-                    (start, end, cur_vol_top[2] + vol_walker, cur_vol_top[3])
-                )
-            self.topic_id[0] = cur_top
+    def get_new_layer(self, cur_vol_pecha_layer, cur_vol_text_layer, cur_vol_offset):
+        for ann_id, local_id in cur_vol_text_layer['local_ids']:
+            pecha_ann_id = cur_vol_pecha_layer['local_ids'].key(local_id)
+            cur_text_ann = cur_vol_text_layer['annotations'][ann_id]
+            cur_pecha_ann = cur_vol_pecha_layer['annotations'][pecha_ann_id]
+            cur_vol_pecha_layer['annotations'][pecha_ann_id] = self.get_new_ann(cur_pecha_ann, cur_text_ann, cur_vol_offset)
+        return cur_vol_pecha_layer
 
-        if self.sub_topic[0][0]:
-            cur_topic = []
-            for st in self.sub_topic[0][0]:
-                cur_sub_top = []
-                for cst in st:
-                    start = cst[0]
-                    end = cst[1]
-                    if cst[2] == 1:
-                        start += extra
-                        end += extra
-                    cur_sub_top.append((start, end, t[2] + vol_walker, t[3]))
-                cur_topic.append(cur_sub_top)
-            self.sub_topic[0] = cur_topic
+    def update_layers(self, pecha_opf_path, text_opf_path, vol_wise_offset):
+        text_vol_ids = self.get_text_vol_ids(text_opf_path)
+        for text_vol_id in text_vol_ids:
+            layers_to_update = list((text_opf_path / f"layers/{text_vol_id}").iterdir())
+            for layer_to_update in layers_to_update:
+                cur_vol_pecha_layer = self.from_yaml((pecha_opf_path / f"layers/{text_vol_id}/{layer_to_update.stem}.yml"))
+                cur_vol_text_layer = self.from_yaml(layer_to_update)
+                cur_vol_offset = vol_wise_offset[text_vol_id]
+                new_layer = self.get_new_layer(cur_vol_pecha_layer, cur_vol_text_layer, cur_vol_offset)
+                new_layer = yaml.safe_load(new_layer)
+                (pecha_opf_path / f"layers/{text_vol_id}/{layer_to_update.stem}.yml").write_text(new_layer, encoding='utf-8')
+        print('INFO: layers updated')
 
-    def get_result(self):
-        index = self.load(self.dirs["opf_path"] / "index.yml")
-        extra = 0
-        for i, ann in enumerate(index["annotations"]):
-            if ann["work"] == self.text_id:
-                extra = ann["work"]["span"][0]["vol"]["span"]["start"]
-                break
-        if not self.is_book:
-            self.__adapt_span_to_vol(extra, i)
-
-        result = {
-            AnnType.poti_title: self.poti_title,
-            AnnType.chapter: self.chapter_title,
-            AnnType.citation: self.citation_pattern,
-            AnnType.pagination: self.page,  # page variable format (start_index,end_index,pg_Info,pg_ann)
-            AnnType.topic: self.topic_id,
-            AnnType.sub_topic: self.sub_topic,
-            AnnType.sabche: self.sabche_pattern,
-            AnnType.tsawa: self.tsawa_pattern,
-            AnnType.yigchung: self.yigchung_pattern,
-            AnnType.correction: self.error_id,
-            AnnType.error_candidate: self.abs_er_id,
-            AnnType.peydurma: self.notes_id,
-        }
-
-        return result
+    def save_text_to_pecha(self, pecha_opf_path, text_opf_path, text_id):
+        pecha_idx = self.from_yaml((pecha_opf_path / "index.yml"))
+        for vol_id, new_base_text in self.update_base_text(pecha_opf_path, text_opf_path, pecha_idx, text_id):
+            (pecha_opf_path / f"base/{vol_id}.txt").write_text(new_base_text, encoding='utf-8')
+            print(f'INFO: {vol_id} base text updated')
+        vol_wise_offset = self.get_offset(pecha_idx, text_id)
+        self.update_layers(pecha_opf_path, text_opf_path, vol_wise_offset)
+        print(f'{text_id} of {pecha_opf_path.stem} saved...')
