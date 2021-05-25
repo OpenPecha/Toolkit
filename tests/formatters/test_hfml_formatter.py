@@ -4,7 +4,7 @@ from pathlib import Path
 import pytest
 
 from openpecha.core.layer import LayersEnum
-from openpecha.formatters import GoogleOCRFormatter, HFMLFormatter, TsadraFormatter
+from openpecha.formatters import HFMLFormatter, TsadraFormatter
 from openpecha.formatters.editor import EditorParser
 from openpecha.formatters.formatter import LocalIdManager
 from openpecha.formatters.layers import AnnType

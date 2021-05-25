@@ -10,9 +10,9 @@ if __name__ == "__main__":
     preview_path = "./output/D1111/"
 
     # preview to opf
-    # formatter = PedurmaFormatter(output_path=opfs_path)
-    # formatter.create_opf(preview_path)
+    formatter = PedurmaFormatter(output_path=opfs_path)
+    formatter.create_opf(preview_path)
 
     # OPf to diplomatic
-    serializer = PedurmaSerializer(opf_path)
-    serializer.serialize()
+    # serializer = PedurmaSerializer(opf_path)
+    # serializer.serialize()

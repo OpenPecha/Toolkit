@@ -14,7 +14,7 @@ class PedurmaFormatter(BaseFormatter):
     Pedurma formatter is to format preview of reconstructed pedurma.
     """
 
-    def __init__(self, output_path, metadata=None):
+    def __init__(self, output_path=None, metadata=None):
         super().__init__(output_path, metadata)
         self.page = []
         self.durchen = []
@@ -71,7 +71,7 @@ class PedurmaFormatter(BaseFormatter):
 
     def parse_pagination(self, walker, page_content):
         page_ann = ()
-        page_pat = re.search('<p(\d+)-(\d+)>', page_content)
+        page_pat = re.search(r'<p(\d+)-(\d+)>', page_content)
         page_num = page_pat.group(2)
         vol_num = page_pat.group(1)
         pat_len_before = self.search_before(page_pat, page_content)
@@ -115,16 +115,16 @@ class PedurmaFormatter(BaseFormatter):
 
     def parse_note(self, note, walker, page_content):
         note_ann = {}
-        note_pat = re.search(f'(:\S+)?{note}', page_content)
+        note_pat = re.search(rf'(:\S+)?{note}', page_content)
         # pat_len_before_ann = search_before(note, page_content)
         if note_pat.group(1):
             ann_start = note_pat.start() + walker 
             ann_end = ann_start + len(note_pat.group(1))
         else:
-            if note_pat := re.search(f'\S+་([^#]\S+་?){note}', page_content):
+            if note_pat := re.search(rf'\S+་([^#]\S+་?){note}', page_content):
                 grp_1_loc = page_content.find(note_pat.group(1))
             else:
-                note_pat = re.search(f'([^#]\S+་?){note}', page_content)
+                note_pat = re.search(rf'([^#]\S+་?){note}', page_content)
                 grp_1_loc = note_pat.start()
             ann_start = grp_1_loc + walker 
             if note_pat.group(1):
@@ -178,7 +178,7 @@ class PedurmaFormatter(BaseFormatter):
         return result
 
     def get_base_text(self):
-        base_text = self.base_text.strip()
+        base_text = self.base_text
         self.base_text = ""
         return base_text
     

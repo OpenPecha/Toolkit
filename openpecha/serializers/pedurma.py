@@ -62,12 +62,43 @@ class PedurmaSerializer(Serialize):
         if not only_start_ann:
             self.add_chars(vol_id, end_cc, False, end_payload)
 
+    def get_chunks(self, text):
+        result = []
+        cur_note = []
+        chunks = re.split('(\{.+?\})', text)
+        for chunk in chunks:
+            if '{' in chunk:
+                note = yaml.safe_load(chunk)
+                cur_note.append(note)
+                result.append(cur_note)
+                cur_note = []
+            else:
+                cur_note.append(chunk)
+        result.append([chunk, {}])
+        return result
+    
+    def process_chunk(self, chunk, pub):
+        chunk_text = chunk[0]
+        chunk_notes = chunk[1]
+        if chunk_notes:
+            note = chunk_notes[pub]
+            old_note = re.search('(:\S+)\n?', chunk_text).group(1)
+            chunk_text = re.sub(old_note, note, chunk_text)
+        return chunk_text
 
-    def serialize(self, output_path="./output/diplomatic_text/"):
+    def get_diplomatic_text(self, text, pub):
+        diplomatic_text = ""
+        chunks = self.get_chunks(text)
+        for chunk in chunks:
+            diplomatic_text += self.process_chunk(chunk, pub)
+        return diplomatic_text
+
+    def serialize(self, output_path="./output/diplomatic_text/", pub='pe'):
         output_path = Path(output_path)
         self.apply_layers()
         results = self.get_result()
         for vol_id, result in results.items():
             result = result.replace('::',":")
-            (output_path / vol_id).write_text(result, encoding='utf-8')
+            diplomatic_text = self.get_diplomatic_text(result, pub)
+            (output_path / vol_id).write_text(diplomatic_text, encoding='utf-8')
         print('Serialize complete...')
