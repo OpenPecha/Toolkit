@@ -207,8 +207,7 @@ class OpenPechaFS(OpenPecha):
         self.layers[base_name][layer_name] = None
 
     def reset_layers(self, base_name: str, exclude: List[LayerEnum] = []):
-        for layer_name in self.layers[base_name]:
+        for layer_name in self.components[base_name]:
             if layer_name in exclude:
-                print("skipped->", layer_name.value)
                 continue
             self.reset_layer(base_name, layer_name)
