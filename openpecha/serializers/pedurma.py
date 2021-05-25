@@ -63,9 +63,17 @@ class PedurmaSerializer(Serialize):
             self.add_chars(vol_id, end_cc, False, end_payload)
 
     def get_chunks(self, text):
+        """Break the text on where notes are located
+
+        Args:
+            text (text): preview text
+
+        Returns:
+            list: contain all the chunks and note along with it
+        """
         result = []
         cur_note = []
-        chunks = re.split('(\{.+?\})', text)
+        chunks = re.split(r'(\{.+?\})', text)
         for chunk in chunks:
             if '{' in chunk:
                 note = yaml.safe_load(chunk)
@@ -78,15 +86,36 @@ class PedurmaSerializer(Serialize):
         return result
     
     def process_chunk(self, chunk, pub):
+        """Reinsert the note to chunk according to publication selected
+
+        Args:
+            chunk (list): text chunk and its notes
+            pub (str): publication annotation
+
+        Returns:
+            str: chunk text with note added according to publication
+        """
         chunk_text = chunk[0]
         chunk_notes = chunk[1]
         if chunk_notes:
             note = chunk_notes[pub]
-            old_note = re.search('(:\S+)\n?', chunk_text).group(1)
-            chunk_text = re.sub(old_note, note, chunk_text)
+            if note:
+                old_note = re.search(r'(:\S+)\n?', chunk_text).group(1)
+                chunk_text = re.sub(old_note, note, chunk_text)
+            else:
+                chunk_text = re.sub(':','',chunk_text)
         return chunk_text
 
     def get_diplomatic_text(self, text, pub):
+        """Reinsert the notes from pedurma of given publication and generates version of the text of given publication
+
+        Args:
+            text (str): text with pedurma notes of all other publication
+            pub (str): annotation of publication de for derge, pe for pecing, nar for narthang and co for cone
+
+        Returns:
+            str: Text of mentioned publication extracted from pedurma text
+        """
         diplomatic_text = ""
         chunks = self.get_chunks(text)
         for chunk in chunks:
@@ -94,6 +123,12 @@ class PedurmaSerializer(Serialize):
         return diplomatic_text
 
     def serialize(self, output_path="./output/diplomatic_text/", pub='pe'):
+        """Serialize pedurma preview opf to diplomatic text of given publication
+
+        Args:
+            output_path (str, optional): output path where user wants to save the diplomatic text. Defaults to "./output/diplomatic_text/".
+            pub (str, optional): publication annotation . Defaults to 'pe'.
+        """
         output_path = Path(output_path)
         self.apply_layers()
         results = self.get_result()

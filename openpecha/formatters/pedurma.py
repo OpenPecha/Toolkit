@@ -116,7 +116,6 @@ class PedurmaFormatter(BaseFormatter):
     def parse_note(self, note, walker, page_content):
         note_ann = {}
         note_pat = re.search(rf'(:\S+)?{note}', page_content)
-        # pat_len_before_ann = search_before(note, page_content)
         if note_pat.group(1):
             ann_start = note_pat.start() + walker 
             ann_end = ann_start + len(note_pat.group(1))
