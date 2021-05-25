@@ -1,0 +1,115 @@
+id: c02ce7befeeb45a4a44b91b35a894a32
+annotation_type: PedurmaNote
+revision: '00001'
+annotations:
+  e11031e90c4147b6935b7212113cc2e0:
+    span:
+      start: 13
+      end: 17
+    note:
+      pe: མཚན་བྱང་འདི་ལྟར་བཀོད།
+      nar: ''
+      der: ''
+      co: ''
+  181a55d4a5904c46919b65bd0b3f703e:
+    span:
+      start: 32
+      end: 39
+    note:
+      pe: ཏྲ་ན་
+      nar: ཏྲ་ན་
+      der: ''
+      co: ''
+  2051a86c24d948adb69a72d06e37020c:
+    span:
+      start: 56
+      end: 60
+    note:
+      pe: ཀྱི་
+      nar: ཀྱི་
+      der: ''
+      co: ''
+  18d47d291c6c433ab85a18fe01616e55:
+    span:
+      start: 126
+      end: 129
+    note:
+      pe: ཅེས་
+      nar: ཅེས་
+      der: ''
+      co: ''
+  54eeaa9c4f8144e6b1ed4dfbeeaf8368:
+    span:
+      start: 135
+      end: 139
+    note:
+      pe: ཀྱི་
+      nar: ཀྱི་
+      der: ''
+      co: གི་
+  44b7ff0592c740fbbc6ccb21a52181b8:
+    span:
+      start: 203
+      end: 206
+    note:
+      pe: ཟད་
+      nar: ཟད་
+      der: ''
+      co: ''
+  1d1de0dcafda472bb113744ed193bbed:
+    span:
+      start: 225
+      end: 232
+    note:
+      pe: སྲེག
+      nar: སྲེག
+      der: ''
+      co: ''
+  0c3c8731882e402e8ed8518953c0a14d:
+    span:
+      start: 320
+      end: 323
+    note:
+      pe: ''
+      nar: འཆི་
+      der: ''
+      co: ''
+  4a221cefe1024de39020ad9557543344:
+    span:
+      start: 362
+      end: 364
+    note:
+      pe: གཅིག
+      nar: གཅིག
+      der: ''
+      co: ''
+  d0e46d5f89c647fd942aa6ab455dccb5:
+    span:
+      start: 417
+      end: 427
+    note:
+      pe: བྲམ་ཟེ་
+      nar: བྲམ་ཟེ་
+      der: ''
+      co: ''
+  be1d778966c14bba8dd3eef8095ece76:
+    span:
+      start: 495
+      end: 503
+    note:
+      pe: ཛ་ར་དན་
+      nar: ''
+      der: ''
+      co: ''
+local_ids:
+  e11031e90c4147b6935b7212113cc2e0: 200000
+  181a55d4a5904c46919b65bd0b3f703e: 200001
+  2051a86c24d948adb69a72d06e37020c: 200002
+  18d47d291c6c433ab85a18fe01616e55: 200003
+  54eeaa9c4f8144e6b1ed4dfbeeaf8368: 200004
+  44b7ff0592c740fbbc6ccb21a52181b8: 200005
+  1d1de0dcafda472bb113744ed193bbed: 200006
+  0c3c8731882e402e8ed8518953c0a14d: 200007
+  4a221cefe1024de39020ad9557543344: 200008
+  d0e46d5f89c647fd942aa6ab455dccb5: 200009
+  be1d778966c14bba8dd3eef8095ece76: 200010
