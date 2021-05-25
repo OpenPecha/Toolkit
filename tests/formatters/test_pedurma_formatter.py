@@ -1,12 +1,5 @@
-import json
 from pathlib import Path
-
-import pytest
-from openpecha import formatters
-
-from openpecha.core.layer import LayersEnum
 from openpecha.formatters import PedurmaFormatter
-from openpecha.formatters.formatter import LocalIdManager
 from openpecha.formatters.layers import AnnType
 
 
