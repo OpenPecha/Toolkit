@@ -2,7 +2,7 @@ import re
 
 import yaml
 
-from openpecha.core.layer import LayersEnum
+from openpecha.core.layer import LayerEnum
 
 from .serialize import Serialize
 
@@ -59,43 +59,43 @@ class EditorSerializer(Serialize):
         start_payload = ""
         end_payload = ""
         ann_id = ann["id"]
-        if ann["type"] == LayersEnum.correction.value:
+        if ann["type"] == LayerEnum.correction.value:
             start_payload = "("
             end_payload = f',{ann["correction"]})'
-        elif ann["type"] == LayersEnum.peydurma.value:
+        elif ann["type"] == LayerEnum.peydurma.value:
             start_payload = "#"
             only_start_ann = True
-        elif ann["type"] == LayersEnum.error_candidate.value:
+        elif ann["type"] == LayerEnum.error_candidate.value:
             start_payload = "["
             end_payload = "]"
-        elif ann["type"] == LayersEnum.book_title.value:
+        elif ann["type"] == LayerEnum.book_title.value:
             start_payload = f'{AnnotationTemplate.book_title_SP} id="{ann_id}">'
             end_payload = AnnotationTemplate.span_EP + AnnotationTemplate.para_EP
-        elif ann["type"] == LayersEnum.sub_title.value:
+        elif ann["type"] == LayerEnum.sub_title.value:
             start_payload = f'{AnnotationTemplate.sub_title_SP} id="{ann_id}">'
             end_payload = AnnotationTemplate.span_EP + AnnotationTemplate.para_EP
-        elif ann["type"] == LayersEnum.book_number.value:
+        elif ann["type"] == LayerEnum.book_number.value:
             start_payload = f'{AnnotationTemplate.book_number_SP} id="{ann_id}">'
             end_payload = AnnotationTemplate.span_EP + AnnotationTemplate.para_EP
-        elif ann["type"] == LayersEnum.author.value:
+        elif ann["type"] == LayerEnum.author.value:
             start_payload = f'{AnnotationTemplate.author_SP} id="{ann_id}">'
             end_payload = AnnotationTemplate.span_EP + AnnotationTemplate.para_EP
-        elif ann["type"] == LayersEnum.chapter.value:
+        elif ann["type"] == LayerEnum.chapter.value:
             start_payload = f'{AnnotationTemplate.chapter_SP} id="{ann_id}">'
             end_payload = AnnotationTemplate.span_EP + AnnotationTemplate.para_EP
-        elif ann["type"] == LayersEnum.tsawa.value:
+        elif ann["type"] == LayerEnum.tsawa.value:
             start_payload = f'{AnnotationTemplate.tsawa_SP} id="{ann_id}">'
             end_payload = AnnotationTemplate.span_EP
-        elif ann["type"] == LayersEnum.citation.value:
+        elif ann["type"] == LayerEnum.citation.value:
             start_payload = f'{AnnotationTemplate.quatation__SP} id="{ann_id}">'
             end_payload = AnnotationTemplate.span_EP
-        elif ann["type"] == LayersEnum.sabche.value:
+        elif ann["type"] == LayerEnum.sabche.value:
             start_payload = f'{AnnotationTemplate.sabche_SP} id="{ann_id}">'
             end_payload = AnnotationTemplate.span_EP
-        elif ann["type"] == LayersEnum.yigchung.value:
+        elif ann["type"] == LayerEnum.yigchung.value:
             start_payload = f'{AnnotationTemplate.yigchung_SP} id="{ann_id}">'
             end_payload = AnnotationTemplate.span_EP
-        elif ann["type"] == LayersEnum.footnote.value:
+        elif ann["type"] == LayerEnum.footnote.value:
             start_payload = f'<a href="#fr{ann_id}>{AnnotationTemplate.footnote_marker_SP} id="fm{ann_id}">'
             end_payload = AnnotationTemplate.footnote_EP
 
