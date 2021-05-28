@@ -3,6 +3,7 @@ from pathlib import Path
 
 import click
 from git import Repo
+from git.cmd import GitCommandError
 from tqdm import tqdm
 
 import openpecha
@@ -12,6 +13,7 @@ from openpecha.buda.openpecha_manager import OpenpechaManager
 from openpecha.catalog import config as catalog_config
 from openpecha.catalog.filter import is_text_good_quality
 from openpecha.catalog.storage import GithubBucket
+from openpecha.exceptions import PechaNotFound
 from openpecha.formatters import *
 from openpecha.serializers import *
 
@@ -47,62 +49,6 @@ def create_config_dirs():
     config["CONFIG_PATH"].mkdir(parents=True, exist_ok=True)
 
 
-def get_pecha(id, batch_path, layers):
-    def _check_pecha(id=None, pechas=None, layer=None, pecha_list=None):
-        if id not in pecha_list:
-            if id in pechas:
-                if layer:
-                    if layer in pechas[id][-1].split("_"):
-                        pecha_list.append(id)
-                    else:
-                        msg = f"{layer} layer is not found in {id}"
-                        click.echo(ERROR.format(msg))
-                else:
-                    pecha_list.append(id)
-            else:
-                msg = f"{id} not found in OpenPecha catalog"
-                click.echo(ERROR.format(msg))
-
-    def _get_batch(batch_path):
-        with Path(batch_path).open() as f:
-            batch_ids = [line.strip() for line in f.readlines()]
-        return batch_ids
-
-    pecha_list = []
-
-    # If filter by layers
-    if layers:
-        layers_name = [layer.strip() for layer in layers.split(",")]
-        for layer in layers_name:
-            batch_ids = None
-            if id:
-                _check_pecha(id=id, pechas=pechas, layer=layer, pecha_list=pecha_list)
-            elif batch_path:
-                if not batch_ids:
-                    batch_ids = _get_batch(batch_path)
-                for b_id in batch_ids:
-                    _check_pecha(
-                        id=b_id, pechas=pechas, layer=layer, pecha_list=pecha_list
-                    )
-            else:
-                for p_id in pechas:
-                    _check_pecha(
-                        id=p_id, pechas=pechas, layer=layer, pecha_list=pecha_list
-                    )
-    else:
-        if id:
-            _check_pecha(id=id, pechas=pechas, pecha_list=pecha_list)
-        elif batch_path:
-            batch_ids = _get_batch(batch_path)
-            for b_id in batch_ids:
-                _check_pecha(id=b_id, pechas=pechas, pecha_list=pecha_list)
-        else:
-            for p_id in pechas:
-                _check_pecha(id=p_id, pechas=pechas, pecha_list=pecha_list)
-
-    return pecha_list
-
-
 def download_pecha(pecha_id, out_path=None, needs_update=True, branch="main"):
     # clone the repo
     pecha_url = f"{config['OP_ORG']}/{pecha_id}.git"
@@ -119,11 +65,16 @@ def download_pecha(pecha_id, out_path=None, needs_update=True, branch="main"):
         if needs_update:
             click.echo(INFO.format(f"Updating {pecha_id} ..."))
             repo.git.pull("origin", branch)
-    else:
-        click.echo(INFO.format(f"Downloading {pecha_id} ..."))
+        return pecha_path
+
+    click.echo(INFO.format(f"Downloading {pecha_id} ..."))
+    try:
         Repo.clone_from(pecha_url, str(pecha_path))
-        repo = Repo(str(pecha_path))
-        repo.git.checkout(branch)
+    except GitCommandError:
+        raise PechaNotFound(f"Pecha with id {pecha_id} doesn't exist")
+    repo = Repo(str(pecha_path))
+    repo.git.checkout(branch)
+
     return pecha_path
 
 
@@ -154,7 +105,6 @@ def download(**kwargs):
     create_config_dirs()
 
     # get pecha
-    # pechas = get_pecha(work_id, kwargs['batch'], kwargs['filter'])
     pechas = [pecha_id]
 
     # download the repo

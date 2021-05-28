@@ -1,0 +1,2 @@
+class PechaNotFound(Exception):
+    pass
