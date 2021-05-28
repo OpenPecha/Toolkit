@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.7.38 (2021-05-28)
+### Fix
+* Raise exception for pecha doesn't exist ([`69aa954`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/69aa954f3970b1e2cfd8e740e24d308ec86c9154))
+
 ## v0.7.37 (2021-05-25)
 ### Fix
 * **core-pecha:** Reset layers by reading components ([`031b8bb`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/031b8bb037c4fceb65b4010a212ed0c220ad303c))
