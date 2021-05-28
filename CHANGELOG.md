@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.7.37 (2021-05-25)
+### Fix
+* **core-pecha:** Reset layers by reading components ([`031b8bb`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/031b8bb037c4fceb65b4010a212ed0c220ad303c))
+
 ## v0.7.36 (2021-05-21)
 ### Fix
 * **core.pecha:** Add rest layers ([`7d25a4a`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/7d25a4a36f47c98a2520d1b9c71bddf7a1cbc12a))
