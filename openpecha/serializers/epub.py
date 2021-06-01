@@ -1,15 +1,14 @@
 import os
 import re
+import requests
 import shutil
 import zipfile
+
 from bs4 import BeautifulSoup
 from pathlib import Path
 
-import requests
-import yaml
-
 from openpecha.formatters.layers import AnnType
-
+from openpecha.utils import load_yaml
 from .serialize import Serialize
 
 
@@ -518,7 +517,7 @@ class EpubSerializer(Serialize):
             footnote_ref_tag = ""
             if "Footnote" in self.layers:
                 footnote_fn = self.opf_path / "layers" / vol_id / "Footnote.yml"
-                footnote_layer = yaml.safe_load(footnote_fn.open())
+                footnote_layer = load_yaml(footnote_fn)
                 footnote_ref_tag = self.get_footnote_references(
                     footnote_layer["annotations"]
                 )

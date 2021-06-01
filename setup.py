@@ -33,6 +33,7 @@ setup(
         "Click>=7.1.2, <8.0",
         "diff-match-patch==20181111",
         "PyYAML>=5.0.0, <6.0",
+        "pylibyaml>=0.1.0, <2.0",
         "requests>=2.22.0, <3.0",
         "tqdm>=4.35.0, <5.0",
         "PyGithub>=1.43.8, <2.0",
