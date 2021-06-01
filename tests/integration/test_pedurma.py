@@ -14,5 +14,5 @@ if __name__ == "__main__":
     formatter.create_opf(preview_path)
 
     # OPf to diplomatic
-    # serializer = PedurmaSerializer(opf_path)
-    # serializer.serialize()
+    serializer = PedurmaSerializer(opf_path)
+    serializer.serialize()

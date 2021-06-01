@@ -59,8 +59,8 @@ class PedurmaFormatter(BaseFormatter):
     def get_pages(self, vol_text):
         result = []
         pg_text = ""
-        pages = re.split(r"(<p\d+-\d+>)", vol_text)
-        for i, page in enumerate(pages[:-1]):
+        pages = re.split(r"(\[[𰵀-󴉱]?[0-9]+[a-z]{1}\])", vol_text)
+        for i, page in enumerate(pages[1:]):
             if i % 2 == 0:
                 pg_text += page
             else:
@@ -69,51 +69,39 @@ class PedurmaFormatter(BaseFormatter):
                 pg_text = ""
         return result
 
-    def parse_pagination(self, walker, page_content):
-        page_ann = ()
-        page_pat = re.search(r'<p(\d+)-(\d+)>', page_content)
-        page_num = page_pat.group(2)
-        vol_num = page_pat.group(1)
-        pat_len_before = self.search_before(page_pat, page_content)
-        page_ann = {
-            'page_num': page_num,
-            'span':{
-                'vol': vol_num,
-                'start': walker,
-                'end': walker + page_pat.start() - pat_len_before -1
-            }
-        }
-
+    def parse_pagination(self, walker, base_page, page_content):
+        page_ann = {}
+        page_pat = re.search(r"\[[𰵀-󴉱]?([0-9]+[a-z]{1})\]", page_content)
+        page_idx = page_pat.group(1)
+        start_page = walker + 1
+        end_page = start_page + len(base_page) - 2
+        span = Span(start_page, end_page)
+        page_ann = Page(span, page_index=page_idx)
         return page_ann
 
     def get_pub_wise_note(self, note):
-        pub_mapping = {
-            '«པེ་»': 'pe',
-            '«སྣར་»': 'nar',
-            '«སྡེ»': 'der',
-            '«ཅོ་»': 'co'
-        }
         reformat_notes = {
-            'pe': '',
-            'nar': '',
-            'der': '',
-            'co': ''
+            '«པེ་»': '',
+            '«སྣར་»': '',
+            '«སྡེ»': '',
+            '«ཅོ་»': ''
         }
         note_parts = re.split('(«.+?»)', note)
         pubs = note_parts[1::2]
         notes = note_parts[2::2]
         for walker, (pub, note_part) in enumerate(zip(pubs, notes)):
             if note_part:
-                reformat_notes[pub_mapping[pub]] = note_part.replace('>', '')
+                reformat_notes[pub] = note_part.replace('>', '')
             else:
                 if notes[walker+1]:
-                    reformat_notes[pub_mapping[pub]] = notes[walker+1].replace('>', '')
+                    reformat_notes[pub] = notes[walker+1].replace('>', '')
                 else:
-                    reformat_notes[pub_mapping[pub]] = notes[walker+2].replace('>', '')
+                    reformat_notes[pub] = notes[walker+2].replace('>', '')
                 
         return reformat_notes
 
     def parse_note(self, note, walker, page_content):
+        page_content = re.sub(r"\[[𰵀-󴉱]?([0-9]+[a-z]{1})\]", "", page_content)
         note_ann = {}
         note_pat = re.search(rf'(:\S+)?{note}', page_content)
         if note_pat.group(1):
@@ -135,7 +123,8 @@ class PedurmaFormatter(BaseFormatter):
                 'start':ann_start,
                 'end': ann_end-1
             },
-            'note': self.get_pub_wise_note(note)
+            'note': self.get_pub_wise_note(note),
+            'collation_note': note
         }
         page_content = re.sub(note, '', page_content, 1)
         return note_ann, page_content
@@ -144,15 +133,15 @@ class PedurmaFormatter(BaseFormatter):
         page_content = page.replace('\n', '#')
         notes = re.findall(r'\<.*?\>', page_content)
         for note in notes:
-            if 'p' in note:
-                cur_vol_pages.append(('',self.parse_pagination(char_walker, page)))
-            else:
-                note_info, page_content = self.parse_note(note, char_walker, page_content)
-                cur_vol_notes.append(('',note_info))
-        new_page = re.sub('<.*?>', '', page)
+            note_info, page_content = self.parse_note(note, char_walker, page_content)
+            cur_vol_notes.append(('',note_info))
+        new_page = self.base_extract(page)
+        page_ann = self.parse_pagination(char_walker, new_page, page)
+        cur_vol_pages.append(('', page_ann))
         return new_page
 
     def base_extract(self, text):
+        text = re.sub(r"\[[𰵀-󴉱]?([0-9]+[a-z]{1})\]", "", text)
         return re.sub('<.*?>', '', text)
 
     def build_layers(self, text):

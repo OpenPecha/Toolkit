@@ -49,12 +49,37 @@ class PedurmaSerializer(Serialize):
         only_start_ann = False
         start_payload = "("
         end_payload = ")"
+        side = 'ab'
         if ann["type"] == AnnType.pagination:
-            start_payload = ''
-            end_payload = f'<p{ann["span"]["vol"]}-{ann["page_num"]}>'
+            pg_idx = ann.get("page_index", "")
+            if not pg_idx:
+                pg_idx = ann.get("imgnum", "")
+            if pg_idx == "0b":
+                pg_n = ann["reference"][5:-1]
+                pg_side = ann["reference"][-1]
+                if "-" in pg_n:
+                    pg_n = int(pg_n.split("-")[0])
+                    pg_side = side[int(pg_side)]
+                    start_payload = f"[{pg_n}{pg_side}]"
+                else:
+                    pg_n = int(pg_n)
+                    if pg_side.isdigit():
+                        pg_n = str(pg_n) + pg_side
+                        pg_side = ""
+                    start_payload = f"[{pg_n}{pg_side}]"
+            else:
+                start_payload = f'[{pg_idx}]'
+                
+            if ann.get("page_info", ""):
+                start_payload += f' {ann["page_info"]}\n'
+            if ann.get("reference", ""):
+                start_payload += f' {ann["reference"]}\n'
+            else:
+                start_payload += "\n"
+            only_start_ann = True
         elif ann["type"] == AnnType.pedurma_note:
-            start_payload = ":"
-            end_payload = f'{ann["note"]}'
+            start_payload = ""
+            end_payload = f'{ann["collation_note"]}'
         
 
         start_cc, end_cc = self.__get_adapted_span(ann["span"], vol_id)
@@ -133,7 +158,6 @@ class PedurmaSerializer(Serialize):
         self.apply_layers()
         results = self.get_result()
         for vol_id, result in results.items():
-            result = result.replace('::',":")
-            diplomatic_text = self.get_diplomatic_text(result, pub)
-            (output_path / vol_id).write_text(diplomatic_text, encoding='utf-8')
+            # diplomatic_text = self.get_diplomatic_text(result, pub)
+            (output_path / vol_id).write_text(result, encoding='utf-8')
         print('Serialize complete...')
