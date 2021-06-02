@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.7.39 (2021-06-02)
+### Fix
+* **utils:** Yaml loader and dumper is changed to Csafeloader and Csafedumper ([`da8ff8b`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/da8ff8b386055357be71db25a7d7f422b554dbdd))
+
 ## v0.7.38 (2021-05-28)
 ### Fix
 * Raise exception for pecha doesn't exist ([`69aa954`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/69aa954f3970b1e2cfd8e740e24d308ec86c9154))
