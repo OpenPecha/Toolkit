@@ -1,11 +1,6 @@
-import os
 import re
-import shutil
-import zipfile
-from bs4 import BeautifulSoup
 from pathlib import Path
 
-import requests
 import yaml
 
 from openpecha.formatters.layers import AnnType

@@ -1,7 +1,5 @@
 from pathlib import Path
 
-import pytest
-
 from openpecha.serializers import PedurmaSerializer
 
 def test_pedurma_serializer():
@@ -11,7 +9,5 @@ def test_pedurma_serializer():
     serializer.apply_layers()
     results = serializer.get_result()
     for vol_id, result in results.items():
-        result = result.replace('::',":")
-        diplomatic_text = serializer.get_diplomatic_text(result, pub='pe')
-        assert expected_diplomatic_text == diplomatic_text
+        assert expected_diplomatic_text == result
 
