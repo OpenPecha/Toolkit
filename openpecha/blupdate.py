@@ -1,9 +1,10 @@
 import math
+
 from pathlib import Path
 
 import diff_match_patch as dmp_module
-import yaml
 from git.objects import base
+from openpecha.utils import load_yaml, dump_yaml
 
 
 class Blupdate:
@@ -223,15 +224,6 @@ class PechaBaseUpdate:
     def layer_path(self):
         return self.dst_opf_path / "layers"
 
-    def dump(self, data, output_fn):
-        with output_fn.open("w") as fn:
-            yaml.dump(
-                data, fn, default_flow_style=False, sort_keys=False, allow_unicode=True
-            )
-
-    def load(self, fn):
-        return yaml.safe_load(fn.open(encoding="utf-8"))
-
     @staticmethod
     def get_base(opf_path, vol_id):
         return (opf_path / "base" / f"{vol_id}.txt").read_text(encoding="utf-8")
@@ -241,9 +233,9 @@ class PechaBaseUpdate:
         Update all the layer annotations
         """
         for layer_fn in (self.layer_path / vol_id).iterdir():
-            layer = self.load(layer_fn)
+            layer = load_yaml(layer_fn)
             update_ann_layer(layer, updater)
-            self.dump(layer, layer_fn)
+            dump_yaml(layer, layer_fn)
 
     def update_vol(self, vol_id):
         src_base = self.get_base(self.src_opf_path, vol_id)
@@ -261,7 +253,7 @@ class PechaBaseUpdate:
             update_span(span_vol, updater)
 
     def update_index_layer(self):
-        layer = self.load(self.index_path)
+        layer = load_yaml(self.index_path)
         for ann in layer["annotations"]:
             # update text span
             self.update_text_span(ann["span"])
@@ -270,7 +262,7 @@ class PechaBaseUpdate:
             for sub_text in ann["parts"]:
                 self.update_text_span(sub_text["span"])
 
-        self.dump(layer, self.index_path)
+        dump_yaml(layer, self.index_path)
 
     def update(self):
         for vol_fn in Path(self.dst_opf_path / "base").iterdir():

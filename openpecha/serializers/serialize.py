@@ -1,11 +1,10 @@
 import re
+
 from collections import defaultdict, namedtuple
 from pathlib import Path
 
-import requests
-import yaml
-
 from openpecha.formatters.layers import AnnType, SubText
+from openpecha.utils import load_yaml
 
 INFO = "[INFO] {}"
 
@@ -108,14 +107,11 @@ class Serialize(object):
     def get_meta_data(self):
         opf_path = self.opf_path
         try:
-            meta = yaml.safe_load((opf_path / "meta.yml").open())
+            meta = load_yaml((opf_path / "meta.yml"))
         except Exception:
             print("Meta data not Found!!!")
             meta = {}
         return meta
-
-    def load_layer(self, fn):
-        return yaml.safe_load(fn.open())
 
     def get_text_spans(self, text_id, index_layer):
         """
@@ -123,7 +119,7 @@ class Serialize(object):
         """
         text_span = {}
         if not index_layer:
-            index_layer = self.load_layer(self.opf_path / "index.yml")
+            index_layer = load_yaml(self.opf_path / "index.yml")
         for id, anno in index_layer["annotations"].items():
             if anno["parts"]:
                 for sub_topic in anno["parts"]:
@@ -136,7 +132,7 @@ class Serialize(object):
 
     def get_index_layer(self, text_id, index_layer):
         if not index_layer:
-            index_layer = self.load_layer(self.opf_path / "index.yml")
+            index_layer = load_yaml(self.opf_path / "index.yml")
         text_index_layer = defaultdict(str)
         text_index_layer["id"] = index_layer["id"]
         text_index_layer["annotation_type"] = index_layer["annotation_type"]
@@ -195,7 +191,7 @@ class Serialize(object):
         layer_fn = self.opf_path / "layers" / vol_id / f"{layer_id}.yml"
         if not layer_fn.is_file():
             return
-        layer = yaml.safe_load(layer_fn.open())
+        layer = load_yaml(layer_fn)
         for ann_id, ann in layer["annotations"].items():
             # text begins in middle of the page
             if (
@@ -244,7 +240,7 @@ class Serialize(object):
         if not self.index_layer:
             index_path = self.opf_path / "index.yml"
             if index_path.is_file():
-                self.index_layer = self.load_layer(index_path)
+                self.index_layer = load_yaml(index_path)
                 self.apply_index()
         else:
             self.apply_index()

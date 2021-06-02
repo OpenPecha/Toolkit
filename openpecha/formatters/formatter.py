@@ -3,12 +3,11 @@ from copy import deepcopy
 from pathlib import Path
 from uuid import uuid4
 
-import yaml
-
 from .. import config
 from .layers import *
 from .layers import AnnType, _attr_names
 
+from openpecha.utils import dump_yaml, load_yaml
 
 class Global2LocalId:
     """Map global id of annotation in a layer to local id of a layer."""
@@ -193,7 +192,7 @@ class BaseFormatter:
                 vol_layer_fn = vol / f"{layer}.yml"
                 if not vol_layer_fn.is_file():
                     continue
-                layers[layer][vol.name] = self.load(vol_layer_fn)
+                layers[layer][vol.name] = load_yaml(vol_layer_fn)
         return layers
 
     def _inc_layer_revision(self, layer):
@@ -321,15 +320,6 @@ class BaseFormatter:
                                   should be implemented in sub_class."
         )
 
-    def dump(self, data, output_fn):
-        with output_fn.open("w") as fn:
-            yaml.dump(
-                data, fn, default_flow_style=False, sort_keys=False, allow_unicode=True
-            )
-
-    def load(self, fn):
-        return yaml.safe_load(fn.open())
-
     def create_opf(self, input_path):
         input_path = Path(input_path)
         self._build_dirs(input_path)
@@ -341,7 +331,7 @@ class BaseFormatter:
         # save layers
         for layer, ann in layers.items():
             layer_fn = self.dirs["layers_path"] / f"{layer}.yml"
-            self.dump(ann, layer_fn)
+            dump_yaml(ann, layer_fn)
 
         # save base_text
         (self.dirs["opf_path"] / "base.txt").write_text(base_text)
