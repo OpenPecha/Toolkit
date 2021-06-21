@@ -117,10 +117,10 @@ class PedurmaFormatter(BaseFormatter):
                 ann_end = ann_start
         note_ann = {
             'span':{
-                'start':ann_start,
+                'start':ann_start, # the variant unit or variant location is capture with help of this span
                 'end': ann_end-1
             },
-            'note': self.get_pub_wise_note(note),
+            'variants': self.get_pub_wise_note(note),
             'collation_note': note
         }
         page_content = re.sub(note, '', page_content, 1)

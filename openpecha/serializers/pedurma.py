@@ -93,7 +93,7 @@ class PedurmaSerializer(Serialize):
         """
         result = []
         cur_note = []
-        chunks = re.split(r'(\{.+?\})', text)
+        chunks = re.split(r'(\<.+?\>)', text)
         for chunk in chunks:
             if '{' in chunk:
                 note = yaml.safe_load(chunk)
