@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.7.40 (2021-06-22)
+### Fix
+* Pagination layer name typo ([`29b6ede`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/29b6edee2b7ddcf06a1fb996175a41ad004e672b))
+
 ## v0.7.39 (2021-06-02)
 ### Fix
 * **utils:** Yaml loader and dumper is changed to Csafeloader and Csafedumper ([`da8ff8b`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/da8ff8b386055357be71db25a7d7f422b554dbdd))
