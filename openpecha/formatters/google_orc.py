@@ -53,8 +53,10 @@ class GoogleOCRFormatter(BaseFormatter):
             page = Page(span=span, imgnum=n_pg, reference=page_ref)
             anns[uuid] = page
 
-        layer = Layer(annotation_type=LayerEnum("pagination"), annotations=anns)
-        result = {"pagination": json.loads(layer.json(exclude_none=True))}
+        layer = Layer(annotation_type=LayerEnum("Pagination"), annotations=anns)
+        result = {
+            LayerEnum("Pagination").value: json.loads(layer.json(exclude_none=True))
+        }
 
         return result
 
