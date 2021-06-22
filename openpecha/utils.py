@@ -3,11 +3,12 @@
 import gzip
 import io
 import shutil
+import pylibyaml
+import yaml
+
 from collections import defaultdict
 from pathlib import Path
 from typing import Dict
-
-import yaml
 
 from openpecha.github_utils import create_release
 
@@ -66,10 +67,10 @@ class Vol2FnManager:
 def dump_yaml(data: Dict, output_fn: Path) -> Path:
     with output_fn.open("w", encoding="utf-8") as fn:
         yaml.dump(
-            data, fn, default_flow_style=False, sort_keys=False, allow_unicode=True
+            data, fn, default_flow_style=False, sort_keys=False, allow_unicode=True, Dumper=yaml.CSafeDumper
         )
     return output_fn
 
 
 def load_yaml(fn: Path) -> None:
-    return yaml.safe_load(fn.open(encoding="utf-8"))
+    return yaml.load(fn.open(encoding="utf-8"), Loader=yaml.CSafeLoader)

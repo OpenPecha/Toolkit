@@ -1,8 +1,7 @@
 import re
 
-import yaml
-
 from openpecha.core.layer import LayerEnum
+from openpecha.utils import load_yaml
 
 from .serialize import Serialize
 
@@ -174,7 +173,7 @@ class EditorSerializer(Serialize):
             footnote_ref_tag = ""
             if "Footnote" in self.layers:
                 footnote_fn = self.opf_path / "layers" / base_name / "Footnote.yml"
-                footnote_layer = yaml.safe_load(footnote_fn.open())
+                footnote_layer = load_yaml(footnote_fn)
                 footnote_ref_tag = self.get_footnote_references(
                     footnote_layer["annotations"]
                 )

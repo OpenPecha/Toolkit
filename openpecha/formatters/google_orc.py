@@ -9,7 +9,7 @@ import requests
 from openpecha.core.annotation import Page, Span
 from openpecha.core.layer import Layer, LayerEnum
 from openpecha.formatters import BaseFormatter
-from openpecha.utils import gzip_str
+from openpecha.utils import gzip_str, dump_yaml
 
 
 class GoogleOCRFormatter(BaseFormatter):
@@ -257,13 +257,13 @@ class GoogleOCRFormatter(BaseFormatter):
             vol_layer_path.mkdir(exist_ok=True)
             for layer, ann in formatted_layers.items():
                 layer_fn = vol_layer_path / f"{layer}.yml"
-                self.dump(ann, layer_fn)
+                dump_yaml(ann, layer_fn)
 
             self.set_vols_meta(vol_path.name, f"{base_id}.txt")
 
         # create meta.yml
         meta_fn = self.dirs["opf_path"] / "meta.yml"
-        self.dump(self.get_metadata(input_path.name), meta_fn)
+        dump_yaml(self.get_metadata(input_path.name), meta_fn)
 
         return self.dirs["opf_path"].parent
 
