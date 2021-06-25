@@ -294,10 +294,11 @@ def create_docx(html, output_path, pecha_id):
 
 def serialize_to_docx(opf_path, output_path):
     epub_serializer = EpubSerializer(opf_path)
-    epub_serializer.apply_layer()
+    epub_serializer.apply_layers()
     pecha_title = epub_serializer.meta["source_metadata"].get("title", "")
     pecha_id = epub_serializer.meta["id"]
     results = epub_serializer.get_result()
     for vol_id, result in results.items():
         serialized_html = epub_serializer.get_serialized_html(result, vol_id, pecha_title)
         create_docx(serialized_html, output_path, pecha_id)
+    return output_path

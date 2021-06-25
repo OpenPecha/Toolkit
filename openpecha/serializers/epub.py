@@ -300,8 +300,8 @@ class EpubSerializer(Serialize):
         source_metadata = self.meta.get("source_metadata", {})
         credit_pg_name = source_metadata.get("credit", "")
         credit_pg_path = self.opf_path / f"assets/image/{credit_pg_name}"
-        book_title_tag = f'<p>{Tsadra_template.cover_page_book_title_SP}{source_metadata.get("title", "")}</span></p>\n'
-        sub_title_tag = f'<p>{Tsadra_template.sub_title_SP}{source_metadata.get("subtitle", "")}</span></p>\n'
+        book_title_tag = f'<p class="tibetan-regular-indented">{Tsadra_template.cover_page_book_title_SP}{source_metadata.get("title", "")}</span></p>\n'
+        sub_title_tag = f'<p class="tibetan-regular-indented">{Tsadra_template.sub_title_SP}{source_metadata.get("subtitle", "")}</span></p>\n'
         authors = source_metadata.get("authors", [])
         front_page += f"{book_title_tag}{sub_title_tag}"
         for author in authors:
