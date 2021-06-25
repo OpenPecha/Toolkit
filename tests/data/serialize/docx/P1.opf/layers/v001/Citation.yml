@@ -1,0 +1,19 @@
+id: de6605b32fbb423ea573a1838854a9dc
+annotation_type: Citation
+revision: '00005'
+annotations:
+  f515964fa0464916815ef3e42128c3c0:
+    span:
+      start: 1012
+      end: 1068
+    is_verse: true
+  585d0fb67b4a49ccb50de73be70789b4:
+    span:
+      start: 1612
+      end: 1729
+    is_verse: true
+  3b3c3045c5414a2cadd85c0b2b80cdf7:
+    span:
+      start: 2884
+      end: 2946
+    is_verse: false
