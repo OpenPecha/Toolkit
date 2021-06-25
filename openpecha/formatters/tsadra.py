@@ -543,12 +543,12 @@ class TsadraFormatter(BaseFormatter):
                         layer_fn = self.dirs["opf_path"] / f"{layer}.yml"
                     else:
                         layer_fn = vol_layer_path / f"{layer}.yml"
-                    self.dump(ann, layer_fn)
+                    dump_yaml(ann, layer_fn)
 
         # save metatdata
         meta_data = self.create_metadata(layers)
         meta_fn = self.dirs["opf_path"] / "meta.yml"
-        self.dump(meta_data, meta_fn)
+        dump_yaml(meta_data, meta_fn)
 
 
 # if __name__ == "__main__":
