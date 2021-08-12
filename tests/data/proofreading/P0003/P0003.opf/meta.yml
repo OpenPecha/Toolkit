@@ -1,0 +1,14 @@
+id: opecha:P000001
+initial_creation_type: input
+source_metadata:
+  id: bdr:W4CZ5369
+  title: བཀའ་འགྱུར ༼སྡེ་དགེ༽
+  publication: སྡེ་དགེ་པར་ཁང་།
+  author: ''
+  volumes:
+    c4c64b7e3a714a4ab3db3375a7c22196:
+      image_group_id: I0919
+      title: ''
+      base_file: v001.txt
+      total_pages: 8
+

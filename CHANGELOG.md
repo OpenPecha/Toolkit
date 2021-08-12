@@ -2,6 +2,18 @@
 
 <!--next-version-placeholder-->
 
+## v0.7.42 (2021-08-12)
+### Fix
+* **proofreading:** Vol info return list of volume details ([`b8164a6`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/b8164a669c24ce014f51d6ae7feb00d5cc47c8b9))
+
+## v0.7.41 (2021-08-12)
+### Fix
+* **proofreading:** Method to assist proof reading editor added ([`d874f91`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/d874f9170e59252607194812d27cfea072d63971))
+
+## v0.7.40 (2021-06-22)
+### Fix
+* Pagination layer name typo ([`29b6ede`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/29b6edee2b7ddcf06a1fb996175a41ad004e672b))
+
 ## v0.7.39 (2021-06-02)
 ### Fix
 * **utils:** Yaml loader and dumper is changed to Csafeloader and Csafedumper ([`da8ff8b`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/da8ff8b386055357be71db25a7d7f422b554dbdd))
