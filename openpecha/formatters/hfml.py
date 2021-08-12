@@ -10,7 +10,7 @@ from pathlib import Path
 
 import yaml
 
-from ..utils import Vol2FnManager
+from ..utils import Vol2FnManager, dump_yaml, load_yaml
 from .formatter import BaseFormatter
 from .layers import *
 from .layers import AnnType, _attr_names
@@ -84,7 +84,7 @@ class HFMLFormatter(BaseFormatter):
             return self.metadata
         meta_fn = self.dirs["opf_path"] / "meta.yml"
         if meta_fn.is_file():
-            return self.load(meta_fn)
+            return load_yaml(meta_fn)
         else:
             return {}
 
@@ -94,7 +94,7 @@ class HFMLFormatter(BaseFormatter):
             self.metadata.update(kwargs)
         if "id" not in self.metadata:
             self.metadata["id"] = f"opecha:{self.pecha_path.name}"
-        self.dump(self.metadata, meta_fn)
+        dump_yaml(self.metadata, meta_fn)
 
     def get_input(self, input_path):
         fns = list(input_path.iterdir())
@@ -1043,7 +1043,7 @@ class HFMLFormatter(BaseFormatter):
                     layer_fn = self.dirs["opf_path"] / f"{layer}.yml"
                 else:
                     layer_fn = vol_layer_path / f"{layer}.yml"
-                self.dump(ann, layer_fn)
+                dump_yaml(ann, layer_fn)
 
         self._save_metadata(vol2fn=dict(vol2fn_manager.vol2fn))
 
