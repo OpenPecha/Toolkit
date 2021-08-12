@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.7.43 (2021-08-12)
+### Fix
+* **download-pecha:** Set fallback branch ([`0286d53`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/0286d53a803a2afa45b44907a7da0b6c235a6351))
+
 ## v0.7.42 (2021-08-12)
 ### Fix
 * **proofreading:** Vol info return list of volume details ([`b8164a6`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/b8164a669c24ce014f51d6ae7feb00d5cc47c8b9))
