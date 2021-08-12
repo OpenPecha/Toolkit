@@ -30,7 +30,7 @@ def get_pagination_layer(pecha_id, vol_meta, pecha_path=None):
     Returns:
         dict: pagination layer of the volume passed in parameter from mentioned pecha_id in parameter
     """
-    vol_id = re.sub('\..+', '', vol_meta['base_file'])
+    vol_id = re.sub(r'\..+', '', vol_meta['base_file'])
     if not pecha_path:
         pecha_path = download_pecha(pecha_id)
     pagination_layer = load_yaml(Path(f'{pecha_path}/{pecha_id}.opf/layers/{vol_id}/Pagination.yml'))
