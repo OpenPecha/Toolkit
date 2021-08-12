@@ -9,6 +9,6 @@ source_metadata:
     c4c64b7e3a714a4ab3db3375a7c22196:
       image_group_id: I0919
       title: ''
-      volume_number: 1
+      base_file: v001.txt
       total_pages: 8
 
