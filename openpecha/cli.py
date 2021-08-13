@@ -52,7 +52,7 @@ def create_config_dirs():
 
 def _eval_branch(repo, branch):
     """return default branch as fallback branch."""
-    if branch in repo.refs:
+    if branch in repo.refs or f"origin/{branch}" in repo.refs:
         return branch
     elif "main" in repo.refs:
         return "main"
