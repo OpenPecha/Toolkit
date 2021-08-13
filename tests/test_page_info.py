@@ -16,7 +16,7 @@ def test_get_pages_info():
     pecha_id = "P0003"
     pecha_path = "./tests/data/proofreading/P0003/"
     vol_id = 'c4c64b7e3a714a4ab3db3375a7c22196'
-    vol_info = get_pages_info(pecha_id, vol_id, pecha_path=pecha_path)
+    vol_info = get_pages_info(pecha_id, vol_id, branch="main", pecha_path=pecha_path)
     assert expected_vol_info == vol_info
 
 
@@ -25,7 +25,7 @@ def test_get_page():
     vol_id = 'c4c64b7e3a714a4ab3db3375a7c22196'
     page_id = "6796e040db684bc09365121dd248acd1"
     pecha_path = './tests/data/proofreading/P0003/'
-    page_info = get_page(pecha_id, vol_id, page_id, pecha_path)
+    page_info = get_page(pecha_id, vol_id, page_id, branch="main", pecha_path=pecha_path)
     expected_page_info = {
         'content': """༄༅༅། །རྒྱ་གར་སྐད་དུ། ཨཱརྱ་པྲཛྙཱ་པཱ་ར་མི་ཏཱ་སཉྩ་ཡ་གཱ་ཐཱ། བོད་སྐད་དུ། འཕགས་པ་ཤེས་རབ་ཀྱི་ཕ་རོལ་ཏུ་ཕྱིན་པ་སྡུད་པ་ཚིགས་སུ་བཅད་པ། འཕགས་པ་
 འཇམ་དཔལ་ལ་ཕྱག་འཚལ་ལོ། །དེ་ནས་ཡང་བཅོམ་ལྡན་འདས་ཀྱིས་འཁོར་བཞི་པོ་དེ་དག་ཡང་དག་པར་རབ་ཏུ་དགའ་བར་མཛད་པའི་ཕྱིར་ཡང་ཤེས་རབ་ཀྱི་ཕ་རོལ་ཏུ་ཕྱིན་པ་འདི་སྟོན་
