@@ -2,6 +2,11 @@
 
 <!--next-version-placeholder-->
 
+## v0.7.45 (2021-08-13)
+### Fix
+* **cli:** Also check for remote branch ([`224e170`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/224e170d087debb377645b8be04bd343ef97d652))
+* **cli:** Pass repo in branch evaluate ([`f3feebd`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/f3feebd6691b1c1df9eb3fe29dc3ffc25f57bf05))
+
 ## v0.7.44 (2021-08-13)
 ### Fix
 * **proofreading:** Branch option and sub text update included ([`af04c6f`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/af04c6f29a0cff16353118a62a25b065af94a446))
