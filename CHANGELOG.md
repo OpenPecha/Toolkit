@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.7.44 (2021-08-13)
+### Fix
+* **proofreading:** Branch option and sub text update included ([`af04c6f`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/af04c6f29a0cff16353118a62a25b065af94a446))
+
 ## v0.7.43 (2021-08-12)
 ### Fix
 * **download-pecha:** Set fallback branch ([`0286d53`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/0286d53a803a2afa45b44907a7da0b6c235a6351))
