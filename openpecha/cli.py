@@ -52,7 +52,7 @@ def create_config_dirs():
 
 def _eval_branch(repo, branch):
     """return default branch as fallback branch."""
-    if branch in repo.refs:
+    if branch in repo.refs or f"origin/{branch}" in repo.refs:
         return branch
     elif "main" in repo.refs:
         return "main"
@@ -72,9 +72,7 @@ def download_pecha(pecha_id, out_path=None, needs_update=True, branch="main"):
 
     if pecha_path.is_dir():  # if repo is already exits at local then try to pull
         repo = Repo(str(pecha_path))
-        print(branch)
         branch = _eval_branch(repo, branch)
-        print(branch)
         repo.git.checkout(branch)
         if needs_update:
             click.echo(INFO.format(f"Updating {pecha_id} ..."))
@@ -87,7 +85,7 @@ def download_pecha(pecha_id, out_path=None, needs_update=True, branch="main"):
     except GitCommandError:
         raise PechaNotFound(f"Pecha with id {pecha_id} doesn't exist")
     repo = Repo(str(pecha_path))
-    branch = _eval_branch(branch)
+    branch = _eval_branch(repo, branch)
     repo.git.checkout(branch)
 
     return pecha_path
