@@ -4,7 +4,7 @@ from openpecha.blupdate import *
 from openpecha.cli import download_pecha
 from openpecha.utils import load_yaml, dump_yaml
 
-def get_meta(pecha_id, pecha_path=None):
+def get_meta(pecha_id, branch="main", pecha_path=None):
     """Return meta data of pecha
 
     Args:
@@ -15,11 +15,11 @@ def get_meta(pecha_id, pecha_path=None):
         dict: meta data of pecha
     """
     if not pecha_path:
-        pecha_path = download_pecha(pecha_id)
+        pecha_path = download_pecha(pecha_id, branch=branch)
     meta = load_yaml(Path(f"{pecha_path}/{pecha_id}.opf/meta.yml"))
     return meta
 
-def get_pagination_layer(pecha_id, vol_meta, pecha_path=None):
+def get_pagination_layer(pecha_id, vol_meta, branch="main", pecha_path=None):
     """Return pagination layer of a volume from pecha opf of mentioned pecha id
 
     Args:
@@ -32,11 +32,11 @@ def get_pagination_layer(pecha_id, vol_meta, pecha_path=None):
     """
     vol_id = re.sub(r'\..+', '', vol_meta['base_file'])
     if not pecha_path:
-        pecha_path = download_pecha(pecha_id)
+        pecha_path = download_pecha(pecha_id, branch=branch)
     pagination_layer = load_yaml(Path(f'{pecha_path}/{pecha_id}.opf/layers/{vol_id}/Pagination.yml'))
     return pagination_layer
 
-def get_vol_info(pecha_id, pecha_path=None):
+def get_vol_info(pecha_id, branch="main", pecha_path=None):
     """Return volumes information in pecha
     Args:
         pecha_id (str): pecha id
@@ -46,7 +46,7 @@ def get_vol_info(pecha_id, pecha_path=None):
         list: list of dict containing each volume's detail
     """
     vols = []
-    meta_data = get_meta(pecha_id, pecha_path)
+    meta_data = get_meta(pecha_id, branch, pecha_path)
     for vol_uuid, vol_info in meta_data['source_metadata']['volumes'].items():
         cur_vol = {
             'id': vol_uuid,
@@ -56,7 +56,7 @@ def get_vol_info(pecha_id, pecha_path=None):
         vols.append(cur_vol)
     return vols
 
-def get_pages_info(pecha_id, vol_id, pecha_path=None):
+def get_pages_info(pecha_id, vol_id, branch="main", pecha_path=None):
     """Return page annotation's uuids in mentioned volume number
 
     Args:
@@ -69,13 +69,13 @@ def get_pages_info(pecha_id, vol_id, pecha_path=None):
     """
     
     pages = []
-    pecha_meta = get_meta(pecha_id, pecha_path)
+    pecha_meta = get_meta(pecha_id, branch, pecha_path)
     vol_meta = pecha_meta['source_metadata']['volumes'][vol_id]
-    pagination_layer = get_pagination_layer(pecha_id, vol_meta, pecha_path)
+    pagination_layer = get_pagination_layer(pecha_id, vol_meta, branch, pecha_path)
     pages = [ann_uuid for ann_uuid, ann in pagination_layer['annotations'].items()]
     return pages
 
-def get_base_text(pecha_id, vol_meta, pecha_path=None):
+def get_base_text(pecha_id, vol_meta, branch="main", pecha_path=None):
     """Return base text of the mentioned volume number
 
     Args:
@@ -89,7 +89,7 @@ def get_base_text(pecha_id, vol_meta, pecha_path=None):
     base_text = ''
     base_fn = vol_meta['base_file']
     if not pecha_path:
-        pecha_path = download_pecha(pecha_id)
+        pecha_path = download_pecha(pecha_id, branch=branch)
     base_text = Path(f'{pecha_path}/{pecha_id}.opf/base/{base_fn}').read_text(encoding='utf-8')
     return base_text
 
@@ -109,11 +109,10 @@ def get_page_content(page_ann, base_text):
     page_content = base_text[page_start_idx:page_end_idx+1]
     return page_content
 
-def get_page_image_url(meta_data, page_ann, vol_meta):
+def get_page_image_url(page_ann, vol_meta):
     """Return image url of the page
 
     Args:
-        meta_data (dict): meta data of pecha
         page_ann (dict): page annotation
         vol_meta (dict): volume meta data
 
@@ -126,7 +125,7 @@ def get_page_image_url(meta_data, page_ann, vol_meta):
     image_url = f"https://iiif.bdrc.io/bdr:{cur_image_grp_id}::{image_ref}/full/max/0/default.jpg"
     return image_url
 
-def get_page(pecha_id, vol_id, page_id, pecha_path=None):
+def get_page(pecha_id, vol_id, page_id, branch="main", pecha_path=None):
     """Return page detail of mentioned page id
 
     Args:
@@ -142,14 +141,13 @@ def get_page(pecha_id, vol_id, page_id, pecha_path=None):
         'content': None,
         'image_url': None,
     }
-    pecha_meta = get_meta(pecha_id, pecha_path)
+    pecha_meta = get_meta(pecha_id, branch, pecha_path)
     vol_meta = pecha_meta['source_metadata']['volumes'][vol_id]
-    pagination_layer = get_pagination_layer(pecha_id, vol_meta, pecha_path)
-    base_text = get_base_text(pecha_id, vol_meta, pecha_path)
+    pagination_layer = get_pagination_layer(pecha_id, vol_meta, branch, pecha_path)
+    base_text = get_base_text(pecha_id, vol_meta, branch, pecha_path)
     cur_page_ann = pagination_layer['annotations'][page_id]
-    meta_data = get_meta(pecha_id, pecha_path)
     page_info['content'] = get_page_content(cur_page_ann, base_text)
-    page_info['image_url'] = get_page_image_url(meta_data, cur_page_ann, vol_meta)
+    page_info['image_url'] = get_page_image_url(cur_page_ann, vol_meta)
     return page_info
 
     
@@ -232,6 +230,23 @@ def update_base(pecha_path, pecha_id, vol_meta, new_vol):
     Path(f"{pecha_path}/{pecha_id}.opf/base/{base_fn}").write_text(new_vol, encoding='utf-8')
     print(f'INFO: {base_fn} base updated..')
 
+def update_sub_text(old_pecha_idx, text_info, vol_num, vol_offset, page_start):
+    check_next_sub_text = True
+    text_uuid = text_info[0]
+    text_ann = text_info[1]
+    for sub_text_uuid, sub_text_ann in text_ann['parts'].items():
+        sub_text_span = sub_text_ann['span']
+        for vol_walker, vol_span in enumerate(sub_text_span):
+            if vol_span['vol'] == vol_num and vol_span['end'] >= page_start:
+                old_pecha_idx["annotations"][text_uuid]['parts'][sub_text_uuid]['span'][vol_walker]['end'] += vol_offset
+            elif vol_span['vol'] > vol_num:
+                check_next_sub_text = False
+                break
+        if not check_next_sub_text:
+            break
+    return old_pecha_idx
+
+
 def update_index(vol_offset, vol_meta, page_start, old_pecha_idx):
     """Return updated index
 
@@ -245,17 +260,24 @@ def update_index(vol_offset, vol_meta, page_start, old_pecha_idx):
         dict: new index with new span using offset to adjust
     """
     vol_num = int(re.search('\d+',vol_meta['base_file'])[0])
+    check_next_text = True
     if vol_offset != 0:
         for text_uuid, text_ann in old_pecha_idx["annotations"].items():
+            if text_ann['parts']:
+                text_info = [text_uuid, text_ann]
+                old_pecha_idx = update_sub_text(old_pecha_idx, text_info, vol_num, vol_offset, page_start)
             text_span = text_ann['span']
             for vol_walker, vol_span in enumerate(text_span):
                 if vol_span['vol'] == vol_num and vol_span['end'] >= page_start:
                     old_pecha_idx["annotations"][text_uuid]['span'][vol_walker]['end'] += vol_offset
                 elif vol_span['vol'] > vol_num:
+                    check_next_text = False
                     break
+            if not check_next_text:
+                break
     return old_pecha_idx
 
-def save_page(pecha_id, vol_id, page_id, page_content, pecha_path=None):
+def save_page(pecha_id, vol_id, page_id, page_content, branch="main", pecha_path=None):
     """Save new page in opf
 
     Args:
@@ -268,13 +290,13 @@ def save_page(pecha_id, vol_id, page_id, page_content, pecha_path=None):
     Returns:
         path: pecha path of updated opf
     """
-    pecha_meta = get_meta(pecha_id, pecha_path)
+    pecha_meta = get_meta(pecha_id, branch, pecha_path)
     vol_meta = pecha_meta['source_metadata']['volumes'][vol_id]
     if not pecha_path:
-        pecha_path = download_pecha(pecha_id)
+        pecha_path = download_pecha(pecha_id, branch)
     old_pecha_idx = load_yaml(Path(f'{pecha_path}/{pecha_id}.opf/index.yml'))
-    pagination_layer = get_pagination_layer(pecha_id, vol_meta, pecha_path)
-    old_vol = get_base_text(pecha_id, vol_meta, pecha_path)
+    pagination_layer = get_pagination_layer(pecha_id, vol_meta, branch, pecha_path)
+    old_vol = get_base_text(pecha_id, vol_meta, branch, pecha_path)
     cur_page_ann = pagination_layer['annotations'][page_id]
     old_page = get_page_content(cur_page_ann, old_vol)
     new_vol = get_new_vol(old_vol, old_page, new_page_content=page_content)

@@ -10,5 +10,5 @@ def test_get_vol_info():
     ]
     pecha_id = "P0003"
     pecha_path = "./tests/data/proofreading/P0003/"
-    vol_info = get_vol_info(pecha_id, pecha_path=pecha_path)
+    vol_info = get_vol_info(pecha_id, branch="main", pecha_path=pecha_path)
     assert expected_vol_info == vol_info
