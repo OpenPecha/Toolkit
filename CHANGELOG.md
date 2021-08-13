@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.7.46 (2021-08-13)
+### Fix
+* **proofreading:** Branch bug fixed ([`5702684`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/5702684a0ffa35d7210c64db3105833769d711f2))
+
 ## v0.7.45 (2021-08-13)
 ### Fix
 * **cli:** Also check for remote branch ([`224e170`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/224e170d087debb377645b8be04bd343ef97d652))
