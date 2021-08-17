@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.7.47 (2021-08-17)
+### Fix
+* **hfml-serializer:** Subtext serializer bug fix ([`01d31c2`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/01d31c2d7fd7952e80bde77d27c35c67c0fa309a))
+
 ## v0.7.46 (2021-08-13)
 ### Fix
 * **proofreading:** Branch bug fixed ([`5702684`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/5702684a0ffa35d7210c64db3105833769d711f2))
