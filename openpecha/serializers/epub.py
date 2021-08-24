@@ -300,8 +300,8 @@ class EpubSerializer(Serialize):
         source_metadata = self.meta.get("source_metadata", {})
         credit_pg_name = source_metadata.get("credit", "")
         credit_pg_path = self.opf_path / f"assets/image/{credit_pg_name}"
-        book_title_tag = f'<p>{Tsadra_template.cover_page_book_title_SP}{source_metadata.get("title", "")}</span></p>\n'
-        sub_title_tag = f'<p>{Tsadra_template.sub_title_SP}{source_metadata.get("subtitle", "")}</span></p>\n'
+        book_title_tag = f'<p class="tibetan-regular-indented">{Tsadra_template.cover_page_book_title_SP}{source_metadata.get("title", "")}</span></p>\n'
+        sub_title_tag = f'<p class="tibetan-regular-indented">{Tsadra_template.sub_title_SP}{source_metadata.get("subtitle", "")}</span></p>\n'
         authors = source_metadata.get("authors", [])
         front_page += f"{book_title_tag}{sub_title_tag}"
         for author in authors:
@@ -493,6 +493,23 @@ class EpubSerializer(Serialize):
         # new_zip_path.rename(new_zip_path.with_suffix('.epub'))
         print('INFO: Epub ready...')
 
+    def get_serialized_html(self, result, vol_id, pecha_title):
+        result = f"{self.get_front_page()}{result}"
+        footnote_ref_tag = ""
+        if "Footnote" in self.layers:
+            footnote_fn = self.opf_path / "layers" / vol_id / "Footnote.yml"
+            footnote_layer = load_yaml(footnote_fn)
+            footnote_ref_tag = self.get_footnote_references(
+                footnote_layer["annotations"]
+            )
+        result = self.p_tag_adder(result)
+        result = self.indentation_adjustment(result)
+        serialized_html = (
+            f"<html>\n<head>\n\t<title>{pecha_title}</title>\n</head>\n<body>\n"
+        )
+        serialized_html += f"{result}{footnote_ref_tag}</body>\n</html>"
+        return serialized_html
+
     def serialize(self, toc_levels={}, output_path="./output/epub_output"):
         """This module serialize .opf file to other format such as .epub etc. In case of epub,
         we are using calibre ebook-convert command to do the conversion by passing our custom css template
@@ -513,20 +530,7 @@ class EpubSerializer(Serialize):
 
         results = self.get_result()
         for vol_id, result in results.items():
-            result = f"{self.get_front_page()}{result}"
-            footnote_ref_tag = ""
-            if "Footnote" in self.layers:
-                footnote_fn = self.opf_path / "layers" / vol_id / "Footnote.yml"
-                footnote_layer = load_yaml(footnote_fn)
-                footnote_ref_tag = self.get_footnote_references(
-                    footnote_layer["annotations"]
-                )
-            result = self.p_tag_adder(result)
-            result = self.indentation_adjustment(result)
-            serialized_html = (
-                f"<html>\n<head>\n\t<title>{pecha_title}</title>\n</head>\n<body>\n"
-            )
-            serialized_html += f"{result}{footnote_ref_tag}</body>\n</html>"
+            serialized_html = self.get_serialized_html(result, vol_id, pecha_title)
             Path(out_html_fn).write_text(serialized_html)
             # Downloading css template file from ebook template repo and saving it
             template = requests.get(

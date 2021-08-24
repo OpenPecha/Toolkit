@@ -1,0 +1,16 @@
+id: 8b93e51d868a4eddb2a23cbda013a6b4
+annotation_type: Sabche
+revision: '00027'
+annotations:
+  398e755b53504ff3ab7aa110353beec2:
+    span:
+      start: 1948
+      end: 2503
+  9a15502943e34ecbbc5346adf029dd04:
+    span:
+      start: 3072
+      end: 3104
+  8ccadf603bc241bc833e26dbc986397b:
+    span:
+      start: 4231
+      end: 4262
