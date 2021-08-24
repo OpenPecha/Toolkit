@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.7.48 (2021-08-24)
+### Fix
+* **epub-test:** Test case updated according to new book title tag ([`d2c0d7f`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/d2c0d7fdbc017d031a4166673cb61034b44e0ee1))
+* **docx:** Test added to docx serializer ([`97c1c87`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/97c1c8780f9f74655ab987030561141718d03fe5))
+* **docx:** Docx serializer added ([`c26b0cd`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/c26b0cd9766245c45757d696e8ec96ef75706c74))
+
 ## v0.7.47 (2021-08-17)
 ### Fix
 * **hfml-serializer:** Subtext serializer bug fix ([`01d31c2`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/01d31c2d7fd7952e80bde77d27c35c67c0fa309a))
