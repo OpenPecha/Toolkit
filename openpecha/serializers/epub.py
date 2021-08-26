@@ -1,16 +1,32 @@
 import os
 import re
-import requests
 import shutil
 import zipfile
-
-from bs4 import BeautifulSoup
+from enum import Enum
 from pathlib import Path
+
+import requests
+from bs4 import BeautifulSoup
 
 from openpecha.formatters.layers import AnnType
 from openpecha.utils import load_yaml
+
 from .serialize import Serialize
 
+
+class TsadraTemplateCSSClasses(Enum):
+    cover_title = 'credits-page_front-title'
+    book_title = 'tibetan-book-title'
+    sub_title = 'tibetan-book-sub-title'
+    book_number = 'tibetan-book-number'
+    chapter = 'tibetan-chapters'
+    tsawa_inline = 'tibetan-root-text'
+    tsawa_verse = 'tibetan-root-text-in-verse'
+    citation_inline = 'tibetan-citations'
+    citation_verse = 'tibetan-citations-in-verse'
+    citation_prose = 'tibetan-citations-prose'
+    sabche = 'tibetan-sabche1'
+    yigchung = 'tibetan-commentary-small'
 
 class Tsadra_template:
     """Variables are important components of tsadra epub template."""
@@ -410,7 +426,7 @@ class EpubSerializer(Serialize):
                 new_toc_levels[walker] = annotation_xpath
                 walker += 1
         return new_toc_levels
-    
+
     def get_new_metadata(self, soup, meta_data):
         """Update meta data of opf
 

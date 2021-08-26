@@ -4,6 +4,7 @@ import pytest
 
 from openpecha.core.layer import LayerEnum
 from openpecha.formatters.editor import EditorParser
+from openpecha.serializers.epub import TsadraTemplateCSSClasses
 
 
 @pytest.fixture(scope="module")
@@ -13,7 +14,7 @@ def editor_content():
 
 def test_parser_editor_content_no_grouping(editor_content):
     parser = EditorParser()
-    parser.parse("v001", editor_content, group=False)
+    parser.parse("v001", editor_content, group_verse=False)
     print(parser.base)
     print(parser.layers)
 
@@ -25,21 +26,71 @@ def test_parser_editor_content_no_grouping(editor_content):
             )
 
 
-def assert_ann(parser, base_name, layer_name, id_, excepted, is_verse):
+def assert_ann(parser, base_name, layer_name, ann_id, excepted, metadata={}):
     layer = parser.layers[base_name][LayerEnum(layer_name)]
-    ann = layer.annotations[id_]
+    ann = layer.annotations[ann_id]
     assert parser.base[base_name][ann.span.start : ann.span.end + 1] == excepted
-    assert ann.is_verse == is_verse
+    assert ann.metadata == metadata
 
 
 def test_parser_editor_content_with_grouping(editor_content):
     parser = EditorParser()
-    parser.parse("v001", editor_content, group=True)
+    parser.parse("v001", editor_content, group_verse=True)
 
-    assert_ann(parser, "v001", "Tsawa", "1", "Tsawa 1\nTsawa 2", True)
-    assert_ann(parser, "v001", "Tsawa", "3", "Tsawa 3", False)
-    assert_ann(parser, "v001", "Tsawa", "4", "Tsawa 4\nTsawa 5", True)
+    assert_ann(
+        parser,
+        base_name="v001",
+        layer_name="Tsawa",
+        ann_id="1",
+        excepted="Tsawa 1\nTsawa 2",
+        metadata={"css_class_name": TsadraTemplateCSSClasses.tsawa_verse.value},
+    )
+    assert_ann(
+        parser,
+        base_name="v001",
+        layer_name="Tsawa",
+        ann_id="3",
+        excepted="Tsawa 3",
+        metadata={"css_class_name": TsadraTemplateCSSClasses.tsawa_inline.value},
+    )
+    assert_ann(
+        parser,
+        base_name="v001",
+        layer_name="Tsawa",
+        ann_id="4",
+        excepted="Tsawa 4\nTsawa 5",
+        metadata={"css_class_name": TsadraTemplateCSSClasses.tsawa_verse.value},
+    )
 
-    assert_ann(parser, "v001", "Citation", "1", "Citation 1", False)
-    assert_ann(parser, "v001", "Citation", "2", "Citation 2\nCitation 3", True)
-    assert_ann(parser, "v001", "Citation", "4", "Citation 4", False)
+    assert_ann(
+        parser,
+        base_name="v001",
+        layer_name="Citation",
+        ann_id="1",
+        excepted="Citation 1",
+        metadata={"css_class_name": TsadraTemplateCSSClasses.citation_inline.value},
+    )
+    assert_ann(
+        parser,
+        base_name="v001",
+        layer_name="Citation",
+        ann_id="2",
+        excepted="Citation 2\nCitation 3",
+        metadata={"css_class_name": TsadraTemplateCSSClasses.citation_verse.value},
+    )
+    assert_ann(
+        parser,
+        base_name="v001",
+        layer_name="Citation",
+        ann_id="4",
+        excepted="Citation 4",
+        metadata={"css_class_name": TsadraTemplateCSSClasses.citation_inline.value},
+    )
+    assert_ann(
+        parser,
+        base_name="v001",
+        layer_name="Citation",
+        ann_id="5",
+        excepted="Citation 5",
+        metadata={"css_class_name": TsadraTemplateCSSClasses.citation_prose.value},
+    )
