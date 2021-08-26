@@ -5,6 +5,7 @@ import shutil
 import zipfile
 
 from bs4 import BeautifulSoup
+from enum import Enum
 from pathlib import Path
 
 from openpecha.formatters.layers import AnnType, Citation
@@ -12,7 +13,7 @@ from openpecha.utils import load_yaml
 from .serialize import Serialize
 
 
-class TsadraTemplateCSSClasses:
+class TsadraTemplateCSSClasses(Enum):
     cover_title = 'credits-page_front-title'
     book_title = 'tibetan-book-title'
     sub_title = 'tibetan-book-sub-title'
@@ -33,33 +34,33 @@ class Tsadra_template:
     span_EP = "</span>"
     para_EP = "</p>"
     ft = '<span class="front-title">'
-    cover_title_SP = f'<span class="{TsadraTemplateCSSClasses.cover_title}">'
-    book_title_SP = f'<span class="{TsadraTemplateCSSClasses.book_title}">'
-    sub_title_SP = f'<span class="{TsadraTemplateCSSClasses.sub_title}">'
-    book_number_SP = f'<p class="{TsadraTemplateCSSClasses.book_number}">{ft}'
+    cover_title_SP = f'<span class="{TsadraTemplateCSSClasses.cover_title.value}">'
+    book_title_SP = f'<span class="{TsadraTemplateCSSClasses.book_title.value}">'
+    sub_title_SP = f'<span class="{TsadraTemplateCSSClasses.sub_title.value}">'
+    book_number_SP = f'<p class="{TsadraTemplateCSSClasses.book_number.value}">{ft}'
     credit_page_SP = (
         '<p class="credits-page_epub-edition-line"><span class="credits-regular">'
     )
     author_SP = '<p class="text-author"><span class="front-page---text-titles">'
-    chapter_SP = f'<span class="{TsadraTemplateCSSClasses.chapter}">'
-    tsawa_inline_SP = f'<span class="{TsadraTemplateCSSClasses.tsawa_inline}">'
-    tsawa_verse_SP = f'<span class="{TsadraTemplateCSSClasses.tsawa_verse}">'
-    citation_inline_SP = f'<span class="{TsadraTemplateCSSClasses.citation_inline}">'
-    citation_verse_SP = f'<span class="{TsadraTemplateCSSClasses.citation_verse}">'
-    citation_prose_sp = f'<span class="{TsadraTemplateCSSClasses.citation_prose}">'
-    sabche_SP = f'<span class="{TsadraTemplateCSSClasses.sabche}">'
-    yigchung_SP = f'<span class="{TsadraTemplateCSSClasses.yigchung}">'
+    chapter_SP = f'<span class="{TsadraTemplateCSSClasses.chapter.value}">'
+    tsawa_inline_SP = f'<span class="{TsadraTemplateCSSClasses.tsawa_inline.value}">'
+    tsawa_verse_SP = f'<span class="{TsadraTemplateCSSClasses.tsawa_verse.value}">'
+    citation_inline_SP = f'<span class="{TsadraTemplateCSSClasses.citation_inline.value}">'
+    citation_verse_SP = f'<span class="{TsadraTemplateCSSClasses.citation_verse.value}">'
+    citation_prose_sp = f'<span class="{TsadraTemplateCSSClasses.citation_prose.value}">'
+    sabche_SP = f'<span class="{TsadraTemplateCSSClasses.sabche.value}">'
+    yigchung_SP = f'<span class="{TsadraTemplateCSSClasses.yigchung.value}">'
     footnote_marker_SP = '<span class="tibetan-footnote-marker"'
     footnote_EP = "</span></a>"
     footnote_reference_SP = '<span class="tibetan-footnote-reference"'
 
     toc_xpaths = {
-        "book-number": f"//*[@class='{TsadraTemplateCSSClasses.book_number}']",
-        "chapter": f"//*[@class='{TsadraTemplateCSSClasses.chapter}']",
-        "sabche": f"//*[@class='{TsadraTemplateCSSClasses.sabche}' or @class='tibetan-sabche']",
+        "book-number": f"//*[@class='{TsadraTemplateCSSClasses.book_number.value}']",
+        "chapter": f"//*[@class='{TsadraTemplateCSSClasses.chapter.value}']",
+        "sabche": f"//*[@class='{TsadraTemplateCSSClasses.sabche.value}' or @class='tibetan-sabche']",
     }
     toc_levels = {"1": "book-number", "2": "chapter", "3": "sabche"}
-    book_title_Xpath = f"//*[@class='{TsadraTemplateCSSClasses.book_title}']"
+    book_title_Xpath = f"//*[@class='{TsadraTemplateCSSClasses.book_title.value}']"
 
 
 class EpubSerializer(Serialize):
@@ -85,6 +86,21 @@ class EpubSerializer(Serialize):
         return adapted_start, adapted_end
 
 
+    def get_css_class_name(self, annotation):
+        """Return css class name of annotation if any exist
+
+        Args:
+            annotation (dict): annotation details
+
+        Returns:
+            str: css class name of the annotation
+        """
+        css_class_name = ''
+        metadata = annotation.get('metadata', {})
+        if metadata:
+            css_class_name = metadata.get('css_class_name', '')
+        return css_class_name
+
     def get_citation_sp(self, css_class_name):
         """Return start payload for citation according to class name
 
@@ -96,9 +112,10 @@ class EpubSerializer(Serialize):
         """
         start_payload = Tsadra_template.citation_inline_SP
         if css_class_name:
-            if css_class_name == 'citation-verse':
+            css_class_enum = TsadraTemplateCSSClasses(css_class_name)
+            if css_class_enum == TsadraTemplateCSSClasses.citation_verse:
                 start_payload = Tsadra_template.citation_verse_SP
-            elif css_class_name == 'citation-prose':
+            elif css_class_enum == TsadraTemplateCSSClasses.citation_prose:
                 start_payload = Tsadra_template.citation_prose_sp
         return start_payload
 
@@ -114,7 +131,8 @@ class EpubSerializer(Serialize):
         """
         start_payload = Tsadra_template.tsawa_inline_SP
         if css_class_name:
-            if css_class_name == 'tsawa-verse':
+            css_class_enum = TsadraTemplateCSSClasses(css_class_name)
+            if css_class_enum == TsadraTemplateCSSClasses.tsawa_verse:
                 start_payload = Tsadra_template.tsawa_verse_SP
         return start_payload
 
@@ -157,11 +175,11 @@ class EpubSerializer(Serialize):
             start_payload = Tsadra_template.chapter_SP
             end_payload = Tsadra_template.span_EP
         elif ann["type"] == AnnType.tsawa:
-            css_class_name = ann.get('css_class_name', '')
+            css_class_name = self.get_css_class_name(ann)
             start_payload = self.get_tsawa_sp(css_class_name)
             end_payload = Tsadra_template.span_EP
         elif ann["type"] == AnnType.citation:
-            css_class_name = ann.get('css_class_name', '')
+            css_class_name = self.get_css_class_name(ann)
             start_payload = self.get_citation_sp(css_class_name)
             end_payload = Tsadra_template.span_EP
         elif ann["type"] == AnnType.sabche:

@@ -6,34 +6,41 @@ annotations:
     span:
       start: 1388
       end: 1512
-    css_class_name: tsawa-verse
+    metadata:
+      css_class_name: tibetan-root-text-in-verse
   c20d174d38544d108b3d597b130b96de:
     span:
       start: 1614
       end: 1731
-    css_class_name: tsawa-verse
+    metadata:
+      css_class_name: tibetan-root-text-in-verse
   2850c408871a478aa097bdcfe38fe113:
     span:
       start: 3047
       end: 3169
-    css_class_name: tsawa-verse
+    metadata:
+      css_class_name: tibetan-root-text-in-verse
   0a9fb776796d4e4aa1a25c7c0a756c2e:
     span:
       start: 3648
       end: 3889
-    css_class_name: tsawa-verse
+    metadata:
+      css_class_name: tibetan-root-text-in-verse
   e0c743c1ee934e34a5635e67bdb639d8:
     span:
       start: 7331
       end: 7449
-    css_class_name: tsawa-verse
+    metadata:
+      css_class_name: tibetan-root-text-in-verse
   a1677ee6bdd64135a965486fe0d123ec:
     span:
       start: 8405
       end: 8514
-    css_class_name: tsawa-inline
+    metadata:
+      css_class_name: tibetan-root-text
   64c22e5bbbb34762ab10a3bacf710379:
     span:
       start: 8791
       end: 8899
-    css_class_name: tsawa-verse
+    metadata:
+      css_class_name: tibetan-root-text-in-verse
