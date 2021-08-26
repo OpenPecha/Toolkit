@@ -22,19 +22,5 @@ def test_opf_2_html_serializer():
 
     results = serializer.get_result()
     for vol_id, result in results.items():
-        result = f"{serializer.get_front_page()}{result}"
-        footnote_ref_tag = ""
-        if "Footnote" in serializer.layers:
-            footnote_fn = serializer.opf_path / "layers" / vol_id / "Footnote.yml"
-            footnote_layer = yaml.safe_load(footnote_fn.open())
-            footnote_ref_tag = serializer.get_footnote_references(
-                footnote_layer["annotations"]
-            )
-        result = serializer.p_tag_adder(result)
-        result = serializer.indentation_adjustment(result)
-        serialized_html = (
-            f"<html>\n<head>\n\t<title>{pecha_title}</title>\n</head>\n<body>\n"
-        )
-        serialized_html += f"{result}{footnote_ref_tag}</body>\n</html>"
+        serialized_html = serializer.get_serialized_html(result, vol_id, pecha_title)
         assert expected_serialized_html == serialized_html
-
