@@ -2,6 +2,17 @@
 
 <!--next-version-placeholder-->
 
+## v0.7.49 (2021-08-26)
+### Fix
+* **epub:** Enum used to avoid hardcoded condition checking ([`306a9c0`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/306a9c0dbe7e42787fe3481ec3af7f88a9d2714e))
+* **editor-formatter:** Ann type supports ([`b8a5f5a`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/b8a5f5ab330ed5918f98008933b9147e797c3d3a))
+* **docx-serializer:** Docx serializer formatted as class ([`024f19a`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/024f19aa890d26f34cbeb8da3c4fa7503f901dfa))
+* **test:** Pecha asset added ([`f97fa31`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/f97fa3140e3c1d35fcbddd528c951fa8c7e0246a))
+* **test:** Chapter and booknumber added ([`8d3a56c`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/8d3a56c3039bfcfb1c025d4cf1a9ea9575f9a32a))
+* **testcase:** New test case added ([`fff431f`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/fff431f09dbfc09d2d08fe4ce410d8b824ebfffb))
+* **epub-serializer:** Multiple type of citation and tsawa annotation supported ([`c35d7cf`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/c35d7cf2f5302d75e43a306e9ff3121a01008c55))
+* **testcase:** Test case imporved ([`97d3b4b`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/97d3b4bba62167afa87f3aa5b7d2520acbfc933d))
+
 ## v0.7.48 (2021-08-24)
 ### Fix
 * **epub-test:** Test case updated according to new book title tag ([`d2c0d7f`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/d2c0d7fdbc017d031a4166673cb61034b44e0ee1))
