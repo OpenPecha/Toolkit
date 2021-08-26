@@ -1,19 +1,49 @@
-id: de6605b32fbb423ea573a1838854a9dc
+id: a288118b3b9a4b09afc4c6ba5a3f52a9
 annotation_type: Citation
-revision: '00005'
+revision: '00003'
 annotations:
-  f515964fa0464916815ef3e42128c3c0:
+  d1b073b0b67b4d1a9911f59b9b762c6b:
     span:
       start: 1012
-      end: 1068
-    is_verse: true
-  585d0fb67b4a49ccb50de73be70789b4:
+      end: 1124
+    css_class_name: citation-verse
+  62ef0c9f477a4e0ebf2f4a2d11e0a41f:
     span:
-      start: 1612
-      end: 1729
-    is_verse: true
-  3b3c3045c5414a2cadd85c0b2b80cdf7:
+      start: 1950
+      end: 2487
+    css_class_name: citation-prose
+  93335b4c8ff94932a6fe29c7caa50de0:
     span:
-      start: 2884
-      end: 2946
-    is_verse: false
+      start: 5615
+      end: 5791
+    css_class_name: citation-prose
+  e9954ce8649d48f2af6d1c9786302185:
+    span:
+      start: 6606
+      end: 6713
+    css_class_name: citation-inline
+  583d73af28534c579e8e0898f7139df8:
+    span:
+      start: 7538
+      end: 7599
+    css_class_name: citation-verse
+  ddb793693ca1498e9237c928292dae90:
+    span:
+      start: 9312
+      end: 9418
+    css_class_name: citation-verse
+  e0cb382e8f314cbd9ea558fc9c809670:
+    span:
+      start: 9429
+      end: 9532
+    css_class_name: citation-verse
+  cb5066d17d334c2cbc71bab6b9fe9f07:
+    span:
+      start: 10031
+      end: 10144
+    css_class_name: citation-verse
+  6d9dbaf1e65f44b9a6a74cefa48bd996:
+    span:
+      start: 11598
+      end: 11818
+    css_class_name: citation-verse

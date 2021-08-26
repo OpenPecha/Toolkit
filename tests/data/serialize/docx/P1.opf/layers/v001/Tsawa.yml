@@ -1,24 +1,39 @@
-id: 938dc9ff834a4da4b116ccdacc6a2f38
+id: 61915d38f21048d89498e1845b137895
 annotation_type: Tsawa
-revision: '00007'
+revision: '00003'
 annotations:
-  a581bc9f75be4509b28ef4b5f311e97a:
+  756d96669c4244c393e2c41d9badd231:
     span:
-      start: 1386
-      end: 1510
-    is_verse: true
-  9c8fd28185b642359039c666ba46eebd:
+      start: 1388
+      end: 1512
+    css_class_name: tsawa-verse
+  c20d174d38544d108b3d597b130b96de:
     span:
-      start: 2643
-      end: 2778
-    is_verse: false
-  bb6a9c11c1b141e183f4a8cb4476f927:
+      start: 1614
+      end: 1731
+    css_class_name: tsawa-verse
+  2850c408871a478aa097bdcfe38fe113:
     span:
-      start: 3106
-      end: 3347
-    is_verse: true
-  2ccf128a99dc4e0282d887357bf10f65:
+      start: 3047
+      end: 3169
+    css_class_name: tsawa-verse
+  0a9fb776796d4e4aa1a25c7c0a756c2e:
     span:
-      start: 4264
-      end: 4383
-    is_verse: true
+      start: 3648
+      end: 3889
+    css_class_name: tsawa-verse
+  e0c743c1ee934e34a5635e67bdb639d8:
+    span:
+      start: 7331
+      end: 7449
+    css_class_name: tsawa-verse
+  a1677ee6bdd64135a965486fe0d123ec:
+    span:
+      start: 8405
+      end: 8514
+    css_class_name: tsawa-inline
+  64c22e5bbbb34762ab10a3bacf710379:
+    span:
+      start: 8791
+      end: 8899
+    css_class_name: tsawa-verse
