@@ -7,10 +7,24 @@ import zipfile
 from bs4 import BeautifulSoup
 from pathlib import Path
 
-from openpecha.formatters.layers import AnnType
+from openpecha.formatters.layers import AnnType, Citation
 from openpecha.utils import load_yaml
 from .serialize import Serialize
 
+
+class TsadraTemplateCSSClasses:
+    cover_title = 'credits-page_front-title'
+    book_title = 'tibetan-book-title'
+    sub_title = 'tibetan-book-sub-title'
+    book_number = 'tibetan-book-number'
+    chapter = 'tibetan-chapters'
+    tsawa_inline = 'tibetan-root-text'
+    tsawa_verse = 'tibetan-root-text-in-verse'
+    citation_inline = 'tibetan-citations'
+    citation_verse = 'tibetan-citations-in-verse'
+    citation_prose = 'tibetan-citations-prose'
+    sabche = 'tibetan-sabche1'
+    yigchung = 'tibetan-commentary-small'
 
 class Tsadra_template:
     """Variables are important components of tsadra epub template."""
@@ -19,32 +33,33 @@ class Tsadra_template:
     span_EP = "</span>"
     para_EP = "</p>"
     ft = '<span class="front-title">'
-    cover_page_book_title_SP = '<span class="credits-page_front-title">'
-    book_title_SP = '<span class="tibetan-book-title">'
-    sub_title_SP = '<span class="tibetan-book-sub-title">'
-    book_number_SP = f'<p class="tibetan-book-number">{ft}'
+    cover_title_SP = f'<span class="{TsadraTemplateCSSClasses.cover_title}">'
+    book_title_SP = f'<span class="{TsadraTemplateCSSClasses.book_title}">'
+    sub_title_SP = f'<span class="{TsadraTemplateCSSClasses.sub_title}">'
+    book_number_SP = f'<p class="{TsadraTemplateCSSClasses.book_number}">{ft}'
     credit_page_SP = (
         '<p class="credits-page_epub-edition-line"><span class="credits-regular">'
     )
     author_SP = '<p class="text-author"><span class="front-page---text-titles">'
-    chapter_SP = '<span class="tibetan-chapters">'
-    tsawa_SP = '<span class="tibetan-root-text">'
-    tsawa_verse_SP = '<span class="tibetan-root-text-in-verse">'
-    quatation__verse_SP = '<span class="tibetan-citations-in-verse">'
-    quatation__SP = '<span class="tibetan-citations">'
-    sabche_SP = '<span class="tibetan-sabche1">'
-    yigchung_SP = '<span class="tibetan-commentary-small">'
+    chapter_SP = f'<span class="{TsadraTemplateCSSClasses.chapter}">'
+    tsawa_inline_SP = f'<span class="{TsadraTemplateCSSClasses.tsawa_inline}">'
+    tsawa_verse_SP = f'<span class="{TsadraTemplateCSSClasses.tsawa_verse}">'
+    citation_inline_SP = f'<span class="{TsadraTemplateCSSClasses.citation_inline}">'
+    citation_verse_SP = f'<span class="{TsadraTemplateCSSClasses.citation_verse}">'
+    citation_prose_sp = f'<span class="{TsadraTemplateCSSClasses.citation_prose}">'
+    sabche_SP = f'<span class="{TsadraTemplateCSSClasses.sabche}">'
+    yigchung_SP = f'<span class="{TsadraTemplateCSSClasses.yigchung}">'
     footnote_marker_SP = '<span class="tibetan-footnote-marker"'
     footnote_EP = "</span></a>"
     footnote_reference_SP = '<span class="tibetan-footnote-reference"'
 
     toc_xpaths = {
-        "book-number": "//*[@class='tibetan-book-number']",
-        "chapter": "//*[@class='tibetan-chapters']",
-        "sabche": "//*[@class='tibetan-sabche1' or @class='tibetan-sabche']",
+        "book-number": f"//*[@class='{TsadraTemplateCSSClasses.book_number}']",
+        "chapter": f"//*[@class='{TsadraTemplateCSSClasses.chapter}']",
+        "sabche": f"//*[@class='{TsadraTemplateCSSClasses.sabche}' or @class='tibetan-sabche']",
     }
     toc_levels = {"1": "book-number", "2": "chapter", "3": "sabche"}
-    book_title_Xpath = "//*[@class='tibetan-book-title']"
+    book_title_Xpath = f"//*[@class='{TsadraTemplateCSSClasses.book_title}']"
 
 
 class EpubSerializer(Serialize):
@@ -69,6 +84,40 @@ class EpubSerializer(Serialize):
         adapted_end = span["end"] - self.text_spans[vol_id]["start"]
         return adapted_start, adapted_end
 
+
+    def get_citation_sp(self, css_class_name):
+        """Return start payload for citation according to class name
+
+        Args:
+            css_class_name (str): css class name to differentiate different types of citations
+
+        Returns:
+            str: citation start payload
+        """
+        start_payload = Tsadra_template.citation_inline_SP
+        if css_class_name:
+            if css_class_name == 'citation-verse':
+                start_payload = Tsadra_template.citation_verse_SP
+            elif css_class_name == 'citation-prose':
+                start_payload = Tsadra_template.citation_prose_sp
+        return start_payload
+
+
+    def get_tsawa_sp(self, css_class_name):
+        """Return start payload for tsawa according to class name
+
+        Args:
+            css_class_name (str): css class name to differentiate different types of tsawa
+
+        Returns:
+            str: tsawa start payload
+        """
+        start_payload = Tsadra_template.tsawa_inline_SP
+        if css_class_name:
+            if css_class_name == 'tsawa-verse':
+                start_payload = Tsadra_template.tsawa_verse_SP
+        return start_payload
+
     def apply_annotation(self, vol_id, ann, uuid2localid):
         """Applies annotation to specific volume base-text, where part of the text exists.
 
@@ -83,9 +132,6 @@ class EpubSerializer(Serialize):
         only_start_ann = False
         start_payload = "("
         end_payload = ")"
-        # if ann["type"] == AnnType.pagination:
-        #     start_payload = f'[{ann["page_index"]}] {ann["page_info"]}\n'
-        #     only_start_ann = True
         if ann["type"] == AnnType.correction:
             start_payload = "("
             end_payload = f',{ann["correction"]})'
@@ -111,16 +157,12 @@ class EpubSerializer(Serialize):
             start_payload = Tsadra_template.chapter_SP
             end_payload = Tsadra_template.span_EP
         elif ann["type"] == AnnType.tsawa:
-            if "is_verse" in ann and ann["is_verse"]:
-                start_payload = Tsadra_template.tsawa_verse_SP
-            else:
-                start_payload = Tsadra_template.tsawa_SP
+            css_class_name = ann.get('css_class_name', '')
+            start_payload = self.get_tsawa_sp(css_class_name)
             end_payload = Tsadra_template.span_EP
         elif ann["type"] == AnnType.citation:
-            if "is_verse" in ann and ann["is_verse"]:
-                start_payload = Tsadra_template.quatation__verse_SP
-            else:
-                start_payload = Tsadra_template.quatation__SP
+            css_class_name = ann.get('css_class_name', '')
+            start_payload = self.get_citation_sp(css_class_name)
             end_payload = Tsadra_template.span_EP
         elif ann["type"] == AnnType.sabche:
             start_payload = Tsadra_template.sabche_SP
@@ -300,7 +342,7 @@ class EpubSerializer(Serialize):
         source_metadata = self.meta.get("source_metadata", {})
         credit_pg_name = source_metadata.get("credit", "")
         credit_pg_path = self.opf_path / f"assets/image/{credit_pg_name}"
-        book_title_tag = f'<p class="tibetan-regular-indented">{Tsadra_template.cover_page_book_title_SP}{source_metadata.get("title", "")}</span></p>\n'
+        book_title_tag = f'<p class="tibetan-regular-indented">{Tsadra_template.cover_title_SP}{source_metadata.get("title", "")}</span></p>\n'
         sub_title_tag = f'<p class="tibetan-regular-indented">{Tsadra_template.sub_title_SP}{source_metadata.get("subtitle", "")}</span></p>\n'
         authors = source_metadata.get("authors", [])
         front_page += f"{book_title_tag}{sub_title_tag}"
@@ -494,6 +536,16 @@ class EpubSerializer(Serialize):
         print('INFO: Epub ready...')
 
     def get_serialized_html(self, result, vol_id, pecha_title):
+        """Serialize html are return using annotated text
+
+        Args:
+            result (str): tsadra epub annotations applied text
+            vol_id (str): volume id
+            pecha_title (str): pecha title
+
+        Returns:
+            str: annotated applied text in html
+        """
         result = f"{self.get_front_page()}{result}"
         footnote_ref_tag = ""
         if "Footnote" in self.layers:
@@ -511,13 +563,18 @@ class EpubSerializer(Serialize):
         return serialized_html
 
     def serialize(self, toc_levels={}, output_path="./output/epub_output"):
-        """This module serialize .opf file to other format such as .epub etc. In case of epub,
+        """
+        This module serialize .opf file to other format such as .epub etc. In case of epub,
         we are using calibre ebook-convert command to do the conversion by passing our custom css template
         and embedding our custom font. The converted output will be then saved in current directory
         as {pecha_id}.epub.
 
         Args:
-        pecha_id (string): Pecha id that needs to be exported in other format
+            toc_levels (dict): table of content level
+            output_path (str): output path where epub needs to be saved
+        
+        Returns:
+            str: output path
 
         """
         output_path = Path(output_path)
