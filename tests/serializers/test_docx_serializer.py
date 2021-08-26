@@ -7,4 +7,4 @@ def test_serialize_docx():
     docx_serializer = DocxSerializer(opf_path)
     output_path = Path("./tests/data/serialize/docx")
     assert output_path == docx_serializer.serialize(output_path)
-    # (output_path / "P1.docx").unlink()
+    (output_path / "P1.docx").unlink()
