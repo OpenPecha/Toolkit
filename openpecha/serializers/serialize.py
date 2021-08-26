@@ -210,12 +210,13 @@ class Serialize(object):
         for ann_id, topic in self.index_layer["annotations"].items():
             topic_ann = defaultdict(str)
             sub_topics = topic["parts"]
-            for i, sub_topic in enumerate(sub_topics):
-                if sub_topic:
-                    vol_id = f"v{sub_topic['span']['vol']:03}"
-                    sub_topic["type"] = AnnType.sub_topic
-                    if sub_topic["work_id"] != sub_topics[i - 1]["work_id"]:
-                        self.apply_annotation(vol_id, sub_topic)
+            for sub_topic_uuid, sub_topic in sub_topics.items():
+                sub_topic_ann = defaultdict(str)
+                vol_id = f"v{sub_topic['span'][0]['vol']:03}"
+                sub_topic_ann["type"] = AnnType.sub_topic
+                sub_topic_ann["work_id"] = sub_topic["work_id"]
+                sub_topic_ann["span"] = sub_topic['span'][0]
+                self.apply_annotation(vol_id, sub_topic_ann)
             if topic["span"]:
                 vol_id = f"v{topic['span'][0]['vol']:03}"
                 topic_ann["type"] = AnnType.topic
