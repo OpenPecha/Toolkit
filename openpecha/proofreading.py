@@ -237,6 +237,8 @@ def update_sub_text(old_pecha_idx, text_info, vol_num, vol_offset, page_start):
     for sub_text_uuid, sub_text_ann in text_ann['parts'].items():
         sub_text_span = sub_text_ann['span']
         for vol_walker, vol_span in enumerate(sub_text_span):
+            if vol_span['vol'] == vol_num and vol_span['start'] > page_start:
+                    old_pecha_idx["annotations"][text_uuid]['parts'][sub_text_uuid]['span'][vol_walker]['start'] += vol_offset
             if vol_span['vol'] == vol_num and vol_span['end'] >= page_start:
                 old_pecha_idx["annotations"][text_uuid]['parts'][sub_text_uuid]['span'][vol_walker]['end'] += vol_offset
             elif vol_span['vol'] > vol_num:
