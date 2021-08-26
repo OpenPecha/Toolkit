@@ -8,7 +8,7 @@ from bs4 import BeautifulSoup
 from enum import Enum
 from pathlib import Path
 
-from openpecha.formatters.layers import AnnType, Citation
+from openpecha.formatters.layers import AnnType
 from openpecha.utils import load_yaml
 from .serialize import Serialize
 
