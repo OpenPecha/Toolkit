@@ -581,7 +581,7 @@ class EpubSerializer(Serialize):
         serialized_html += f"{result}{footnote_ref_tag}</body>\n</html>"
         return serialized_html
 
-    def serialize(self, toc_levels={}, output_path="./output/epub_output"):
+    def serialize(self,  output_path="./output/epub_output", toc_levels={}) -> Path:
         """
         This module serialize .opf file to other format such as .epub etc. In case of epub,
         we are using calibre ebook-convert command to do the conversion by passing our custom css template

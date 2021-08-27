@@ -1,12 +1,14 @@
-from openpecha.serializers.serialize import Serialize
+from pathlib import Path
+
+from bs4 import BeautifulSoup
 from docx import Document
-from docx.shared import RGBColor
 from docx.enum.style import WD_STYLE_TYPE
 from docx.enum.text import WD_BREAK, WD_PARAGRAPH_ALIGNMENT
-from docx.shared import Pt
-from bs4 import BeautifulSoup
+from docx.shared import Pt, RGBColor
 
 from openpecha.serializers.epub import EpubSerializer
+from openpecha.serializers.serialize import Serialize
+
 
 class DocxSerializer(Serialize):
 
@@ -58,7 +60,7 @@ class DocxSerializer(Serialize):
         elif "tibetan-citations-in-verse-last-line" == span['class'][0]:
             p.style = document.styles['Citation_verse_last_line']
             Citation = p.add_run(f'{span.text}')
-        
+
         elif "tibetan-citations-prose" == span['class'][0]:
             p.style = document.styles['Citation_prose']
             Citation = p.add_run(f'{span.text}')
@@ -70,7 +72,7 @@ class DocxSerializer(Serialize):
         elif "tibetan-sabche" == span['class'][0]:
             p.style = document.styles['Heading 2']
             Sabche = p.add_run(f'{span.text}')
-        
+
         elif "tibetan-sabche1" == span['class'][0]:
             Inline_sabche = p.add_run(f'{span.text}')
             Inline_sabche.style = document.styles['Inline_sabche']
@@ -78,19 +80,19 @@ class DocxSerializer(Serialize):
         elif "tibetan-chapters" in span['class'][0]:
             p.style = document.styles['Heading 1']
             Chapter = p.add_run(f'{span.text}')
-        
+
         elif "credits-page_front-title" in span['class'][0]:
             p.style = document.styles['Book_title']
             Booktitle = p.add_run(f'{span.text}')
-        
+
         elif "tibetan-book-sub-title" in span['class'][0]:
             p.style = document.styles['Subtitle']
             Subtitle = p.add_run(f'{span.text}')
-        
+
         elif "front-page---text-titles" in span['class'][0]:
             p.style = document.styles['Author']
             Author = p.add_run(f'{span.text}')
-        
+
         elif "tibetan-commentary-small" == span['class'][0]:
             Yigchung = p.add_run(f'{span.text}')
             Yigchung.style = document.styles['Yigchung']
@@ -100,7 +102,7 @@ class DocxSerializer(Serialize):
             normal_text.style = document.styles['Commentary']
 
     def add_credit_page(self, p_tag, p):
-        """Serialise credit page iamge in document  
+        """Serialise credit page iamge in document
 
         Args:
             p_tag (obj): para tag object of bs4
@@ -304,10 +306,12 @@ class DocxSerializer(Serialize):
                 self.add_credit_page(p_tag, p)
             else:
                 self.format_p_tag(p_tag, p, document)
-        out_path = output_path / f"{pecha_id}.docx"
-        document.save(str(out_path))
+        out_fn = output_path / f"{pecha_id}.docx"
+        document.save(str(out_fn))
+        return out_fn
 
-    def serialize(self, output_path):
+    def serialize(self, output_path: Path, **kwargs) -> Path:
+        output_path = Path(output_path)
         epub_serializer = EpubSerializer(self.opf_path)
         epub_serializer.apply_layers()
         pecha_title = epub_serializer.meta["source_metadata"].get("title", "")
@@ -315,5 +319,5 @@ class DocxSerializer(Serialize):
         results = epub_serializer.get_result()
         for vol_id, result in results.items():
             serialized_html = epub_serializer.get_serialized_html(result, vol_id, pecha_title)
-            self.create_docx(serialized_html, output_path, pecha_id)
-        return output_path
+            out_fn = self.create_docx(serialized_html, output_path, pecha_id)
+            return out_fn

@@ -1,5 +1,4 @@
 import tempfile
-import yaml
 from pathlib import Path
 
 from openpecha.serializers import EpubSerializer
@@ -10,7 +9,7 @@ def test_opf_2_tsadra_serializer():
     with tempfile.TemporaryDirectory() as tmpdirname:
         serializer = EpubSerializer(opf_path)
         out_fn = serializer.serialize(output_path=tmpdirname)
-        assert Path(out_fn).name == "P000801.epub"
+        assert out_fn.name == "P000801.epub"
 
 
 def test_opf_2_html_serializer():
