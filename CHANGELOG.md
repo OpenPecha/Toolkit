@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.7.50 (2021-08-27)
+### Fix
+* **serialisers:** Unify aserialize api ([`3faa1b5`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/3faa1b51eb3aad2475ec846d4457551590364fbc))
+
 ## v0.7.49 (2021-08-26)
 ### Fix
 * **epub:** Enum used to avoid hardcoded condition checking ([`306a9c0`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/306a9c0dbe7e42787fe3481ec3af7f88a9d2714e))
