@@ -86,22 +86,6 @@ class EpubSerializer(Serialize):
         adapted_end = span["end"] - self.text_spans[vol_id]["start"]
         return adapted_start, adapted_end
 
-
-    def get_css_class_name(self, annotation):
-        """Return css class name of annotation if any exist
-
-        Args:
-            annotation (dict): annotation details
-
-        Returns:
-            str: css class name of the annotation
-        """
-        css_class_name = ''
-        metadata = annotation.get('metadata', {})
-        if metadata:
-            css_class_name = metadata.get('css_class_name', '')
-        return css_class_name
-
     def get_citation_sp(self, css_class_name):
         """Return start payload for citation according to class name
 
