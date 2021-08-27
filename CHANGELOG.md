@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.7.51 (2021-08-27)
+### Fix
+* **editor-serializer:** Multiple tsawa and citation type supported ([`d65835d`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/d65835dfdcb20d8bdd8a50f2dbe7ea448ac1076c))
+
 ## v0.7.50 (2021-08-27)
 ### Fix
 * **serialisers:** Unify aserialize api ([`3faa1b5`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/3faa1b51eb3aad2475ec846d4457551590364fbc))
