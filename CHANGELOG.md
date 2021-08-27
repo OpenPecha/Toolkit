@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.7.52 (2021-08-27)
+### Fix
+* **docx-serializer:** Font family included in styles ([`f794ca5`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/f794ca5ad23483ae92ca0ce15fb2ead1ba990be8))
+
 ## v0.7.51 (2021-08-27)
 ### Fix
 * **editor-serializer:** Multiple tsawa and citation type supported ([`d65835d`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/d65835dfdcb20d8bdd8a50f2dbe7ea448ac1076c))
