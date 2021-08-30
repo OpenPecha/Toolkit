@@ -1,19 +1,58 @@
-id: 97d8138551e64ae99f759e17ddbe0991
+id: a288118b3b9a4b09afc4c6ba5a3f52a9
 annotation_type: Citation
-revision: '00015'
+revision: '00003'
 annotations:
-  e54f06a0254e4e1f9f72552c514841b3:
+  d1b073b0b67b4d1a9911f59b9b762c6b:
     span:
-      start: 111
-      end: 152
-    is_verse: false
-  a3cacfe626734376b5a45ade275de779:
+      start: 1012
+      end: 1124
+    metadata:
+      css_class_name: tibetan-citations-in-verse
+  62ef0c9f477a4e0ebf2f4a2d11e0a41f:
     span:
-      start: 188
-      end: 227
-    is_verse: false
-  a3cacfe626734376b5a45ade275de789:
+      start: 1950
+      end: 2487
+    metadata:
+      css_class_name: tibetan-citations-prose
+  93335b4c8ff94932a6fe29c7caa50de0:
     span:
-      start: 466
-      end: 570
-    is_verse: true
+      start: 5615
+      end: 5791
+    metadata:
+      css_class_name: tibetan-citations-prose
+  e9954ce8649d48f2af6d1c9786302185:
+    span:
+      start: 6606
+      end: 6713
+    metadata:
+      css_class_name: tibetan-citations
+  583d73af28534c579e8e0898f7139df8:
+    span:
+      start: 7538
+      end: 7599
+    metadata:
+      css_class_name: tibetan-citations-in-verse
+  ddb793693ca1498e9237c928292dae90:
+    span:
+      start: 9312
+      end: 9418
+    metadata:
+      css_class_name: tibetan-citations-in-verse
+  e0cb382e8f314cbd9ea558fc9c809670:
+    span:
+      start: 9429
+      end: 9532
+    metadata:
+      css_class_name: tibetan-citations-in-verse
+  cb5066d17d334c2cbc71bab6b9fe9f07:
+    span:
+      start: 10031
+      end: 10144
+    metadata:
+      css_class_name: tibetan-citations-in-verse
+  6d9dbaf1e65f44b9a6a74cefa48bd996:
+    span:
+      start: 11598
+      end: 11818
+    metadata:
+      css_class_name: tibetan-citations-in-verse

@@ -2,9 +2,11 @@ from collections import defaultdict
 from typing import Dict
 
 from bs4 import BeautifulSoup
+from pydantic.tools import T
 
-from openpecha.core.annotation import AnnBase, Span, VerseTypeAnn
+from openpecha.core.annotation import AnnBase, Span
 from openpecha.core.layer import Layer, LayerEnum
+from openpecha.serializers.epub import TsadraTemplateCSSClasses
 
 
 class EditorParser:
@@ -25,10 +27,10 @@ class EditorParser:
         self.last_base_char_idx = end
         return start, end
 
-    def _get_ann(self, tag):
+    def _get_ann(self, tag, ann_class, extra_attrs):
         start, end = self._get_content_span(tag.text)
         span = Span(start=start, end=end)
-        return AnnBase(span=span), tag["id"]
+        return ann_class(span=span, **extra_attrs), tag["id"]
 
     @staticmethod
     def _get_empty_layer(layerEnum):
@@ -39,8 +41,8 @@ class EditorParser:
         self.layers[base_name][layerEnum] = layer
         return layer
 
-    def _add_ann(self, base_name, layerEnum, tag):
-        ann, id_ = self._get_ann(tag)
+    def _add_ann(self, base_name, layerEnum, tag, ann_class=AnnBase, extra_attrs={}):
+        ann, id_ = self._get_ann(tag, ann_class, extra_attrs)
         layer = self._get_layer(base_name, layerEnum)
         layer.annotations[id_] = ann
 
@@ -64,62 +66,108 @@ class EditorParser:
                 self._add_ann(base_name, LayerEnum.author, child)
             elif "chapter" in tag_class:
                 self._add_ann(base_name, LayerEnum.chapter, child)
-            elif "citation" in tag_class:
-                self._add_ann(base_name, LayerEnum.citation, child)
-            elif "root-text" in tag_class:
-                self._add_ann(base_name, LayerEnum.tsawa, child)
             elif "sabche" in tag_class:
                 self._add_ann(base_name, LayerEnum.sabche, child)
             elif "yigchung" in tag_class:
                 self._add_ann(base_name, LayerEnum.yigchung, child)
+            elif "citation" in tag_class:
+                self._add_ann(
+                    base_name,
+                    LayerEnum.citation,
+                    child,
+                    extra_attrs={
+                        "metadata": {
+                            "css_class_name": TsadraTemplateCSSClasses.citation_inline.value
+                        }
+                    },
+                )
+            elif "citation-verse" in tag_class:
+                self._add_ann(
+                    base_name,
+                    LayerEnum.citation,
+                    child,
+                    extra_attrs={
+                        "metadata": {
+                            "css_class_name": TsadraTemplateCSSClasses.citation_verse.value
+                        }
+                    },
+                )
+            elif "citation-prose" in tag_class:
+                self._add_ann(
+                    base_name,
+                    LayerEnum.citation,
+                    child,
+                    extra_attrs={
+                        "metadata": {
+                            "css_class_name": TsadraTemplateCSSClasses.citation_prose.value
+                        }
+                    },
+                )
+            elif "root-text" in tag_class:
+                self._add_ann(
+                    base_name,
+                    LayerEnum.tsawa,
+                    child,
+                    extra_attrs={
+                        "metadata": {
+                            "css_class_name": TsadraTemplateCSSClasses.tsawa_inline.value
+                        }
+                    },
+                )
+            elif "root-text-verse" in tag_class:
+                self._add_ann(
+                    base_name,
+                    LayerEnum.tsawa,
+                    child,
+                    extra_attrs={
+                        "metadata": {
+                            "css_class_name": TsadraTemplateCSSClasses.tsawa_verse.value
+                        }
+                    },
+                )
 
         # newline at the end of every p tag
         self.last_base_char_idx += 1
 
-    def _group_anns(self, base_name, layer_name):
+    def _group_verse(self, base_name, layer_name):
+        """Group same typed of annotation in consicutive order."""
+
         def _create_ann(start, end, is_verse):
-            return VerseTypeAnn(span=Span(start=start, end=end), is_verse=is_verse)
+            pass
 
         if layer_name not in self.layers[base_name]:
             return
 
         layer = self.layers[base_name][layer_name]
-        grouped_anns = {}
+        verse_grouped_anns = {}
 
-        # init with first ann
-        anns = list(layer.annotations.items())
-        true_id = anns[0][0]
-        true_start = anns[0][1].span.start
-        true_end = anns[0][1].span.end
-        is_verse = False
-        grouped_anns[true_id] = _create_ann(true_start, true_end, is_verse)
+        anns = sorted(layer.annotations.items(), key=lambda ann: ann[1].span.start)
 
-        for i, (id_, ann) in enumerate(anns[1:], start=2):
+        verse_ended = True
+        start_verse_ann_id = None
+        prev_verse_ann = None
+        for i, (ann_id, ann) in enumerate(anns):
+            if "verse" in ann.metadata["css_class_name"]:
+                if verse_ended:
+                    verse_grouped_anns[ann_id] = ann
+                    start_verse_ann_id = ann_id
+                    verse_ended = False
+                else:
+                    prev_verse_ann = ann
 
-            # find the last element of the group
-            if ann.span.start == (true_end + 2):
-                true_end = ann.span.end
-                is_verse = True
-                if i == len(anns):
-                    grouped_anns[true_id] = _create_ann(true_start, true_end, is_verse)
+                # if last ann is verse
+                if i+1 == len(anns):
+                    verse_grouped_anns[start_verse_ann_id].span.end = prev_verse_ann.span.end
+            else:
+                verse_grouped_anns[ann_id] = ann
+                if not verse_ended:
+                    verse_grouped_anns[start_verse_ann_id].span.end = prev_verse_ann.span.end
+                    verse_ended = True
 
-            # create the group
-            elif i == len(anns) or ann.span.start > (true_end + 2):
-                grouped_anns[true_id] = _create_ann(true_start, true_end, is_verse)
+        layer.annotations = verse_grouped_anns
 
-                # start next group with first element
-                true_id = id_
-                true_start = ann.span.start
-                true_end = ann.span.end
-                is_verse = False
 
-                # single last ann
-                if i == len(anns):
-                    grouped_anns[true_id] = _create_ann(true_start, true_end, is_verse)
-
-        layer.annotations = grouped_anns
-
-    def parse(self, base_name, html, group=True):
+    def parse(self, base_name, html, group_verse=True):
         self._reset()
 
         root = BeautifulSoup(html, "html.parser")
@@ -128,6 +176,6 @@ class EditorParser:
         for p in root.find_all("p"):
             self._parse_p_tag(base_name, p)
 
-        if group:
-            self._group_anns(base_name, LayerEnum("Tsawa"))
-            self._group_anns(base_name, LayerEnum("Citation"))
+        if group_verse:
+            self._group_verse(base_name, LayerEnum("Tsawa"))
+            self._group_verse(base_name, LayerEnum("Citation"))

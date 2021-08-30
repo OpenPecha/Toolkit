@@ -113,6 +113,21 @@ class Serialize(object):
             meta = {}
         return meta
 
+    def get_css_class_name(self, annotation):
+        """Return css class name of annotation if any exist
+
+        Args:
+            annotation (dict): annotation details
+
+        Returns:
+            str: css class name of the annotation
+        """
+        css_class_name = ''
+        metadata = annotation.get('metadata', {})
+        if metadata:
+            css_class_name = metadata.get('css_class_name', '')
+        return css_class_name
+        
     def get_text_spans(self, text_id, index_layer):
         """
         get spans of text

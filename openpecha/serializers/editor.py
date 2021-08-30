@@ -4,6 +4,7 @@ from openpecha.core.layer import LayerEnum
 from openpecha.utils import load_yaml
 
 from .serialize import Serialize
+from .epub import TsadraTemplateCSSClasses
 
 
 class AnnotationTemplate:
@@ -15,7 +16,10 @@ class AnnotationTemplate:
     author_SP = '<p><span class="author"'
     chapter_SP = '<p><span class="chapter"'
     tsawa_SP = '<span class="root-text"'
-    quatation__SP = '<span class="citation"'
+    tsawa_verse_SP = '<span class="root-text-verse"'
+    citation_SP = '<span class="citation"'
+    citation_verse_SP = '<span class="citation-verse"'
+    citation_prose_SP = '<span class="citation-prose"'
     sabche_SP = '<span class="sabche"'
     yigchung_SP = '<span class="yigchung"'
     footnote_marker_SP = '<span class="footnote-marker"'
@@ -43,6 +47,41 @@ class EditorSerializer(Serialize):
         adapted_end = span["end"] - self.text_spans[vol_id]["start"]
         return adapted_start, adapted_end
 
+    def get_citation_sp(self, css_class_name, ann_id):
+        """Return start payload for citation according to class name
+
+        Args:
+            css_class_name (str): css class name to differentiate different types of citations
+
+        Returns:
+            str: citation start payload
+        """
+        start_payload = f'{AnnotationTemplate.citation_SP} id="{ann_id}">'
+        if css_class_name:
+            css_class_enum = TsadraTemplateCSSClasses(css_class_name)
+            if css_class_enum == TsadraTemplateCSSClasses.citation_verse:
+                start_payload = f'{AnnotationTemplate.citation_verse_SP} id="{ann_id}">'
+            elif css_class_enum == TsadraTemplateCSSClasses.citation_prose:
+                start_payload = f'{AnnotationTemplate.citation_prose_SP} id="{ann_id}">'
+        return start_payload
+
+
+    def get_tsawa_sp(self, css_class_name, ann_id):
+        """Return start payload for tsawa according to class name
+
+        Args:
+            css_class_name (str): css class name to differentiate different types of tsawa
+
+        Returns:
+            str: tsawa start payload
+        """
+        start_payload = f'{AnnotationTemplate.tsawa_SP} id="{ann_id}">'
+        if css_class_name:
+            css_class_enum = TsadraTemplateCSSClasses(css_class_name)
+            if css_class_enum == TsadraTemplateCSSClasses.tsawa_verse:
+                start_payload = f'{AnnotationTemplate.tsawa_verse_SP} id="{ann_id}">'
+        return start_payload
+        
     def apply_annotation(self, vol_id, ann, uuid2localid):
         """Applies annotation to specific volume base-text, where part of the text exists.
 
@@ -83,10 +122,12 @@ class EditorSerializer(Serialize):
             start_payload = f'{AnnotationTemplate.chapter_SP} id="{ann_id}">'
             end_payload = AnnotationTemplate.span_EP + AnnotationTemplate.para_EP
         elif ann["type"] == LayerEnum.tsawa.value:
-            start_payload = f'{AnnotationTemplate.tsawa_SP} id="{ann_id}">'
+            css_class_name = self.get_css_class_name(ann)
+            start_payload = self.get_tsawa_sp(css_class_name, ann_id)
             end_payload = AnnotationTemplate.span_EP
         elif ann["type"] == LayerEnum.citation.value:
-            start_payload = f'{AnnotationTemplate.quatation__SP} id="{ann_id}">'
+            css_class_name = self.get_css_class_name(ann)
+            start_payload = self.get_citation_sp(css_class_name, ann_id)
             end_payload = AnnotationTemplate.span_EP
         elif ann["type"] == LayerEnum.sabche.value:
             start_payload = f'{AnnotationTemplate.sabche_SP} id="{ann_id}">'
