@@ -2,6 +2,11 @@
 
 <!--next-version-placeholder-->
 
+## v0.7.53 (2021-08-31)
+### Fix
+* **proofreading:** Span of sub text is update bug fixed ([`434638d`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/434638db2d9f28408cb68bdac4b751a9b03525d0))
+* **proofreading:** Subtext start update bug fixed ([`0fbeb4d`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/0fbeb4d668d222f049a31b768200d48b34d3f594))
+
 ## v0.7.52 (2021-08-27)
 ### Fix
 * **docx-serializer:** Font family included in styles ([`f794ca5`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/f794ca5ad23483ae92ca0ce15fb2ead1ba990be8))
