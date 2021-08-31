@@ -231,20 +231,35 @@ def update_base(pecha_path, pecha_id, vol_meta, new_vol):
     print(f'INFO: {base_fn} base updated..')
 
 def update_sub_text(old_pecha_idx, text_info, vol_num, vol_offset, page_start):
+    """Update span of sub text acording to offset
+
+    Args:
+        old_pecha_idx (dict): old pecha index
+        text_info (list): contains text uuid and text annotation details
+        vol_num (int): volume number
+        vol_offset (int): offset between new and old base text
+        page_start (int): starting span of the page which you want to save
+
+    Returns:
+        dict: old pecha with updated sub text span 
+    """
+    new_pecha_idx = old_pecha_idx
     check_next_sub_text = True
     text_uuid = text_info[0]
     text_ann = text_info[1]
     for sub_text_uuid, sub_text_ann in text_ann['parts'].items():
         sub_text_span = sub_text_ann['span']
         for vol_walker, vol_span in enumerate(sub_text_span):
+            if vol_span['vol'] == vol_num and vol_span['start'] > page_start:
+                new_pecha_idx["annotations"][text_uuid]['parts'][sub_text_uuid]['span'][vol_walker]['start'] += vol_offset
             if vol_span['vol'] == vol_num and vol_span['end'] >= page_start:
-                old_pecha_idx["annotations"][text_uuid]['parts'][sub_text_uuid]['span'][vol_walker]['end'] += vol_offset
+                new_pecha_idx["annotations"][text_uuid]['parts'][sub_text_uuid]['span'][vol_walker]['end'] += vol_offset
             elif vol_span['vol'] > vol_num:
                 check_next_sub_text = False
                 break
         if not check_next_sub_text:
             break
-    return old_pecha_idx
+    return new_pecha_idx
 
 
 def update_index(vol_offset, vol_meta, page_start, old_pecha_idx):
@@ -259,23 +274,24 @@ def update_index(vol_offset, vol_meta, page_start, old_pecha_idx):
     Returns:
         dict: new index with new span using offset to adjust
     """
+    new_pecha_idx = old_pecha_idx
     vol_num = int(re.search(r'\d+',vol_meta['base_file'])[0])
     check_next_text = True
     if vol_offset != 0:
-        for text_uuid, text_ann in old_pecha_idx["annotations"].items():
+        for text_uuid, text_ann in new_pecha_idx["annotations"].items():
             if text_ann['parts']:
                 text_info = [text_uuid, text_ann]
-                old_pecha_idx = update_sub_text(old_pecha_idx, text_info, vol_num, vol_offset, page_start)
+                new_pecha_idx = update_sub_text(new_pecha_idx, text_info, vol_num, vol_offset, page_start)
             text_span = text_ann['span']
             for vol_walker, vol_span in enumerate(text_span):
                 if vol_span['vol'] == vol_num and vol_span['end'] >= page_start:
-                    old_pecha_idx["annotations"][text_uuid]['span'][vol_walker]['end'] += vol_offset
+                    new_pecha_idx["annotations"][text_uuid]['span'][vol_walker]['end'] += vol_offset
                 elif vol_span['vol'] > vol_num:
                     check_next_text = False
                     break
             if not check_next_text:
                 break
-    return old_pecha_idx
+    return new_pecha_idx
 
 def save_page(pecha_id, vol_id, page_id, page_content, branch="main", pecha_path=None):
     """Save new page in opf
