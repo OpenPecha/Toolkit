@@ -284,6 +284,8 @@ def update_index(vol_offset, vol_meta, page_start, old_pecha_idx):
                 new_pecha_idx = update_sub_text(new_pecha_idx, text_info, vol_num, vol_offset, page_start)
             text_span = text_ann['span']
             for vol_walker, vol_span in enumerate(text_span):
+                if vol_span['vol'] == vol_num and vol_span['start'] > page_start:
+                    new_pecha_idx["annotations"][text_uuid]['span'][vol_walker]['start'] += vol_offset
                 if vol_span['vol'] == vol_num and vol_span['end'] >= page_start:
                     new_pecha_idx["annotations"][text_uuid]['span'][vol_walker]['end'] += vol_offset
                 elif vol_span['vol'] > vol_num:
