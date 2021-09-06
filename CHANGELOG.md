@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.7.54 (2021-09-06)
+### Fix
+* **save_page:** Starting of text in same vol updated properly ([`eb273e0`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/eb273e0d4db114ee778882ecb7a0cfbbb917dde5))
+
 ## v0.7.53 (2021-08-31)
 ### Fix
 * **proofreading:** Span of sub text is update bug fixed ([`434638d`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/434638db2d9f28408cb68bdac4b751a9b03525d0))
