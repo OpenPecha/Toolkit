@@ -10,6 +10,7 @@ if __name__ == "__main__":
     ebook_path = f"./tests/data/serialize/tsadra/src/{pecha_name}/OEBPS/"
     opfs_path = "./tests/data/serialize/tsadra"
     opf_path = f"./tests/data/serialize/tsadra/{pecha_name}/{pecha_name}.opf/"
+    opf_path = f"./output/opfs/P000888.opf"
     hfml_path = "./output/demo/output/P000113_hfml/"
     ebook_output_path = "./tests/data/serialize/tsadra/ebook"
 
@@ -36,5 +37,5 @@ if __name__ == "__main__":
     serializer.serialize(toc_levels, ebook_output_path)
 
     # Editor serializer
-    # serializer = EditorSerializer(Path(opf_path))
-    # serializer.serialize(ebook_output_path)
+    # serializer = EditorSerializer(opf_path)
+    # basename, result = serializer.serialize()
