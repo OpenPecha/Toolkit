@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.7.56 (2021-09-15)
+### Fix
+* **hfml:** Self.dump replace to dump_yaml from utils ([`b96eb87`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/b96eb87a158074ab245e7569fcdceae9575f4291))
+
 ## v0.7.55 (2021-09-15)
 ### Fix
 * **google-ocr:** Flag added if meta required or not ([`1a80bc2`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/1a80bc29343a44df9c46b541a4b4351797b49c9e))
