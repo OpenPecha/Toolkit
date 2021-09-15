@@ -22,7 +22,6 @@ def test_get_base_text(get_resources):
     formatter.build_layers(responses, "I1PD95846")
 
     result = formatter.get_base_text()
-
     assert result
 
     # TODO: create base-text
@@ -35,7 +34,7 @@ def test_build_layers(get_resources):
 
     result = formatter.build_layers(responses, "I1PD95846")
 
-    expected = {"pages": [(0, 19), (24, 888), (893, 1607), (1612, 1809)]}
+    expected = {"pages": [(0, 19), (24, 887), (892, 1601), (1606, 1799)]}
 
     for result_page, expected_page in zip(result["pages"], expected["pages"]):
         assert result_page[:2] == expected_page
