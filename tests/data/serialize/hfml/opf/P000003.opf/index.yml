@@ -3,7 +3,7 @@ annotation_type: index
 revision: '00001'
 annotations:
   12590fb37da14c32ba0785f7f68c6f5e:
-    parts: []
+    parts: {}
     span:
     - vol: 1
       start: 0
@@ -13,7 +13,7 @@ annotations:
       end: 218
     work_id: D1118
   ac26bb9b4a034a0fa959ecc6af68fa0e:
-    parts: []
+    parts: {}
     span:
     - vol: 2
       start: 218

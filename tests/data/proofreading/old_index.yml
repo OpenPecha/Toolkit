@@ -1,0 +1,30 @@
+id: 68f9113d7a7f4f97b1c61af77251e6d7
+annotation_type: Index
+revision: '00001'
+annotations:
+  9ad0f66df8a848bbb97f083030f6f171:
+    work_id: T13
+    parts:
+      a6a2e0a2fe474911a83c44db140bad46:
+        work: T1-6
+        span:
+        - vol: 1
+          start: 200
+          end: 350
+      a6a2e0a2fe474911a93c44db140bad46:
+        work: T1-6
+        span:
+        - vol: 1
+          start: 400
+          end: 750
+    span:
+    - vol: 1
+      start: 33
+      end: 750
+  a6a2e0a2fe474911a93c44db140bud46:
+    work: T2
+    parts: {}
+    span:
+    - vol: 1
+      start: 750
+      end: 900

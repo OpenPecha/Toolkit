@@ -30,6 +30,7 @@ setup(
     url="https://github.com/OpenPoti/openpecha-toolkit",
     packages=find_packages(),
     install_requires=[
+        "antx>=0.1.10, <2.0",
         "Click>=7.1.2, <8.0",
         "diff-match-patch==20181111",
         "PyYAML>=5.0.0, <6.0",
@@ -42,6 +43,7 @@ setup(
         "pyewts>=0.1.3, <1.0",
         "rdflib>=5.0.0, <6.0",
         "pydantic==1.7.3, <2.0",
+        "python-docx==0.8.11, <1.0",
     ],
     python_requires=">=3.6",
     tests_require=["pytest"],

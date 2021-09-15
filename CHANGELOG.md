@@ -2,6 +2,82 @@
 
 <!--next-version-placeholder-->
 
+## v0.7.56 (2021-09-15)
+### Fix
+* **hfml:** Self.dump replace to dump_yaml from utils ([`b96eb87`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/b96eb87a158074ab245e7569fcdceae9575f4291))
+
+## v0.7.55 (2021-09-15)
+### Fix
+* **google-ocr:** Flag added if meta required or not ([`1a80bc2`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/1a80bc29343a44df9c46b541a4b4351797b49c9e))
+* **google-ocr:** Post processing for page is done to google ocred pages ([`62db212`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/62db212b002b41acdf1f4fde134e7a2abc4373c3))
+
+## v0.7.54 (2021-09-06)
+### Fix
+* **save_page:** Starting of text in same vol updated properly ([`eb273e0`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/eb273e0d4db114ee778882ecb7a0cfbbb917dde5))
+
+## v0.7.53 (2021-08-31)
+### Fix
+* **proofreading:** Span of sub text is update bug fixed ([`434638d`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/434638db2d9f28408cb68bdac4b751a9b03525d0))
+* **proofreading:** Subtext start update bug fixed ([`0fbeb4d`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/0fbeb4d668d222f049a31b768200d48b34d3f594))
+
+## v0.7.52 (2021-08-27)
+### Fix
+* **docx-serializer:** Font family included in styles ([`f794ca5`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/f794ca5ad23483ae92ca0ce15fb2ead1ba990be8))
+
+## v0.7.51 (2021-08-27)
+### Fix
+* **editor-serializer:** Multiple tsawa and citation type supported ([`d65835d`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/d65835dfdcb20d8bdd8a50f2dbe7ea448ac1076c))
+
+## v0.7.50 (2021-08-27)
+### Fix
+* **serialisers:** Unify aserialize api ([`3faa1b5`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/3faa1b51eb3aad2475ec846d4457551590364fbc))
+
+## v0.7.49 (2021-08-26)
+### Fix
+* **epub:** Enum used to avoid hardcoded condition checking ([`306a9c0`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/306a9c0dbe7e42787fe3481ec3af7f88a9d2714e))
+* **editor-formatter:** Ann type supports ([`b8a5f5a`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/b8a5f5ab330ed5918f98008933b9147e797c3d3a))
+* **docx-serializer:** Docx serializer formatted as class ([`024f19a`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/024f19aa890d26f34cbeb8da3c4fa7503f901dfa))
+* **test:** Pecha asset added ([`f97fa31`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/f97fa3140e3c1d35fcbddd528c951fa8c7e0246a))
+* **test:** Chapter and booknumber added ([`8d3a56c`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/8d3a56c3039bfcfb1c025d4cf1a9ea9575f9a32a))
+* **testcase:** New test case added ([`fff431f`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/fff431f09dbfc09d2d08fe4ce410d8b824ebfffb))
+* **epub-serializer:** Multiple type of citation and tsawa annotation supported ([`c35d7cf`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/c35d7cf2f5302d75e43a306e9ff3121a01008c55))
+* **testcase:** Test case imporved ([`97d3b4b`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/97d3b4bba62167afa87f3aa5b7d2520acbfc933d))
+
+## v0.7.48 (2021-08-24)
+### Fix
+* **epub-test:** Test case updated according to new book title tag ([`d2c0d7f`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/d2c0d7fdbc017d031a4166673cb61034b44e0ee1))
+* **docx:** Test added to docx serializer ([`97c1c87`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/97c1c8780f9f74655ab987030561141718d03fe5))
+* **docx:** Docx serializer added ([`c26b0cd`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/c26b0cd9766245c45757d696e8ec96ef75706c74))
+
+## v0.7.47 (2021-08-17)
+### Fix
+* **hfml-serializer:** Subtext serializer bug fix ([`01d31c2`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/01d31c2d7fd7952e80bde77d27c35c67c0fa309a))
+
+## v0.7.46 (2021-08-13)
+### Fix
+* **proofreading:** Branch bug fixed ([`5702684`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/5702684a0ffa35d7210c64db3105833769d711f2))
+
+## v0.7.45 (2021-08-13)
+### Fix
+* **cli:** Also check for remote branch ([`224e170`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/224e170d087debb377645b8be04bd343ef97d652))
+* **cli:** Pass repo in branch evaluate ([`f3feebd`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/f3feebd6691b1c1df9eb3fe29dc3ffc25f57bf05))
+
+## v0.7.44 (2021-08-13)
+### Fix
+* **proofreading:** Branch option and sub text update included ([`af04c6f`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/af04c6f29a0cff16353118a62a25b065af94a446))
+
+## v0.7.43 (2021-08-12)
+### Fix
+* **download-pecha:** Set fallback branch ([`0286d53`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/0286d53a803a2afa45b44907a7da0b6c235a6351))
+
+## v0.7.42 (2021-08-12)
+### Fix
+* **proofreading:** Vol info return list of volume details ([`b8164a6`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/b8164a669c24ce014f51d6ae7feb00d5cc47c8b9))
+
+## v0.7.41 (2021-08-12)
+### Fix
+* **proofreading:** Method to assist proof reading editor added ([`d874f91`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/d874f9170e59252607194812d27cfea072d63971))
+
 ## v0.7.40 (2021-06-22)
 ### Fix
 * Pagination layer name typo ([`29b6ede`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/29b6edee2b7ddcf06a1fb996175a41ad004e672b))
