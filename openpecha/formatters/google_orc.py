@@ -2,15 +2,15 @@ import gzip
 import json
 import math
 import re
-from antx import transfer
 from pathlib import Path
 
 import requests
+from antx import transfer
 
 from openpecha.core.annotation import Page, Span
 from openpecha.core.layer import Layer, LayerEnum
 from openpecha.formatters import BaseFormatter
-from openpecha.utils import gzip_str, dump_yaml
+from openpecha.utils import dump_yaml, gzip_str
 
 
 class GoogleOCRFormatter(BaseFormatter):
@@ -28,7 +28,7 @@ class GoogleOCRFormatter(BaseFormatter):
     def text_preprocess(self, text):
 
         return text
-    
+
     def get_bounding_poly_mid(self, bounding_poly):
         """Calculate middle of the bounding poly vertically using y coordinates of the bounding poly
 
@@ -38,9 +38,9 @@ class GoogleOCRFormatter(BaseFormatter):
         Returns:
             float: mid point's y coordinate of bounding poly
         """
-        y1 = bounding_poly['boundingPoly']['vertices'][0]['y']
-        y2 = bounding_poly['boundingPoly']['vertices'][2]['y']
-        y_avg = (y1+y2)/2
+        y1 = bounding_poly["boundingPoly"]["vertices"][0]["y"]
+        y2 = bounding_poly["boundingPoly"]["vertices"][2]["y"]
+        y_avg = (y1 + y2) / 2
         return y_avg
 
     def get_avg_bounding_poly_height(self, bounding_polys):
@@ -54,10 +54,10 @@ class GoogleOCRFormatter(BaseFormatter):
         """
         height_sum = 0
         for bounding_poly in bounding_polys:
-            y1 = bounding_poly['boundingPoly']['vertices'][0]['y']
-            y2 = bounding_poly['boundingPoly']['vertices'][2]['y']
-            height_sum += y2-y1
-        avg_height = height_sum/len(bounding_polys)
+            y1 = bounding_poly["boundingPoly"]["vertices"][0]["y"]
+            y2 = bounding_poly["boundingPoly"]["vertices"][2]["y"]
+            height_sum += y2 - y1
+        avg_height = height_sum / len(bounding_polys)
         return avg_height
 
     def is_in_cur_line(self, prev_bounding_poly, bounding_poly, avg_height):
@@ -73,7 +73,11 @@ class GoogleOCRFormatter(BaseFormatter):
             boolean: true if bouding poly is in same line as previous bounding poly else false
         """
         threshold = 10
-        if self.get_bounding_poly_mid(bounding_poly) - self.get_bounding_poly_mid(prev_bounding_poly) < avg_height/threshold:
+        if (
+            self.get_bounding_poly_mid(bounding_poly)
+            - self.get_bounding_poly_mid(prev_bounding_poly)
+            < avg_height / threshold
+        ):
             return True
         else:
             return False
@@ -89,19 +93,19 @@ class GoogleOCRFormatter(BaseFormatter):
         """
         prev_bounding_poly = bounding_polys[0]
         lines = []
-        cur_line = ''
+        cur_line = ""
         avg_line_height = self.get_avg_bounding_poly_height(bounding_polys)
         for bounding_poly in bounding_polys:
             if self.is_in_cur_line(prev_bounding_poly, bounding_poly, avg_line_height):
-                cur_line += bounding_poly['description']
+                cur_line += bounding_poly["description"]
             else:
                 lines.append(cur_line)
-                cur_line = bounding_poly['description']
+                cur_line = bounding_poly["description"]
             prev_bounding_poly = bounding_poly
         if cur_line:
             lines.append(cur_line)
         return lines
-    
+
     def transfer_space(self, base_with_space, base_without_space):
         """transfer space from base with space to without space
 
@@ -113,11 +117,7 @@ class GoogleOCRFormatter(BaseFormatter):
             [str]: page content
         """
         new_base = transfer(
-            base_with_space,[
-            ["space",r"( )"],
-            ],
-            base_without_space,
-            output="txt",
+            base_with_space, [["space", r"( )"]], base_without_space, output="txt"
         )
         return new_base
 
@@ -130,13 +130,15 @@ class GoogleOCRFormatter(BaseFormatter):
         Returns:
             str: page content
         """
-        postprocessed_page_content =''
-        page_content = page['textAnnotations'][0]['description']
-        bounding_polys = page['textAnnotations'][1:]
+        postprocessed_page_content = ""
+        page_content = page["textAnnotations"][0]["description"]
+        bounding_polys = page["textAnnotations"][1:]
         lines = self.get_lines(bounding_polys)
         page_content_without_space = "\n".join(lines)
-        postprocessed_page_content = self.transfer_space(page_content, page_content_without_space)
-        return postprocessed_page_content+'\n'
+        postprocessed_page_content = self.transfer_space(
+            page_content, page_content_without_space
+        )
+        return postprocessed_page_content + "\n"
 
     def get_input(self, input_path):
         """
@@ -342,7 +344,17 @@ class GoogleOCRFormatter(BaseFormatter):
             "base_file": base_file_name,
         }
 
-    def create_opf(self, input_path, pecha_id):
+    def create_opf(self, input_path, pecha_id, meta_flag=False):
+        """Create opf of google ocred pecha
+
+        Args:
+            input_path (str): input path
+            pecha_id (str): pecha id
+            meta_flag (bool, optional): True if meta data needed else false. Defaults to False.
+
+        Returns:
+            path: opf path
+        """
         input_path = Path(input_path)
         self._build_dirs(input_path, id_=pecha_id)
 
@@ -372,8 +384,9 @@ class GoogleOCRFormatter(BaseFormatter):
             self.set_vols_meta(vol_path.name, f"{base_id}.txt")
 
         # create meta.yml
-        meta_fn = self.dirs["opf_path"] / "meta.yml"
-        dump_yaml(self.get_metadata(input_path.name), meta_fn)
+        if meta_flag:
+            meta_fn = self.dirs["opf_path"] / "meta.yml"
+            dump_yaml(self.get_metadata(input_path.name), meta_fn)
 
         return self.dirs["opf_path"].parent
 
