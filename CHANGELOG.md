@@ -2,6 +2,18 @@
 
 <!--next-version-placeholder-->
 
+## v0.7.57 (2021-09-15)
+### Fix
+* **test-formatter:** Pedurma testcase updated according to changes made in formatter ([`8de3f01`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/8de3f01fcb9f5f0e7f9a236186336624f019ff31))
+* **pedurma:** Formatter and serializer test case updated ([`d965422`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/d96542236a1b8db7ce04d3e8ead55608073aa8b9))
+* **pedurma-formatter:** Pagination annotation changed to hfml format ([`bb80bbd`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/bb80bbd276cc1d0cf72a167c85bffab62838cefb))
+* **pedurma-serializer:** Doc string added ([`b9613ae`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/b9613aee8dc51a25a91b18bb6a4461e8267492c8))
+* **test:** Merge conflict resolved ([`9bb1a6c`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/9bb1a6cf97cb350fd9711ea989ffd900a9552af1))
+* **test:** Test case added for pedurma formatter and serializer ([`64d2b98`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/64d2b988b95ba1107c9ea3c3a5c83814a05abf20))
+* **pedumra:** Formatter for preview text and serializer of diplomatic text completed ([`d7ee2f5`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/d7ee2f5f34c0967080365a7e2316329ab69b835b))
+* **pedurma-formatter:** Integration completed ([`5691391`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/5691391c86c1d38fd5dc95a4a4936a9fa6b23185))
+* **pedurmaFormatter:** Pedurma note formatter and serializer added ([`c39863b`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/c39863bf0bb6efd16dc140d9622c0a1ad93897ef))
+
 ## v0.7.56 (2021-09-15)
 ### Fix
 * **hfml:** Self.dump replace to dump_yaml from utils ([`b96eb87`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/b96eb87a158074ab245e7569fcdceae9575f4291))
