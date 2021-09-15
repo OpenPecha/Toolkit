@@ -2,6 +2,11 @@
 
 <!--next-version-placeholder-->
 
+## v0.7.55 (2021-09-15)
+### Fix
+* **google-ocr:** Flag added if meta required or not ([`1a80bc2`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/1a80bc29343a44df9c46b541a4b4351797b49c9e))
+* **google-ocr:** Post processing for page is done to google ocred pages ([`62db212`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/62db212b002b41acdf1f4fde134e7a2abc4373c3))
+
 ## v0.7.54 (2021-09-06)
 ### Fix
 * **save_page:** Starting of text in same vol updated properly ([`eb273e0`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/eb273e0d4db114ee778882ecb7a0cfbbb917dde5))
