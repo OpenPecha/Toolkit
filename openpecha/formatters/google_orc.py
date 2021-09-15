@@ -2,6 +2,7 @@ import gzip
 import json
 import math
 import re
+from antx import transfer
 from pathlib import Path
 
 import requests
@@ -27,6 +28,115 @@ class GoogleOCRFormatter(BaseFormatter):
     def text_preprocess(self, text):
 
         return text
+    
+    def get_bounding_poly_mid(self, bounding_poly):
+        """Calculate middle of the bounding poly vertically using y coordinates of the bounding poly
+
+        Args:
+            bounding_poly (dict): bounding poly's details
+
+        Returns:
+            float: mid point's y coordinate of bounding poly
+        """
+        y1 = bounding_poly['boundingPoly']['vertices'][0]['y']
+        y2 = bounding_poly['boundingPoly']['vertices'][2]['y']
+        y_avg = (y1+y2)/2
+        return y_avg
+
+    def get_avg_bounding_poly_height(self, bounding_polys):
+        """Calculate the average height of bounding polys in page
+
+        Args:
+            bounding_polys (list): list of boundingpolys
+
+        Returns:
+            float: average height of bounding ploys
+        """
+        height_sum = 0
+        for bounding_poly in bounding_polys:
+            y1 = bounding_poly['boundingPoly']['vertices'][0]['y']
+            y2 = bounding_poly['boundingPoly']['vertices'][2]['y']
+            height_sum += y2-y1
+        avg_height = height_sum/len(bounding_polys)
+        return avg_height
+
+    def is_in_cur_line(self, prev_bounding_poly, bounding_poly, avg_height):
+        """Check if bounding poly is in same line as previous bounding poly
+        a threshold to check the conditions set to 10 but it can varies for pecha to pecha
+
+        Args:
+            prev_bounding_poly (dict): previous bounding poly
+            bounding_poly (dict): current bounding poly
+            avg_height (float): average height of all the bounding polys in page
+
+        Returns:
+            boolean: true if bouding poly is in same line as previous bounding poly else false
+        """
+        threshold = 10
+        if self.get_bounding_poly_mid(bounding_poly) - self.get_bounding_poly_mid(prev_bounding_poly) < avg_height/threshold:
+            return True
+        else:
+            return False
+
+    def get_lines(self, bounding_polys):
+        """Return list of lines in page using bounding polys of page
+
+        Args:
+            bounding_polys (list): list of all the bounding polys
+
+        Returns:
+            list: list of lines in page
+        """
+        prev_bounding_poly = bounding_polys[0]
+        lines = []
+        cur_line = ''
+        avg_line_height = self.get_avg_bounding_poly_height(bounding_polys)
+        for bounding_poly in bounding_polys:
+            if self.is_in_cur_line(prev_bounding_poly, bounding_poly, avg_line_height):
+                cur_line += bounding_poly['description']
+            else:
+                lines.append(cur_line)
+                cur_line = bounding_poly['description']
+            prev_bounding_poly = bounding_poly
+        if cur_line:
+            lines.append(cur_line)
+        return lines
+    
+    def transfer_space(self, base_with_space, base_without_space):
+        """transfer space from base with space to without space
+
+        Args:
+            base_with_space (str): base with space which is extracted from page['textAnnotations'][0]['description']
+            base_without_space (str): base without space as it is generated using accumulating non space char only
+
+        Returns:
+            [str]: page content
+        """
+        new_base = transfer(
+            base_with_space,[
+            ["space",r"( )"],
+            ],
+            base_without_space,
+            output="txt",
+        )
+        return new_base
+
+    def post_process_page(self, page):
+        """parse page response to generate page content by reordering the bounding polys
+
+        Args:
+            page (dict): page content response given by google ocr engine
+
+        Returns:
+            str: page content
+        """
+        postprocessed_page_content =''
+        page_content = page['textAnnotations'][0]['description']
+        bounding_polys = page['textAnnotations'][1:]
+        lines = self.get_lines(bounding_polys)
+        page_content_without_space = "\n".join(lines)
+        postprocessed_page_content = self.transfer_space(page_content, page_content_without_space)
+        return postprocessed_page_content+'\n'
 
     def get_input(self, input_path):
         """
@@ -73,7 +183,7 @@ class GoogleOCRFormatter(BaseFormatter):
         except KeyError:
             return None, None
 
-        text = page["description"]
+        text = self.post_process_page(response)
         # vertices = page['boundingPoly']['vertices']  # get text box
 
         return text, None  # self._get_coord(vertices)
