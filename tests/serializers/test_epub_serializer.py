@@ -2,6 +2,7 @@ import tempfile
 from pathlib import Path
 
 from openpecha.serializers import EpubSerializer
+from openpecha.utils import load_yaml
 
 
 def test_opf_2_tsadra_serializer():
@@ -21,5 +22,18 @@ def test_opf_2_html_serializer():
 
     results = serializer.get_result()
     for vol_id, result in results.items():
-        serialized_html = serializer.get_serialized_html(result, vol_id, pecha_title)
+        result = f"{serializer.get_front_page()}{result}"
+        footnote_ref_tag = ""
+        if "Footnote" in serializer.layers:
+            footnote_fn = serializer.opf_path / "layers" / vol_id / "Footnote.yml"
+            footnote_layer = load_yaml(footnote_fn)
+            footnote_ref_tag = serializer.get_footnote_references(
+                footnote_layer["annotations"]
+            )
+        result = serializer.p_tag_adder(result)
+        result = serializer.indentation_adjustment(result)
+        serialized_html = (
+            f"<html>\n<head>\n\t<title>{pecha_title}</title>\n</head>\n<body>\n"
+        )
+        serialized_html += f"{result}{footnote_ref_tag}</body>\n</html>"
         assert expected_serialized_html == serialized_html

@@ -46,6 +46,7 @@ class AnnType:
     correction = "Correction"
     error_candidate = "ErrorCandidate"
     peydurma = "Peydurma"
+    pedurma_note = "PedurmaNote"
     sabche = "Sabche"
     tsawa = "Tsawa"
     yigchung = "Yigchung"

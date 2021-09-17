@@ -295,31 +295,6 @@ class Serialize(object):
         raise NotImplementedError(
             "The Serialize class doesn't provide any serialization, please use a subclass such ass SerializeMd"
         )
-
-    def _assign_line_layer(self, result, vol_id):
-        def _get_page_index(line):
-            page_index = ""
-            if re.search("[𰵀-󴉱]", line):
-                i = 2
-            else:
-                i = 1
-            while line[i] != "]":
-                page_index += line[i]
-                i += 1
-            return page_index
-
-        result_with_line = ""
-        page_index = ""
-        n_line = 1
-        for line in result.split("\n"):
-            if re.search(r"\[[𰵀-󴉱]?[0-9]+[a-z]{1}\]", line):
-                page_index = _get_page_index(line)
-                n_line = 1
-            elif not re.search(r"^\[", line):
-                line = f"[{page_index}.{n_line}]" + line
-                n_line += 1
-            result_with_line += line + "\n"
-        return result_with_line
     
     def _clip_extra_newline(self, cur_vol_result):
         """An extra line found in pages are removed.
