@@ -11,6 +11,7 @@ def _mkdir(path):
 # Path
 BASE_PATH = _mkdir(Path.home() / ".openpecha")
 PECHAS_PATH = _mkdir(BASE_PATH / "pechas")
+COLLECTIONS_PATH = _mkdir(BASE_PATH / "collection")
 
 # Pecha
 PECHA_PREFIX = "P"
