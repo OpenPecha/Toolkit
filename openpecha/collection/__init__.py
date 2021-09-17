@@ -66,4 +66,4 @@ class Collection:
                         Path(f"{export_path}/{title}_{file}").write_text(base_content, encoding='utf-8')
 
         shutil.make_archive(export_path, "zip", export_path)
-        return export_path._str 
+        return f"{export_path._str}.zip"
