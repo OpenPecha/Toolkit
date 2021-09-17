@@ -1,14 +1,13 @@
 from pathlib import Path
 
 from openpecha.cli import download_pecha
-from openpecha.utils import load_yaml
+from openpecha.utils import dump_yaml, load_yaml
 
 
 class Alignment:
-    def __init__(self, id, title, alignment_type, segment_sources, segment_pairs):
+    def __init__(self, id="", title="", segment_sources={}, segment_pairs={}):
         self.id = id
         self.title = title
-        self.alignment_type = alignment_type
         self.segment_sources = segment_sources
         self.segment_pairs = segment_pairs
 
@@ -60,9 +59,32 @@ class Alignment:
             cur_segment_pairs = self.get_cur_segment_pairs(
                 segment_annotations, segment_walker
             )
-            segment_pairs[f"{int(segment_walker):04}"] = cur_segment_pairs
+            segment_pairs[f"{int(segment_walker+1):04}"] = cur_segment_pairs
             cur_segment_pairs = {}
         return segment_pairs
+
+    def create_alignment(self, items, segment_src_paths={}, output_path="./"):
+        """convert alignment object to yml file and saves in output path
+
+        Args:
+            items (dict): contains segment srcs details
+            output_path (str, optional): output on which yml file will be saved. Defaults to "./".
+
+        Returns:
+            path: output path
+        """
+        self.segment_sources = items
+        if not segment_src_paths:
+            segment_src_paths = self.get_segment_src_paths()
+        self.segment_pairs = self.generate_segment_pairs(segment_src_paths)
+        alignment = {
+            "id": self.id,
+            "title": self.title,
+            "segment_sources": self.segment_sources,
+            "segment_pairs": self.segment_pairs,
+        }
+        alignment_path = dump_yaml(alignment, output_fn=Path(output_path))
+        return alignment_path
 
     def export(self, format=None):
         pass
