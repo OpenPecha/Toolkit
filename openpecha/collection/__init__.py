@@ -57,9 +57,9 @@ class Collection:
                 meta_yml = Path(f"{self.output_path}/{pecha_id}/{pecha_id}.opf/meta.yml").read_text(encoding='utf-8')
                 content = yaml.safe_load(meta_yml)
                 if pecha_id[0] == "P":
-                    title = content['source_metadata']['title']
+                    title = content['source_metadata']['title'][:20]
                 elif pecha_id[0] == "W":
-                    title = content['title']
+                    title = content['title'][:20]
                 for file in os.listdir(f"{self.output_path}/{pecha_id}/{pecha_id}.opf/base"):
                     if file.endswith(".txt"):
                         base_content = Path(f"{self.output_path}/{pecha_id}/{pecha_id}.opf/base/{file}").read_text(encoding='utf-8')
