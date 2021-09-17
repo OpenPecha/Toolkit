@@ -24,7 +24,7 @@ class Alignment:
     def get_segment_layer(self, pecha_id, pecha_path):
         try:
             segment_layer = load_yaml(
-                (Path(pecha_path) / f"{pecha_id}/layers/Segment.yml")
+                (Path(pecha_path) / f"{pecha_id}.opf/layers/Segment.yml")
             )
             segment_annotations = list(segment_layer["annotations"])
             return segment_annotations
