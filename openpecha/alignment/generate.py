@@ -1,6 +1,5 @@
 from pathlib import Path
 
-from openpecha.alignment import Alignment
 from openpecha.utils import load_yaml
 
 
@@ -17,7 +16,7 @@ def get_src_bases(src_paths):
     for src_name, src_path in src_paths.items():
         try:
             src_bases[src_name] = (
-                Path(src_path) / f"{src_name}.opf/bases/0001.txt"
+                Path(src_path) / f"{src_name}.opf/bases/v001.txt"
             ).read_text(encoding="utf-8")
         except Exception:
             src_bases[src_name] = ""
@@ -36,7 +35,7 @@ def get_segment_layer(pecha_id, pecha_path):
     """
     try:
         segment_layer = load_yaml(
-            (Path(pecha_path) / f"{pecha_id}.opf/layers/Segment.yml")
+            (Path(pecha_path) / f"{pecha_id}.opf/layers/v001/Segment.yml")
         )
         segment_annotations = segment_layer["annotations"]
         return segment_annotations

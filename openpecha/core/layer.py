@@ -30,6 +30,7 @@ class LayerEnum(Enum):
     archaic = "Archaic"
     durchen = "Durchen"
     footnote = "Footnote"
+    segment = "Segment"
 
 
 class InitialCreationEnum(Enum):
