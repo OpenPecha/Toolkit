@@ -44,5 +44,5 @@ def test_with_gzip_json():
     ocr_path = Path("tests/data/formatter/google_ocr/W1PD95844")
     with tempfile.TemporaryDirectory() as tmpdirname:
         formatter = GoogleOCRFormatter(output_path=tmpdirname)
-        pecha_path = formatter.create_opf(ocr_path, 1)
+        pecha_path = formatter.create_opf(ocr_path, 1, meta_flag=False)
         assert isinstance(pecha_path, Path) and pecha_path.is_dir()
