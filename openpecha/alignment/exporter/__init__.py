@@ -72,8 +72,8 @@ class Exporter:
             pecha_path = download_pecha(pecha_id)
         base_text = self.get_base_layer(pecha_id, pecha_path)
         segment_layer = self.get_segment_layer(pecha_id, pecha_path)
-        for pair_id, segment_pair in self.alignment["segment_pairs"].items():
-            segment_id = segment_pair.get("pecha_id", "")
+        for pair_id, segment_pair in self.alignment["segment-pairs"].items():
+            segment_id = segment_pair.get(pecha_id, "")
             segment_ann = segment_layer.get(segment_id, {})
             if segment_ann:
                 segment_texts[pair_id] = self.get_segment(segment_ann, base_text)
