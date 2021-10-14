@@ -1,5 +1,13 @@
-"""
-This module contains all the functions required for Transifex integeration
+"""Module to support transifex integration.
+
+Adding TM to transifex project is a premium feature.
+This module provides hacky way to add TM to transifex project
+by converting OpenPecha Alignment to transifex project resource
+files.
+
+Available classes:
+- TransifexProject: class to represent transifex project
+
 """
 
 import json
@@ -14,7 +22,13 @@ API_TOKEN = os.getenv("TX_API_TOKEN")
 transifex_api.setup(auth=API_TOKEN)
 
 class TransifexProject:
-    """Class represents translation project on transifex"""
+    """Class representing translation project on transifex.
+
+    Public methods:
+    - add_resource: create resource with source file.
+    - add_tm: create resource with source file and it's translations,
+              which act as TM.
+    """
 
     def __init__(self, org_slug: str, project_slug: str):
         org = transifex_api.Organization.get(slug=org_slug)
@@ -24,15 +38,6 @@ class TransifexProject:
     @property
     def languages(self):
         return self.project.fetch("languages")
-
-
-    def add_translation(self, resource_slug: str):
-        language = transifex_api.Language.get(code="en")
-        resource = self.project.fetch('resources').get(slug=resource_slug)
-        translations = transifex_api.ResourceTranslation.\
-            filter(resource=resource, language=language).\
-            include('resource_string')
-        return translations
 
     def _create_empty_resource(self, name, slug):
         """creates empty resource if doesn't exists yet and return resource id"""
@@ -150,13 +155,17 @@ class TransifexProject:
         print(f"[INFO] Resource ({resource_id}) deleted")
 
 
-    def add_tm(self, source_path: Path, target_path: Path, target_lang="en"):
+    def add_tm(
+        self,
+        source_path: Path,
+        target_path: Path,
+        target_lang="en",
+        resource_name="Translation Memory (don't open)",
+        resource_slug="tm"
+    ):
         """add .po format translation memory to the project"""
 
         print(f"[INFO] adding TM to project ({self.project.id})")
-
-        resource_name = "Translation Memory (don't open)"
-        resource_slug = "tm"
 
         resource_id = self.add_resource(name=resource_name, slug=resource_slug, source_path=source_path)
         if not resource_id:
