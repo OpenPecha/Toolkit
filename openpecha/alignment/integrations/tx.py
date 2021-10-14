@@ -40,8 +40,23 @@ class TransifexProject:
         self.resources_api_url = "https://rest.api.transifex.com/resources"
 
     @classmethod
-    def create(cls, org_slug:str, project_name: str, repo_url: str):
-        """Creates new project if doesn't exists"""
+    def create(cls, org_slug:str, project_name: str, repo_url: str, source_lang="bo", target_lang="en"):
+        """Create new translation project.
+
+        This classmethod create new project to the organization
+        but returns same project if it's already existed.
+
+        Args:
+            org_slug: organization slug
+            project_name: name of project to be display in transifex.
+            repo_url: project github repo url as it's madatory for public project.
+            source_lang: source language code, default is Tibetan
+            target_lang: target language code, default is English
+
+        Returns:
+            An instance of TransifexProject
+        """
+
         project_slug = slugify(project_name)
         org = transifex_api.Organization.get(slug=org_slug)
 
@@ -51,7 +66,8 @@ class TransifexProject:
             return cls(org_slug, project_slug)
         except DoesNotExist:
             # create new project
-            source_language = transifex_api.Language.get("l:bo")
+            source_language = transifex_api.Language.get(f"l:{source_lang}")
+            # target_language = transifex_api.Language.get(f"l:{target_lang}")
 
             project = transifex_api.Project.create(
                 name=project_name,
@@ -64,6 +80,9 @@ class TransifexProject:
             if not project:
                 print(f"[ERROR] Cloud not create project ({project_name})")
                 return
+
+            # then add target language
+            # project.add("languages", [target_language])
 
             return cls(org_slug, project_slug)
 
@@ -132,6 +151,16 @@ class TransifexProject:
         return resource_id
 
     def add_resource(self, name: str, slug: str, source_path: Path):
+        """Add resource to transifex project
+
+        Args:
+            name: name of the resource to be displayed in transifex
+            slug: slug of resource, used for locating the resource
+            source_path: path to source .po file
+
+        Returns:
+            Id of the resource issued by transifex
+        """
 
         print(f"[INFO] adding resource to project ({self.project.id})")
 
@@ -151,8 +180,20 @@ class TransifexProject:
         print(f"[INFO] Resource created at {resource_id}")
         return resource_id
 
-    def add_translation(self, resource_id, lang:str, content_path: Path):
-        """add translation .po file to a resource"""
+    def add_translation(self, resource_id:str, lang:str, content_path: Path):
+        """add translation .po file to a resource.
+
+        Create async translation upload job and check if translation
+        has been uploaded every 5 seconds.
+
+        Args:
+            resource_id: Id of a resource where translation .op file to be added.
+            lang: lange code of the translation.
+            content_path: path to translation (or target) .op file
+
+        Returns:
+            Upload job id of transifex
+        """
 
         url = "https://rest.api.transifex.com/resource_translations_async_uploads"
         headers = {
@@ -193,10 +234,21 @@ class TransifexProject:
         source_path: Path,
         target_path: Path,
         target_lang="en",
-        resource_name="Translation Memory (don't open)",
+        resource_name="Translation Memory",
         resource_slug="tm"
     ):
-        """add .po format translation memory to the project"""
+        """Add Translation Memory to the project.
+
+        Basically create resource with 100% translated source and traget .po files,
+        which acts as a translation memory for actual resoruce to be translated
+
+        Args:
+            source_path: path to source .po file.
+            target_path: path to target (translated) .po files.
+            traget_lang: lang code to translation.
+            resource_name: TM resource name to be displayed in transifex
+            resource_slug: slug to locate TM resource.
+        """
 
         print(f"[INFO] adding TM to project ({self.project.id})")
 
