@@ -67,7 +67,7 @@ class TransifexProject:
         except DoesNotExist:
             # create new project
             source_language = transifex_api.Language.get(f"l:{source_lang}")
-            # target_language = transifex_api.Language.get(f"l:{target_lang}")
+            target_language = transifex_api.Language.get(f"l:{target_lang}")
 
             project = transifex_api.Project.create(
                 name=project_name,
@@ -82,7 +82,7 @@ class TransifexProject:
                 return
 
             # then add target language
-            # project.add("languages", [target_language])
+            project.add("languages", [target_language])
 
             return cls(org_slug, project_slug)
 
