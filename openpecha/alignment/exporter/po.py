@@ -44,6 +44,7 @@ class PoExporter(Exporter):
         segments = self.get_segment_texts(pecha_id, pecha_path)
         wt = WordTokenizer()
         for pair_id, segment_text in segments.items():
+            segment_text = segment_text.replace("\n", "")
             if lang == "bo":
                 segment_tokens = wt.tokenize(segment_text, split_affixes=True)
                 tokenized_segment = get_normalized_sentence(segment_tokens)
@@ -54,7 +55,7 @@ class PoExporter(Exporter):
                 self._create_entry(msgid=segment_text, msgctxt=pair_id)
 
     def export(self, output_dir):
-        segment_srcs = self.alignment.get("segment-sources", {})
+        segment_srcs = self.alignment.get("segment_sources", {})
         for seg_src_id, seg_src in segment_srcs.items():
             lang = seg_src.get("lang", "")
             if lang:
