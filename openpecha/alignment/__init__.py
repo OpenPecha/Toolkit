@@ -1,3 +1,7 @@
+from openpecha.cli import download_pecha
+from openpecha.github_utils import commit, create_orphan_branch
+
+from .exporter.po import PoExporter
 from .segmenters import Segmenter
 
 
@@ -5,9 +9,18 @@ class Alignment:
     def __init__(self, id=None, segmenter: Segmenter = None):
         self.id = id
         self.segmenter = segmenter
+        self.alignment_repo_path = download_pecha(self.id)
+
+    @property
+    def alignment_path(self):
+        return self.alignment_repo_path / f"{self.id}.opa" / "Alignment.yml"
 
     def create(self):
         pass
 
-    def export(self, format=None):
-        pass
+    def create_po_view(self):
+        exporter = PoExporter(self.alignment_path)
+        create_orphan_branch(self.alignment_repo_path, "po")
+        exporter.export(self.alignment_repo_path)
+        commit(self.alignment_repo_path, "po file added", branch="po")
+        return self.alignment_repo_path
