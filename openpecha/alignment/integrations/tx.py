@@ -16,7 +16,9 @@ import time
 from pathlib import Path
 
 import requests
+from slugify import slugify
 from transifex.api import transifex_api
+from transifex.api.jsonapi.exceptions import DoesNotExist
 
 API_TOKEN = os.getenv("TX_API_TOKEN")
 transifex_api.setup(auth=API_TOKEN)
@@ -31,9 +33,40 @@ class TransifexProject:
     """
 
     def __init__(self, org_slug: str, project_slug: str):
+        self.org_slug = org_slug
+        self.project_slug = project_slug
         org = transifex_api.Organization.get(slug=org_slug)
         self.project = org.fetch("projects").get(slug=project_slug)
         self.resources_api_url = "https://rest.api.transifex.com/resources"
+
+    @classmethod
+    def create(cls, org_slug:str, project_name: str, repo_url: str):
+        """Creates new project if doesn't exists"""
+        project_slug = slugify(project_name)
+        org = transifex_api.Organization.get(slug=org_slug)
+
+        try:
+            # check if projects exists
+            project = org.fetch("projects").get(slug=project_slug)
+            return cls(org_slug, project_slug)
+        except DoesNotExist:
+            # create new project
+            source_language = transifex_api.Language.get("l:bo")
+
+            project = transifex_api.Project.create(
+                name=project_name,
+                slug=project_slug,
+                private=False,
+                organization=org,
+                source_language=source_language,
+                repository_url=repo_url
+            )
+            if not project:
+                print(f"[ERROR] Cloud not create project ({project_name})")
+                return
+
+            return cls(org_slug, project_slug)
+
 
     @property
     def languages(self):
@@ -185,7 +218,12 @@ class TransifexProject:
 
 
 if __name__ == "__main__":
-    project = TransifexProject("esukhia", "test-2612")
+    project = TransifexProject.create(
+        org_slug="esukhia",
+        project_name="test tenzin project",
+        repo_url="https://github.com/Esukhia/wordbook-translation"
+    )
+    # project = TransifexProject("esukhia", "test-2612")
     # project.remove_resource(slug="tm")
     # project.remove_resource(slug="translatethis")
     print("[INFO] Adding source file")

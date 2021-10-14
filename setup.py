@@ -45,6 +45,12 @@ setup(
         "pydantic==1.7.3, <2.0",
         "python-docx==0.8.11, <1.0",
     ],
+    extras_require={
+        "transifex": [
+            "transifex-python>=1.0, <2.0",
+            "python-slugify[unidecode]>=5.0, <6.0"
+        ]
+    },
     python_requires=">=3.6",
     tests_require=["pytest"],
     entry_points={
