@@ -2,6 +2,7 @@ from pathlib import Path
 
 from openpecha.cli import download_pecha
 from openpecha.github_utils import commit, create_orphan_branch
+from openpecha.utils import load_yaml
 
 from .exporter.bitext import BitextExporter
 from .exporter.po import PoExporter
@@ -10,17 +11,26 @@ from .exporter.po import PoExporter
 class Alignment:
     def __init__(self, path=None, id: str = None):
         if not path:
-          self.id = id
-          self.alignment_repo_path = download_pecha(self.id)
+            self.id = id
+            self.alignment_repo_path = download_pecha(self.id)
         else:
-          self.alignment_repo_path = Path(path)
-          self.id = self.alignment_repo_path.stem
+            self.alignment_repo_path = Path(path)
+            self.id = self.alignment_repo_path.stem
 
     @classmethod
     def from_path(cls, path):
-      if not Path(path).is_dir():
-        raise FileNotFoundError(f"Alignment repo {path}")
-      return cls(path=path)
+        if not Path(path).is_dir():
+            raise FileNotFoundError(f"Alignment repo {path}")
+        return cls(path=path)
+
+    @property
+    def meta_path(self):
+        return self.alignment_repo_path / f"{self.id}.opa" / "meta.yml"
+
+    @property
+    def title(self):
+        meta = load_yaml(self.meta_path)
+        return meta["title"]
 
     @property
     def alignment_path(self):

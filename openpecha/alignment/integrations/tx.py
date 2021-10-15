@@ -16,12 +16,15 @@ import json
 import os
 import time
 from pathlib import Path
+from typing import List
 from urllib.parse import urljoin
 
 import requests
 from slugify import slugify
 from transifex.api import transifex_api
 from transifex.api.jsonapi.exceptions import DoesNotExist
+
+from openpecha import alignment
 
 from .. import Alignment
 
@@ -285,17 +288,35 @@ class OPATransifexProject:
     def create(self):
         """Creates OpenPecha Alignment project on transifex"""
         alignment_repo_url = urljoin(self.github_org_url, self.alignment.id)
-        alignment_title = self.alignment.title
         self.tx_project = TransifexProject.create(
             org_slug=self.org_slug,
-            project_name=alignment_title,
+            project_name=alignment.title,
             repo_url=alignment_repo_url
         )
 
+    def upload_source(self):
+        """upload source file to alignment"""
+        po_view = self.alignment.get_po_view()
+        self.tx_project.add_resource(
+            name=self.alignment.title,
+            slug=slugify(self.alignment.title),
+            source_path = Path(po_view["source"]["path"])
+        )
 
+    def add_tm(self, alignment_ids: List[str]):
+        """add `alignments` to the project."""
 
-
-
+        for alignment_id in alignment_ids:
+            alignment = Alignment(id=alignment_id)
+            po_view = alignment.get_po_view()
+            resource_name=f"TM:{alignment.title}"
+            self.tx_project.add_tm(
+                source_path=Path(po_view["source"]["path"]),
+                target_path=Path(po_view["target"]["path"]),
+                target_lang=Path(po_view["target"]["lang"]),
+                resource_name=resource_name,
+                resource_slug=slugify(resource_name)
+            )
 
 
 if __name__ == "__main__":
