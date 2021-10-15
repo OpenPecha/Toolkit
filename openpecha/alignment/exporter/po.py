@@ -1,4 +1,5 @@
 import re
+from pathlib import Path
 
 import polib
 from botok.tokenizers.sentencetokenizer import get_normalized_sentence
@@ -60,7 +61,7 @@ class PoExporter(Exporter):
             lang = seg_src.get("lang", "")
             if lang:
                 self.segment_to_entries(seg_src_id, src_path=None, lang=lang)
-                self.write_to_file(f"{output_dir}/{lang}.po")
+                self.write_to_file((Path(output_dir) / f"{lang}.po"))
             self.file = polib.POFile()
             self.file.metadata = {
                 "MIME-Version": "1.0",
