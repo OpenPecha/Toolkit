@@ -7,6 +7,8 @@ files.
 
 Available classes:
 - TransifexProject: class to represent transifex project
+- OPATransifexProject: class to represent OpenPecha Alignment
+    as transifex project
 
 """
 
@@ -14,11 +16,14 @@ import json
 import os
 import time
 from pathlib import Path
+from urllib.parse import urljoin
 
 import requests
 from slugify import slugify
 from transifex.api import transifex_api
 from transifex.api.jsonapi.exceptions import DoesNotExist
+
+from .. import Alignment
 
 API_TOKEN = os.getenv("TX_API_TOKEN")
 transifex_api.setup(auth=API_TOKEN)
@@ -266,6 +271,30 @@ class TransifexProject:
             self.remove_resource(slug=resource_slug)
 
         print(f"[INFO] Successfully added TM to project ({self.project.id})")
+
+
+class OPATransifexProject:
+    """Represent OpenPecha Alignment as transifex project"""
+
+    def __init__(self, org_slug: str, alignment: Alignment):
+        self.org_slug = org_slug
+        self.alignment = alignment
+        self.tx_project = None
+        self.github_org_url = "https://github.com/OpenPecha"
+
+    def create(self):
+        """Creates OpenPecha Alignment project on transifex"""
+        alignment_repo_url = urljoin(self.github_org_url, self.alignment.id)
+        alignment_title = self.alignment.title
+        self.tx_project = TransifexProject.create(
+            org_slug=self.org_slug,
+            project_name=alignment_title,
+            repo_url=alignment_repo_url
+        )
+
+
+
+
 
 
 
