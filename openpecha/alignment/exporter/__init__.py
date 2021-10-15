@@ -7,7 +7,7 @@ from openpecha.utils import load_yaml
 
 class Exporter:
     def __init__(self, alignment_path) -> None:
-        self.alignment_path = Path(alignment_path) if alignment_path else None
+        self.alignment_path = alignment_path if alignment_path else None
         self.alignment = load_yaml(self.alignment_path) if self.alignment_path else {}
 
     def get_base_layer(self, pecha_id, pecha_path=None):
@@ -23,7 +23,7 @@ class Exporter:
         base = ""
         if pecha_path is None:
             pecha_path = download_pecha(pecha_id)
-        base = (Path(pecha_path) / f"{pecha_id}.opf" / "base" / "001.txt").read_text(
+        base = (pecha_path / f"{pecha_id}.opf" / "base" / "001.txt").read_text(
             encoding="utf-8"
         )
         return base
@@ -42,13 +42,7 @@ class Exporter:
             pecha_path = download_pecha(pecha_id)
         try:
             segment_layer = load_yaml(
-                (
-                    Path(pecha_path)
-                    / f"{pecha_id}.opf"
-                    / "layers"
-                    / "001"
-                    / "Segment.yml"
-                )
+                (pecha_path / f"{pecha_id}.opf" / "layers" / "001" / "Segment.yml")
             )
             segment_annotations = segment_layer["annotations"]
             return segment_annotations
