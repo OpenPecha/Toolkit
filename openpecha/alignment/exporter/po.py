@@ -39,9 +39,21 @@ class PoExporter(Exporter):
         self.file.append(entry)
 
     def write_to_file(self, filename):
+        """Save pofile object to mentioned filename
+
+        Args:
+            filename (path): file path
+        """
         self.file.save(filename)
 
-    def segment_to_entries(self, pecha_id, pecha_path, lang):
+    def segment_to_entries(self, pecha_id, pecha_path, lang="bo"):
+        """Add segment to po file
+
+        Args:
+            pecha_id (uuid): pecha id
+            pecha_path (path): pecha path
+            lang (str): language of the pecha
+        """
         segments = self.get_segment_texts(pecha_id, pecha_path)
         wt = WordTokenizer()
         for pair_id, segment_text in segments.items():
@@ -56,11 +68,16 @@ class PoExporter(Exporter):
                 self._create_entry(msgid=segment_text, msgctxt=pair_id)
 
     def export(self, output_dir):
+        """Export all the segment src po file in given directory
+
+        Args:
+            output_dir (str): output directory in which po files will be saved
+        """
         segment_srcs = self.alignment.get("segment_sources", {})
         for seg_src_id, seg_src in segment_srcs.items():
             lang = seg_src.get("lang", "")
             if lang:
-                self.segment_to_entries(seg_src_id, src_path=None, lang=lang)
+                self.segment_to_entries(seg_src_id, pecha_path=None, lang=lang)
                 self.write_to_file((Path(output_dir) / f"{lang}.po"))
             self.file = polib.POFile()
             self.file.metadata = {

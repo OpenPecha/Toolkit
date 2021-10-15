@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from openpecha.alignment.exporter.bitext import BitextExporter
 
 

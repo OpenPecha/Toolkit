@@ -64,11 +64,14 @@ def test_po_exporter_en(alignment_path, en_src_path, expected_en_po_path):
         assert expected_entry == result_entry
 
 
-def test_po_exporter_single(alignment_path, bo_src_path, expected_bo_po_path):
+def test_po_exporter_single(bo_src_path, expected_bo_po_path):
+    alignment_path = (
+        Path.cwd() / "tests" / "data" / "alignment" / "Single_Alignment.yml"
+    )
     poexporter = PoExporter(alignment_path)
 
     bo_src_id = bo_src_path.stem
-    poexporter.segment_to_entries(bo_src_id, bo_src_path, lang="bo")
+    poexporter.segment_to_entries(bo_src_id, bo_src_path)
     expected_bo_po = polib.pofile(expected_bo_po_path)
     for expected_entry, result_entry in zip(expected_bo_po, poexporter.file):
         assert expected_entry == result_entry
