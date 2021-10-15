@@ -31,8 +31,10 @@ setup(
     packages=find_packages(),
     install_requires=[
         "antx>=0.1.10, <2.0",
+        "botok>=0.8.8, <1.0",
         "Click>=7.1.2, <8.0",
         "diff-match-patch==20181111",
+        "polib==1.1.1, <2.0",
         "PyYAML>=5.0.0, <6.0",
         "pylibyaml>=0.1.0, <2.0",
         "requests>=2.22.0, <3.0",
