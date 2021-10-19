@@ -4,6 +4,7 @@ Avialable functions:
     create_alignment_from_tmx: It will create source and target opf and alignment opa from tmx path.
 """
 
+import os
 from pathlib import Path
 from uuid import uuid4
 
@@ -108,7 +109,7 @@ def publish_pecha(pecha_path):
         not_includes=[],
         layers=[],
         org="Openpecha",
-        token="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",
+        token=os.environ.get("GITHUB_TOKEN"),
     )
 
 
