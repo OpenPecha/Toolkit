@@ -344,13 +344,13 @@ class GoogleOCRFormatter(BaseFormatter):
             "base_file": base_file_name,
         }
 
-    def create_opf(self, input_path, pecha_id, meta_flag=False):
+    def create_opf(self, input_path, pecha_id, meta_flag=True):
         """Create opf of google ocred pecha
 
         Args:
             input_path (str): input path
             pecha_id (str): pecha id
-            meta_flag (bool, optional): True if meta data needed else false. Defaults to False.
+            meta_flag (bool, optional): True if meta data needed else false. Defaults to True.
 
         Returns:
             path: opf path
