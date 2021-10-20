@@ -152,7 +152,7 @@ def create_alignment_from_source_text(text_path, title, publish=True):
 def create_alignment(source_pecha_path, target_pecha_path, title, source_metadata):
     obj = TMXAlignment()
     alignment_path = obj.create_alignment_repo(
-        source_pecha_path, target_pecha_path.stem, title, source_metadata
+        source_pecha_path, target_pecha_path, title, source_metadata
     )
     return alignment_path
 
