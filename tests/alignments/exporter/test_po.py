@@ -1,10 +1,8 @@
-import shutil
 from pathlib import Path
 
 import polib
 import pytest
 
-from openpecha import config
 from openpecha.alignment.exporter.po import PoExporter
 
 
@@ -48,20 +46,24 @@ def test_po_exporter_bo(alignment_path, bo_src_path, expected_bo_po_path):
     poexporter = PoExporter(alignment_path)
 
     bo_src_id = bo_src_path.stem
+    poexporter.file.metadata = {"Language": "bo"}
     poexporter.segment_to_entries(bo_src_id, bo_src_path, lang="bo")
     expected_bo_po = polib.pofile(expected_bo_po_path)
     for expected_entry, result_entry in zip(expected_bo_po, poexporter.file):
         assert expected_entry == result_entry
+    assert expected_bo_po.metadata["Language"] == "bo"
 
 
 def test_po_exporter_en(alignment_path, en_src_path, expected_en_po_path):
     poexporter = PoExporter(alignment_path)
 
     en_src_id = en_src_path.stem
+    poexporter.file.metadata["Language"] = "en"
     poexporter.segment_to_entries(en_src_id, en_src_path, lang="en")
     expected_en_po = polib.pofile(expected_en_po_path)
     for expected_entry, result_entry in zip(expected_en_po, poexporter.file):
         assert expected_entry == result_entry
+    assert expected_en_po.metadata["Language"] == "en"
 
 
 def test_po_exporter_single(bo_src_path, expected_bo_po_path):
@@ -71,7 +73,9 @@ def test_po_exporter_single(bo_src_path, expected_bo_po_path):
     poexporter = PoExporter(alignment_path)
 
     bo_src_id = bo_src_path.stem
+    poexporter.file.metadata["Language"] = "bo"
     poexporter.segment_to_entries(bo_src_id, bo_src_path)
     expected_bo_po = polib.pofile(expected_bo_po_path)
     for expected_entry, result_entry in zip(expected_bo_po, poexporter.file):
         assert expected_entry == result_entry
+    assert expected_bo_po.metadata["Language"] == "bo"
