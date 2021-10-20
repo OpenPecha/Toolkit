@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.7.58 (2021-10-20)
+### Fix
+* **blupdate:**  typos in update span ([`8d089f5`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/8d089f51f58d2a0a59afa252df36fedc6a9361be))
+
 ## v0.7.57 (2021-09-15)
 ### Fix
 * **test-formatter:** Pedurma testcase updated according to changes made in formatter ([`8de3f01`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/8de3f01fcb9f5f0e7f9a236186336624f019ff31))
