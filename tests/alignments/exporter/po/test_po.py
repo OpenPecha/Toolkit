@@ -10,10 +10,8 @@ from openpecha.alignment.exporter.po import PoExporter
 def alignment_path():
     alignment_id = "b696df2dbe314e8a87881a2bc391d0d5"
     return (
-        Path.cwd()
-        / "tests"
+        Path(__file__).parent
         / "data"
-        / "alignment"
         / alignment_id
         / f"{alignment_id}.opa"
         / "Alignment.yml"
@@ -23,23 +21,23 @@ def alignment_path():
 @pytest.fixture(scope="module")
 def bo_src_path():
     bo_src_id = "3f3fa97e02c94a3199056146b389d889"
-    return Path.cwd() / "tests" / "data" / "alignment" / "opfs" / bo_src_id
+    return Path(__file__).parent / "data" / "opfs" / bo_src_id
 
 
 @pytest.fixture(scope="module")
 def en_src_path():
     en_src_id = "1d154e16b23f4f9fa7c7f25cd1fd7463"
-    return Path.cwd() / "tests" / "data" / "alignment" / "opfs" / en_src_id
+    return Path(__file__).parent / "data" / "opfs" / en_src_id
 
 
 @pytest.fixture(scope="module")
 def expected_bo_po_path():
-    return Path.cwd() / "tests" / "data" / "alignment" / "po" / "expected_bo.po"
+    return Path(__file__).parent / "data" / "po" / "expected_bo.po"
 
 
 @pytest.fixture(scope="module")
 def expected_en_po_path():
-    return Path.cwd() / "tests" / "data" / "alignment" / "po" / "expected_en.po"
+    return Path(__file__).parent / "data" / "po" / "expected_en.po"
 
 
 def test_po_exporter_bo(alignment_path, bo_src_path, expected_bo_po_path):
@@ -67,9 +65,7 @@ def test_po_exporter_en(alignment_path, en_src_path, expected_en_po_path):
 
 
 def test_po_exporter_single(bo_src_path, expected_bo_po_path):
-    alignment_path = (
-        Path.cwd() / "tests" / "data" / "alignment" / "Single_Alignment.yml"
-    )
+    alignment_path = Path(__file__).parent / "data" / "Single_Alignment.yml"
     poexporter = PoExporter(alignment_path)
 
     bo_src_id = bo_src_path.stem
