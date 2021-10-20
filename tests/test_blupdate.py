@@ -13,13 +13,21 @@ def inputs(request):
     return request.param
 
 
-@pytest.fixture(params=[{"expected_result": [(0, 2, 0), (2, 5, 2), (8, 10, -1)]}])
+@pytest.fixture(
+    params=[
+        {"input": {"srcbl": "abefghijkl", "dstbl": "abcdefgkl"}, "expected_result": [(0, 2, 0), (2, 5, 2), (8, 10, -1)]},
+        {"input": {"srcbl": "abcd", "dstbl": "cd"}, "expected_result": [(2, 4, -2)]},
+    ]
+)
 def compute_cctv_test_cases(request):
     return request.param
 
 
-def test_compute_cctv(inputs, compute_cctv_test_cases):
-    updater = Blupdate(inputs["srcbl"], inputs["dstbl"])
+def test_compute_cctv(compute_cctv_test_cases):
+    updater = Blupdate(
+        compute_cctv_test_cases["input"]["srcbl"],
+        compute_cctv_test_cases["input"]["dstbl"],
+    )
 
     result = updater.cctv
 
