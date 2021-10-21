@@ -1,5 +1,6 @@
 import logging
-from collections import defaultdict
+import shutil
+import traceback
 from pathlib import Path
 
 import click
@@ -9,6 +10,8 @@ from tqdm import tqdm
 
 import openpecha
 from openpecha import config
+from openpecha.alignment.integrations.tx import OPATransifexProject
+from openpecha.alignment.tmx import create_opf as alignment
 from openpecha.blupdate import PechaBaseUpdate
 from openpecha.buda.openpecha_manager import OpenpechaManager
 from openpecha.catalog import config as catalog_config
@@ -313,3 +316,78 @@ def update_layers(**kwargs):
     dst_opf_path = Path(kwargs["pecha_path"]) / f"{pecha_id}.opf"
     pecha = PechaBaseUpdate(src_opf_path, dst_opf_path)
     pecha.update()
+
+
+def get_alignment_ids(path):
+    path = Path(path)
+    return [line for line in path.read_text().splitlines() if line]
+
+
+alignment_import_types = ["tmx"]
+
+
+@cli.command()
+@click.argument("path")
+@click.option("--verbose", "-v", help="verbose", is_flag=True)
+@click.option("--debug", "-d", help="debug", is_flag=True)
+@click.option(
+    "--type",
+    "-t",
+    type=click.Choice(alignment_import_types),
+    help="Type of alignment import format. Default is tmx",
+)
+@click.option(
+    "--tm-path", "-tm", help="path to file containing OpenPecha alignment id's"
+)
+def import_alignment(**kwargs):
+    """
+    import existing alignment into OpenPecha
+    """
+    if kwargs["debug"]:
+        logging.basicConfig(level=logging.DEBUG)
+    elif kwargs["verbose"]:
+        logging.basicConfig(level=logging.INFO)
+    logging.info("Creating OpenPecha alignment")
+    alignment_path = alignment.create_alignment_from_tmx(tmx_path=Path(kwargs["path"]))
+
+    added_tms_path = []
+    try:
+        logging.info(f"Alignment created at {alignment_path}")
+        project = OPATransifexProject(org_slug="esukhia", alignment_path=alignment_path)
+        project.create()
+        project.import_translation()
+        logging.info("Imported translation")
+        logging.info("Adding TMs")
+        added_tms_path = project.add_tm(
+            alignment_ids=get_alignment_ids(kwargs["--tm-path"])
+        )
+    except Exception as e:
+        print(traceback.print_exc())
+        logging.info("Cleaning up")
+        # shutil.rmtree(str(alignment_path))
+    finally:
+        if alignment_path.is_dir and added_tms_path:
+            logging.info("Cleaning up")
+            if alignment_path.is_dir():
+                shutil.rmtree(str(alignment_path))
+            for path in added_tms_path:
+                shutil.rmtree(str(path))
+
+
+@cli.command()
+@click.argument("path")
+@click.option("-t", "--title", help="title of the text")
+@click.option(
+    "--tm-path", "-tm", help="path to file containing OpenPecha alignment id's"
+)
+def new_translation(**kwargs):
+    """
+    prepare translation project in transifex
+    """
+    alignment_path = alignment.create_alignment_from_source_text(
+        text_path=Path(kwargs["path"])
+    )
+    project = OPATransifexProject(org_slug="esukhia", alignment_path=alignment_path)
+    project.create()
+    project.start_new_translation()
+    project.add_tm(alignment_ids=get_alignment_ids(kwargs["--tm-path"]))

@@ -98,13 +98,13 @@ def _eval_branch(repo, branch):
 
 def download_pecha(pecha_id, out_path=None, needs_update=True, branch="main"):
     # clone the repo
-    pecha_url = f"{config['OP_ORG']}/{pecha_id}.git"
+    pecha_url = f"{config.GITHUB_ORG_URL}/{pecha_id}.git"
     if out_path:
         out_path = Path(out_path)
         out_path.mkdir(exist_ok=True, parents=True)
         pecha_path = out_path / pecha_id
     else:
-        pecha_path = config["OP_PECHAS_PATH"] / pecha_id
+        pecha_path = config.PECHAS_PATH / pecha_id
 
     if pecha_path.is_dir():  # if repo is already exits at local then try to pull
         repo = Repo(str(pecha_path))

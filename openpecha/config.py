@@ -16,4 +16,4 @@ PECHAS_PATH = _mkdir(BASE_PATH / "pechas")
 PECHA_PREFIX = "P"
 N_SIG = 6  # no. of significant digits for pecha id
 
-OP_ORG = "https://github.com/OpenPecha"
+GITHUB_ORG_URL = "https://github.com/OpenPecha"
