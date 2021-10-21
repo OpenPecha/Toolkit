@@ -83,10 +83,12 @@ class TMXAlignment:
             alignment_path / f"{alignment_id}.opa" / "Alignment.yml"
         )
         segment_source = alignment_yml["segment_sources"]
-        for pecha_id in segment_source:
-            source_pecha_id = pecha_id
+        for uid, info in segment_source.items():
+            if info["relation"] == "source":
+                source_pecha_id = uid
         target_segment[target_pecha_id] = {
             "type": target_meta_yml.get("origin_type", None),
+            "relation": "target",
             "lang": target_meta_yml.get("source_metadata", {}).get("langauge", ""),
         }
         segment_source.update(target_segment)
@@ -152,10 +154,12 @@ class TMXAlignment:
                 "segment_sources": {
                     f"{source_pecha_path.stem}": {
                         "type": origin_type,
+                        "relation": "source",
                         "lang": src_lang,
                     },
                     f"{target_pecha_path.stem}": {
                         "type": origin_type,
+                        "relation": "target",
                         "lang": tar_lang,
                     },
                 },
@@ -165,7 +169,11 @@ class TMXAlignment:
             segment = self.get_segment_of_source(source_pecha_path)
             alignment = {
                 "segment_sources": {
-                    f"{source_pecha_path.stem}": {"type": origin_type, "lang": src_lang}
+                    f"{source_pecha_path.stem}": {
+                        "type": origin_type,
+                        "relation": "source",
+                        "lang": src_lang,
+                    }
                 },
                 "segment_pairs": segment,
             }
