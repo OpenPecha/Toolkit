@@ -13,13 +13,21 @@ def inputs(request):
     return request.param
 
 
-@pytest.fixture(params=[{"expected_result": [(0, 2, 0), (2, 5, 2), (8, 10, -1)]}])
+@pytest.fixture(
+    params=[
+        {"input": {"srcbl": "abefghijkl", "dstbl": "abcdefgkl"}, "expected_result": [(0, 2, 0), (2, 5, 2), (8, 10, -1)]},
+        {"input": {"srcbl": "abcd", "dstbl": "cd"}, "expected_result": [(2, 4, -2)]},
+    ]
+)
 def compute_cctv_test_cases(request):
     return request.param
 
 
-def test_compute_cctv(inputs, compute_cctv_test_cases):
-    updater = Blupdate(inputs["srcbl"], inputs["dstbl"])
+def test_compute_cctv(compute_cctv_test_cases):
+    updater = Blupdate(
+        compute_cctv_test_cases["input"]["srcbl"],
+        compute_cctv_test_cases["input"]["dstbl"],
+    )
 
     result = updater.cctv
 
@@ -66,17 +74,35 @@ def test_get_context(inputs, get_context_test_cases):
 
 @pytest.fixture(
     params=[
-        {"context": ("fghi", "jkl"), "dstcoordestimate": 8, "expected_result": 7},
-        {"context": ("ab", "efgh"), "dstcoordestimate": 4, "expected_result": 4},
-        {"context": ("ghij", "kl"), "dstcoordestimate": 7, "expected_result": 7},
+        {
+            "input": {"srcbl": "abefghijkl", "dstbl": "abcdefgkl"},
+            "context": ("fghi", "jkl"), "dstcoordestimate": 8, "expected_result": 7
+        },
+        {
+            "input": {"srcbl": "abefghijkl", "dstbl": "abcdefgkl"},
+            "context": ("ab", "efgh"), "dstcoordestimate": 4, "expected_result": 4
+        },
+        {
+            "input": {"srcbl": "abefghijkl", "dstbl": "abcdefgkl"},
+            "context": ("ghij", "kl"), "dstcoordestimate": 7, "expected_result": 7
+        },
+        {
+            "input": {"srcbl": "abefghijkl", "dstbl": "abcdefgkl"},
+            "context": ("ghij", "kl"), "dstcoordestimate": 7, "expected_result": 7
+        },
+        {   # deleting chars of length >= content_len at start
+            "input": {"srcbl": "abcdefgkl", "dstbl": "efgkl"},
+            "context": ("", "abcd"), "dstcoordestimate": 0, "expected_result": -1
+        },
     ]
 )
 def dmp_find_test_cases(request):
     return request.param
 
 
-def test_dmp_find(inputs, dmp_find_test_cases):
-    updater = Blupdate(inputs["srcbl"], inputs["dstbl"], context_len=4)
+def test_dmp_find(dmp_find_test_cases):
+    updater = Blupdate(dmp_find_test_cases["input"]["srcbl"], dmp_find_test_cases["input"]["dstbl"], context_len=4)
+    updater.get_cctv_for_coord(0)
 
     result = updater.dmp_find(
         dmp_find_test_cases["context"], dmp_find_test_cases["dstcoordestimate"]
