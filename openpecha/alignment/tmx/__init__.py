@@ -6,15 +6,6 @@ from openpecha.utils import dump_yaml, load_yaml
 
 
 class TMXAlignment:
-    def create_alignment_meta(self, alignment_id, title, source_metadata, origin_type):
-        metadata = {
-            "id": alignment_id,
-            "title": title,
-            "type": origin_type,
-            "source_metadata": source_metadata,
-        }
-        return metadata
-
     def get_all_ids(self, annotations):
         curr_segment = {}
         final_segments = {}
@@ -78,40 +69,42 @@ class TMXAlignment:
                 curr_pair = {}
         return segment_pairs
 
-    def create_alignment_yml(
-        self, source_pecha_path, target_pecha_path, src_lang, tar_lang, origin_type
-    ):
-        alignment_id = uuid4().hex
-        if target_pecha_path:
-            segment_pairs = self.get_segment_pairs(source_pecha_path, target_pecha_path)
-            alignment = {
-                "segment_sources": {
-                    f"{source_pecha_path.stem}": {
-                        "type": origin_type,
-                        "lang": src_lang,
-                    },
-                    f"{target_pecha_path}": {"type": origin_type, "lang": tar_lang},
-                },
-                "segment_pairs": segment_pairs,
-            }
-        else:
-            segment = self.get_segment_of_source(source_pecha_path)
-            alignment = {
-                "segment_sources": {
-                    f"{source_pecha_path.stem}": {"type": origin_type, "lang": src_lang}
-                },
-                "segment_pairs": segment,
-            }
-        return alignment_id, alignment
-
-    def _mkdir(self, path: Path):
-        path.mkdir(parents=True, exist_ok=True)
-        return path
-
-    def create_readme_for_opa(self, alignment_id):
-        meta_yml = load_yaml(
-            (config.PECHAS_PATH / alignment_id / f"{alignment_id}.opa/meta.yml")
+    def update_alignment_repo(self, alignment_path, target_pecha_path, annotation_map):
+        curr_pair = {}
+        new_segment_pairs = {}
+        target_segment = {}
+        segment_source = {}
+        target_pecha_id = target_pecha_path.stem
+        alignment_id = alignment_path.stem
+        target_meta_yml = load_yaml(
+            target_pecha_path / f"{target_pecha_id}.opf" / "meta.yml"
         )
+        alignment_yml = load_yaml(
+            alignment_path / f"{alignment_id}.opa" / "Alignment.yml"
+        )
+        segment_source = alignment_yml["segment_sources"]
+        for pecha_id in segment_source:
+            source_pecha_id = pecha_id
+        target_segment[target_pecha_id] = {
+            "type": target_meta_yml.get("origin_type", None),
+            "lang": target_meta_yml.get("source_metadata", {}).get("langauge", ""),
+        }
+        segment_source.update(target_segment)
+        segment_pairs = alignment_yml["segment_pairs"]
+        if annotation_map:
+            for alignment_id, annotation_id in annotation_map.items():
+                segment_pair = segment_pairs[alignment_id]
+                curr_pair[alignment_id] = {
+                    f"{source_pecha_id}": segment_pair[source_pecha_id],
+                    f"{target_pecha_id}": annotation_id["annotation_id"],
+                }
+                new_segment_pairs.update(curr_pair)
+                curr_pair = {}
+        alignment_yml["segment_sources"] = segment_source
+        alignment_yml["segment_pairs"] = new_segment_pairs
+        self.write_alignment_repo(alignment_path, alignment_yml)
+
+    def create_readme_for_opa(self, alignment_id, meta_yml):
         source_metadata = meta_yml["source_metadata"]
         type = meta_yml["type"]
         alignment = f"|Alignment id | {alignment_id}"
@@ -127,47 +120,56 @@ class TMXAlignment:
         readme = f"{alignment}\n{Table}\n{Title}\n{type}\n{srclang}\n{tarlang}"
         return readme
 
-    def update_alignment_repo(
-        self, alignment_id, target_pecha_id, annotation_map, lan, type
-    ):
-        curr_pair = {}
-        new_segment_pairs = {}
-        target_segment = {}
-        segment_source = {}
-        alignment_yml = load_yaml(
-            (config.PECHAS_PATH / alignment_id / f"{alignment_id}.opa/Alignment.yml")
-        )
-        meta_yml = load_yaml(
-            (config.PECHAS_PATH / alignment_id / f"{alignment_id}.opa/meta.yml")
-        )
-        segment_source = alignment_yml["segment_sources"]
-        for pecha_id in segment_source:
-            source_pecha_id = pecha_id
-        target_segment[target_pecha_id] = {"type": type, "lang": lan}
-        segment_source.update(target_segment)
-        segment_pairs = alignment_yml["segment_pairs"]
-        if annotation_map:
-            for alignment_id, annotation_id in annotation_map.items():
-                segment_pair = segment_pairs[alignment_id]
-                curr_pair[alignment_id] = {
-                    f"{source_pecha_id}": segment_pair[source_pecha_id],
-                    f"{target_pecha_id}": annotation_id,
-                }
-                new_segment_pairs.update(curr_pair)
-                curr_pair = {}
-        alignment_yml["segment_sources"] = segment_source
-        alignment_yml["segment_pairs"] = new_segment_pairs
-        meta_yml["segment_sources"] = segment_source
-        self.write_alignment_repo(alignment_id, alignment_yml, meta_yml)
+    def _mkdir(self, path: Path):
+        path.mkdir(parents=True, exist_ok=True)
+        return path
 
-    def write_alignment_repo(self, alignment_id, alignment_yml, meta_yml):
-        repo_path = config.PECHAS_PATH / alignment_id / f"{alignment_id}.opa"
-        self._mkdir(repo_path)
-        alignment_path = repo_path / "Alignment.yml"
-        meta_path = repo_path / "meta.yml"
-        dump_yaml(alignment_yml, alignment_path)
-        dump_yaml(meta_yml, meta_path)
-        return Path(repo_path.parent)
+    def write_alignment_repo(self, alignment_path, alignment_yml, meta_yml=None):
+        alignment_opa_path = alignment_path / f"{alignment_path.stem}.opa"
+        self._mkdir(alignment_opa_path)
+        alignment_yml_path = alignment_opa_path / "Alignment.yml"
+        meta_path = alignment_opa_path / "meta.yml"
+        dump_yaml(alignment_yml, alignment_yml_path)
+        if meta_yml:
+            dump_yaml(meta_yml, meta_path)
+
+    def create_alignment_meta(self, alignment_id, title, source_metadata, origin_type):
+        metadata = {
+            "id": alignment_id,
+            "title": title,
+            "type": origin_type,
+            "source_metadata": source_metadata,
+        }
+        return metadata
+
+    def create_alignment_yml(
+        self, source_pecha_path, target_pecha_path, src_lang, tar_lang, origin_type
+    ):
+        alignment_id = uuid4().hex
+        if target_pecha_path:
+            segment_pairs = self.get_segment_pairs(source_pecha_path, target_pecha_path)
+            alignment = {
+                "segment_sources": {
+                    f"{source_pecha_path.stem}": {
+                        "type": origin_type,
+                        "lang": src_lang,
+                    },
+                    f"{target_pecha_path.stem}": {
+                        "type": origin_type,
+                        "lang": tar_lang,
+                    },
+                },
+                "segment_pairs": segment_pairs,
+            }
+        else:
+            segment = self.get_segment_of_source(source_pecha_path)
+            alignment = {
+                "segment_sources": {
+                    f"{source_pecha_path.stem}": {"type": origin_type, "lang": src_lang}
+                },
+                "segment_pairs": segment,
+            }
+        return alignment_id, alignment
 
     def create_alignment_repo(
         self,
@@ -183,15 +185,19 @@ class TMXAlignment:
         else:
             src_lang = None
             tar_lang = None
+
         alignment_id, alignment_yml = self.create_alignment_yml(
             source_pecha_path, target_pecha_path, src_lang, tar_lang, origin_type
         )
+
+        alignment_path = config.PECHAS_PATH / alignment_id / f"{alignment_id}.opa"
+
         meta_yml = self.create_alignment_meta(
             alignment_id, title, source_metadata, origin_type
         )
-        alignment_path = self.write_alignment_repo(
-            alignment_id, alignment_yml, meta_yml
-        )
-        readme = self.create_readme_for_opa(alignment_id)
-        (alignment_path / "readme.md").write_text(readme, encoding="utf-8")
-        return alignment_path
+
+        self.write_alignment_repo(alignment_path.parent, alignment_yml, meta_yml)
+
+        readme = self.create_readme_for_opa(alignment_id, meta_yml)
+        (alignment_path.parent / "readme.md").write_text(readme, encoding="utf-8")
+        return alignment_path.parent

@@ -1,5 +1,7 @@
+import tempfile
 from pathlib import Path
 
+from openpecha import config
 from openpecha.alignment.tmx.create_opf import create_opf_from_tmx
 from openpecha.utils import load_yaml
 
@@ -18,6 +20,7 @@ def get_span(segment):
 
 
 def test_create_tmx_to_opf():
+    config.PECHAS_PATH = Path(tempfile.gettempdir()) / "pechas"
     tmx_path = Path("./tests/data/alignment/tmx/input.tmx")
     source_pecha_path, target_pecha_path, _ = create_opf_from_tmx(tmx_path)
 

@@ -1,0 +1,21 @@
+# 
+# Translators:
+# Tenzin Kaldan, 2021
+# 
+msgid ""
+msgstr ""
+"Last-Translator: Tenzin Kaldan, 2021\n"
+"Language-Team: English (https://www.transifex.com/esukhia/teams/125794/en/)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: en\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+# རྒྱུད་གསུམ་པ།
+msgid "b5a293ab0d5a4ae39923de414013ef35"
+msgstr "The Threefold Ritual"
+
+# ཚངས་པ་བརྒྱ་བྱིན་རྒྱལ་ཆེན་ལྷ་དང་ཀླུ། །གནོད་སྦྱིན་དྲི་ཟ་ལྟོ་འཕྱེ་ལྷ་མ་ཡིན།
+msgid "65f6b7994ec646b3bcb1af823ca857a3"
+msgstr "Brahmā, great king Śakra, gods and nāgas"
