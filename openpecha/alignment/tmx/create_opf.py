@@ -170,3 +170,5 @@ def create_alignment_from_tmx(tmx_path, publish=True):
         publish_pecha(source_pecha_path)
         publish_pecha(target_pecha_path)
         publish_pecha(alignment_path)
+
+    return alignment_path
