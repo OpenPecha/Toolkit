@@ -92,15 +92,20 @@ def create_orphan_branch(repo_path, branch_name, parent_branch="master", type_="
     repo.git.checkout(parent_branch)
     repo.git.checkout("--orphan", branch_name)
 
-    # move base-text root level
-    repo_path = Path(repo.working_dir)
-    pecha_opf_path = repo_path / f"{repo_path.name}.{type_}"
-    if (pecha_opf_path / "base").is_dir():
-        for vol_fn in (pecha_opf_path / "base").iterdir():
-            shutil.move(str(vol_fn), str(repo_path))
+    # # move base-text root level
+    # repo_path = Path(repo.working_dir)
+    # pecha_opf_path = repo_path / f"{repo_path.name}.{type_}"
+    # if (pecha_opf_path / "base").is_dir():
+    #     for vol_fn in (pecha_opf_path / "base").iterdir():
+    #         shutil.move(str(vol_fn), str(repo_path))
 
-    repo.git.rm("-rf", str(pecha_opf_path.name))
-    repo.git.rm("-f", "README.md")
+    for path in Path(repo_path).iterdir():
+        if path.name == ".git":
+            continue
+        if path.is_dir():
+            repo.git.rm("-rf", str(path))
+        elif path.is_file():
+            repo.git.rm("-f", str(path))
 
 
 def github_publish(

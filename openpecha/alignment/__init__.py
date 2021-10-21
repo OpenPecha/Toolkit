@@ -2,9 +2,8 @@ from pathlib import Path
 
 from git import Repo
 
-from openpecha.cli import download_pecha
 from openpecha.github_utils import commit, create_orphan_branch
-from openpecha.utils import load_yaml
+from openpecha.utils import download_pecha, load_yaml
 
 from .exporter.bitext import BitextExporter
 from .exporter.po import PoExporter
@@ -18,6 +17,7 @@ class Alignment:
         else:
             self.alignment_repo_path = Path(path)
             self.id = self.alignment_repo_path.stem
+        self.metadata = None
 
     @classmethod
     def from_path(cls, path):
@@ -29,10 +29,21 @@ class Alignment:
     def meta_path(self):
         return self.alignment_repo_path / f"{self.id}.opa" / "meta.yml"
 
+    def _load_metadata(self):
+        repo = Repo(self.alignment_repo_path)
+        pre_active_branch = repo.active_branch.name
+        repo.git.checkout("master")
+        metadata = load_yaml(self.meta_path)
+        repo.git.checkout(pre_active_branch)
+        return metadata
+
     @property
     def title(self):
-        meta = load_yaml(self.meta_path)
-        return meta["title"]
+        if self.metadata:
+            return self.metadata["title"]
+
+        self.metadata = self._load_metadata()
+        return self.metadata["title"]
 
     @property
     def alignment_path(self):
@@ -46,7 +57,7 @@ class Alignment:
         repo = Repo(self.alignment_repo_path)
         if not self.is_po_created(repo):
             create_orphan_branch(
-                self.alignment_repo_path, "po", parent_branch="main", type_="opa"
+                self.alignment_repo_path, "po", parent_branch="master", type_="opa"
             )
         else:
             repo.git.checkout("po")
@@ -83,7 +94,7 @@ class Alignment:
     def create_bitext_view(self):
         exporter = BitextExporter(self.alignment_path)
         create_orphan_branch(
-            self.alignment_repo_path, "bitext", parent_branch="main", type_="opa"
+            self.alignment_repo_path, "bitext", parent_branch="master", type_="opa"
         )
         exporter.export(self.alignment_repo_path)
         commit(

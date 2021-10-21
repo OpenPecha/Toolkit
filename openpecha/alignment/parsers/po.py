@@ -133,6 +133,6 @@ def update_alignment_from_po(po_path, alignment_path, publish=True):
         token = os.environ.get("GITHUB_TOKEN")
         setup_auth(repo, "Openpecha", token)
         message = "updated alginment.yml"
-        commit(repo, message, not_includes=[], branch="main")
+        commit(repo, message, not_includes=[], branch="master")
         publish_pecha(target_pecha_path)
     return target_pecha_path
