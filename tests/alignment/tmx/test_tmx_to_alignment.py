@@ -116,3 +116,16 @@ def test_tmx_to_alignment():
         tar_seg = opf_text[num]["tar"]
         assert expected_segment_src == src_seg
         assert expected_segment_tar == tar_seg
+
+    alignment_yml = load_yaml(
+        alignment_path / f"{alignment_path.stem}.opa" / "Alignment.yml"
+    )
+    segment_source = alignment_yml["segment_sources"]
+    for uid, segment_info in segment_source.items():
+        if segment_info["relation"] == "source":
+            source_pecha_id = uid
+        elif segment_info["relation"] == "target":
+            target_pecha_id = uid
+
+    assert source_pecha_path.stem == source_pecha_id
+    assert target_pecha_path.stem == target_pecha_id

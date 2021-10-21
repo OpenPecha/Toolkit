@@ -1,6 +1,7 @@
 segment_sources:
   9c48f0abcaa44746aefd03fc55e00718:
     type: translation
+    relation: source
     lang: bo
 segment_pairs:
   b5a293ab0d5a4ae39923de414013ef35:
