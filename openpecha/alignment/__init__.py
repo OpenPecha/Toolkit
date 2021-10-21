@@ -71,7 +71,7 @@ class Alignment:
             else:
                 repo.git.checkout("po")
             for pecha_id, pecha_info in seg_srcs.items():
-                pecha_type = pecha_info.get("type", "")
+                pecha_type = pecha_info.get("relation", "")
                 pecha_lang = pecha_info.get("lang", "")
                 if pecha_type:
                     po_views[pecha_type] = {
