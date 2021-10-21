@@ -62,10 +62,10 @@ class PoExporter(Exporter):
                 segment_tokens = wt.tokenize(segment_text, split_affixes=True)
                 tokenized_segment = get_normalized_sentence(segment_tokens)
                 self._create_entry(
-                    msgid=tokenized_segment, msgctxt=pair_id, tcomment=segment_text
+                    msgid=pair_id, tcomment=segment_text, msgstr=tokenized_segment
                 )
             else:
-                self._create_entry(msgid=segment_text, msgctxt=pair_id)
+                self._create_entry(msgid=pair_id, msgstr=segment_text)
 
     def export(self, output_dir):
         """Export all the segment src po file in given directory
@@ -76,6 +76,7 @@ class PoExporter(Exporter):
         segment_srcs = self.alignment.get("segment_sources", {})
         for seg_src_id, seg_src in segment_srcs.items():
             lang = seg_src.get("lang", "")
+            self.file.metadata["Language"] = lang
             if lang:
                 self.segment_to_entries(seg_src_id, pecha_path=None, lang=lang)
                 self.write_to_file((Path(output_dir) / f"{lang}.po"))
