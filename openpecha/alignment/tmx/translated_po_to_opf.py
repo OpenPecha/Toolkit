@@ -22,8 +22,8 @@ def get_id_and_string(po_file):
     po_dict = {}
     curr_po = {}
     for entry in po_file:
-        id = entry.msgctxt
-        string = entry.tcomment
+        id = entry.msgid
+        string = entry.msgstr
         text = re.sub(r"\n", " ", string)
         curr_po[id] = {text}
         po_dict.update(curr_po)

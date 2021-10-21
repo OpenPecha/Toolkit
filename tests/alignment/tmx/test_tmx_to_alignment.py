@@ -1,6 +1,7 @@
+import tempfile
 from pathlib import Path
 
-from openpecha.alignment.parsers.tmx import parse_tmx
+from openpecha import config
 from openpecha.alignment.tmx import TMXAlignment
 from openpecha.alignment.tmx.create_opf import create_opf_from_tmx
 from openpecha.utils import load_yaml
@@ -71,6 +72,8 @@ def get_text(
 
 
 def test_tmx_to_alignment():
+    config.PECHAS_PATH = Path(tempfile.gettempdir()) / "pechas"
+
     tmx_path = Path("./tests/data/alignment/tmx/input.tmx")
     source_pecha_path, target_pecha_path, source_metadata = create_opf_from_tmx(
         tmx_path
