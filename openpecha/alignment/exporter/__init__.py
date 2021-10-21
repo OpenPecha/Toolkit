@@ -22,7 +22,7 @@ class Exporter:
         base = ""
         if pecha_path is None:
             pecha_path = download_pecha(pecha_id)
-        base = (pecha_path / f"{pecha_id}.opf" / "base" / "001.txt").read_text(
+        base = (pecha_path / f"{pecha_id}.opf" / "base" / "0001.txt").read_text(
             encoding="utf-8"
         )
         return base
@@ -41,7 +41,7 @@ class Exporter:
             pecha_path = download_pecha(pecha_id)
         try:
             segment_layer = load_yaml(
-                (pecha_path / f"{pecha_id}.opf" / "layers" / "001" / "Segment.yml")
+                (pecha_path / f"{pecha_id}.opf" / "layers" / "0001" / "Segment.yml")
             )
             segment_annotations = segment_layer["annotations"]
             return segment_annotations
