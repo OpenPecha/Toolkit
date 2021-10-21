@@ -14,7 +14,9 @@ def test_opf_2_tsadra_serializer():
 
 
 def test_opf_2_html_serializer():
-    opf_path = Path(__file__).parent / "data" / "P000801" / "P000801.opf"
+    opf_path = (
+        Path("./tests") / "serializers" / "epub" / "data" / "P000801" / "P000801.opf"
+    )
     expected_serialized_html = (
         Path(__file__).parent / "data" / "serialized_P000801.html"
     ).read_text(encoding="utf-8")
