@@ -1,0 +1,9 @@
+segment_sources:
+  9c48f0abcaa44746aefd03fc55e00718:
+    type: translation
+    lang: bo
+segment_pairs:
+  b5a293ab0d5a4ae39923de414013ef35:
+    9c48f0abcaa44746aefd03fc55e00718: d78c7334023a4a899749284e173ccb56
+  65f6b7994ec646b3bcb1af823ca857a3:
+    9c48f0abcaa44746aefd03fc55e00718: 4e0a5f54712b4e5d97bc5212890ef31f

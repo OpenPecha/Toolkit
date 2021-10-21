@@ -51,7 +51,8 @@ def get_base_text(text):
     return final_base
 
 
-def create_opf_repo(segmented_text, opf_path, pecha_id, title, lang, origin_type):
+def create_opf_repo(segmented_text, opf_path, title, lang, origin_type):
+    pecha_id = opf_path.stem
     opf = OpenPechaFS(opf_path=opf_path)
     layers = {"0001": {LayerEnum.segment: get_segment_layer(segmented_text)}}
     base_text = get_base_text(segmented_text)
@@ -76,14 +77,15 @@ def create_opf_repo(segmented_text, opf_path, pecha_id, title, lang, origin_type
     dump_yaml(metadata, meta_fn)
 
 
-def create_readme(pecha_id):
-    meta_yml = load_yaml((config.PECHAS_PATH / pecha_id / f"{pecha_id}.opf/meta.yml"))
+def create_readme(pecha_path):
+    pecha_id = pecha_path.stem
+    meta_yml = load_yaml((pecha_path / f"{pecha_id}.opf/meta.yml"))
     pecha = f"|Pecha id | {pecha_id}"
     Table = "| --- | --- "
-    Title = f"|Title | {meta_yml['source_metadata']['title']} "
-    type = f"|Type | {meta_yml['origin_type']}"
-    lang = f"|Language | {meta_yml['source_metadata']['language']}"
-    Creator = f"|Initial creation | { meta_yml['initial_creation_type']}"
+    Title = f"|Title | {meta_yml.get('source_metadata', {}).get('title', None)} "
+    type = f"|Type | {meta_yml.get('origin_type', None)}"
+    lang = f"|Language | {meta_yml.get('source_metadata',{}).get('language', None)}"
+    Creator = f"|Initial creation | { meta_yml.get('initial_creation_type', None)}"
     readme = f"{pecha}\n{Table}\n{Title}\n{lang}\n{type}\n{Creator}"
     return readme
 
@@ -94,12 +96,10 @@ def create_opf(text, title=None, lang=None, origin_type="translation", new=False
             text = get_sentence_segments(text)
         pecha_id = uuid4().hex
         opf_path = config.PECHAS_PATH / pecha_id / f"{pecha_id}.opf"
-        create_opf_repo(text, opf_path, pecha_id, title, lang, origin_type)
-        readme = create_readme(pecha_id)
-        (config.PECHAS_PATH / pecha_id / "readme.md").write_text(
-            readme, encoding="utf-8"
-        )
-    return Path(opf_path.parent)
+        create_opf_repo(text, opf_path, title, lang, origin_type)
+        readme = create_readme(opf_path.parent)
+        (opf_path.parent / "readme.md").write_text(readme, encoding="utf-8")
+    return opf_path.parent
 
 
 def publish_pecha(pecha_path):
