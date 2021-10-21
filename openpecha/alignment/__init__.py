@@ -2,9 +2,8 @@ from pathlib import Path
 
 from git import Repo
 
-from openpecha.cli import download_pecha
 from openpecha.github_utils import commit, create_orphan_branch
-from openpecha.utils import load_yaml
+from openpecha.utils import download_pecha, load_yaml
 
 from .exporter.bitext import BitextExporter
 from .exporter.po import PoExporter

@@ -1,8 +1,7 @@
 from logging import NOTSET
 from pathlib import Path
 
-from openpecha.cli import download_pecha
-from openpecha.utils import load_yaml
+from openpecha.utils import download_pecha, load_yaml
 
 
 class Exporter:

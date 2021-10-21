@@ -8,8 +8,14 @@ from pathlib import Path
 from typing import Dict
 
 import yaml
+from git import Repo
+from git.cmd import GitCommandError
 
+from openpecha import config
+from openpecha.exceptions import PechaNotFound
 from openpecha.github_utils import create_release
+
+INFO = "[INFO] {}"
 
 
 def gzip_str(string_):
@@ -78,3 +84,44 @@ def dump_yaml(data: Dict, output_fn: Path) -> Path:
 
 def load_yaml(fn: Path) -> None:
     return yaml.load(fn.open(encoding="utf-8"), Loader=yaml.CSafeLoader)
+
+
+def _eval_branch(repo, branch):
+    """return default branch as fallback branch."""
+    if branch in repo.refs or f"origin/{branch}" in repo.refs:
+        return branch
+    elif "main" in repo.refs:
+        return "main"
+    else:
+        return "master"
+
+
+def download_pecha(pecha_id, out_path=None, needs_update=True, branch="main"):
+    # clone the repo
+    pecha_url = f"{config['OP_ORG']}/{pecha_id}.git"
+    if out_path:
+        out_path = Path(out_path)
+        out_path.mkdir(exist_ok=True, parents=True)
+        pecha_path = out_path / pecha_id
+    else:
+        pecha_path = config["OP_PECHAS_PATH"] / pecha_id
+
+    if pecha_path.is_dir():  # if repo is already exits at local then try to pull
+        repo = Repo(str(pecha_path))
+        branch = _eval_branch(repo, branch)
+        repo.git.checkout(branch)
+        if needs_update:
+            print(INFO.format(f"Updating {pecha_id} ..."))
+            repo.git.pull("origin", branch)
+        return pecha_path
+
+    print(INFO.format(f"Downloading {pecha_id} ..."))
+    try:
+        Repo.clone_from(pecha_url, str(pecha_path))
+    except GitCommandError:
+        raise PechaNotFound(f"Pecha with id {pecha_id} doesn't exist")
+    repo = Repo(str(pecha_path))
+    branch = _eval_branch(repo, branch)
+    repo.git.checkout(branch)
+
+    return pecha_path
