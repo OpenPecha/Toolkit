@@ -13,6 +13,7 @@ Available classes:
 """
 
 import json
+import logging
 import os
 import time
 from pathlib import Path
@@ -24,12 +25,11 @@ from slugify import slugify
 from transifex.api import transifex_api
 from transifex.api.jsonapi.exceptions import DoesNotExist
 
-from openpecha import alignment
-
 from .. import Alignment
 
 API_TOKEN = os.getenv("TX_API_TOKEN")
 transifex_api.setup(auth=API_TOKEN)
+
 
 class TransifexProject:
     """Class representing translation project on transifex.
@@ -47,8 +47,19 @@ class TransifexProject:
         self.project = org.fetch("projects").get(slug=project_slug)
         self.resources_api_url = "https://rest.api.transifex.com/resources"
 
+    @property
+    def id(self):
+        return self.project.id
+
     @classmethod
-    def create(cls, org_slug:str, project_name: str, repo_url: str, source_lang="bo", target_lang="en"):
+    def create(
+        cls,
+        org_slug: str,
+        project_name: str,
+        repo_url: str,
+        source_lang="bo",
+        target_lang="en",
+    ):
         """Create new translation project.
 
         This classmethod create new project to the organization
@@ -83,7 +94,7 @@ class TransifexProject:
                 private=False,
                 organization=org,
                 source_language=source_language,
-                repository_url=repo_url
+                repository_url=repo_url,
             )
             if not project:
                 print(f"[ERROR] Cloud not create project ({project_name})")
@@ -94,7 +105,6 @@ class TransifexProject:
 
             return cls(org_slug, project_slug)
 
-
     @property
     def languages(self):
         return self.project.fetch("languages")
@@ -104,52 +114,39 @@ class TransifexProject:
 
         headers = {
             "Authorization": f"Bearer {API_TOKEN}",
-            "Content-type": "application/vnd.api+json"
+            "Content-type": "application/vnd.api+json",
         }
         payload = {
             "data": {
                 "attributes": {
                     "accept_translations": True,
-                    "categories": [
-                        "category_1",
-                        "category_2"
-                    ],
+                    "categories": ["category_1", "category_2"],
                     "name": name,
                     "priority": "normal",
-                    "slug": slug
+                    "slug": slug,
                 },
                 "relationships": {
-                    "i18n_format": {
-                        "data": {
-                            "id": "PO",
-                            "type": "i18n_formats"
-                        }
-                    },
-                    "project": {
-                        "data": {
-                            "id": self.project.id,
-                            "type": "projects"
-                        }
-                    }
+                    "i18n_format": {"data": {"id": "PO", "type": "i18n_formats"}},
+                    "project": {"data": {"id": self.project.id, "type": "projects"}},
                 },
-                "type": "resources"
+                "type": "resources",
             }
         }
 
-        response = requests.post(self.resources_api_url, headers=headers, data=json.dumps(payload))
+        response = requests.post(
+            self.resources_api_url, headers=headers, data=json.dumps(payload)
+        )
         if response.status_code == 200:
             return response.json()["data"]["id"]
 
-    def _get_resource_id(self, slug:str):
-        headers = {
-            "Authorization": f"Bearer {API_TOKEN}",
-        }
-        url =  f"{self.resources_api_url}/{self.project.id}:r:{slug}"
+    def _get_resource_id(self, slug: str):
+        headers = {"Authorization": f"Bearer {API_TOKEN}"}
+        url = f"{self.resources_api_url}/{self.project.id}:r:{slug}"
         response = requests.get(url, headers=headers)
         if response.status_code == 200:
             return response.json()["data"]["id"]
 
-    def _get_resource(self, name:str, slug:str):
+    def _get_resource(self, name: str, slug: str):
         resource_id = self._create_empty_resource(name, slug)
         if not resource_id:
             resource_id = self._get_resource_id(slug)
@@ -180,15 +177,14 @@ class TransifexProject:
         if not resource_id:
             return
 
-        resource = self.project.fetch('resources').get(slug=slug)
+        resource = self.project.fetch("resources").get(slug=slug)
         transifex_api.ResourceStringsAsyncUpload.upload(
-            resource=resource,
-            content=source_path.open()
+            resource=resource, content=source_path.open()
         )
         print(f"[INFO] Resource created at {resource_id}")
         return resource_id
 
-    def add_translation(self, resource_id:str, lang:str, content_path: Path):
+    def add_translation(self, resource_id: str, lang: str, content_path: Path):
         """add translation .po file to a resource.
 
         Create async translation upload job and check if translation
@@ -204,13 +200,8 @@ class TransifexProject:
         """
 
         url = "https://rest.api.transifex.com/resource_translations_async_uploads"
-        headers = {
-            "Authorization": f"Bearer {API_TOKEN}",
-        }
-        payload = {
-            "language": f"l:{lang}",
-            "resource": resource_id
-        }
+        headers = {"Authorization": f"Bearer {API_TOKEN}"}
+        payload = {"language": f"l:{lang}", "resource": resource_id}
         files = {"content": content_path.open("rb")}
         response = requests.post(url, headers=headers, data=payload, files=files)
 
@@ -228,14 +219,13 @@ class TransifexProject:
                 return upload_id
             time.sleep(5)
 
-    def remove_resource(self, slug:str):
+    def remove_resource(self, slug: str):
         """remvoes resource from the project"""
 
-        resource = self.project.fetch('resources').get(slug=slug)
+        resource = self.project.fetch("resources").get(slug=slug)
         resource_id = resource.id
         resource.delete()
         print(f"[INFO] Resource ({resource_id}) deleted")
-
 
     def add_tm(
         self,
@@ -243,7 +233,7 @@ class TransifexProject:
         target_path: Path,
         target_lang="en",
         resource_name="Translation Memory",
-        resource_slug="tm"
+        resource_slug="tm",
     ):
         """Add Translation Memory to the project.
 
@@ -260,14 +250,16 @@ class TransifexProject:
 
         print(f"[INFO] adding TM to project ({self.project.id})")
 
-        resource_id = self.add_resource(name=resource_name, slug=resource_slug, source_path=source_path)
+        resource_id = self.add_resource(
+            name=resource_name, slug=resource_slug, source_path=source_path
+        )
         if not resource_id:
-            print(f"[ERROR] failed to add translation memory to project {self.project.id}")
+            print(
+                f"[ERROR] failed to add translation memory to project {self.project.id}"
+            )
             return
         upload_id = self.add_translation(
-            resource_id=resource_id,
-            lang=target_lang,
-            content_path=target_path
+            resource_id=resource_id, lang=target_lang, content_path=target_path
         )
         if not upload_id:
             print("[ERROR] failed to upload translation")
@@ -279,51 +271,70 @@ class TransifexProject:
 class OPATransifexProject:
     """Represent OpenPecha Alignment as transifex project"""
 
-    def __init__(self, org_slug: str, alignment: Alignment):
+    def __init__(self, org_slug: str, alignment_path: Path):
         self.org_slug = org_slug
-        self.alignment = alignment
+        self.alignment = Alignment(path=alignment_path)
         self.tx_project = None
         self.github_org_url = "https://github.com/OpenPecha"
 
     def create(self):
         """Creates OpenPecha Alignment project on transifex"""
+
         alignment_repo_url = urljoin(self.github_org_url, self.alignment.id)
         self.tx_project = TransifexProject.create(
             org_slug=self.org_slug,
-            project_name=alignment.title,
-            repo_url=alignment_repo_url
+            project_name=self.alignment.title,
+            repo_url=alignment_repo_url,
         )
+        logging.info(f"Project ({self.tx_project.id})")
 
-    def upload_source(self):
+    def start_new_translation(self):
         """upload source file to alignment"""
         po_view = self.alignment.get_po_view()
         self.tx_project.add_resource(
             name=self.alignment.title,
             slug=slugify(self.alignment.title),
-            source_path = Path(po_view["source"]["path"])
+            source_path=Path(po_view["source"]["path"]),
+        )
+
+    def import_translation(self):
+        po_view = self.alignment.get_po_view()
+        print(po_view)
+        resource_id = self.tx_project.add_resource(
+            name=self.alignment.title,
+            slug=slugify(self.alignment.title),
+            source_path=Path(po_view["source"]["path"]),
+        )
+        self.tx_project.add_translation(
+            resource_id=resource_id,
+            lang="en",
+            content_path=Path(po_view["target"]["path"]),
         )
 
     def add_tm(self, alignment_ids: List[str]):
         """add `alignments` to the project."""
 
+        added_tm_paths = []
         for alignment_id in alignment_ids:
             alignment = Alignment(id=alignment_id)
             po_view = alignment.get_po_view()
-            resource_name=f"TM:{alignment.title}"
+            resource_name = f"TM:{alignment.title}"
             self.tx_project.add_tm(
                 source_path=Path(po_view["source"]["path"]),
                 target_path=Path(po_view["target"]["path"]),
                 target_lang=Path(po_view["target"]["lang"]),
                 resource_name=resource_name,
-                resource_slug=slugify(resource_name)
+                resource_slug=slugify(resource_name),
             )
+            added_tm_paths.append(alignment.alignment_repo_path)
+        return added_tm_paths
 
 
 if __name__ == "__main__":
     project = TransifexProject.create(
         org_slug="esukhia",
         project_name="test tenzin project",
-        repo_url="https://github.com/Esukhia/wordbook-translation"
+        repo_url="https://github.com/Esukhia/wordbook-translation",
     )
     # project = TransifexProject("esukhia", "test-2612")
     # project.remove_resource(slug="tm")
@@ -336,5 +347,5 @@ if __name__ == "__main__":
     )
     project.add_tm(
         source_path=Path("./tests/data/alignment/test-bo.po"),
-        target_path=Path("./tests/data/alignment/test-en.po")
+        target_path=Path("./tests/data/alignment/test-en.po"),
     )
