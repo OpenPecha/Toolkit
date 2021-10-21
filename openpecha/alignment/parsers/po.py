@@ -7,7 +7,6 @@ import polib
 from git import Repo
 
 from openpecha import config
-from openpecha.cli import download_pecha
 from openpecha.core.layer import Layer, LayerEnum
 from openpecha.core.pecha import OpenPechaFS
 from openpecha.github_utils import commit
