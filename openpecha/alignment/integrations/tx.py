@@ -227,6 +227,16 @@ class TransifexProject:
         resource.delete()
         print(f"[INFO] Resource ({resource_id}) deleted")
 
+    def _review_tm_translation(self, resource_slug, lang):
+        """set review to true for tm translation"""
+        language = transifex_api.Language.get(code=lang)
+        resource = self.project.fetch("resources").get(slug=resource_slug)
+        translations = transifex_api.ResourceTranslation.filter(
+            resource=resource, language=language
+        )
+        for translation in translations:
+            translation.save(reviewd=True)
+
     def add_tm(
         self,
         source_path: Path,
@@ -265,6 +275,8 @@ class TransifexProject:
             print("[ERROR] failed to upload translation")
             self.remove_resource(slug=resource_slug)
 
+        # self._review_tm_translation(resource_slug=resource_slug, lang=target_lang)
+
         print(f"[INFO] Successfully added TM to project ({self.project.id})")
 
 
@@ -275,7 +287,7 @@ class OPATransifexProject:
         self.org_slug = org_slug
         self.alignment = Alignment(path=alignment_path)
         self.tx_project = None
-        self.github_org_url = "https://github.com/OpenPecha"
+        self.github_org_url = "https://github.com/OpenPecha/"
 
     def create(self):
         """Creates OpenPecha Alignment project on transifex"""
@@ -299,7 +311,6 @@ class OPATransifexProject:
 
     def import_translation(self):
         po_view = self.alignment.get_po_view()
-        print(po_view)
         resource_id = self.tx_project.add_resource(
             name=self.alignment.title,
             slug=slugify(self.alignment.title),

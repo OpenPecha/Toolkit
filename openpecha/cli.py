@@ -359,7 +359,7 @@ def import_alignment(**kwargs):
         logging.info("Imported translation")
         logging.info("Adding TMs")
         added_tms_path = project.add_tm(
-            alignment_ids=get_alignment_ids(kwargs["--tm-path"])
+            alignment_ids=get_alignment_ids(kwargs["tm_path"])
         )
     except Exception as e:
         print(traceback.print_exc())
@@ -390,4 +390,4 @@ def new_translation(**kwargs):
     project = OPATransifexProject(org_slug="esukhia", alignment_path=alignment_path)
     project.create()
     project.start_new_translation()
-    project.add_tm(alignment_ids=get_alignment_ids(kwargs["--tm-path"]))
+    project.add_tm(alignment_ids=get_alignment_ids(kwargs["tm_path"]))
