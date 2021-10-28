@@ -2,6 +2,41 @@
 
 <!--next-version-placeholder-->
 
+## v0.7.59 (2021-10-28)
+### Fix
+* **alignment-transifex:** Set transifex project repo url ([`26bae15`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/26bae15fe01466aae0498231242b2628f3a9e0d1))
+* **alignment-tmx:** Add relation to alignment.yml's segmentsource ([`1a00972`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/1a00972e0b171774c09700c39522dacf819308ea))
+* **alignment-tmx:** Add relation to alignment.yml's segmentsource ([`db65e41`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/db65e41cd2edf4d00de320b2eefb58374eec32db))
+* **alignment-tmx:** Add relation to alignment.yml's segmentsource ([`b96adc3`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/b96adc3923ba700ffd132c6cb66da9a2bf6ceb51))
+* **po:** Po view look up done on relation ([`1d81623`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/1d816239cc95dfe65a4833d2dad36f7fbcf08724))
+* **alignment:** Add import alignment cli ([`dc8aff0`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/dc8aff09f5e0533cd4ba4e9b35eca0584c458a23))
+* **alignment:** Return alignment repo path ([`7d0bf1c`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/7d0bf1cce3ad813a5c6734dc8366033f9730b8da))
+* **alignment:** Default branch is master ([`413acbe`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/413acbe47b1f28696044bb5d04a1ccd371721e6c))
+* **alignment:** Return project id and alignment title ([`c54b82d`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/c54b82d805d67b6368f18cd9e6d43fa2a01df405))
+* **alignment:** Base in exporter ([`4ce9e99`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/4ce9e99d2520d6af66a1a457d7f3185d8b0a89ce))
+* **alignment:** Load metadata ([`876b817`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/876b817c952d5061f6b30839a7b111640fb170c7))
+* **alignment-tmx:** Add tmx parsers and po parsers ([`e462628`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/e4626286024eff5220803b5cd4a854147b2015cb))
+* **alignment-tmx:** Add tmx parsers and po parsers ([`cb7703c`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/cb7703c56539b7074a02a85b9f934ef1cdce0272))
+* **test:** Po test data separated ([`3a92be9`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/3a92be9bc03127e07e0e7a56bf1e7b893b6c509c))
+* **test:** Po test data separated ([`461e0f1`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/461e0f10aa07ba3d81939e7c515816a6b18dbfcc))
+* **po:** Language added while po export ([`8fcb59c`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/8fcb59cfd08f45b560bce6faac204c918003987c))
+* **alignment-tmx:** Add create alignment from tmx ([`049d970`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/049d9708484de52ccf0548d7f560258d337a05ef))
+* **po:** Po exporter updated ([`e25d1db`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/e25d1dbd347ca315b4e1373d07f4b5c986f9e53e))
+* **alignment-tmx:** Add create alignment from tmx ([`ed3588c`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/ed3588cf536a4c320aaacf9512f2652560a108a1))
+* **alignment-tmx:** Add create alignment from tmx ([`8c2c592`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/8c2c592fd28d78377fd2876fa1a078e2b7f608ff))
+* **alignment:** Get po view added ([`b832737`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/b8327379e876dd94bb0a4c5df7aed026c16c3552))
+* **po:** Keyerro bug fixed and functions documented ([`d7ead02`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/d7ead026f0f8a4c87b11347a5493481d079fc290))
+* **test:** Test code updated ([`dbbae52`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/dbbae523a692e541f39d7ab9105457ab982d4a61))
+* **alignment-transifex:** Add traget language to the project ([`8a89e01`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/8a89e017b7058862039382cc9ddd04184681b151))
+* **po:** Po view populated to po branch ([`226d36b`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/226d36b91c4179286f898dc0d6a2fa8844b1e37c))
+* **bitext:** Bitext exporter implemented ([`538c3e7`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/538c3e7a8ce38ad8d60d80940225d1286f359a6e))
+* **alignment-transifex:** Add TM to transifex project ([`7d861f0`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/7d861f0d27407f9bb10ad04512c0c3837f915e2f))
+* **po:** Po exporter implemented ([`26bd01d`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/26bd01d34ca6770b96919ca35d3e19cf5863177e))
+
+### Documentation
+* **alignment-transifex:** Improve documentation ([`353175a`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/353175a144e3c12f9924eb51f121b69b145599e8))
+* **alignment-transifex:** Add doc_strings ([`6a7fab5`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/6a7fab5fd815db4e840b24a9de766cfe7b05d337))
+
 ## v0.7.58 (2021-10-20)
 ### Fix
 * **blupdate:**  typos in update span ([`8d089f5`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/8d089f51f58d2a0a59afa252df36fedc6a9361be))
