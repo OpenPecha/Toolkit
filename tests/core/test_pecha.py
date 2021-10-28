@@ -1,3 +1,4 @@
+import shutil
 import tempfile
 
 import pytest
@@ -17,9 +18,7 @@ def test_create_pecha():
         layers={
             "v001": {
                 LayerEnum.citation: Layer(
-                    annotation_type=LayerEnum.citation,
-                    revision="00001",
-                    annotations={},
+                    annotation_type=LayerEnum.citation, revision="00001", annotations={}
                 )
             }
         },
@@ -47,15 +46,13 @@ def test_load_openpecha(opf_path):
 
 def test_save_layer(opf_path):
     pecha = OpenPechaFS(opf_path)
-    pecha.save_layer(
+    layer_fn = pecha.save_layer(
         "v002",
         LayerEnum.citation,
-        Layer(
-            annotation_type=LayerEnum.citation,
-            revision="00001",
-            annotations={},
-        ),
+        Layer(annotation_type=LayerEnum.citation, revision="00001", annotations={}),
     )
+    assert layer_fn.is_file()
+    shutil.rmtree(str(layer_fn.parent))
 
 
 def test_pecha_update(opf_path):
