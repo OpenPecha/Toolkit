@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tmx xmlns="http://www.lisa.org/tmx14" xmlns:eft="http://read.84000.co/ns/1.0" xmlns:tei="http://www.tei-c.org/ns/1.0" version="1.4b">
+<header creationtool="InterText" creationtoolversion="1.0" datatype="PlainText" segtype="block" adminlang="en-us" srclang="bo" o-tmf="XML aligned text" eft:text-id="UT22084-100-002" eft:text-version="1.1.5 2020"/>
+<body>
+<tu>
+            <prop name="folio">F.3.b</prop>
+	<tuv xml:lang="bo">
+                <seg>
+                    <tei:ref folio="F.3.b"/>རྒྱུད་གསུམ་པ། </seg>
+            </tuv>
+	<tuv xml:lang="en">
+                <seg>The Threefold Ritual</seg>
+            </tuv>
+</tu>
+<tu>
+            <prop name="folio">F.3.b</prop>
+	<tuv xml:lang="bo">
+                <seg>ཚངས་པ་བརྒྱ་བྱིན་རྒྱལ་ཆེན་ལྷ་དང་ཀླུ། 
+                        །གནོད་སྦྱིན་དྲི་ཟ་ལྟོ་འཕྱེ་ལྷ་མ་ཡིན།</seg>
+            </tuv>
+	<tuv xml:lang="en">
+                <seg>
+                    <tei:milestone xml:id="UT22084-100-002-7"/>Brahmā, great king Śakra, gods 
+                            and nāgas</seg>
+            </tuv>
+</tu>
+</body>
+</tmx>

@@ -38,8 +38,8 @@ class GoogleOCRFormatter(BaseFormatter):
         Returns:
             float: mid point's y coordinate of bounding poly
         """
-        y1 = bounding_poly["boundingPoly"]["vertices"][0]["y"]
-        y2 = bounding_poly["boundingPoly"]["vertices"][2]["y"]
+        y1 = bounding_poly["boundingPoly"]["vertices"][0].get("y", 0)
+        y2 = bounding_poly["boundingPoly"]["vertices"][2].get("y", 0)
         y_avg = (y1 + y2) / 2
         return y_avg
 
@@ -54,8 +54,8 @@ class GoogleOCRFormatter(BaseFormatter):
         """
         height_sum = 0
         for bounding_poly in bounding_polys:
-            y1 = bounding_poly["boundingPoly"]["vertices"][0]["y"]
-            y2 = bounding_poly["boundingPoly"]["vertices"][2]["y"]
+            y1 = bounding_poly["boundingPoly"]["vertices"][0].get("y", 0)
+            y2 = bounding_poly["boundingPoly"]["vertices"][2].get("y", 0)
             height_sum += y2 - y1
         avg_height = height_sum / len(bounding_polys)
         return avg_height
@@ -97,10 +97,10 @@ class GoogleOCRFormatter(BaseFormatter):
         avg_line_height = self.get_avg_bounding_poly_height(bounding_polys)
         for bounding_poly in bounding_polys:
             if self.is_in_cur_line(prev_bounding_poly, bounding_poly, avg_line_height):
-                cur_line += bounding_poly["description"]
+                cur_line += bounding_poly.get("description", "")
             else:
                 lines.append(cur_line)
-                cur_line = bounding_poly["description"]
+                cur_line = bounding_poly.get("description", "")
             prev_bounding_poly = bounding_poly
         if cur_line:
             lines.append(cur_line)
@@ -131,13 +131,18 @@ class GoogleOCRFormatter(BaseFormatter):
             str: page content
         """
         postprocessed_page_content = ""
-        page_content = page["textAnnotations"][0]["description"]
+        try:
+            page_content = page["textAnnotations"][0]["description"]
+        except Exception:
+            print("Page empty!!")
+            return postprocessed_page_content
         bounding_polys = page["textAnnotations"][1:]
         lines = self.get_lines(bounding_polys)
         page_content_without_space = "\n".join(lines)
         postprocessed_page_content = self.transfer_space(
             page_content, page_content_without_space
         )
+
         return postprocessed_page_content + "\n"
 
     def get_input(self, input_path):

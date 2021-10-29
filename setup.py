@@ -30,12 +30,14 @@ setup(
     url="https://github.com/OpenPoti/openpecha-toolkit",
     packages=find_packages(),
     install_requires=[
-        "antx>=0.1.10, <2.0",
+        "botok>=0.8.8, <1.0",
         "Click>=7.1.2, <8.0",
         "diff-match-patch==20181111",
+        "polib==1.1.1, <2.0",
         "PyYAML>=5.0.0, <6.0",
         "pylibyaml>=0.1.0, <2.0",
         "requests>=2.22.0, <3.0",
+        "antx>=0.1.10, <2.0",
         "tqdm>=4.35.0, <5.0",
         "PyGithub>=1.43.8, <2.0",
         "GitPython>=3.1.0, <4.0",
@@ -45,6 +47,12 @@ setup(
         "pydantic==1.7.3, <2.0",
         "python-docx==0.8.11, <1.0",
     ],
+    extras_require={
+        "transifex": [
+            "transifex-python>=1.0, <2.0",
+            "python-slugify[unidecode]>=5.0, <6.0",
+        ]
+    },
     python_requires=">=3.6",
     tests_require=["pytest"],
     entry_points={

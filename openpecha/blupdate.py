@@ -1,10 +1,9 @@
 import math
-
 from pathlib import Path
 
 import diff_match_patch as dmp_module
-from git.objects import base
-from openpecha.utils import load_yaml, dump_yaml
+
+from openpecha.utils import dump_yaml, load_yaml
 
 
 class Blupdate:
@@ -193,10 +192,10 @@ def update_span(ann, updater: Blupdate):
         ann["span"]["fail_update"] = "both"
     elif start == -1:
         ann["span"]["fail_update"] = "start"
-        ann["span"]["end"] == end
+        ann["span"]["end"] = end
     elif end == -1:
         ann["span"]["fail_update"] = "end"
-        ann["span"]["start"] == start
+        ann["span"]["start"] = start
     else:
         ann["span"]["start"] = start
         ann["span"]["end"] = end
