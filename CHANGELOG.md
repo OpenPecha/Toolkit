@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.7.61 (2021-10-29)
+### Fix
+* **hfml:** Page annotation updated ([`a7eec5e`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/a7eec5e12ddce18d0ed1dbb732a42cf48f94dd09))
+
 ## v0.7.60 (2021-10-29)
 ### Fix
 * **test:** Test data included separately ([`e951fca`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/e951fca4e36d7ef17d2dd62e0103375ee77d1879))

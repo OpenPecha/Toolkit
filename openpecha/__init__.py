@@ -1,2 +1,2 @@
 # Version of openpecha-toolkit package
-__version__ = "0.7.60"
+__version__ = "0.7.61"
