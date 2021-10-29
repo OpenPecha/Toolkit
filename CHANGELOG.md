@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.7.60 (2021-10-29)
+### Fix
+* **test:** Test data included separately ([`e951fca`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/e951fca4e36d7ef17d2dd62e0103375ee77d1879))
+
 ## v0.7.59 (2021-10-28)
 ### Fix
 * **alignment-transifex:** Set transifex project repo url ([`26bae15`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/26bae15fe01466aae0498231242b2628f3a9e0d1))
