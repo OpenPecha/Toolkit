@@ -6,6 +6,7 @@ from .formatter import BaseFormatter
 from .layers import *
 from .layers import AnnType, _attr_names
 
+
 class PedurmaFormatter(BaseFormatter):
     """
     Pedurma formatter is to format preview of reconstructed pedurma.
@@ -16,7 +17,7 @@ class PedurmaFormatter(BaseFormatter):
         self.page = []
         self.durchen = []
         self.base_text = ""
-    
+
     def text_preprocess(self, text):
         if text[0] == "\ufeff":
             text = text[1:]
@@ -44,10 +45,12 @@ class PedurmaFormatter(BaseFormatter):
         fns_len = len(fns)
         for fn in sorted(fns):
             yield self.text_preprocess(fn.read_text()), fn.name, fns_len
-    
+
     def search_before(self, ann, page_content):
         length_before = 0
-        match_list = re.finditer("<.*?>", page_content)  # list of match object of given pattern in line
+        match_list = re.finditer(
+            "<.*?>", page_content
+        )  # list of match object of given pattern in line
         for match in match_list:
             if ann.start() > match.start():
                 length_before = length_before + len(match[0])
@@ -56,7 +59,7 @@ class PedurmaFormatter(BaseFormatter):
     def get_pages(self, vol_text):
         result = []
         pg_text = ""
-        pages = re.split(r"(\[[𰵀-󴉱]?[0-9]+[a-z]{1}\])", vol_text)
+        pages = re.split(r"(〔[𰵀-󴉱]?\d+〕)", vol_text)
         for i, page in enumerate(pages[1:]):
             if i % 2 == 0:
                 pg_text += page
@@ -68,78 +71,74 @@ class PedurmaFormatter(BaseFormatter):
 
     def parse_pagination(self, walker, base_page, page_content):
         page_ann = {}
-        page_pat = re.search(r"\[[𰵀-󴉱]?([0-9]+[a-z]{1})\]", page_content)
-        page_idx = page_pat.group(1)
+        page_pat = re.search(r"〔[𰵀-󴉱]?(\d+)〕", page_content)
+        imgnum = page_pat.group(1)
         start_page = walker + 1
         end_page = start_page + len(base_page) - 2
         span = Span(start_page, end_page)
-        page_ann = Page(span, page_index=page_idx)
+        page_ann = Page(span, imgnum=imgnum)
         return page_ann
 
     def get_pub_wise_note(self, note):
-        reformat_notes = {
-            '«པེ་»': '',
-            '«སྣར་»': '',
-            '«སྡེ»': '',
-            '«ཅོ་»': ''
-        }
-        note_parts = re.split('(«.+?»)', note)
+        reformat_notes = {"«པེ་»": "", "«སྣར་»": "", "«སྡེ»": "", "«ཅོ་»": ""}
+        note_parts = re.split("(«.+?»)", note)
         pubs = note_parts[1::2]
         notes = note_parts[2::2]
         for walker, (pub, note_part) in enumerate(zip(pubs, notes)):
             if note_part:
-                reformat_notes[pub] = note_part.replace('>', '')
+                reformat_notes[pub] = note_part.replace(">", "")
             else:
-                if notes[walker+1]:
-                    reformat_notes[pub] = notes[walker+1].replace('>', '')
+                if notes[walker + 1]:
+                    reformat_notes[pub] = notes[walker + 1].replace(">", "")
                 else:
-                    reformat_notes[pub] = notes[walker+2].replace('>', '')
-                
+                    reformat_notes[pub] = notes[walker + 2].replace(">", "")
+
         return reformat_notes
 
     def parse_note(self, note, walker, page_content):
-        page_content = re.sub(r"\[[𰵀-󴉱]?([0-9]+[a-z]{1})\]", "", page_content)
+        page_content = re.sub(r"〔[𰵀-󴉱]?\d+〕", "", page_content)
         note_ann = {}
-        note_pat = re.search(rf'(:\S+)?{note}', page_content)
+        note_pat = re.search(rf"(:\S+)?{note}", page_content)
         if note_pat.group(1):
-            ann_start = note_pat.start() + walker 
+            ann_start = note_pat.start() + walker
             ann_end = ann_start + len(note_pat.group(1))
         else:
-            if note_pat := re.search(rf'\S+་([^#]\S+་?){note}', page_content):
+            if re.search(rf"\S+་([^#]\S+་?){note}", page_content):
+                note_pat = re.search(rf"\S+་([^#]\S+་?){note}", page_content)
                 grp_1_loc = page_content.find(note_pat.group(1))
             else:
-                note_pat = re.search(rf'([^#]\S+་?){note}', page_content)
+                note_pat = re.search(rf"([^#]\S+་?){note}", page_content)
                 grp_1_loc = note_pat.start()
-            ann_start = grp_1_loc + walker 
+            ann_start = grp_1_loc + walker
             if note_pat.group(1):
                 ann_end = ann_start + len(note_pat.group(1))
             else:
                 ann_end = ann_start
         note_ann = {
-            'span':{
-                'start':ann_start, # the variant unit or variant location is capture with help of this span
-                'end': ann_end-1
+            "span": {
+                "start": ann_start,  # the variant unit or variant location is capture with help of this span
+                "end": ann_end - 1,
             },
-            'variants': self.get_pub_wise_note(note),
-            'collation_note': note
+            "variants": self.get_pub_wise_note(note),
+            "collation_note": note,
         }
-        page_content = re.sub(note, '', page_content, 1)
+        page_content = re.sub(note, "", page_content, 1)
         return note_ann, page_content
 
     def parse_page(self, page, cur_vol_notes, cur_vol_pages, char_walker):
-        page_content = page.replace('\n', '#')
-        notes = re.findall(r'\<.*?\>', page_content)
+        page_content = page.replace("\n", "#")
+        notes = re.findall(r"\<.*?\>", page_content)
         for note in notes:
             note_info, page_content = self.parse_note(note, char_walker, page_content)
-            cur_vol_notes.append(('',note_info))
+            cur_vol_notes.append(("", note_info))
         new_page = self.base_extract(page)
         page_ann = self.parse_pagination(char_walker, new_page, page)
-        cur_vol_pages.append(('', page_ann))
+        cur_vol_pages.append(("", page_ann))
         return new_page
 
     def base_extract(self, text):
-        text = re.sub(r"\[[𰵀-󴉱]?([0-9]+[a-z]{1})\]", "", text)
-        return re.sub('<.*?>', '', text)
+        text = re.sub(r"〔[𰵀-󴉱]?\d+〕", "", text)
+        return re.sub("<.*?>", "", text)
 
     def build_layers(self, text):
         char_walker = 0
@@ -152,13 +151,13 @@ class PedurmaFormatter(BaseFormatter):
         self.page.append(cur_vol_pages)
         self.durchen.append(cur_vol_notes)
         self.base_text = self.base_extract(text)
-    
+
     def get_result(self):
         result = {
             AnnType.topic: [],
             AnnType.sub_topic: [],
             AnnType.pagination: self.page,
-            AnnType.pedurma_note: self.durchen
+            AnnType.pedurma_note: self.durchen,
         }
         return result
 
@@ -166,8 +165,8 @@ class PedurmaFormatter(BaseFormatter):
         base_text = self.base_text
         self.base_text = ""
         return base_text
-    
-    def create_opf(self, input_path, id_ = None, **kwargs):
+
+    def create_opf(self, input_path, id_=None, **kwargs):
         input_path = Path(input_path)
         self._build_dirs(input_path, id_=id_)
         self.metadata = self._load_metadata()

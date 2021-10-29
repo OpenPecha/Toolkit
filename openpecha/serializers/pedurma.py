@@ -30,6 +30,12 @@ class PedurmaSerializer(Serialize):
         adapted_end = span["end"] - self.text_spans[vol_id]["start"]
         return adapted_start, adapted_end
 
+    def get_local_id(self, ann, uuid2localid):
+        try:
+            return chr(uuid2localid[ann["id"]])
+        except Exception:
+            return ""
+
     def apply_annotation(self, vol_id, ann, uuid2localid):
         """Applies annotation to specific volume base-text, where part of the text exists.
 
@@ -44,7 +50,8 @@ class PedurmaSerializer(Serialize):
         only_start_ann = False
         start_payload = "("
         end_payload = ")"
-        side = 'ab'
+        side = "ab"
+        local_id = self.get_local_id(ann, uuid2localid)
         if ann["type"] == AnnType.pagination:
             pg_idx = ann.get("page_index", "")
             if not pg_idx:
@@ -55,18 +62,15 @@ class PedurmaSerializer(Serialize):
                 if "-" in pg_n:
                     pg_n = int(pg_n.split("-")[0])
                     pg_side = side[int(pg_side)]
-                    start_payload = f"[{pg_n}{pg_side}]"
+                    start_payload = f"[{local_id}{pg_n}{pg_side}]"
                 else:
                     pg_n = int(pg_n)
                     if pg_side.isdigit():
                         pg_n = str(pg_n) + pg_side
                         pg_side = ""
-                    start_payload = f"[{pg_n}{pg_side}]"
+                    start_payload = f"〔{local_id}{pg_n}{pg_side}〕"
             else:
-                start_payload = f'[{pg_idx}]'
-                
-            if ann.get("page_info", ""):
-                start_payload += f' {ann["page_info"]}\n'
+                start_payload = f"〔{local_id}{pg_idx}〕"
             if ann.get("reference", ""):
                 start_payload += f' {ann["reference"]}\n'
             else:
@@ -75,7 +79,6 @@ class PedurmaSerializer(Serialize):
         elif ann["type"] == AnnType.pedurma_note:
             start_payload = ""
             end_payload = f'{ann["collation_note"]}'
-        
 
         start_cc, end_cc = self.__get_adapted_span(ann["span"], vol_id)
         self.add_chars(vol_id, start_cc, True, start_payload)
@@ -93,9 +96,9 @@ class PedurmaSerializer(Serialize):
         """
         result = []
         cur_note = []
-        chunks = re.split(r'(\<.+?\>)', text)
+        chunks = re.split(r"(\<.+?\>)", text)
         for chunk in chunks:
-            if '{' in chunk:
+            if "{" in chunk:
                 note = yaml.safe_load(chunk)
                 cur_note.append(note)
                 result.append(cur_note)
@@ -104,7 +107,7 @@ class PedurmaSerializer(Serialize):
                 cur_note.append(chunk)
         result.append([chunk, {}])
         return result
-    
+
     def process_chunk(self, chunk, pub):
         """Reinsert the note to chunk according to publication selected
 
@@ -120,10 +123,10 @@ class PedurmaSerializer(Serialize):
         if chunk_notes:
             note = chunk_notes[pub]
             if note:
-                old_note = re.search(r'(:\S+)\n?', chunk_text).group(1)
+                old_note = re.search(r"(:\S+)\n?", chunk_text).group(1)
                 chunk_text = re.sub(old_note, note, chunk_text)
             else:
-                chunk_text = re.sub(':','',chunk_text)
+                chunk_text = re.sub(":", "", chunk_text)
         return chunk_text
 
     def get_diplomatic_text(self, text, pub):
@@ -142,7 +145,7 @@ class PedurmaSerializer(Serialize):
             diplomatic_text += self.process_chunk(chunk, pub)
         return diplomatic_text
 
-    def serialize(self, output_path="./output/diplomatic_text/", pub='pe'):
+    def serialize(self, output_path="./output/diplomatic_text/", pub="pe"):
         """Serialize pedurma preview opf to diplomatic text of given publication
 
         Args:
@@ -154,5 +157,5 @@ class PedurmaSerializer(Serialize):
         results = self.get_result()
         for vol_id, result in results.items():
             # diplomatic_text = self.get_diplomatic_text(result, pub)
-            (output_path / vol_id).write_text(result, encoding='utf-8')
-        print('Serialize complete...')
+            (output_path / vol_id).write_text(result, encoding="utf-8")
+        print("Serialize complete...")

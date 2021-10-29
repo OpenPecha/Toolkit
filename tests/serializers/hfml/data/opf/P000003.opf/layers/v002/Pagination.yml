@@ -3,49 +3,49 @@ annotation_type: Pagination
 revision: '00001'
 annotations:
   67660054b8fb483ab699f46c0926136e:
-    page_index: 1a
+    imgnum: 1
     page_info: ''
     reference: null
     span:
       start: 0
       end: 57
   1548ece390064800ab5349b1ac587610:
-    page_index: 1b
+    imgnum: 2
     page_info: ''
     reference: null
     span:
       start: 60
       end: 116
   cd2222d95f9d4be4b41025ed811ec1e0:
-    page_index: 2a
+    imgnum: 3
     page_info: ''
     reference: null
     span:
       start: 119
       end: 166
   0c60ba8ae84f4b478b73c3fb4665df7e:
-    page_index: 2b
+    imgnum: 4
     page_info: ''
     reference: null
     span:
       start: 169
       end: 215
   3ef64fa53a5e49298da14142bc38e50e:
-    page_index: 3a
+    imgnum: 5
     page_info: ''
     reference: null
     span:
       start: 218
       end: 281
   e32b553de58542a9b8560ff06a1180eb:
-    page_index: 3b
+    imgnum: 6
     page_info: ''
     reference: null
     span:
       start: 284
       end: 334
   d05d3718d3c14426939d64792c7f56cd:
-    page_index: 4a
+    imgnum: 7
     page_info: ''
     reference: null
     span:

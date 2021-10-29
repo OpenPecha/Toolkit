@@ -3,28 +3,28 @@ annotation_type: Pagination
 revision: '00001'
 annotations:
   b0e24e4d6a204cff8eb9d35922f220c4:
-    imgnum: 1a
+    imgnum: 1
     page_info: ''
     reference: null
     span:
       start: 0
       end: 60
   7416375009a147d2856037206a9fb1b5:
-    page_index: 1b
+    imgnum: 2
     page_info: ''
     reference: null
     span:
       start: 63
       end: 102
   dc00bb4296324eb3b0956843bc772128:
-    page_index: 2a
+    imgnum: 3
     page_info: ''
     reference: null
     span:
       start: 105
       end: 145
   c6143cdbeef84245b324f180e2b8047e:
-    page_index: 2b
+    imgnum: 4
     page_info: ''
     reference: null
     span:

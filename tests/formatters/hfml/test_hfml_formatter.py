@@ -56,27 +56,24 @@ class TestHFMLFormatter:
                     (
                         1000000,
                         {
-                            "page_index": "1a",
-                            "page_info": "kk",
-                            "reference": None,
+                            "imgnum": "1",
+                            "reference": "kk",
                             "span": {"start": 0, "end": 24},
                         },
                     ),
                     (
                         1000001,
                         {
-                            "page_index": "1b",
-                            "page_info": "kl",
-                            "reference": None,
+                            "imgnum": "2",
+                            "reference": "kl",
                             "span": {"start": 27, "end": 676},
                         },
                     ),
                     (
                         1000027,
                         {
-                            "page_index": "2a",
-                            "page_info": "lm",
-                            "reference": None,
+                            "imgnum": "3",
+                            "reference": "lm",
                             "span": {"start": 679, "end": 2173},
                         },
                     ),
@@ -85,18 +82,16 @@ class TestHFMLFormatter:
                     (
                         1000015,
                         {
-                            "page_index": "1a",
-                            "page_info": "kk",
-                            "reference": None,
+                            "imgnum": "1",
+                            "reference": "kk",
                             "span": {"start": 0, "end": 0},
                         },
                     ),
                     (
                         1000016,
                         {
-                            "page_index": "1b",
-                            "page_info": "",
-                            "reference": None,
+                            "imgnum": "2",
+                            "reference": "",
                             "span": {"start": 0, "end": 266},
                         },
                     ),
@@ -105,9 +100,8 @@ class TestHFMLFormatter:
                     (
                         1000022,
                         {
-                            "page_index": "1a",
-                            "page_info": "ko",
-                            "reference": None,
+                            "imgnum": "1",
+                            "reference": "ko",
                             "span": {"start": 0, "end": 266},
                         },
                     )
