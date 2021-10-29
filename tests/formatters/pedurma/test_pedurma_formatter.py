@@ -19,8 +19,7 @@ def test_pedurma_formatter():
                 (
                     "",
                     {
-                        "page_index": "42a",
-                        "page_info": None,
+                        "imgnum": "42",
                         "reference": None,
                         "span": {"start": 1, "end": 120},
                     },
@@ -28,8 +27,7 @@ def test_pedurma_formatter():
                 (
                     "",
                     {
-                        "page_index": "42b",
-                        "page_info": None,
+                        "imgnum": "43",
                         "reference": None,
                         "span": {"start": 122, "end": 361},
                     },
@@ -37,8 +35,7 @@ def test_pedurma_formatter():
                 (
                     "",
                     {
-                        "page_index": "43a",
-                        "page_info": None,
+                        "imgnum": "44",
                         "reference": None,
                         "span": {"start": 363, "end": 538},
                     },
