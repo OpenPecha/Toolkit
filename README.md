@@ -19,7 +19,7 @@ For NLP this toolkit will provide a way to have annoated corpra with minimal err
   - [Windows installer](https://github.com/OpenPecha/openpecha-toolkit/blob/master/installers/openpecha_windows_installer.zip?raw=true)
 
 ## Usage
-First we need to download all the poti which are in openpecha format.
+First, we need to download all the pecha from OpenPecha.
 
 ```
 $ openpecha download --help
