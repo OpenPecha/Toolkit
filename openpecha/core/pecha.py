@@ -4,8 +4,11 @@ from collections import defaultdict
 from pathlib import Path
 from typing import Dict, List, Union
 
+from pydantic.typing import resolve_annotations
+
 from openpecha import config
 from openpecha.core.layer import Layer, LayerEnum, MetaData
+from openpecha.publisher import GithubPublisher
 from openpecha.utils import dump_yaml, load_yaml
 
 
@@ -26,6 +29,14 @@ class OpenPecha:
         self._index = index
         self.assets = assets
         self._components = components
+
+    def __str__(self):
+        source_metadata = []
+        for val in self.meta.source_metadata.values():
+            if not isinstance(val, [str, int]):
+                continue
+            source_metadata.append(val)
+        return ",".join(source_metadata)
 
     def reset_base_and_layers(self):
         self.base = {}
@@ -95,8 +106,12 @@ class OpenPechaFS(OpenPecha):
     def opf_path(self) -> Path:
         if self._opf_path:
             return self._opf_path
-        self._opf_path = self.output_dir / self.pecha_id / f"{self.pecha_id}.opf"
+        self._opf_path = self.pecha_path / f"{self.pecha_id}.opf"
         return self._opf_path
+
+    @property
+    def pecha_path(self) -> Path:
+        return self.output_dir / self.pecha_id
 
     @property
     def base_path(self) -> Path:
@@ -212,3 +227,7 @@ class OpenPechaFS(OpenPecha):
             if layer_name in exclude:
                 continue
             self.reset_layer(base_name, layer_name)
+
+    def publish_to_github(self):
+        publisher = GithubPublisher()
+        publisher.publish(path=self.pecha_path, description=str(self))
