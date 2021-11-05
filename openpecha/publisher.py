@@ -100,7 +100,8 @@ class GithubPublisher(PublisherBase):
         local_repo = self._init_local_repo(path=path, remote_url=remote_repo_url)
         commit_and_push(repo=local_repo, message="Initial commit")
 
-    def remove(self, name: str, path: Path):
+    def remove(self, name: str, path: Path = None):
         repo = self.org.get_repo(name)
         repo.delete()
-        shutil.rmtree(str(path))
+        if path:
+            shutil.rmtree(str(path))
