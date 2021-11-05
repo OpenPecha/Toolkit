@@ -29,12 +29,16 @@ class OpenPecha:
         self._components = components
 
     def __str__(self):
+        return f"OpenPecha:{self.pecha_id}"
+
+    @property
+    def about(self):
         source_metadata = []
         for val in self.meta.source_metadata.values():
-            if not isinstance(val, [str, int]):
+            if not isinstance(val, (str, int)):
                 continue
             source_metadata.append(val)
-        return ",".join(source_metadata)
+        return ", ".join(source_metadata)
 
     def reset_base_and_layers(self):
         self.base = {}
@@ -234,7 +238,7 @@ class OpenPechaFS(OpenPecha):
 
     def publish_to_all(self):
         for publisher in self.publishers.values():
-            publisher.publish(path=self.pecha_path, description=str(self))
+            publisher.publish(path=self.pecha_path, description=self.about)
 
     def remove_from_all(self):
         for publisher in self.publishers.values():
@@ -242,7 +246,7 @@ class OpenPechaFS(OpenPecha):
 
     def publish_to_github(self):
         publisher = self.publishers[Publishers.GITHUB]
-        publisher.publish(path=self.pecha_path, description=str(self))
+        publisher.publish(path=self.pecha_path, description=self.about)
 
     def remove_from_github(self):
         publisher = self.publishers[Publishers.GITHUB]
