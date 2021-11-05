@@ -4,11 +4,9 @@ from collections import defaultdict
 from pathlib import Path
 from typing import Dict, List, Union
 
-from pydantic.typing import resolve_annotations
-
 from openpecha import config
 from openpecha.core.layer import Layer, LayerEnum, MetaData
-from openpecha.publisher import GithubPublisher
+from openpecha.publisher import Publishers, get_publishers
 from openpecha.utils import dump_yaml, load_yaml
 
 
@@ -92,9 +90,15 @@ class OpenPecha:
 
 
 class OpenPechaFS(OpenPecha):
-    def __init__(self, opf_path=None, **kwargs):
+    def __init__(
+        self,
+        opf_path: str = None,
+        publishers: List[Publishers] = [Publishers.GITHUB],
+        **kwargs,
+    ):
         self._opf_path = Path(opf_path) if opf_path else opf_path
         self.output_dir = None
+        self.publishers = get_publishers(publishers)
         super().__init__(**kwargs)
 
     @staticmethod
@@ -228,6 +232,18 @@ class OpenPechaFS(OpenPecha):
                 continue
             self.reset_layer(base_name, layer_name)
 
+    def publish_to_all(self):
+        for publisher in self.publishers.values():
+            publisher.publish(path=self.pecha_path, description=str(self))
+
+    def remove_from_all(self):
+        for publisher in self.publishers.values():
+            publisher.remove()
+
     def publish_to_github(self):
-        publisher = GithubPublisher()
+        publisher = self.publishers[Publishers.GITHUB]
         publisher.publish(path=self.pecha_path, description=str(self))
+
+    def remove_from_github(self):
+        publisher = self.publishers[Publishers.GITHUB]
+        publisher.remove(name=self.pecha_id)

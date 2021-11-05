@@ -1,9 +1,25 @@
+import enum
 import os
+import shutil
 import time
 from pathlib import Path
 
 from git import Repo
 from github import Github
+
+
+class Publishers(enum.Enum):
+    GITHUB = enum.auto()
+
+
+def get_publishers(publishers=[], all=False):
+    if all:
+        publishers = list(Publishers)
+    prepared_publishers = {}
+    for pub in publishers:
+        if pub == Publishers.GITHUB:
+            prepared_publishers[pub] = GithubPublisher()
+    return prepared_publishers
 
 
 def _getenv(name):
@@ -18,13 +34,21 @@ def _get_value(value, env_name):
     return value if value else _getenv(env_name)
 
 
-def commit_and_push(repo, message, not_includes, branch="master"):
+def commit_and_push(repo, message, branch="master"):
     repo.git.add("-A")
     repo.git.commit("-m", message)
     repo.git.push("origin", branch)
 
 
-class GithubPublisher:
+class PublisherBase:
+    def publish(self):
+        raise NotImplementedError
+
+    def remove(self):
+        raise NotImplementedError
+
+
+class GithubPublisher(PublisherBase):
     """class representing Github publisher
 
     This publisher creates local openpecha a git repo
@@ -69,7 +93,14 @@ class GithubPublisher:
         return repo._html_url.value
 
     def publish(self, path: Path, description: str):
+        """publish openpecha to github."""
         remote_repo_url = self._init_remote_repo(
             name=path.name, description=description
         )
         local_repo = self._init_local_repo(path=path, remote_url=remote_repo_url)
+        commit_and_push(repo=local_repo, message="Initial commit")
+
+    def remove(self, name: str, path: Path):
+        repo = self.org.get_repo(name)
+        repo.delete()
+        shutil.rmtree(str(path))
