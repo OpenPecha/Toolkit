@@ -4,9 +4,9 @@ from collections import defaultdict
 from pathlib import Path
 from typing import Dict, List, Union
 
-from openpecha import config
+from openpecha import config, storages
 from openpecha.core.layer import Layer, LayerEnum, MetaData
-from openpecha.publisher import Publishers, get_publishers
+from openpecha.storages import GithubStorage, StorageBase
 from openpecha.utils import dump_yaml, load_yaml
 
 
@@ -94,15 +94,10 @@ class OpenPecha:
 
 
 class OpenPechaFS(OpenPecha):
-    def __init__(
-        self,
-        opf_path: str = None,
-        publishers: List[Publishers] = [Publishers.GITHUB],
-        **kwargs,
-    ):
+    def __init__(self, opf_path: str = None, storage: StorageBase = None, **kwargs):
         self._opf_path = Path(opf_path) if opf_path else opf_path
         self.output_dir = None
-        self.publishers = get_publishers(publishers)
+        self.storage = storage if storage else GithubStorage()
         super().__init__(**kwargs)
 
     @staticmethod
@@ -236,18 +231,8 @@ class OpenPechaFS(OpenPecha):
                 continue
             self.reset_layer(base_name, layer_name)
 
-    def publish_to_all(self):
-        for publisher in self.publishers.values():
-            publisher.publish(path=self.pecha_path, description=self.about)
+    def publish(self):
+        self.storage.add_dir(path=self.pecha_path, description=self.about)
 
-    def remove_from_all(self):
-        for publisher in self.publishers.values():
-            publisher.remove()
-
-    def publish_to_github(self):
-        publisher = self.publishers[Publishers.GITHUB]
-        publisher.publish(path=self.pecha_path, description=self.about)
-
-    def remove_from_github(self):
-        publisher = self.publishers[Publishers.GITHUB]
-        publisher.remove(name=self.pecha_id)
+    def remove(self):
+        self.storage.remove_dir_with_path(name=self.pecha_path)
