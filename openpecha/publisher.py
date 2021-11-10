@@ -44,7 +44,10 @@ class PublisherBase:
     def publish(self):
         raise NotImplementedError
 
-    def remove(self):
+    def remove_with_name(self):
+        raise NotImplementedError
+
+    def remove_with_path(self):
         raise NotImplementedError
 
 
@@ -69,11 +72,11 @@ class GithubPublisher(PublisherBase):
         username: str = None,
         email: str = None,
     ):
-        self.org = _get_value(org, "GITHUB_ORG")
+        self.org_name = _get_value(org, "GITHUB_ORG")
         self.token = _get_value(token, "GITHUB_TOKEN")
         self.username = _get_value(username, "GITHUB_USERNAME")
         self.email = _get_value(email, "GITHUB_EMAIL")
-        self._org = Github(self.token).get_organization(self.org)
+        self.org = Github(self.token).get_organization(self.org_name)
 
     def _init_local_repo(self, path: Path, remote_url: str):
         repo = Repo.init(path)
@@ -100,8 +103,20 @@ class GithubPublisher(PublisherBase):
         local_repo = self._init_local_repo(path=path, remote_url=remote_repo_url)
         commit_and_push(repo=local_repo, message="Initial commit")
 
-    def remove(self, name: str, path: Path = None):
+    def remove_with_name(self, name: str):
         repo = self.org.get_repo(name)
         repo.delete()
-        if path:
-            shutil.rmtree(str(path))
+
+    def remove_with_path(self, path: Path):
+        """Remove repo with local path, assumes that local and remote name is same."""
+        repo = self.org.get_repo(path.name)
+        repo.delete()
+        shutil.rmtree(str(path))
+
+    def get_with_name(self, name: str):
+        repo = self.org.get_repo(name)
+        return repo
+
+    def get_with_path(self, path: Path):
+        repo = self.org.get_repo(path.name)
+        return repo
