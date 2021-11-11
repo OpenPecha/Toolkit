@@ -9,11 +9,11 @@ the catalog. Functonalities includes:
 import os
 
 import yaml
-from git import util
 
 from openpecha.core.utils import get_unique_id
 from openpecha.formatters import *
-from openpecha.github_utils import create_file, create_readme, github_publish
+from openpecha.github_utils import create_readme, github_publish
+from openpecha.storages import GithubStorage, Storage
 from openpecha.utils import *
 
 buildin_pipes = {
@@ -30,12 +30,9 @@ class CatalogManager:
         pipes=None,
         formatter=None,
         layers=[],
-        org="OpenPecha",
-        token=os.environ.get("GITHUB_TOKEN"),
         not_include_files=["releases"],
+        storage: Storage = None,
     ):
-        self.org = org
-        self.token = token
         self.repo_name = "catalog"
         self.batch_path = "data/batch.csv"
         self.batch = []
@@ -43,10 +40,11 @@ class CatalogManager:
         self.layers = layers
         self.not_include_files = not_include_files
         self.pipes = pipes if pipes else buildin_pipes
+        self.storage = storage if storage else GithubStorage()
 
     def _add_id_url(self, row):
         id = row[0]
-        row[0] = f"[{id}](https://github.com/{self.org}/{id})"
+        row[0] = f"[{id}](https://github.com/{self.storage.org_name}/{id})"
         return row
 
     def update(self):
@@ -55,13 +53,11 @@ class CatalogManager:
             "\n".join([",".join(row) for row in map(self._add_id_url, self.batch)])
             + "\n"
         )
-        create_file(
-            self.repo_name,
-            self.batch_path,
-            content,
-            "create new batch",
-            org=self.org,
-            token=self.token,
+        self.storage.add_file(
+            dir_name=self.repo_name,
+            path=self.batch_path,
+            content=content,
+            message="update with new batch",
         )
         print("[INFO] Updated the catalog")
 
@@ -88,8 +84,8 @@ class CatalogManager:
             self.formatter.pecha_path,
             not_includes=self.not_include_files,
             layers=self.layers,
-            org=self.org,
-            token=self.token,
+            org=self.storage.org_name,
+            token=self.storage.token,
         )
         return self.formatter.pecha_path
 
