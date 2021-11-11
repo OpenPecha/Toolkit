@@ -33,7 +33,7 @@ def commit_and_push(repo, message, branch="master"):
     repo.git.push("origin", branch)
 
 
-class StorageBase:
+class Storage:
     def add_dir(self):
         raise NotImplementedError
 
@@ -44,7 +44,7 @@ class StorageBase:
         raise NotImplementedError
 
 
-class GithubStorage(StorageBase):
+class GithubStorage(Storage):
     """class representing Github Storage
 
     This storage create, update, and delete github repo and files

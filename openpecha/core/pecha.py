@@ -6,7 +6,7 @@ from typing import Dict, List, Union
 
 from openpecha import config, storages
 from openpecha.core.layer import Layer, LayerEnum, MetaData
-from openpecha.storages import GithubStorage, StorageBase
+from openpecha.storages import GithubStorage, Storage
 from openpecha.utils import dump_yaml, load_yaml
 
 
@@ -94,7 +94,7 @@ class OpenPecha:
 
 
 class OpenPechaFS(OpenPecha):
-    def __init__(self, opf_path: str = None, storage: StorageBase = None, **kwargs):
+    def __init__(self, opf_path: str = None, storage: Storage = None, **kwargs):
         self._opf_path = Path(opf_path) if opf_path else opf_path
         self.output_dir = None
         self.storage = storage if storage else GithubStorage()
