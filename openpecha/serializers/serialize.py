@@ -1,5 +1,4 @@
 import re
-
 from collections import defaultdict, namedtuple
 from pathlib import Path
 
@@ -122,12 +121,12 @@ class Serialize(object):
         Returns:
             str: css class name of the annotation
         """
-        css_class_name = ''
-        metadata = annotation.get('metadata', {})
+        css_class_name = ""
+        metadata = annotation.get("metadata", {})
         if metadata:
-            css_class_name = metadata.get('css_class_name', '')
+            css_class_name = metadata.get("css_class_name", "")
         return css_class_name
-        
+
     def get_text_spans(self, text_id, index_layer):
         """
         get spans of text
@@ -178,7 +177,7 @@ class Serialize(object):
             vol_base = (self.opf_path / f"base/{vol_id}.txt").read_text()
             start = self.text_spans[vol_id]["start"]
             end = self.text_spans[vol_id]["end"]
-            return vol_base[start:end+1]
+            return vol_base[start : end + 1]
         else:
             vol_base = (self.opf_path / f"base/{vol_id}.txt").read_text()
             return vol_base
@@ -230,7 +229,7 @@ class Serialize(object):
                 vol_id = f"v{sub_topic['span'][0]['vol']:03}"
                 sub_topic_ann["type"] = AnnType.sub_topic
                 sub_topic_ann["work_id"] = sub_topic["work_id"]
-                sub_topic_ann["span"] = sub_topic['span'][0]
+                sub_topic_ann["span"] = sub_topic["span"][0]
                 self.apply_annotation(vol_id, sub_topic_ann)
             if topic["span"]:
                 vol_id = f"v{topic['span'][0]['vol']:03}"
@@ -295,7 +294,7 @@ class Serialize(object):
         raise NotImplementedError(
             "The Serialize class doesn't provide any serialization, please use a subclass such ass SerializeMd"
         )
-    
+
     def _clip_extra_newline(self, cur_vol_result):
         """An extra line found in pages are removed.
 
@@ -305,14 +304,14 @@ class Serialize(object):
         Returns:
             str: clean serialize results
         """
-        clean_result = ''
-        pages_and_anns = re.split(r"(\[[𰵀-󴉱]?[0-9]+[a-z]{1}\])", cur_vol_result)
+        clean_result = ""
+        pages_and_anns = re.split(r"(〔[𰵀-󴉱]?\d+〕)", cur_vol_result)
         for page_and_ann in pages_and_anns:
             if page_and_ann:
-                if re.search(r"\[([𰵀-󴉱])?[0-9]+[a-z]{1}\]", page_and_ann):
+                if re.search(r"\(([𰵀-󴉱])?\d+\)", page_and_ann):
                     clean_result += page_and_ann
                 else:
-                    if page_and_ann[-1] == '\n':
+                    if page_and_ann[-1] == "\n":
                         clean_result += page_and_ann[:-1]
                     else:
                         clean_result += page_and_ann

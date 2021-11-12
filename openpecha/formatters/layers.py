@@ -70,8 +70,8 @@ class _attr_names:
     END = "end"
 
     # Page
+    IMGNUM = "imgnum"
     PAGE_INDEX = "page_index"  # Page number based on Volume specified, type: int
-    PAGE_INFO = "page_info"  # Page information. type: str
     PAGE_REFERENCE = "reference"  # Any reference of page, eg: img_url. type: str
 
     # Text
@@ -129,10 +129,9 @@ Text = {
 # ~~~~~ ANNOTATIONS Layers ~~~~~~
 
 
-def Page(span, page_index=None, page_info=None, page_ref=None):
+def Page(span, imgnum=None, page_ref=None):
     return {
-        _attr_names.PAGE_INDEX: page_index,
-        _attr_names.PAGE_INFO: page_info,
+        _attr_names.IMGNUM: imgnum,
         _attr_names.PAGE_REFERENCE: page_ref,
         _attr_names.SPAN: span,
     }

@@ -38,12 +38,9 @@ class HFMLSerializer(Serialize):
                     if pg_side.isdigit():
                         pg_n = str(pg_n) + pg_side
                         pg_side = ""
-                    start_payload = f"[{local_id}{pg_n}{pg_side}]"
+                    start_payload = f"〔{local_id}{pg_n}{pg_side}〕"
             else:
-                start_payload = f'[{local_id}{pg_idx}]'
-
-            if ann.get("page_info", ""):
-                start_payload += f' {ann["page_info"]}\n'
+                start_payload = f"〔{local_id}{pg_idx}〕"
             if ann.get("reference", ""):
                 start_payload += f' {ann["reference"]}\n'
             else:

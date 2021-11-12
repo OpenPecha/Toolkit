@@ -4,8 +4,8 @@ Formatter for HFML annotations in the text
 This module implements all classes necessary to format HFML annotation to OpenPecha format.
 HFML (Human Friendly Markup Language) contains tagset used for structuring and annotating the text.
 """
-from json import encoder
 import re
+from json import encoder
 from pathlib import Path
 
 import yaml
@@ -451,7 +451,7 @@ class HFMLFormatter(BaseFormatter):
         cur_vol_abs_er_id = []  # list variable to store abs_er annotation
         cur_vol_archaic_id = []
         note_id = []  # list variable to store note annotation '#"
-        pg_info = []  # lsit variable to store page info component
+        pg_refs = []  # lsit variable to store page info component
         pg_ann = []  # list variable to store page annotation content
         pg_tid = []
 
@@ -497,7 +497,7 @@ class HFMLFormatter(BaseFormatter):
             "book_number_pattern": r"\<([𰵀-󴉱])?k4.+?\>",
             "poti_title_pattern": r"\<([𰵀-󴉱])?k2.+?\>",
             "chapter_title_pattern": r"\<([𰵀-󴉱])?k3.+?\>",
-            "page_pattern": r"\[([𰵀-󴉱])?[0-9]+[a-z]{1}\]",
+            "page_pattern": r"〔([𰵀-󴉱])?\d+〕",
             "line_pattern": r"\[\w+\.\d+\]",
             "topic_pattern": r"\{([𰵀-󴉱])?\w+\}",
             "start_cit_pattern": r"\<([𰵀-󴉱])?g",
@@ -548,20 +548,20 @@ class HFMLFormatter(BaseFormatter):
                 end_page = end_line
                 local_id = self.get_local_id(re.search(pat_list["page_pattern"], line))
                 pg_tid.append(local_id)
-                page_info = line[re.search(pat_list["page_pattern"], line).end() :]
+                page_reference = line[re.search(pat_list["page_pattern"], line).end() :]
                 if local_id:
                     pg_ann.append(re.search(pat_list["page_pattern"], line)[0][2:-1])
                 else:
                     pg_ann.append(re.search(pat_list["page_pattern"], line)[0][1:-1])
-                pg_info.append(page_info)
-                if len(pg_info) >= 2:
+                pg_refs.append(page_reference)
+                if len(pg_refs) >= 2:
                     cur_vol_pages.append(
                         (
                             pg_tid[-2],
                             Page(
                                 Span(start_page, end_page),
-                                page_index=pg_ann[-2],
-                                page_info=pg_info[-2],
+                                imgnum=pg_ann[-2],
+                                page_ref=pg_refs[-2],
                             ),
                         )
                     )
@@ -897,8 +897,8 @@ class HFMLFormatter(BaseFormatter):
                             pg_tid[-1],
                             Page(
                                 Span(start_page, char_walker - 2),
-                                page_index=pg_ann[-1],
-                                page_info=pg_info[-1],
+                                imgnum=pg_ann[-1],
+                                page_ref=pg_refs[-1],
                             ),
                         )
                     )
@@ -1049,7 +1049,6 @@ class HFMLFormatter(BaseFormatter):
 
 
 class HFMLTextFromatter(HFMLFormatter):
-
     def __init_(self, output_path="./output", is_book=False, text_id=None):
         super().__init__(output_path=output_path, is_book=is_book)
         self.text_id = text_id
@@ -1059,10 +1058,10 @@ class HFMLTextFromatter(HFMLFormatter):
 
     def get_offset(self, index_layer, text_id):
         offset = {}
-        for text_uuid, text in index_layer['annotations'].items():
-            if text['work_id'] == text_id:
-                for span in text['span']:
-                    offset[span['vol']] = span['start']
+        for text_uuid, text in index_layer["annotations"].items():
+            if text["work_id"] == text_id:
+                for span in text["span"]:
+                    offset[span["vol"]] = span["start"]
                 return offset
         return offset
 
@@ -1074,35 +1073,45 @@ class HFMLTextFromatter(HFMLFormatter):
 
     def get_old_text_base(pecha_idx, pecha_base_text, text_id, text_vol_id):
         vol_num = int(text_vol_id[1:])
-        for text_uuid, text in pecha_idx['annotations'].items():
-            if text['word_id'] == text_id:
-                for vol_span in text['span']:
-                    if vol_span['vol'] == vol_num:
-                        return pecha_base_text[vol_span['start']:vol_span['end']]
+        for text_uuid, text in pecha_idx["annotations"].items():
+            if text["word_id"] == text_id:
+                for vol_span in text["span"]:
+                    if vol_span["vol"] == vol_num:
+                        return pecha_base_text[vol_span["start"] : vol_span["end"]]
         return pecha_base_text
 
     def update_base_text(self, pecha_opf_path, text_opf_path, pecha_idx, text_id):
         text_vol_ids = self.get_text_vol_ids(text_opf_path)
         for text_vol_id in text_vol_ids:
-            pecha_base_text = (pecha_opf_path / f"base/{text_vol_id}.txt").read_text(encoding='utf-8')
-            old_text_base = self.get_old_base_text(pecha_idx, pecha_base_text, text_id, text_vol_id)
-            new_text_base = (text_opf_path / f"base/{text_vol_id}.txt").read_text(encoding='utf-8')
+            pecha_base_text = (pecha_opf_path / f"base/{text_vol_id}.txt").read_text(
+                encoding="utf-8"
+            )
+            old_text_base = self.get_old_base_text(
+                pecha_idx, pecha_base_text, text_id, text_vol_id
+            )
+            new_text_base = (text_opf_path / f"base/{text_vol_id}.txt").read_text(
+                encoding="utf-8"
+            )
             new_base_text = pecha_base_text.replace(old_text_base, new_base_text)
             yield text_vol_id, new_base_text
-            (pecha_opf_path / f"base/{text_vol_id}.txt").write_text(new_base_text, encoding='utf-8')
-        print('INFO: base text updated')
+            (pecha_opf_path / f"base/{text_vol_id}.txt").write_text(
+                new_base_text, encoding="utf-8"
+            )
+        print("INFO: base text updated")
 
     def get_new_ann(self, cur_pecha_ann, cur_text_ann, cur_vol_offset):
-        cur_pecha_ann['span']['start'] = cur_text_ann['span']['start'] + cur_vol_offset
-        cur_pecha_ann['span']['end'] = cur_text_ann['span']['end'] + cur_vol_offset
+        cur_pecha_ann["span"]["start"] = cur_text_ann["span"]["start"] + cur_vol_offset
+        cur_pecha_ann["span"]["end"] = cur_text_ann["span"]["end"] + cur_vol_offset
         return cur_pecha_ann
 
     def get_new_layer(self, cur_vol_pecha_layer, cur_vol_text_layer, cur_vol_offset):
-        for ann_id, local_id in cur_vol_text_layer['local_ids']:
-            pecha_ann_id = cur_vol_pecha_layer['local_ids'].key(local_id)
-            cur_text_ann = cur_vol_text_layer['annotations'][ann_id]
-            cur_pecha_ann = cur_vol_pecha_layer['annotations'][pecha_ann_id]
-            cur_vol_pecha_layer['annotations'][pecha_ann_id] = self.get_new_ann(cur_pecha_ann, cur_text_ann, cur_vol_offset)
+        for ann_id, local_id in cur_vol_text_layer["local_ids"]:
+            pecha_ann_id = cur_vol_pecha_layer["local_ids"].key(local_id)
+            cur_text_ann = cur_vol_text_layer["annotations"][ann_id]
+            cur_pecha_ann = cur_vol_pecha_layer["annotations"][pecha_ann_id]
+            cur_vol_pecha_layer["annotations"][pecha_ann_id] = self.get_new_ann(
+                cur_pecha_ann, cur_text_ann, cur_vol_offset
+            )
         return cur_vol_pecha_layer
 
     def update_layers(self, pecha_opf_path, text_opf_path, vol_wise_offset):
@@ -1110,19 +1119,32 @@ class HFMLTextFromatter(HFMLFormatter):
         for text_vol_id in text_vol_ids:
             layers_to_update = list((text_opf_path / f"layers/{text_vol_id}").iterdir())
             for layer_to_update in layers_to_update:
-                cur_vol_pecha_layer = self.from_yaml((pecha_opf_path / f"layers/{text_vol_id}/{layer_to_update.stem}.yml"))
+                cur_vol_pecha_layer = self.from_yaml(
+                    (
+                        pecha_opf_path
+                        / f"layers/{text_vol_id}/{layer_to_update.stem}.yml"
+                    )
+                )
                 cur_vol_text_layer = self.from_yaml(layer_to_update)
                 cur_vol_offset = vol_wise_offset[text_vol_id]
-                new_layer = self.get_new_layer(cur_vol_pecha_layer, cur_vol_text_layer, cur_vol_offset)
+                new_layer = self.get_new_layer(
+                    cur_vol_pecha_layer, cur_vol_text_layer, cur_vol_offset
+                )
                 new_layer = yaml.safe_load(new_layer)
-                (pecha_opf_path / f"layers/{text_vol_id}/{layer_to_update.stem}.yml").write_text(new_layer, encoding='utf-8')
-        print('INFO: layers updated')
+                (
+                    pecha_opf_path / f"layers/{text_vol_id}/{layer_to_update.stem}.yml"
+                ).write_text(new_layer, encoding="utf-8")
+        print("INFO: layers updated")
 
     def save_text_to_pecha(self, pecha_opf_path, text_opf_path, text_id):
         pecha_idx = self.from_yaml((pecha_opf_path / "index.yml"))
-        for vol_id, new_base_text in self.update_base_text(pecha_opf_path, text_opf_path, pecha_idx, text_id):
-            (pecha_opf_path / f"base/{vol_id}.txt").write_text(new_base_text, encoding='utf-8')
-            print(f'INFO: {vol_id} base text updated')
+        for vol_id, new_base_text in self.update_base_text(
+            pecha_opf_path, text_opf_path, pecha_idx, text_id
+        ):
+            (pecha_opf_path / f"base/{vol_id}.txt").write_text(
+                new_base_text, encoding="utf-8"
+            )
+            print(f"INFO: {vol_id} base text updated")
         vol_wise_offset = self.get_offset(pecha_idx, text_id)
         self.update_layers(pecha_opf_path, text_opf_path, vol_wise_offset)
-        print(f'{text_id} of {pecha_opf_path.stem} saved...')
+        print(f"{text_id} of {pecha_opf_path.stem} saved...")
