@@ -34,6 +34,9 @@ jobs:
         pip install -e .
     
     - name: Run Test Coverage
+      env:
+        GITHUB_ORG: ${{ secrects.GH_ORG }}
+        GITHUB_TOKEN: ${{ secrets.ADMIN_GITHUB_TOKEN }}
       run: |
         coverage run -m pytest tests/
         coverage report
