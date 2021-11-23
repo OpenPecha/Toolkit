@@ -1,9 +1,10 @@
+from datetime import datetime
 from enum import Enum
 from typing import Dict, Optional
 
 from pydantic import BaseModel, validator
 
-from .utils import get_unique_id
+from .utils import get_id, get_uuid
 
 
 class LayerEnum(Enum):
@@ -47,7 +48,7 @@ class Layer(BaseModel):
 
     @validator("id", pre=True, always=True)
     def set_id(cls, v):
-        return v or get_unique_id()
+        return v or get_uuid()
 
     @validator("revision")
     def revision_must_int_parsible(cls, v):
@@ -62,11 +63,13 @@ class Layer(BaseModel):
         self.annotations = {}
 
 
-class MetaData(BaseModel):
+class PechaMetaData(BaseModel):
     id: str = None
     initial_creation_type: InitialCreationEnum
     source_metadata: Optional[Dict] = {}
+    created_at: datetime = None
+    last_modified_at: datetime = None
 
     @validator("id", pre=True, always=True)
     def set_id(cls, v):
-        return v or get_unique_id()
+        return v or get_id(prefix="P", length=8)

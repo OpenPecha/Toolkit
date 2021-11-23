@@ -4,8 +4,8 @@ from collections import defaultdict
 from pathlib import Path
 from typing import Dict, List, Union
 
-from openpecha import config, storages
-from openpecha.core.layer import Layer, LayerEnum, MetaData
+from openpecha import config
+from openpecha.core.layer import Layer, LayerEnum, PechaMetaData
 from openpecha.storages import GithubStorage, Storage
 from openpecha.utils import dump_yaml, load_yaml
 
@@ -16,7 +16,7 @@ class OpenPecha:
         base: Dict[str, str] = {},
         layers: Dict[str, Dict[LayerEnum, Layer]] = defaultdict(dict),
         index: Layer = None,
-        meta: MetaData = None,
+        meta: PechaMetaData = None,
         assets: Dict[str, List[Union[str, Path]]] = {},
         components: Dict[str, List[Layer]] = {},
     ):
@@ -52,10 +52,10 @@ class OpenPecha:
         return self._pecha_id
 
     @property
-    def meta(self) -> MetaData:
+    def meta(self) -> PechaMetaData:
         if self._meta:
             return self._meta
-        self._meta = MetaData.parse_obj(self.read_meta_file())
+        self._meta = PechaMetaData.parse_obj(self.read_meta_file())
         return self._meta
 
     @property

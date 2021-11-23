@@ -3,7 +3,7 @@ from pathlib import Path
 from pydantic.errors import SubclassError
 
 from openpecha.catalog.utils import create_pecha_id
-from openpecha.core.layer import InitialCreationEnum, Layer, LayerEnum, MetaData
+from openpecha.core.layer import InitialCreationEnum, Layer, LayerEnum, PechaMetaData
 from openpecha.core.pecha import OpenPechaFS
 
 from .. import config
@@ -40,7 +40,7 @@ class EmptyEbook:
         openpecha = OpenPechaFS(
             base={"v001": text},
             layers={"v001": self.get_dummy_layers()},
-            meta=MetaData(
+            meta=PechaMetaData(
                 initial_creation_type=InitialCreationEnum.ebook,
                 source_metadata=self.metadata,
             ),

@@ -3,7 +3,7 @@ import tempfile
 
 import pytest
 
-from openpecha.core.layer import InitialCreationEnum, Layer, LayerEnum, MetaData
+from openpecha.core.layer import InitialCreationEnum, Layer, LayerEnum, PechaMetaData
 from openpecha.core.pecha import OpenPechaFS
 
 
@@ -22,7 +22,7 @@ def test_create_pecha():
                 )
             }
         },
-        meta=MetaData(initial_creation_type=InitialCreationEnum.ebook),
+        meta=PechaMetaData(initial_creation_type=InitialCreationEnum.ebook),
     )
     assert openpecha.meta.id
     assert openpecha.get_base("v001")

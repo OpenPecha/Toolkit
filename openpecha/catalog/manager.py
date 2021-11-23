@@ -10,7 +10,7 @@ import os
 
 import yaml
 
-from openpecha.core.utils import get_unique_id
+from openpecha.core.utils import get_id
 from openpecha.formatters import *
 from openpecha.github_utils import create_readme, github_publish
 from openpecha.storages import GithubStorage, Storage
@@ -78,7 +78,7 @@ class CatalogManager:
 
     def format_and_publish(self, path):
         """Convert input pecha to opf-pecha with id assigined"""
-        self.formatter.create_opf(path, get_unique_id())
+        self.formatter.create_opf(path, get_id(prefix="P", length=8))
         self._get_catalog_metadata(self.formatter.meta_fn)
         github_publish(
             self.formatter.pecha_path,

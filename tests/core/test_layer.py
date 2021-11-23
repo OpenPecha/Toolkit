@@ -1,7 +1,9 @@
+from datetime import datetime
+
 import pytest
 from pydantic import ValidationError
 
-from openpecha.core.layer import Layer, LayerEnum
+from openpecha.core.layer import InitialCreationEnum, Layer, LayerEnum, PechaMetaData
 
 
 def test_layer_model():
@@ -33,3 +35,20 @@ def test_layer_reset():
     layer.reset()
     assert layer.revision == "00001"
     assert layer.annotations == {}
+
+
+def test_metadata_model():
+    created_at = datetime.fromisoformat("2020-01-01T00:00:00")
+    last_modified_at = datetime.fromisoformat("2020-01-01T00:00:00")
+
+    metadata = PechaMetaData(
+        initial_creation_type=InitialCreationEnum.ocr,
+        created_at=created_at,
+        last_modified_at=last_modified_at,
+    )
+
+    assert metadata.created_at == created_at
+    assert metadata.last_modified_at == last_modified_at
+    assert metadata.initial_creation_type.value == InitialCreationEnum.ocr.value
+    assert metadata.id.startswith("P")
+    assert len(metadata.id) == 9
