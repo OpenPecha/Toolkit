@@ -6,7 +6,7 @@ on:
       - '*'
   pull_request:
     branches:
-      - '*' 
+      - '*'
 
 jobs:
   build:
@@ -26,16 +26,16 @@ jobs:
       uses: actions/setup-python@v1
       with:
         python-version: ${{ matrix.python-version }}
-    
+
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements-dev.txt
         pip install -e .
-    
+
     - name: Run Test Coverage
       env:
-        GITHUB_ORG: ${{ secrects.GH_ORG }}
+        GITHUB_ORG: ${{ secrets.GH_ORG }}
         GITHUB_TOKEN: ${{ secrets.ADMIN_GITHUB_TOKEN }}
       run: |
         coverage run -m pytest tests/

@@ -29,7 +29,7 @@ jobs:
 
     - name: Run Test
       env:
-        GITHUB_ORG: ${{ secrects.GH_ORG }}
+        GITHUB_ORG: ${{ secrets.GH_ORG }}
         GITHUB_TOKEN: ${{ secrets.ADMIN_GITHUB_TOKEN }}
       run: |
         pytest tests/
