@@ -27,6 +27,9 @@ jobs:
         pip install -r requirements-dev.txt
         pip install -e .
     - name: Run Test
+      env:
+          GITHUB_ORG: ${{ secrects.GH_ORG }}
+          GITHUB_TOKEN: ${{ secrets.ADMIN_GITHUB_TOKEN }}
       run: |
         pytest tests/
   
