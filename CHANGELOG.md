@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.7.63 (2021-11-25)
+### Fix
+* **core:** Get id for pecha, work, alignment and collection ([`aa88541`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/aa88541272ab4897f2ff957af1fe1e46c4a4fe55))
+
 ## v0.7.62 (2021-11-23)
 ### Fix
 * **github-storage:** Rename publisher to storage and add and remove file ([`557f5d8`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/557f5d80ff2406cfa506d1b5ff5a3e8292888b88))
