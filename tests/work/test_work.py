@@ -4,7 +4,7 @@ from datetime import datetime
 import pytest
 
 from openpecha.core.layer import InitialCreationEnum
-from openpecha.core.work import Instance, InstanceMetadata, Work
+from openpecha.work import Instance, InstanceMetadata, Work
 
 
 @pytest.fixture(scope="module")

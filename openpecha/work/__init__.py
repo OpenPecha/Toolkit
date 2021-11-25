@@ -11,9 +11,9 @@ from typing import Dict, List, Union
 from pydantic import BaseModel, validator
 from pydantic.networks import AnyHttpUrl
 
+from ..core.ids import get_work_id
+from ..core.layer import InitialCreationEnum
 from ..utils import dump_yaml, load_yaml
-from .ids import get_work_id
-from .layer import InitialCreationEnum
 
 
 class InstanceMetadata(BaseModel):
