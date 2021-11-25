@@ -4,7 +4,7 @@ from typing import Dict, Optional
 
 from pydantic import BaseModel, validator
 
-from .utils import get_id, get_uuid
+from .ids import get_pecha_id, get_uuid
 
 
 class LayerEnum(Enum):
@@ -72,4 +72,4 @@ class PechaMetaData(BaseModel):
 
     @validator("id", pre=True, always=True)
     def set_id(cls, v):
-        return v or get_id(prefix="P", length=8)
+        return v or get_pecha_id()

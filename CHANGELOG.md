@@ -2,6 +2,14 @@
 
 <!--next-version-placeholder-->
 
+## v0.7.62 (2021-11-23)
+### Fix
+* **github-storage:** Rename publisher to storage and add and remove file ([`557f5d8`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/557f5d80ff2406cfa506d1b5ff5a3e8292888b88))
+* **publisher-github:** Remove and get repo ([`550c486`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/550c48643d794eaf5cc076112d28a78bb91a3a25))
+* **publishers-github:** Aget dpecha description from about prop ([`93a341a`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/93a341a0b11215dae38a1466edf66af0bedf82b3))
+* **publishers-github:** Cimake path optional when remove pecha ([`6c004f0`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/6c004f069c175b7d40b6b4071b28c1ae4ee55cec))
+* **core-publisher:** Add base publisher class ([`7746060`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/774606092305123223b887b4534174b733a8f03a))
+
 ## v0.7.61 (2021-10-29)
 ### Fix
 * **hfml:** Page annotation updated ([`a7eec5e`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/a7eec5e12ddce18d0ed1dbb732a42cf48f94dd09))
