@@ -2,6 +2,13 @@
 
 <!--next-version-placeholder-->
 
+## v0.7.64 (2021-11-25)
+### Fix
+* **core:** Move work in work sub-pkg ([`691f9ee`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/691f9ee4324dfc91d05fd440a91183ce56ab9e73))
+* **core:** Save and load workk from yaml ([`1fba453`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/1fba453b9312957cebc33ae896d9dff483d9fc54))
+* **core:** Add Work model and test ([`366540d`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/366540dab431ac5de303802e617539ff20bf34db))
+* **work:** Add work test ([`caf8b52`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/caf8b52bc1b5a46114e9dfbc6f1a410201334f28))
+
 ## v0.7.63 (2021-11-25)
 ### Fix
 * **core:** Get id for pecha, work, alignment and collection ([`aa88541`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/aa88541272ab4897f2ff957af1fe1e46c4a4fe55))
