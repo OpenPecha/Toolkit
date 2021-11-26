@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.7.65 (2021-11-26)
+### Fix
+* **work:** Aadd load work from id ([`d75d67b`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/d75d67b238d00bdde8f3d4f3bb54ad60fdf44e97))
+
 ## v0.7.64 (2021-11-25)
 ### Fix
 * **core:** Move work in work sub-pkg ([`691f9ee`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/691f9ee4324dfc91d05fd440a91183ce56ab9e73))
