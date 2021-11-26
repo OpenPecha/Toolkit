@@ -13,7 +13,7 @@ from pydantic.networks import AnyHttpUrl
 
 from ..core.ids import get_work_id
 from ..core.layer import InitialCreationEnum
-from ..utils import dump_yaml, load_yaml
+from ..utils import download_pecha, dump_yaml, load_yaml
 
 
 class InstanceMetadata(BaseModel):
@@ -36,6 +36,12 @@ class Instance(BaseModel):
 
     id: str
     metadata: InstanceMetadata
+
+
+class WorkNotFound(Exception):
+    """Work not found exception."""
+
+    pass
 
 
 class Work(BaseModel):
@@ -113,3 +119,21 @@ class Work(BaseModel):
         work_fn = output_dir / f"{self.id}.yaml"
         dump_yaml(data=json.loads(self.json()), output_fn=work_fn)
         return work_fn
+
+    @classmethod
+    def from_id(cls, id_: str) -> "Work":
+        """Create Work from id.
+
+        Args:
+            id (str): Work id.
+
+        Returns:
+            Work: Work object.
+        """
+        works_path = download_pecha("works")
+        work_fn = works_path / f"{id_}.yaml"
+        if not work_fn.is_file():
+            work_fn = works_path / f"{id_}.yml"
+            if not work_fn.is_file():
+                raise WorkNotFound(f"Work {id_} not found")
+        return cls.from_yaml(work_fn)
