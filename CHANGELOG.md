@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.7.66 (2021-11-26)
+### Fix
+* **work:** Opwork id can be searched using bdrc instance id ([`a97796d`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/a97796d550d8b7515cbdb31b8cae614204e0d62f))
+
 ## v0.7.65 (2021-11-26)
 ### Fix
 * **work:** Aadd load work from id ([`d75d67b`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/d75d67b238d00bdde8f3d4f3bb54ad60fdf44e97))
