@@ -11,6 +11,7 @@ from typing import Dict, List, Union
 from pydantic import BaseModel, validator
 from pydantic.networks import AnyHttpUrl
 
+from .. import config
 from ..core.ids import get_work_id
 from ..core.layer import InitialCreationEnum
 from ..utils import download_pecha, dump_yaml, load_yaml
@@ -105,16 +106,24 @@ class Work(BaseModel):
         Returns:
             Work: Work object.
         """
-        if isinstance(fn, str):
-            fn = Path(fn)
-
+        fn = Path(fn)
         data = load_yaml(fn)
         work = cls.parse_obj(data)
         for instance_id, metadata in work.instances.items():
             work.instances[instance_id] = InstanceMetadata.parse_obj(metadata)
         return work
 
-    def save_to_yaml(self, output_dir: Union[str, Path]) -> Path:
+    def save_to_yaml(self, output_dir: Union[str, Path] = None) -> Path:
+        """Save work to yaml file.
+
+        Args:
+            output_dir (str): Output directory.
+
+        Returns:
+            Path: Path to saved yaml file.
+        """
+        if not output_dir:
+            output_dir = download_pecha(config.WORKS_REPO_NAME)
         output_dir = Path(output_dir)
         work_fn = output_dir / f"{self.id}.yaml"
         dump_yaml(data=json.loads(self.json()), output_fn=work_fn)
@@ -130,7 +139,7 @@ class Work(BaseModel):
         Returns:
             Work: Work object.
         """
-        works_path = download_pecha("works")
+        works_path = download_pecha(config.WORKS_REPO_NAME)
         work_fn = works_path / f"{id_}.yaml"
         if not work_fn.is_file():
             work_fn = works_path / f"{id_}.yml"

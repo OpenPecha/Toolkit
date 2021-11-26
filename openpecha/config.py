@@ -19,6 +19,7 @@ N_SIG = 6  # no. of significant digits for pecha id
 GITHUB_ORG_URL = "https://github.com/OpenPecha"
 
 # Work
+WORKS_REPO_NAME = "works"
 OP2BDRC_WORK_MAPPING_URL = (
     "https://raw.githubusercontent.com/OpenPecha/works/main/mappings/bdrc.csv"
 )
