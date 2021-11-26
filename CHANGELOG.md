@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.7.67 (2021-11-26)
+### Fix
+* **core:** Rset deefault path to save work ([`0b11e67`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/0b11e67edd047b3a0c3057d4e8b1af3831e6f03b))
+
 ## v0.7.66 (2021-11-26)
 ### Fix
 * **work:** Opwork id can be searched using bdrc instance id ([`a97796d`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/a97796d550d8b7515cbdb31b8cae614204e0d62f))
