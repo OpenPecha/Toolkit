@@ -1,9 +1,14 @@
 import tempfile
 from pathlib import Path
+from re import S
 
 import pytest
 
-from openpecha.storages import GithubStorage
+from openpecha.storages import (
+    GithubStorage,
+    is_repo_authenticated,
+    setup_auth_for_old_repo,
+)
 
 
 def create_file_in_dir(dir_):
@@ -19,12 +24,15 @@ def test_add_dir():
         storage = GithubStorage()
         create_file_in_dir(tmpdir)
 
-        storage.add_dir(tmpdir, "test repo")
+        try:
+            repo = storage.add_dir(tmpdir, "test repo")
+            repo = setup_auth_for_old_repo(repo, storage.org, storage.token)
 
-        assert storage.get_dir_with_path(tmpdir)
-        assert storage.get_dir_with_name(tmpdir.name)
-
-        storage.remove_dir_with_path(tmpdir)
+            assert is_repo_authenticated(repo)
+            assert storage.get_dir_with_path(tmpdir)
+            assert storage.get_dir_with_name(tmpdir.name)
+        finally:
+            storage.remove_dir_with_path(tmpdir)
 
 
 @pytest.mark.skip(reason="external call")
@@ -33,20 +41,22 @@ def test_add_file():
         tmpdir = Path(tmpdir)
         storage = GithubStorage()
         create_file_in_dir(tmpdir)
-        storage.add_dir(tmpdir, "test repo")
-        file_path = "test2/test.txt"
-        file_content = "test file 2"
+        try:
+            storage.add_dir(tmpdir, "test repo")
+            file_path = "test2/test.txt"
+            file_content = "test file 2"
 
-        storage.add_file(
-            dir_name=tmpdir.name,
-            path=file_path,
-            content=file_content,
-            message="add test file 2 file",
-        )
+            storage.add_file(
+                dir_name=tmpdir.name,
+                path=file_path,
+                content=file_content,
+                message="add test file 2 file",
+            )
 
-        assert storage.get_file(dir_name=tmpdir.name, path=file_path)
+            assert storage.get_file(dir_name=tmpdir.name, path=file_path)
 
-        storage.remove_file(
-            dir_name=tmpdir.name, path=file_path, message="delete test2 file"
-        )
-        storage.remove_dir_with_path(tmpdir)
+            storage.remove_file(
+                dir_name=tmpdir.name, path=file_path, message="delete test2 file"
+            )
+        finally:
+            storage.remove_dir_with_path(tmpdir)

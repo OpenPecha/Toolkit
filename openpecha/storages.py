@@ -27,6 +27,34 @@ def _get_value(value, env_name, optional=False):
     return value if value else _getenv(env_name, optional)
 
 
+def get_authenticated_remote_url(url, org, token):
+    old_url = url.split("//")
+    auth_remote_url = f"{old_url[0]}//{org}:{token}@{old_url[1]}"
+    return auth_remote_url
+
+
+def setup_auth_for_new_repo(repo, org, token, remote_url):
+    auth_remote_url = get_authenticated_remote_url(remote_url, org, token)
+    repo.create_remote("origin", auth_remote_url)
+    return repo
+
+
+def is_repo_authenticated(repo) -> bool:
+    remote_url = repo.remote().url
+    if "@" in remote_url:
+        return True
+    return False
+
+
+def setup_auth_for_old_repo(repo, org, token):
+    remote_url = repo.remote().url
+    if is_repo_authenticated(repo):
+        return repo
+    auth_remote_url = get_authenticated_remote_url(remote_url, org, token)
+    repo.set_remote("origin", auth_remote_url)
+    return repo
+
+
 def commit_and_push(repo, message, branch="master"):
     repo.git.add("-A")
     repo.git.commit("-m", message)
@@ -86,10 +114,7 @@ class GithubStorage(Storage):
 
     def _init_local_repo(self, path: Path, remote_url: str):
         repo = Repo.init(path)
-        old_url = remote_url.split("//")
-        auth_remote_url = f"{old_url[0]}//{self.org}:{self.token}@{old_url[1]}"
-        repo.create_remote("origin", auth_remote_url)
-
+        repo = setup_auth_for_new_repo(repo, self.org_name, self.token, remote_url)
         repo.config_writer().set_value("user", "name", self.username).release()
         repo.config_writer().set_value("user", "email", self.email).release()
         return repo
@@ -108,6 +133,7 @@ class GithubStorage(Storage):
         )
         local_repo = self._init_local_repo(path=path, remote_url=remote_repo_url)
         commit_and_push(repo=local_repo, message="Initial commit")
+        return local_repo
 
     def remove_dir_with_name(self, name: str):
         repo = self.org.get_repo(name)
