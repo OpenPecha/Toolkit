@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.7.68 (2021-11-26)
+### Fix
+* **core:** Set default output path to save work ([`9488419`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/9488419a31c4bc046959940f238e87a3e69907c2))
+
 ## v0.7.67 (2021-11-26)
 ### Fix
 * **core:** Rset deefault path to save work ([`0b11e67`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/0b11e67edd047b3a0c3057d4e8b1af3831e6f03b))
