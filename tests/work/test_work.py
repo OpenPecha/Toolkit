@@ -97,7 +97,7 @@ def test_save_work_to_yml(instance):
         assert work_fn.is_file()
 
 
-def test_create_work_from_yaml(instance):
+def test_load_work_from_yaml(instance):
     work = Work(title="title")
     work.add_instance(instance)
 
@@ -108,3 +108,12 @@ def test_create_work_from_yaml(instance):
         assert loaded_work.id == work.id
         assert loaded_work.title == work.title
         assert loaded_work.instances == work.instances
+
+
+@pytest.mark.skip(reason="Pulling Github repo")
+def test_load_work_from_id():
+    work_id = "W00000000"
+
+    work = Work.from_id(work_id)
+
+    assert work.id == work_id
