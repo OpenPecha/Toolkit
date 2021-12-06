@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.7.69 (2021-12-06)
+### Fix
+* **storages:** Add github repo auth ([`5b8cf8e`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/5b8cf8e21c5d12ef28d7e23603b4345faebfbafc))
+
 ## v0.7.68 (2021-11-26)
 ### Fix
 * **core:** Set default output path to save work ([`9488419`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/9488419a31c4bc046959940f238e87a3e69907c2))
