@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.7.70 (2021-12-06)
+### Fix
+* **github:** Setup auth for download repo ([`a11c86e`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/a11c86e9617aeb2a5d71f09e16cbf7dae259df8c))
+
 ## v0.7.69 (2021-12-06)
 ### Fix
 * **storages:** Add github repo auth ([`5b8cf8e`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/5b8cf8e21c5d12ef28d7e23603b4345faebfbafc))
