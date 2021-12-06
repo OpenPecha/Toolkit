@@ -115,15 +115,15 @@ def download_pecha(pecha_id, out_path=None, needs_update=True, branch="main"):
             print(INFO.format(f"Updating {pecha_id} ..."))
             repo.git.pull("origin", branch)
         return pecha_path
-
-    print(INFO.format(f"Downloading {pecha_id} ..."))
-    try:
-        Repo.clone_from(pecha_url, str(pecha_path))
-    except GitCommandError:
-        raise PechaNotFound(f"Pecha with id {pecha_id} doesn't exist")
-    repo = Repo(str(pecha_path))
-    branch = _eval_branch(repo, branch)
-    repo.git.checkout(branch)
+    else:
+        print(INFO.format(f"Downloading {pecha_id} ..."))
+        try:
+            Repo.clone_from(pecha_url, str(pecha_path))
+        except GitCommandError:
+            raise PechaNotFound(f"Pecha with id {pecha_id} doesn't exist")
+        repo = Repo(str(pecha_path))
+        branch = _eval_branch(repo, branch)
+        repo.git.checkout(branch)
 
     # setup auth
     storage = GithubStorage()
