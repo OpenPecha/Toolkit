@@ -20,6 +20,7 @@ from openpecha.catalog.storage import GithubBucket
 from openpecha.exceptions import PechaNotFound
 from openpecha.formatters import *
 from openpecha.serializers import *
+from openpecha.storages import GithubStorage, setup_auth_for_old_repo
 
 OP_PATH = config.BASE_PATH
 config = {
@@ -90,6 +91,10 @@ def download_pecha(pecha_id, out_path=None, needs_update=True, branch="main"):
     repo = Repo(str(pecha_path))
     branch = _eval_branch(repo, branch)
     repo.git.checkout(branch)
+
+    # setup auth
+    storage = GithubStorage()
+    setup_auth_for_old_repo(repo, org=storage.org_name, token=storage.token)
 
     return pecha_path
 

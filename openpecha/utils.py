@@ -8,12 +8,13 @@ from pathlib import Path
 from typing import Dict
 
 import yaml
-from git import Repo
+from git import GIT_OK, Repo
 from git.cmd import GitCommandError
 
-from openpecha import config
+from openpecha import config, storages
 from openpecha.exceptions import PechaNotFound
 from openpecha.github_utils import create_release
+from openpecha.storages import GithubStorage, setup_auth_for_old_repo
 
 INFO = "[INFO] {}"
 
@@ -123,5 +124,9 @@ def download_pecha(pecha_id, out_path=None, needs_update=True, branch="main"):
     repo = Repo(str(pecha_path))
     branch = _eval_branch(repo, branch)
     repo.git.checkout(branch)
+
+    # setup auth
+    storage = GithubStorage()
+    setup_auth_for_old_repo(repo, org=storage.org_name, token=storage.token)
 
     return pecha_path
