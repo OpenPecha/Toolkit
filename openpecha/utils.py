@@ -114,7 +114,6 @@ def download_pecha(pecha_id, out_path=None, needs_update=True, branch="main"):
         if needs_update:
             print(INFO.format(f"Updating {pecha_id} ..."))
             repo.git.pull("origin", branch)
-        return pecha_path
     else:
         print(INFO.format(f"Downloading {pecha_id} ..."))
         try:
