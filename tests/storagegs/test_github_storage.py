@@ -17,7 +17,7 @@ def create_file_in_dir(dir_):
     return fn
 
 
-@pytest.mark.skip(reason="external call")
+# @pytest.mark.skip(reason="external call")
 def test_add_dir():
     with tempfile.TemporaryDirectory() as tmpdir:
         tmpdir = Path(tmpdir)
@@ -26,7 +26,7 @@ def test_add_dir():
 
         try:
             repo = storage.add_dir(tmpdir, "test repo")
-            repo = setup_auth_for_old_repo(repo, storage.org, storage.token)
+            repo = setup_auth_for_old_repo(repo, storage.org_name, storage.token)
 
             assert is_repo_authenticated(repo)
             assert storage.get_dir_with_path(tmpdir)
