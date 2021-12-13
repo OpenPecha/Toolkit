@@ -1,0 +1,25 @@
+site_name: OpenPecha
+theme:
+  name: material
+nav:
+  - Introduction: index.md
+  - OPF Format: opf-format.md
+  - Import:
+    - importers/hfml.md
+  - Export: exporters.md
+markdown_extensions:
+  - toc:
+      permalink: true
+  - markdown.extensions.codehilite:
+      guess_lang: false
+  - mdx_include:
+      base_path: docs
+  - admonition
+  - codehilite
+  - extra
+  - pymdownx.superfences:
+      custom_fences:
+      - name: mermaid
+        class: mermaid
+        format: !!python/name:pymdownx.superfences.fence_code_format ''
+  - pymdownx.tabbed

@@ -54,7 +54,6 @@ setup(
         ]
     },
     python_requires=">=3.6",
-    tests_require=["pytest"],
     entry_points={
         "console_scripts": [
             "openpecha=openpecha.cli:cli"
