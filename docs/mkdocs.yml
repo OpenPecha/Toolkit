@@ -4,6 +4,7 @@ theme:
 nav:
   - Introduction: index.md
   - OPF Format: opf-format.md
+  - Annotations: annotations.md
   - Import:
     - importers/hfml.md
   - Export: exporters.md
