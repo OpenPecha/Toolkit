@@ -17,7 +17,7 @@ def create_file_in_dir(dir_):
     return fn
 
 
-# @pytest.mark.skip(reason="external call")
+@pytest.mark.skip(reason="Github API call")
 def test_add_dir():
     with tempfile.TemporaryDirectory() as tmpdir:
         tmpdir = Path(tmpdir)
