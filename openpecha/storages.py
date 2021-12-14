@@ -51,7 +51,7 @@ def setup_auth_for_old_repo(repo, org, token):
     if is_repo_authenticated(repo):
         return repo
     auth_remote_url = get_authenticated_remote_url(remote_url, org, token)
-    repo.set_remote("origin", auth_remote_url)
+    repo.remote().set_url(auth_remote_url)
     return repo
 
 
