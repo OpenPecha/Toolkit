@@ -2,6 +2,13 @@
 
 <!--next-version-placeholder-->
 
+## v0.7.73 (2021-12-14)
+### Fix
+* **storage:** Set remote url ([`23d4570`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/23d4570fd996f61836b8db4e61fb4d6d7599b479))
+
+### Documentation
+* Setup mkdocs ([`e5c322e`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/e5c322e0f41da6f979462224cbf182029a4101f5))
+
 ## v0.7.72 (2021-12-06)
 ### Fix
 * **github:** Remove return in update pecha download ([`de1c237`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/de1c237b222029fa271eef98c3a66da14515f8e0))
