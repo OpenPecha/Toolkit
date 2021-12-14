@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.7.72 (2021-12-06)
+### Fix
+* **github:** Remove return in update pecha download ([`de1c237`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/de1c237b222029fa271eef98c3a66da14515f8e0))
+
 ## v0.7.71 (2021-12-06)
 ### Fix
 * **github:** Setup repo auth when download ([`cf315b4`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/cf315b4f77e2e02b0009a15b20653e4b58ae04a5))
