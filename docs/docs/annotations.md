@@ -14,6 +14,7 @@ Title of the book
 #### SubTitle
 
 Sub title of the book
+
 #### Edition
 
 It can be Edition number/name. Previously called *BookNumber*.
@@ -25,6 +26,7 @@ author of the book
 #### Chapter
 
 Chapter title
+
 #### Text
 
 Represents text and used in *Index* layer.
@@ -32,6 +34,7 @@ Represents text and used in *Index* layer.
 #### SubText
 
 Represents Sub text and used in *Index* layer.
+
 #### Pagination
 
 Represents the page of the book
@@ -43,6 +46,16 @@ Any annotations from the **Verbal text**
 #### Citation
 
 Citation
+
+JSON Schema:
+```json
+{!../../docs_src/annotations/Citation_schema.json!}
+```
+
+Python example:
+```python
+{!../../docs_src/annotations/Citation_tutorial.py!}
+```
 
 #### Correction
 
