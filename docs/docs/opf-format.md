@@ -45,7 +45,7 @@ The key to the format is the Index. The Index splits a text into subsections, an
 
 ## Layers
 
-Layers are represented by YAML file. They are just collection of a particular types of annotations with some attributes. Here is the example of Correction layer:
+Layers are represented by YAML file. They are just collection of a particular types of [annotations](annotations.md) with some attributes. Here is the example of Correction layer:
 
 ```yaml
 id: 2ea1861be051406a858307cd592ef5ec
@@ -66,4 +66,59 @@ annotations:
       end: 145971
 ```
 
-## Annotations
+## Types of layer
+
+```python
+class LayerEnum(Enum):
+    index = "index"
+
+    book_title = "BookTitle"
+    sub_title = "SubTitle"
+    book_number = "BookNumber"
+    poti_title = "PotiTitle"
+    author = "Author"
+    chapter = "Chapter"
+
+    topic = "Text"
+    sub_topic = "SubText"
+
+    pagination = "Pagination"
+    citation = "Citation"
+    correction = "Correction"
+    error_candidate = "ErrorCandidate"
+    peydurma = "Peydurma"
+    sabche = "Sabche"
+    tsawa = "Tsawa"
+    yigchung = "Yigchung"
+    archaic = "Archaic"
+    durchen = "Durchen"
+    footnote = "Footnote"
+    segment = "Segment"
+```
+
+### Index layer
+
+similar to *table of content*, contains *Text* and *SubText* annotations.
+
+here is an example of index layer.
+```yaml
+id: 68f9113d7a7f4f97b1c61af77251e6d7
+annotation_type: index
+revision: '00001'
+annotations:
+  51f58796058b461ab32f3c972ee5417c:
+    work_id: T1
+    parts:
+      3cbe647abf404688a79c24d14742826c:
+        work_id: T1-1
+        span:
+        - vol: 1
+          start: 27
+          end: 396711
+    span:
+    - vol: 1
+      start: 27
+      end: 934579
+```
+
+here is the live example of [P000001](https://github.com/OpenPecha/P000001/blob/master/P000001.opf/index.yml)
