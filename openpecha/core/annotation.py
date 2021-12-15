@@ -1,6 +1,7 @@
 from typing import Dict, Optional
 
 from pydantic import BaseModel, validator
+from pydantic.networks import AnyHttpUrl
 
 
 class Span(BaseModel):
@@ -21,13 +22,24 @@ class Span(BaseModel):
 
 
 class AnnBase(BaseModel):
+    # TODO: will be replaced by BaseAnnotation
     span: Span
     metadata: Dict = {}
 
 
-class Page(AnnBase):
+class BaseAnnotation(AnnBase):
+    span: Span
+    metadata: Dict = {}
+    pass
+
+
+class Page(BaseAnnotation):
     page_info: Optional[str] = None  # page payload
     imgnum: Optional[
         int
     ] = None  # image sequence no. from bdrc api, http://iiifpres.bdrc.io/il/v:bdr:I0888
     reference: Optional[str] = None  # image filename from bdrc
+
+
+class Citation(BaseAnnotation):
+    pass
