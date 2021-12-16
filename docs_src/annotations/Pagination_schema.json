@@ -1,0 +1,49 @@
+{
+  "title": "Pagination",
+  "type": "object",
+  "properties": {
+    "span": {
+      "$ref": "#/definitions/Span"
+    },
+    "metadata": {
+      "title": "Metadata",
+      "default": {},
+      "type": "object"
+    },
+    "page_info": {
+      "title": "Page Info",
+      "type": "string"
+    },
+    "imgnum": {
+      "title": "Imgnum",
+      "type": "integer"
+    },
+    "reference": {
+      "title": "Reference",
+      "type": "string"
+    }
+  },
+  "required": [
+    "span"
+  ],
+  "definitions": {
+    "Span": {
+      "title": "Span",
+      "type": "object",
+      "properties": {
+        "start": {
+          "title": "Start",
+          "type": "integer"
+        },
+        "end": {
+          "title": "End",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "start",
+        "end"
+      ]
+    }
+  }
+}
