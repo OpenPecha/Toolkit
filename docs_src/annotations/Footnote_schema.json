@@ -1,5 +1,5 @@
 {
-  "title": "Pagination",
+  "title": "Footnote",
   "type": "object",
   "properties": {
     "span": {
@@ -9,26 +9,6 @@
       "title": "Metadata",
       "default": {},
       "type": "object"
-    },
-    "page_info": {
-      "title": "Page Info",
-      "description": "page payload",
-      "type": "string"
-    },
-    "imgnum": {
-      "title": "Imgnum",
-      "description": "image sequence number",
-      "type": "integer"
-    },
-    "order": {
-      "title": "Order",
-      "description": "order of the page",
-      "type": "integer"
-    },
-    "reference": {
-      "title": "Reference",
-      "description": "can be url or just string indentifier of source page",
-      "type": "string"
     }
   },
   "required": [

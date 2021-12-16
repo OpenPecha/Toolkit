@@ -1,6 +1,8 @@
 import inspect
 from pathlib import Path
 
+from pydantic import BaseModel
+
 from openpecha.core import annotations
 
 
@@ -8,9 +10,12 @@ def get_annotation_classes():
     NON_ANNOTATION_CLASSES = ["BaseModel", "BaseAnnotation"]
 
     for name, obj in inspect.getmembers(annotations):
-        if not inspect.isclass(obj) or name in NON_ANNOTATION_CLASSES:
-            continue
-        yield name, obj
+        if (
+            inspect.isclass(obj)
+            and name not in NON_ANNOTATION_CLASSES
+            and issubclass(obj, BaseModel)
+        ):
+            yield name, obj
 
 
 def build_schema_for_annotations():

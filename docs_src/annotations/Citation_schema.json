@@ -14,6 +14,7 @@
   "required": [
     "span"
   ],
+  "additionalProperties": false,
   "definitions": {
     "Span": {
       "title": "Span",
@@ -21,17 +22,20 @@
       "properties": {
         "start": {
           "title": "Start",
+          "minimum": 0,
           "type": "integer"
         },
         "end": {
           "title": "End",
+          "minimum": 0,
           "type": "integer"
         }
       },
       "required": [
         "start",
         "end"
-      ]
+      ],
+      "additionalProperties": false
     }
   }
 }
