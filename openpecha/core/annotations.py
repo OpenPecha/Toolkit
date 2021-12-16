@@ -1,6 +1,6 @@
 from typing import Dict, Optional
 
-from pydantic import BaseModel, validator
+from pydantic import BaseModel, Extra, validator
 
 
 class Span(BaseModel):
@@ -19,11 +19,16 @@ class Span(BaseModel):
             raise ValueError("Span end must not be less than start")
         return v
 
+    class Config:
+        extra = Extra.forbid
+
 
 class BaseAnnotation(BaseModel):
     span: Span
     metadata: Dict = {}
-    pass
+
+    class Config:
+        extra = Extra.forbid
 
 
 class Pagination(BaseAnnotation):
