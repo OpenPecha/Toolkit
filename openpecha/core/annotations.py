@@ -26,7 +26,7 @@ class BaseAnnotation(BaseModel):
     pass
 
 
-class Page(BaseAnnotation):
+class Pagination(BaseAnnotation):
     page_info: Optional[str] = None  # page payload
     imgnum: Optional[
         int
