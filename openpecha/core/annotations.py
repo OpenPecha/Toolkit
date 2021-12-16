@@ -1,7 +1,3 @@
-"""
-TODO: will be replaced by ./annotations.py
-"""
-
 from typing import Dict, Optional
 
 from pydantic import BaseModel, validator
@@ -24,14 +20,19 @@ class Span(BaseModel):
         return v
 
 
-class AnnBase(BaseModel):
+class BaseAnnotation(BaseModel):
     span: Span
     metadata: Dict = {}
+    pass
 
 
-class Page(AnnBase):
+class Page(BaseAnnotation):
     page_info: Optional[str] = None  # page payload
     imgnum: Optional[
         int
     ] = None  # image sequence no. from bdrc api, http://iiifpres.bdrc.io/il/v:bdr:I0888
     reference: Optional[str] = None  # image filename from bdrc
+
+
+class Citation(BaseAnnotation):
+    pass
