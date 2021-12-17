@@ -34,14 +34,14 @@ Correction
 <details>
 <summary>JSON Schema</summary>
 ```json
-{!../../docs_src/annotations/Citation_schema.json!}
+{!../../docs_src/annotations/Correction_schema.json!}
 ```
 </details>
 
 <details>
 <summary>Python example</summary>
 ```python
-{!../../docs_src/annotations/Citation_tutorial.py!}
+{!../../docs_src/annotations/Correction_tutorial.py!}
 ```
 </details>
 
