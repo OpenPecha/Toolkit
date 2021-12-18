@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.7.74 (2021-12-18)
+### Fix
+* Pydantic version ([`525d980`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/525d980de76622c7e59964ad56742e22593033d4))
+
 ## v0.7.73 (2021-12-14)
 ### Fix
 * **storage:** Set remote url ([`23d4570`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/23d4570fd996f61836b8db4e61fb4d6d7599b479))
