@@ -44,8 +44,8 @@ setup(
         "bs4>=0.0.1, <1.0",
         "pyewts>=0.1.3, <1.0",
         "rdflib>=5.0.0, <6.0",
-        "pydantic==1.7.3, <2.0",
-        "python-docx==0.8.11, <1.0",
+        "pydantic>=1.7.3, <2.0",
+        "python-docx>=0.8.11, <1.0",
     ],
     extras_require={
         "transifex": [
