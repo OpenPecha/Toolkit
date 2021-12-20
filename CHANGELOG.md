@@ -2,6 +2,21 @@
 
 <!--next-version-placeholder-->
 
+## v0.7.75 (2021-12-20)
+### Fix
+* **core:** Add remaining annotaion classes ([`e12b4e0`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/e12b4e02ab59fb5428cd92541e7e2375c32240fb))
+* **core:** Forbid extra parameter in Annotation init ([`1d0ccb0`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/1d0ccb02922f5bc1f3d2f4736ca63cb9dbfea3b6))
+* **core:** Add Citation annotation ([`bd1538d`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/bd1538d0dbb7292a538f42152a8d7e09eb90d649))
+
+### Documentation
+* **annotations:** Fix correction shema and tutorial path ([`d0cd410`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/d0cd410d065d9e1ab2063ed1936566cd8c37fee0))
+* **annotations:** Add examples and test ([`d45fd71`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/d45fd719dfb68287d3208292f26cfd162b5fd7a5))
+* **annotation:** Add json schema build script ([`c2a066d`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/c2a066dc5bb1a4476cb35bf6645fdda1d39bc328))
+* Add citation schema and example ([`abb8ad1`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/abb8ad17fe2e13481bb12a6b64236dce1e17a66a))
+* Add index layer example ([`603fb00`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/603fb00d1f0fc02177a086d14f23e1a4b38f6061))
+* Add annotations types ([`4489e1e`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/4489e1e6aa6b64b8cf466a170a584419bdb4eed3))
+* Add annotations page ([`910f8c3`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/910f8c3a32e3c862cbf7fbe316daeca555bb8795))
+
 ## v0.7.74 (2021-12-18)
 ### Fix
 * Pydantic version ([`525d980`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/525d980de76622c7e59964ad56742e22593033d4))
