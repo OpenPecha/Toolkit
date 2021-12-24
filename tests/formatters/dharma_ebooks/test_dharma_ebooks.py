@@ -1,7 +1,7 @@
 import os
 import shutil
 from pathlib import Path
-from openpecha.utils import load_yaml
+from openpecha.utils import load_yaml, remove_dir
 from openpecha.formatters.dharma_ebooks import create_opf
 
 def clean_dir(layers_output_dir):
@@ -77,5 +77,5 @@ def test_dharma_ebooks():
         assert result_ann_info["span"]["start"] == expected_ann_info["span"]["start"]
         assert result_ann_info["span"]["end"] == expected_ann_info["span"]["end"]
     assert_number_of_layers(opf_path)
-    clean_dir(output_path)
+    remove_dir(output_path)
     
