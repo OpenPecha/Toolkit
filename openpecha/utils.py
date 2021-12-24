@@ -129,3 +129,7 @@ def download_pecha(pecha_id, out_path=None, needs_update=True, branch="main"):
     setup_auth_for_old_repo(repo, org=storage.org_name, token=storage.token)
 
     return pecha_path
+
+def remove_dir(path):
+    if path.is_dir():
+            shutil.rmtree(str(path))
