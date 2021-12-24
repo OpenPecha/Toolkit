@@ -1,0 +1,24 @@
+Tibetan-Chapter:
+   span:
+      start: 0
+      end: 85
+Tibetan-Citations-in-Verse_Tibetan-Citations-First-line-alone:
+  span:
+      start: 6824
+      end: 6853
+Tibetan-Regular-Indented:
+  span:
+      start: 41791
+      end: 42292
+Tibetan-Root-Text_Tibetan-Root-Text-First-line-alone:
+  span:
+      start: 4203
+      end: 4230
+Tibetan-Root-Text_Tibetan-Root-Text-MIddle-Lines:
+  span:
+      start: 35650
+      end: 35678
+Tibetan-Root-Text:
+  span:
+      start: 4203
+      end: 4230
