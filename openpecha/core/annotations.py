@@ -1,9 +1,11 @@
 """Module contains all the Annotations classes
 """
 
-from typing import Dict, Optional
+from typing import Dict
 
 from pydantic import BaseModel, Extra, Field, validator
+
+from .ids import get_uuid
 
 
 class Span(BaseModel):
@@ -27,8 +29,13 @@ class Span(BaseModel):
 
 
 class BaseAnnotation(BaseModel):
+    id: str = None
     span: Span
     metadata: Dict = {}
+
+    @validator("id", pre=True, always=True)
+    def set_id(cls, v):
+        return v or get_uuid()
 
     class Config:
         extra = Extra.forbid

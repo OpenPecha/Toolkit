@@ -3,6 +3,7 @@ from datetime import datetime
 import pytest
 from pydantic import ValidationError
 
+from openpecha.core.annotations import Citation, Span
 from openpecha.core.layer import InitialCreationEnum, Layer, LayerEnum, PechaMetaData
 
 
@@ -35,6 +36,37 @@ def test_layer_reset():
     layer.reset()
     assert layer.revision == "00001"
     assert layer.annotations == {}
+
+
+def test_add_annotation():
+    layer = Layer(annotation_type=LayerEnum.citation)
+    ann = Citation(span=Span(start=10, end=20))
+
+    layer.add_annotation(ann)
+
+    assert layer.annotations[ann.id]["id"] == ann.id
+
+
+def test_get_annotation():
+    layer = Layer(annotation_type=LayerEnum.citation)
+    ann = Citation(span=Span(start=10, end=20))
+
+    layer.add_annotation(ann)
+
+    assert layer.get_annotation(ann.id).id == ann.id
+
+
+def test_remove_annotation():
+    layer = Layer(annotation_type=LayerEnum.citation)
+    ann = Citation(span=Span(start=10, end=20))
+
+    layer.add_annotation(ann)
+
+    assert ann.id in layer.annotations
+
+    layer.remove_annotation(ann.id)
+
+    assert ann.id not in layer.annotations
 
 
 def test_metadata_model():
