@@ -27,6 +27,7 @@ class OpenPecha:
         self._index = index
         self.assets = assets
         self._components = components
+        self.current_base_order = 1
 
     def __str__(self):
         return f"OpenPecha:{self.pecha_id}"
@@ -72,11 +73,27 @@ class OpenPecha:
         self._components = self._read_components()
         return self._components
 
+    def _get_base_name(self):
+        base_name = f"{self.current_base_order:05}"
+        self.current_base_order += 1
+        return base_name
+
     def get_base(self, base_name: str) -> str:
         if base_name in self.base:
             return self.base[base_name]
         self.base[base_name] = self.read_base_file(base_name)
         return self.base[base_name]
+
+    def set_base(self, content: str, base_name: str = None) -> str:
+        """Create new base with `content` if `base_name` is not
+        given otherwise overwrites it and return base_name.
+        """
+        if base_name and base_name in self.base:
+            self.base[base_name] = content
+        else:
+            base_name = self._get_base_name()
+            self.base[base_name] = content
+        return base_name
 
     def get_layer(self, base_name: str, layer_name: LayerEnum) -> Layer:
         if base_name in self.layers and layer_name in self.layers[base_name]:
@@ -91,6 +108,12 @@ class OpenPecha:
             layer = Layer(annotation_type=layer_name)
         self.layers[base_name][layer_name] = layer
         return layer
+
+    def set_layer(self, base_name: str, layer_name: LayerEnum, layer: Layer):
+        if base_name not in self.base:
+            raise ValueError(f"set base for {base_name} first")
+
+        self.layers[base_name][layer_name] = layer
 
 
 class OpenPechaFS(OpenPecha):

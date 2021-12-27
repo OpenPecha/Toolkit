@@ -4,7 +4,7 @@ import tempfile
 import pytest
 
 from openpecha.core.layer import InitialCreationEnum, Layer, LayerEnum, PechaMetaData
-from openpecha.core.pecha import OpenPechaFS
+from openpecha.core.pecha import OpenPecha, OpenPechaFS
 
 
 @pytest.fixture(scope="module")
@@ -123,3 +123,21 @@ def test_reset_layers(opf_path):
         pecha.get_layer(base_name, layer_name_2)
         assert not pecha.layers[base_name][layer_name_1].annotations
         assert pecha.layers[base_name][layer_name_2].annotations
+
+
+def test_set_base():
+    pecha = OpenPecha()
+
+    base_name = pecha.set_base("base content")
+
+    assert pecha.base[base_name] == "base content"
+
+
+def test_set_layer():
+    pecha = OpenPecha()
+    base_name = pecha.set_base("base content")
+    layer = Layer(annotation_type=LayerEnum.citation)
+
+    pecha.set_layer(base_name, LayerEnum.citation, layer)
+
+    assert pecha.layers[base_name][LayerEnum.citation].id == layer.id
