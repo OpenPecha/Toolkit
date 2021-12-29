@@ -12,6 +12,7 @@ nav:
   - Developer Guide:
     - developer/00_index.md
     - developer/layer.md
+    - developer/pecha.md
 markdown_extensions:
   - toc:
       permalink: true
