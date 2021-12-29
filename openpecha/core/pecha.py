@@ -109,11 +109,11 @@ class OpenPecha:
         self.layers[base_name][layer_name] = layer
         return layer
 
-    def set_layer(self, base_name: str, layer_name: LayerEnum, layer: Layer):
+    def set_layer(self, base_name: str, layer: Layer):
         if base_name not in self.base:
             raise ValueError(f"set base for {base_name} first")
 
-        self.layers[base_name][layer_name] = layer
+        self.layers[base_name][layer.annotation_type] = layer
 
 
 class OpenPechaFS(OpenPecha):

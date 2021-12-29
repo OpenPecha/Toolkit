@@ -138,6 +138,6 @@ def test_set_layer():
     base_name = pecha.set_base("base content")
     layer = Layer(annotation_type=LayerEnum.citation)
 
-    pecha.set_layer(base_name, LayerEnum.citation, layer)
+    pecha.set_layer(base_name, layer)
 
     assert pecha.layers[base_name][LayerEnum.citation].id == layer.id
