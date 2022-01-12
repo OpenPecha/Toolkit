@@ -97,7 +97,7 @@ class OpenPechaFS(OpenPecha):
     def __init__(self, opf_path: str = None, storage: Storage = None, **kwargs):
         self._opf_path = Path(opf_path) if opf_path else opf_path
         self.output_dir = None
-        self.storage = storage if storage else GithubStorage()
+        #self.storage = storage if storage else GithubStorage()
         super().__init__(**kwargs)
 
     @staticmethod
