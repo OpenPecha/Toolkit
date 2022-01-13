@@ -2,11 +2,15 @@
 
 ## Create new Layer
 
+use [LayerEnum](../opf-format.md#types-of-layer) to create types of layer.
+
 ```python
 {!../../docs_src/developer/layer/create_layer.py!}
 ```
 
 ## Add Annotation to Layer
+
+Refer [Annotations](../annotations.md) docs about OpenPecha annotations.
 
 ```python
 {!../../docs_src/developer/layer/add_annotation.py!}
