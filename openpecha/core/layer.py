@@ -139,3 +139,14 @@ class PechaMetaData(BaseModel):
     @validator("id", pre=True, always=True)
     def set_id(cls, v):
         return v or get_pecha_id()
+
+    @validator("created_at", pre=True, always=True)
+    def set_created_date(cls, v):
+        return v or datetime.now()
+
+    @validator("last_modified_at", pre=True, always=True)
+    def set_last_modified_date(cls, v):
+        return v or datetime.now()
+
+    def update_last_modified_date(self):
+        self.last_modified_at = datetime.now()

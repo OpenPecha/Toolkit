@@ -109,6 +109,9 @@ class OpenPecha:
         self.layers[base_name][layer_name] = layer
         return layer
 
+    def update_metadata(self):
+        self.meta.update_last_modified_date()
+
     def set_layer(self, base_name: str, layer: Layer):
         if base_name not in self.base:
             raise ValueError(f"set base for {base_name} first")
@@ -234,12 +237,14 @@ class OpenPechaFS(OpenPecha):
 
     def update_base(self, base_name: str, content: str):
         self.save_single_base(base_name, content)
+        self.update_metadata()
 
     def update_layer(self, base_name: str, layer_name: LayerEnum, layer: Layer):
         old_layer = self.get_layer(base_name, layer_name)
         old_layer.bump_revision()
         old_layer.annotations = layer.annotations
         self.save_layer(base_name, layer_name, old_layer)
+        self.update_metadata()
 
     def reset_layer(self, base_name: str, layer_name: LayerEnum):
         print("reset->", layer_name.value)
