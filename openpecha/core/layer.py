@@ -1,7 +1,7 @@
 import json
 from datetime import datetime
 from enum import Enum
-from typing import Dict, Optional
+from typing import Dict, List, Optional
 
 from pydantic import BaseModel, validator
 
@@ -110,6 +110,14 @@ class Layer(BaseModel):
         self.revision = "00001"
         self.annotations = {}
 
+    def get_annotations(self):
+        """Yield Annotation Objects"""
+        for ann_id, ann_dict in self.annotations.items():
+            ann_class = _get_annotation_class(self.annotation_type)
+            ann_dict["id"] = ann_id
+            ann = ann_class.parse_obj(ann_dict)
+            yield ann
+
     def get_annotation(self, annotation_id: str) -> Optional[BaseAnnotation]:
         """Retrieve annotation of id `annotation_id`"""
         ann_dict = self.annotations.get(annotation_id)
@@ -150,3 +158,9 @@ class PechaMetaData(BaseModel):
 
     def update_last_modified_date(self):
         self.last_modified_at = datetime.now()
+
+
+class SpanINFO(BaseModel):
+    text: str
+    layers: Dict[LayerEnum, List[BaseAnnotation]]
+    metadata: PechaMetaData

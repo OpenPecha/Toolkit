@@ -1,8 +1,12 @@
+import json
 import shutil
 import tempfile
+from pathlib import Path
+from re import L
 
 import pytest
 
+from openpecha.core.annotations import Span
 from openpecha.core.layer import InitialCreationEnum, Layer, LayerEnum, PechaMetaData
 from openpecha.core.pecha import OpenPecha, OpenPechaFS
 
@@ -10,6 +14,11 @@ from openpecha.core.pecha import OpenPecha, OpenPechaFS
 @pytest.fixture(scope="module")
 def opf_path():
     return "tests/data/pechas/P000100.opf"
+
+
+@pytest.fixture(scope="module")
+def test_pechas_path():
+    return Path("tests/data/pechas")
 
 
 def test_create_pecha():
@@ -141,3 +150,46 @@ def test_set_layer():
     pecha.set_layer(base_name, layer)
 
     assert pecha.layers[base_name][LayerEnum.citation].id == layer.id
+
+
+def get_sub_string(string, span):
+    return string[span.start : span.end + 1]
+
+
+def test_span_info_with_layers(test_pechas_path):
+    opf_path = test_pechas_path / "span_info.opf"
+    pecha = OpenPechaFS(opf_path)
+
+    span_info = pecha.get_span_info(
+        base_name="0001",
+        span=Span(start=16, end=33),
+        layers=[LayerEnum.citation, LayerEnum.tsawa, LayerEnum.yigchung],
+    )
+
+    assert (
+        get_sub_string(span_info.text, span_info.layers[LayerEnum.citation][0].span)
+        == "cc"
+    )
+
+    assert (
+        get_sub_string(span_info.text, span_info.layers[LayerEnum.tsawa][0].span)
+        == "rrrr\nrrrr"
+    )
+
+    assert (
+        get_sub_string(span_info.text, span_info.layers[LayerEnum.yigchung][0].span)
+        == "yy"
+    )
+
+
+def test_span_info_without_layers(test_pechas_path):
+    opf_path = test_pechas_path / "span_info.opf"
+    pecha = OpenPechaFS(opf_path)
+
+    span_info = pecha.get_span_info(
+        base_name="0001",
+        span=Span(start=1, end=10),
+        layers=[LayerEnum.citation, LayerEnum.tsawa, LayerEnum.yigchung],
+    )
+
+    assert not span_info.layers

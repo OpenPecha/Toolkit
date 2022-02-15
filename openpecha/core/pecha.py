@@ -5,7 +5,8 @@ from pathlib import Path
 from typing import Dict, List, Union
 
 from openpecha import config
-from openpecha.core.layer import Layer, LayerEnum, PechaMetaData
+from openpecha.core.annotations import BaseAnnotation, Span
+from openpecha.core.layer import Layer, LayerEnum, PechaMetaData, SpanINFO
 from openpecha.storages import GithubStorage, Storage
 from openpecha.utils import dump_yaml, load_yaml
 
@@ -117,6 +118,48 @@ class OpenPecha:
             raise ValueError(f"set base for {base_name} first")
 
         self.layers[base_name][layer.annotation_type] = layer
+
+    def __find_span_layers(
+        self, base_name: str, span: Span, layers: List[LayerEnum]
+    ) -> Dict[LayerEnum, List[BaseAnnotation]]:
+        result = defaultdict(list)
+        for layer_name in layers:
+            if layer_name not in self.components[base_name]:
+                result[layer_name] = []
+
+            layer = self.get_layer(base_name, layer_name)
+            for ann in layer.get_annotations():
+                is_ann_found = False
+                base_str = self.get_base(base_name)
+                if ann.span.start >= span.start and ann.span.end <= span.end:
+                    is_ann_found = True
+                    print("In between")
+                    print(base_str[ann.span.start : ann.span.end + 1])
+                elif ann.span.end >= span.start and ann.span.start < span.start:
+                    is_ann_found = True
+                    ann.span.start = span.start
+                    print("Start Overlapped")
+                    print(base_str[ann.span.start : ann.span.end + 1])
+                elif ann.span.start <= span.end and ann.span.end > span.end:
+                    is_ann_found = True
+                    ann.span.end = span.end
+                    print("End Overlapped")
+                    print(base_str[ann.span.start : ann.span.end + 1])
+
+                if is_ann_found:
+                    ann.span.start -= span.start
+                    ann.span.end -= span.start
+                    result[layer_name].append(ann)
+
+        return result
+
+    def get_span_info(
+        self, base_name: str, span: Span, layers: List[LayerEnum] = []
+    ) -> SpanINFO:
+        base_str = self.get_base(base_name)
+        span_str = base_str[span.start : span.end + 1]
+        layers = self.__find_span_layers(base_name, span, layers)
+        return SpanINFO(text=span_str, layers=layers, metadata=self.meta)
 
 
 class OpenPechaFS(OpenPecha):
