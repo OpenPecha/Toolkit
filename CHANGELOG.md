@@ -2,6 +2,21 @@
 
 <!--next-version-placeholder-->
 
+## v0.7.76 (2022-02-15)
+### Fix
+* **core-pecha:** Retrive span info ([`0fb51b9`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/0fb51b9b59afd35566d32199f8c2f0ee8577673b))
+* **core-pecha:** Add update last modified date ([`6285f79`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/6285f7962ed32e7e07c38a4d82881298303d6295))
+* **core:** Remove layer_name arg from set_layer ([`e88fe77`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/e88fe777ccf6bfa5f2d6267f385376134bd9c3fb))
+* **core:** Set base and layer with OpenPecha ([`bb2f6d4`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/bb2f6d469bcf18a6b9c014165c183a0bab0c1006))
+* **core:** Layer can add, get and remove annotation from it ([`eed2086`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/eed20864b6f0ff8693d32b4125fa8cbd12cdbae1))
+
+### Documentation
+* **core:** How to add base and layer to openpecha ([`15f96f5`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/15f96f5aca6e1c4112174ba5da614bca012f717d))
+* Add base and layer to pecha ([`18a1571`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/18a1571837ea9c56b0c1620737d78b4294911483))
+* Add assert in add annotation in layer ([`5347fb4`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/5347fb41ab669c5152e501f180c8a5d078243b81))
+* Fix docs src path ([`23a2a49`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/23a2a493148e33b38242fba84ee6249fb56db065))
+* Add managing layer docs ([`a8bb38a`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/a8bb38a50390d43c05169dcb7ab33244f8e940d2))
+
 ## v0.7.75 (2021-12-20)
 ### Fix
 * **core:** Add remaining annotaion classes ([`e12b4e0`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/e12b4e02ab59fb5428cd92541e7e2375c32240fb))
