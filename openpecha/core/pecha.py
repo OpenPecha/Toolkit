@@ -1,4 +1,5 @@
 import json
+import logging
 import shutil
 from collections import defaultdict
 from pathlib import Path
@@ -7,7 +8,7 @@ from typing import Dict, List, Union
 from openpecha import config
 from openpecha.core.annotations import BaseAnnotation, Span
 from openpecha.core.layer import Layer, LayerEnum, PechaMetaData, SpanINFO
-from openpecha.storages import GithubStorage, Storage
+from openpecha.storages import GithubStorage, Storage, Storages
 from openpecha.utils import dump_yaml, load_yaml
 
 
@@ -163,11 +164,27 @@ class OpenPecha:
 
 
 class OpenPechaFS(OpenPecha):
-    def __init__(self, opf_path: str = None, storage: Storage = None, **kwargs):
-        self._opf_path = Path(opf_path) if opf_path else opf_path
+    def __init__(self, path: str = None, storage: Storage = None, **kwargs):
+        self._opf_path = self.get_opf_path(path)
         self.output_dir = None
-        self.storage = storage if storage else GithubStorage()
+        self.storage = storage
         super().__init__(**kwargs)
+
+    @staticmethod
+    def get_opf_path(path: str) -> Path:
+        """convert pecha path to pecha's opf path"""
+        if not path:
+            return path
+
+        path = Path(path)
+        if path.name.endswith(".opf"):
+            if not path.is_dir():
+                raise FileNotFoundError(f"Pecha not found at: {path}")
+            return path
+        path = path / f"{path.name}.opf"
+        if not path.is_dir():
+            raise FileNotFoundError(f"Pecha not found at: {path}")
+        return path
 
     @staticmethod
     def _mkdir(path: Path):
@@ -303,6 +320,8 @@ class OpenPechaFS(OpenPecha):
             self.reset_layer(base_name, layer_name)
 
     def publish(self):
+        if not self.storage:
+            self.storage = GithubStorage()
         self.storage.add_dir(path=self.pecha_path, description=self.about)
 
     def remove(self):

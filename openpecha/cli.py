@@ -17,6 +17,8 @@ from openpecha.buda.openpecha_manager import OpenpechaManager
 from openpecha.catalog import config as catalog_config
 from openpecha.catalog.filter import is_text_good_quality
 from openpecha.catalog.storage import GithubBucket
+from openpecha.core.pecha import OpenPechaFS
+from openpecha.corpus.quality import NonWordsCounter
 from openpecha.exceptions import PechaNotFound
 from openpecha.formatters import *
 from openpecha.serializers import *
@@ -395,3 +397,23 @@ def new_translation(**kwargs):
     project.create()
     project.start_new_translation()
     project.add_tm(alignment_ids=get_alignment_ids(kwargs["tm_path"]))
+
+
+@cli.command()
+@click.argument("pecha_path")
+@click.option("--save", "-v", help="save non-words counts", is_flag=True)
+def count_non_words(**kwargs):
+    """
+    check quality of pecha base text
+    """
+    pecha = OpenPechaFS(path=kwargs["pecha_path"])
+    click.echo("Counting Non Words...")
+    non_words_conut = NonWordsCounter(empty=True)
+    for base_name in pecha.components.keys():
+        text = pecha.get_base(base_name)
+        non_words_conut += NonWordsCounter(text)
+
+    click.echo(non_words_conut.dict())
+    if kwargs["save"]:
+        pecha.meta.quality = non_words_conut.dict()
+        pecha.save_meta()

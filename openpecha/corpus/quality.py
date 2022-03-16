@@ -7,6 +7,7 @@
 
 from dataclasses import dataclass
 from multiprocessing.sharedctypes import Value
+from queue import Empty
 from typing import Dict
 
 from botok import WordTokenizer
@@ -24,10 +25,11 @@ class NonWordsCounter:
         tokenizer: WordTokenizer = None,
         total_tokens: int = 0,
         total_non_words: int = 0,
+        empty=False,
     ):
         self.total_tokens: int = total_tokens
         self.total_non_words: int = total_non_words
-        if not total_non_words:
+        if not total_non_words and not empty:
             self.count(text, tokenizer)
 
     def count(self, text, tokenizer):
