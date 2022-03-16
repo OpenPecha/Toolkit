@@ -1,7 +1,7 @@
 import json
 from datetime import datetime
 from enum import Enum
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Union
 
 from pydantic import BaseModel, validator
 
@@ -143,6 +143,7 @@ class PechaMetaData(BaseModel):
     source_metadata: Optional[Dict] = {}
     created_at: datetime = None
     last_modified_at: datetime = None
+    quality: Dict[str, Union[int, float]] = None
 
     @validator("id", pre=True, always=True)
     def set_id(cls, v):
