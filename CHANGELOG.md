@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.7.78 (2022-03-17)
+### Fix
+* Missing __init__ file ([`b1ddca8`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/b1ddca841054de8e226f09331dacaab4aec313fd))
+
 ## v0.7.77 (2022-03-17)
 ### Fix
 * OpenPechaFS path ([`b99a041`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/b99a04114a91310685759c416447d5723427219c))
