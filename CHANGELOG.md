@@ -2,6 +2,13 @@
 
 <!--next-version-placeholder-->
 
+## v0.7.77 (2022-03-17)
+### Fix
+* OpenPechaFS path ([`b99a041`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/b99a04114a91310685759c416447d5723427219c))
+* Add cli to count non word and save in meta.yml ([`5ac97c5`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/5ac97c58ac148e49415436f92ad0387cfb8722ca))
+* Twn non_word conter can be added ([`8825625`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/8825625c2ad4ef1ff9be25c11aaf72180fa0e152))
+* **core-pecha:** Add pecha text quality attr in meta ([`e0a59cf`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/e0a59cfb976df3cc33729861f255aa3bad24e4ce))
+
 ## v0.7.76 (2022-02-15)
 ### Fix
 * **core-pecha:** Retrive span info ([`0fb51b9`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/0fb51b9b59afd35566d32199f8c2f0ee8577673b))
