@@ -408,12 +408,12 @@ def count_non_words(**kwargs):
     """
     pecha = OpenPechaFS(path=kwargs["pecha_path"])
     click.echo("Counting Non Words...")
-    non_words_conut = NonWordsCounter(empty=True)
+    non_words_count = NonWordsCounter(empty=True)
     for base_name in pecha.components.keys():
         text = pecha.get_base(base_name)
-        non_words_conut += NonWordsCounter(text)
+        non_words_count += NonWordsCounter(text)
 
-    click.echo(non_words_conut.dict())
+    click.echo(non_words_count.dict())
     if kwargs["save"]:
-        pecha.meta.quality = non_words_conut.dict()
+        pecha.meta.quality = non_words_count.dict()
         pecha.save_meta()
