@@ -178,8 +178,6 @@ class OpenPechaFS(OpenPecha):
 
         path = Path(path)
         if path.name.endswith(".opf"):
-            if not path.is_dir():
-                raise FileNotFoundError(f"Pecha not found at: {path}")
             return path
         path = path / f"{path.name}.opf"
         if not path.is_dir():
