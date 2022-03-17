@@ -10,7 +10,6 @@ from tqdm import tqdm
 
 import openpecha
 from openpecha import config
-from openpecha.alignment.integrations.tx import OPATransifexProject
 from openpecha.alignment.tmx import create_opf as alignment
 from openpecha.blupdate import PechaBaseUpdate
 from openpecha.buda.openpecha_manager import OpenpechaManager
@@ -349,6 +348,13 @@ def import_alignment(**kwargs):
     """
     import existing alignment into OpenPecha
     """
+    try:
+        from openpecha.alignment.integrations.tx import OPATransifexProject
+    except Exception:
+        raise ImportError(
+            "install with `pip install openpecha[tx]` for transifex dependencies"
+        )
+
     if kwargs["debug"]:
         logging.basicConfig(level=logging.DEBUG)
     elif kwargs["verbose"]:
@@ -390,6 +396,13 @@ def new_translation(**kwargs):
     """
     prepare translation project in transifex
     """
+    try:
+        from openpecha.alignment.integrations.tx import OPATransifexProject
+    except Exception:
+        raise ImportError(
+            "install with `pip install openpecha[tx]` for transifex dependencies"
+        )
+
     alignment_path = alignment.create_alignment_from_source_text(
         text_path=Path(kwargs["path"])
     )
