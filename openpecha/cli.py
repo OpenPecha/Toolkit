@@ -401,7 +401,7 @@ def new_translation(**kwargs):
 
 @cli.command()
 @click.argument("pecha_path")
-@click.option("--save", "-v", help="save non-words counts", is_flag=True)
+@click.option("--save", "-s", help="save non-words counts", is_flag=True)
 def count_non_words(**kwargs):
     """
     check quality of pecha base text
