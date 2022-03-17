@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.7.80 (2022-03-17)
+### Fix
+* Add missing __init__ ([`3adacbc`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/3adacbce184bff0ed41f3b723ac5737aa328a7e9))
+
 ## v0.7.79 (2022-03-17)
 ### Fix
 * **cli:** Transifex imports in cli ([`de530cf`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/de530cf23fc2438223e9fc12e33e9d362fef868b))
