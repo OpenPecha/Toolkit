@@ -7,6 +7,15 @@ from openpecha.github_utils import get_github_repo
 
 
 def get_base_vol_list(pecha_repo, pecha_id):
+    """Return list of base text file name present in pecha's opf
+
+    Args:
+        pecha_repo (repo): pecha repo object
+        pecha_id (str): pecha id
+
+    Returns:
+        list: list of base text file name
+    """
     base_vols = []
     contents = pecha_repo.get_contents(f"./{pecha_id}.opf/base")
     for content_file in contents:
@@ -15,6 +24,13 @@ def get_base_vol_list(pecha_repo, pecha_id):
 
 
 def download_base_vols(output_path, pecha_id, base_vols):
+    """Download and save pecha's base text in output path dir
+
+    Args:
+        output_path (Path): output path dir
+        pecha_id (sttr): pecha id
+        base_vols (list): list of base text in opf
+    """
     for base_vol in base_vols:
         base_response = requests.get(
             f"https://github.com/OpenPecha/{pecha_id}/blob/master/{pecha_id}.opf/base/{base_vol}"
@@ -26,6 +42,12 @@ def download_base_vols(output_path, pecha_id, base_vols):
 
 
 def download_corpus(corpus_name, output_path=None):
+    """download corpus from openpecha
+
+    Args:
+        corpus_name (str): name of corpus on which list of pecha has been prepared in catalog repo of openpecha
+        output_path (Path, optional): output path where corpus will be saved. Defaults to None.
+    """
     if not output_path:
         Path("./openpecha_corpus").mkdir(exist_ok=True)
         output_path = Path().home() / "openpecha_corpus"
