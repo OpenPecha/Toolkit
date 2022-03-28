@@ -1,9 +1,11 @@
 import os
-from pathlib import Path
 
 import requests
 
+from openpecha import config
 from openpecha.github_utils import get_github_repo
+from openpecha import utils
+
 
 
 def get_base_vol_list(pecha_repo, pecha_id):
@@ -36,10 +38,9 @@ def download_base_vols(output_path, pecha_id, base_vols):
             f"https://raw.githubusercontent.com/OpenPecha/{pecha_id}/blob/master/{pecha_id}.opf/base/{base_vol}"
         )
         base_text = base_response.text
-        (output_path / pecha_id).mkdir(exist_ok=True)
-        (output_path / pecha_id / base_vol).write_text(base_text, encoding="utf-8")
+        pecha_dir_path = utils._mkdir((output_path / pecha_id))
+        (pecha_dir_path / base_vol).write_text(base_text, encoding="utf-8")
         print(f"INFO: {base_vol} download completee...")
-
 
 def download_corpus(corpus_name, output_path=None):
     """download corpus from openpecha
@@ -47,12 +48,15 @@ def download_corpus(corpus_name, output_path=None):
     Args:
         corpus_name (str): name of corpus on which list of pecha has been prepared in catalog repo of openpecha
         output_path (Path, optional): output path where corpus will be saved. Defaults to None.
+    
+    Return:
+        path: output path
     """
     if not output_path:
-        Path("./openpecha_corpus").mkdir(exist_ok=True)
-        output_path = Path().home() / "openpecha_corpus"
+        output_path = utils._mkdir(config.BASE_PATH / "corpus")
+    output_path = output_path / corpus_name
     corpus_pecha_list = requests.get(
-        f"https://raw.githubusercontent.com/OpenPecha/catalog/master/data/{corpus_name}/pecha_list.txt"
+        f"https://raw.githubusercontent.com/OpenPecha/catalog/master/data/corpus/{corpus_name}.txt"
     )
     corpus_pecha_ids = corpus_pecha_list.text.splitlines()
     for pecha_id in corpus_pecha_ids:
@@ -61,3 +65,4 @@ def download_corpus(corpus_name, output_path=None):
         )
         base_vols = get_base_vol_list(pecha_repo, pecha_id)
         download_base_vols(output_path, pecha_id, base_vols)
+    return output_path
