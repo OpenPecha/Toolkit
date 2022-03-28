@@ -33,7 +33,7 @@ def download_base_vols(output_path, pecha_id, base_vols):
     """
     for base_vol in base_vols:
         base_response = requests.get(
-            f"https://github.com/OpenPecha/{pecha_id}/blob/master/{pecha_id}.opf/base/{base_vol}"
+            f"https://raw.githubusercontent.com/OpenPecha/{pecha_id}/blob/master/{pecha_id}.opf/base/{base_vol}"
         )
         base_text = base_response.text
         (output_path / pecha_id).mkdir(exist_ok=True)
