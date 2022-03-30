@@ -29,7 +29,12 @@ def gzip_str(string_):
     bytes_obj = out.getvalue()
     return bytes_obj
 
-
+def _mkdir(path):
+    if path.is_dir():
+        return path
+    path.mkdir(exist_ok=True, parents=True)
+    return path
+    
 def ocr_result_input(path):
     return path
 
