@@ -2,6 +2,13 @@
 
 <!--next-version-placeholder-->
 
+## v0.7.81 (2022-03-30)
+### Fix
+* **download:** Download suggestion implemented ([`5dffcd6`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/5dffcd646421ce04cafc427caf39b3541f7b8ef9))
+* **download:** Base text url updated ([`db1d18b`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/db1d18bd664fc85ce5aab146de4f696b78dcaf1a))
+* **doc:** Documented download function in corpus module ([`f381a3f`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/f381a3facf70596e82d6319c292dffa1b4a9c8f7))
+* **corpus:** Download corpus module compeleted ([`8b9cc73`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/8b9cc73849015cfeaaa13336d3b2af881f677d4f))
+
 ## v0.7.80 (2022-03-17)
 ### Fix
 * Add missing __init__ ([`3adacbc`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/3adacbce184bff0ed41f3b723ac5737aa328a7e9))
