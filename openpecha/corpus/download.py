@@ -1,11 +1,26 @@
+import io
+import json
 import os
+import zipfile
 
 import requests
 
-from openpecha import config
+from openpecha import config, utils
 from openpecha.github_utils import get_github_repo
-from openpecha import utils
 
+
+def get_download_token():
+    github_keys_path = config.BASE_PATH / "keys" / "github.json"
+    if github_keys_path.is_file():
+        keys = json.load(github_keys_path.open())
+        return keys["download"]
+
+    url = "https://github.com/OpenPecha-dev/keys/releases/download/v1/keys.zip"
+    r = requests.get(url)
+    z = zipfile.ZipFile(io.BytesIO(r.content))
+    z.extractall(path=str(config.BASE_PATH))
+    keys = json.load(github_keys_path.open())
+    return keys["download"]
 
 
 def get_base_vol_list(pecha_repo, pecha_id):
@@ -42,13 +57,14 @@ def download_base_vols(output_path, pecha_id, base_vols):
         (pecha_dir_path / base_vol).write_text(base_text, encoding="utf-8")
         print(f"INFO: {base_vol} download completee...")
 
+
 def download_corpus(corpus_name, output_path=None):
     """download corpus from openpecha
 
     Args:
         corpus_name (str): name of corpus on which list of pecha has been prepared in catalog repo of openpecha
         output_path (Path, optional): output path where corpus will be saved. Defaults to None.
-    
+
     Return:
         path: output path
     """
@@ -66,3 +82,8 @@ def download_corpus(corpus_name, output_path=None):
         base_vols = get_base_vol_list(pecha_repo, pecha_id)
         download_base_vols(output_path, pecha_id, base_vols)
     return output_path
+
+
+if __name__ == "__main__":
+    download_key = get_download_token()
+    print(download_key)
