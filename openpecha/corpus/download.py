@@ -40,7 +40,7 @@ def get_base_vol_list(pecha_repo, pecha_id):
     return base_vols
 
 
-def download_base_vols(output_path, pecha_id, base_vols):
+def download_base_vols(output_path, pecha_id, base_vols, session):
     """Download and save pecha's base text in output path dir
 
     Args:
@@ -49,13 +49,12 @@ def download_base_vols(output_path, pecha_id, base_vols):
         base_vols (list): list of base text in opf
     """
     for base_vol in base_vols:
-        base_response = requests.get(
-            f"https://raw.githubusercontent.com/OpenPecha/{pecha_id}/blob/master/{pecha_id}.opf/base/{base_vol}"
+        base_response = session.get(
+            f"https://raw.githubusercontent.com/OpenPecha/{pecha_id}/master/{pecha_id}.opf/base/{base_vol}"
         )
         base_text = base_response.text
         pecha_dir_path = utils._mkdir((output_path / pecha_id))
         (pecha_dir_path / base_vol).write_text(base_text, encoding="utf-8")
-        print(f"INFO: {base_vol} download completee...")
 
 
 def download_corpus(corpus_name, output_path=None):
@@ -71,19 +70,21 @@ def download_corpus(corpus_name, output_path=None):
     if not output_path:
         output_path = utils._mkdir(config.BASE_PATH / "corpus")
     output_path = output_path / corpus_name
-    corpus_pecha_list = requests.get(
+
+    session = requests.Session()
+    token = get_download_token()
+    session.headers["Authorization"] = f"token {token}"
+    corpus_pecha_list = session.get(
         f"https://raw.githubusercontent.com/OpenPecha/catalog/master/data/corpus/{corpus_name}.txt"
     )
     corpus_pecha_ids = corpus_pecha_list.text.splitlines()
     for pecha_id in corpus_pecha_ids:
-        pecha_repo = get_github_repo(
-            pecha_id, org_name="OpenPecha", token=os.environ.get("GITHUB_TOKEN")
-        )
+        print(f"INFO: Downloading {pecha_id}...")
+        pecha_repo = get_github_repo(pecha_id, org_name="OpenPecha", token=token)
         base_vols = get_base_vol_list(pecha_repo, pecha_id)
-        download_base_vols(output_path, pecha_id, base_vols)
+        download_base_vols(output_path, pecha_id, base_vols, session)
     return output_path
 
 
 if __name__ == "__main__":
-    download_key = get_download_token()
-    print(download_key)
+    download_corpus("classical_bo")
