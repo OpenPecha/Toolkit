@@ -2,6 +2,11 @@
 
 <!--next-version-placeholder-->
 
+## v0.7.82 (2022-03-31)
+### Fix
+* **corpus-download:** Use authenticated requests session ([`f0fe570`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/f0fe5706591f452559c85a2e3d2f129ef50b278e))
+* **corpus:** Get gh token for corpus download ([`94e3188`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/94e3188637c4cf7a53e0945105705463f8e03ceb))
+
 ## v0.7.81 (2022-03-30)
 ### Fix
 * **download:** Download suggestion implemented ([`5dffcd6`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/5dffcd646421ce04cafc427caf39b3541f7b8ef9))
