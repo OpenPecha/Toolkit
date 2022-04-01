@@ -79,6 +79,8 @@ def download_corpus(corpus_name, output_path=None):
     )
     corpus_pecha_ids = corpus_pecha_list.text.splitlines()
     for pecha_id in corpus_pecha_ids:
+        if (output_dir / pecha_id).is_dir():
+            continue
         print(f"INFO: Downloading {pecha_id}...")
         pecha_repo = get_github_repo(pecha_id, org_name="OpenPecha", token=token)
         base_vols = get_base_vol_list(pecha_repo, pecha_id)
