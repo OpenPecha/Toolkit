@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.7.83 (2022-04-01)
+### Fix
+* **corpus-download:** Skip downloaded pecha" ([`f42e150`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/f42e1500e3b714dc702c90d038fe465939552739))
+
 ## v0.7.82 (2022-03-31)
 ### Fix
 * **corpus-download:** Use authenticated requests session ([`f0fe570`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/f0fe5706591f452559c85a2e3d2f129ef50b278e))
