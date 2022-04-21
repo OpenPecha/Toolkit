@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.8.1 (2022-04-21)
+### Fix
+* **corpus-download:** Add download progress bar with tqdm ([`c075662`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/c075662d55456ff8bd946aa59b72b79740099ce5))
+
 ## v0.8.0 (2022-04-01)
 ### Feature
 * Create empty ebook opf ([`cfb180d`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/cfb180dfe92ec995d72ca8b7b6880291b5ac5795))
