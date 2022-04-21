@@ -7,6 +7,7 @@ import requests
 
 from openpecha import config, utils
 from openpecha.github_utils import get_github_repo
+from tqdm import tqdm
 
 
 def get_download_token():
@@ -78,10 +79,9 @@ def download_corpus(corpus_name, output_path=None, replace=False):
         f"https://raw.githubusercontent.com/OpenPecha/catalog/master/data/corpus/{corpus_name}.txt"
     )
     corpus_pecha_ids = corpus_pecha_list.text.splitlines()
-    for pecha_id in corpus_pecha_ids:
+    for pecha_id in tqdm(corpus_pecha_ids):
         if (output_path / pecha_id).is_dir() and not replace:
             continue
-        print(f"INFO: Downloading {pecha_id}...")
         pecha_repo = get_github_repo(pecha_id, org_name="OpenPecha", token=token)
         base_vols = get_base_vol_list(pecha_repo, pecha_id)
         download_base_vols(output_path, pecha_id, base_vols, session)
