@@ -57,7 +57,7 @@ def download_base_vols(output_path, pecha_id, base_vols, session):
         (pecha_dir_path / base_vol).write_text(base_text, encoding="utf-8")
 
 
-def download_corpus(corpus_name, output_path=None):
+def download_corpus(corpus_name, output_path=None, replace=False):
     """download corpus from openpecha
 
     Args:
@@ -79,7 +79,7 @@ def download_corpus(corpus_name, output_path=None):
     )
     corpus_pecha_ids = corpus_pecha_list.text.splitlines()
     for pecha_id in corpus_pecha_ids:
-        if (output_dir / pecha_id).is_dir():
+        if (output_path / pecha_id).is_dir() and not replace:
             continue
         print(f"INFO: Downloading {pecha_id}...")
         pecha_repo = get_github_repo(pecha_id, org_name="OpenPecha", token=token)
