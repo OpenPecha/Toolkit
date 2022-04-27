@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.8.2 (2022-04-27)
+### Fix
+* **corpus-download:** Pecha base path ([`155feb0`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/155feb0646b56073bf1967a1ff5fdee2fba3098d))
+
 ## v0.8.1 (2022-04-21)
 ### Fix
 * **corpus-download:** Add download progress bar with tqdm ([`c075662`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/c075662d55456ff8bd946aa59b72b79740099ce5))
