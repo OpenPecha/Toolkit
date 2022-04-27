@@ -35,7 +35,7 @@ def get_base_vol_list(pecha_repo, pecha_id):
         list: list of base text file name
     """
     base_vols = []
-    contents = pecha_repo.get_contents(f"./{pecha_id}.opf/base")
+    contents = pecha_repo.get_contents(f"/{pecha_id}.opf/base")
     for content_file in contents:
         base_vols.append(content_file.name)
     return base_vols
