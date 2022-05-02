@@ -2,7 +2,9 @@ from openpecha.core.annotations import Citation, Span
 from openpecha.core.layer import InitialCreationEnum, Layer, LayerEnum, PechaMetaData
 from openpecha.core.pecha import OpenPechaFS
 
-pecha = OpenPechaFS(path="<path_to_pecha>")
+# create new pecha
+metadata = PechaMetaData(initial_creation_type=InitialCreationEnum.input)
+pecha = OpenPechaFS(metadata=metadata)
 
 # create a simple layer
 ann = Citation(span=Span(start=10, end=20))
@@ -13,5 +15,3 @@ base_name = pecha.set_base("base content")
 pecha.set_layer(base_name, layer)
 
 pecha.save()
-
-assert pecha.layers[base_name][LayerEnum.citation].id == layer.id

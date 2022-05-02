@@ -11,9 +11,11 @@ from .ids import get_uuid
 class Span(BaseModel):
     start: int = Field(..., ge=0)
     end: int = Field(..., ge=0)
+    errors: Dict = {}
 
-    @validator("*")
+    @validator("start", "end")
     def span_must_not_be_neg(cls, v):
+
         if v < 0:
             raise ValueError("span shouldn't be negative")
         return v
@@ -87,6 +89,7 @@ class Durchen(BaseAnnotation):
     options: Dict[str, str] = Field(
         ..., description="all other spell options in dict of {text_name, option}"
     )
+    printable: bool = True
 
 
 class Footnote(BaseAnnotation):

@@ -269,3 +269,32 @@ class PechaBaseUpdate:
             self.update_vol(vol_fn.stem)
         print("[INFO] Updating index ...")
         self.update_index_layer()
+
+
+def update_single_base(pecha, base_name: str, new_content: str):
+    """Only update base and layers associated with it"""
+
+    def update_ann_span(ann, updater):
+        start = updater.get_updated_coord(ann.span.start)
+        end = updater.get_updated_coord(ann.span.end)
+        error_msg = "Blupdate failed"
+        if start == -1 and end == -1:
+            ann.span.errors[error_msg] = "both start and end char index"
+        elif start == -1:
+            ann.span.errors[error_msg] = "start char index"
+            ann.span.end = end
+        elif end == -1:
+            ann.span.errors[error_msg] = "end char index"
+            ann.span.start = start
+        else:
+            ann.span.start = start
+            ann.span.end = end
+
+        return ann
+
+    src_base = pecha.get_base(base_name)
+    updater = Blupdate(src_base, new_content)
+    for layer in pecha.get_layers(base_name):
+        for ann in layer.get_annotations():
+            ann = update_ann_span(ann, updater)
+            layer.set_annotation(ann)

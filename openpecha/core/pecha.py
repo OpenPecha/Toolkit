@@ -1,11 +1,10 @@
 import json
-import logging
 import shutil
 from collections import defaultdict
 from pathlib import Path
 from typing import Dict, List, Union
 
-from openpecha import config
+from openpecha import blupdate, config
 from openpecha.core.annotations import BaseAnnotation, Span
 from openpecha.core.layer import Layer, LayerEnum, PechaMetaData, SpanINFO
 from openpecha.storages import GithubStorage, Storage, Storages
@@ -91,11 +90,16 @@ class OpenPecha:
         given otherwise overwrites it and return base_name.
         """
         if base_name and base_name in self.base:
+            blupdate.update_single_base(self, base_name, content)
             self.base[base_name] = content
         else:
             base_name = self._get_base_name()
             self.base[base_name] = content
         return base_name
+
+    def get_layers(self, base_name: str) -> Layer:
+        for layer_name in self.components[base_name]:
+            yield self.get_layer(base_name, layer_name)
 
     def get_layer(self, base_name: str, layer_name: LayerEnum) -> Layer:
         if base_name in self.layers and layer_name in self.layers[base_name]:
@@ -249,7 +253,9 @@ class OpenPechaFS(OpenPecha):
     def save_meta(self):
         dump_yaml(json.loads(self.meta.json()), self.meta_fn)
 
-    def save_single_base(self, base_name: str, content: str):
+    def save_single_base(self, base_name: str, content: str = None):
+        if not content:
+            content = self.base[base_name]
         base_fn = self._mkdir(self.base_path) / f"{base_name}.txt"
         base_fn.write_text(content)
 
@@ -294,7 +300,8 @@ class OpenPechaFS(OpenPecha):
         return self.opf_path
 
     def update_base(self, base_name: str, content: str):
-        self.save_single_base(base_name, content)
+        self.set_base(content, base_name)
+        self.save_single_base(base_name)
         self.update_metadata()
 
     def update_layer(self, base_name: str, layer_name: LayerEnum, layer: Layer):
