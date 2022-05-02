@@ -127,8 +127,8 @@ class Layer(BaseModel):
         ann = ann_class.parse_obj(ann_dict)
         return ann
 
-    def add_annotation(self, ann: BaseAnnotation):
-        """Add annotation `ann` to the layer"""
+    def set_annotation(self, ann: BaseAnnotation):
+        """Add or Update annotation `ann` to the layer"""
         self.annotations[ann.id] = json.loads(ann.json())
 
     def remove_annotation(self, annotation_id: str):

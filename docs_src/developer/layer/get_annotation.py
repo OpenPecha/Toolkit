@@ -3,7 +3,7 @@ from openpecha.core.layer import Layer, LayerEnum
 
 layer = Layer(annotation_type=LayerEnum.citation)
 ann = Citation(span=Span(start=10, end=20))
-layer.add_annotation(ann)
+layer.set_annotation(ann)
 
 new_ann = layer.get_annotation(ann.id)  # new
 

@@ -42,7 +42,7 @@ def test_add_annotation():
     layer = Layer(annotation_type=LayerEnum.citation)
     ann = Citation(span=Span(start=10, end=20))
 
-    layer.add_annotation(ann)
+    layer.set_annotation(ann)
 
     assert layer.annotations[ann.id]["id"] == ann.id
 
@@ -51,7 +51,7 @@ def test_get_annotation():
     layer = Layer(annotation_type=LayerEnum.citation)
     ann = Citation(span=Span(start=10, end=20))
 
-    layer.add_annotation(ann)
+    layer.set_annotation(ann)
 
     assert layer.get_annotation(ann.id).id == ann.id
 
@@ -60,7 +60,7 @@ def test_remove_annotation():
     layer = Layer(annotation_type=LayerEnum.citation)
     ann = Citation(span=Span(start=10, end=20))
 
-    layer.add_annotation(ann)
+    layer.set_annotation(ann)
 
     assert ann.id in layer.annotations
 
