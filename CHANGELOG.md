@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.8.3 (2022-05-02)
+### Fix
+* **core:** Apply blupdate everytime base is upated ([`a899043`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/a8990433c64d9591e34ecea235a5d7243adf3aed))
+* **core-layer:** Update annotation ([`1553f41`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/1553f414e52768c2e7a78e880ef12bd111b434b3))
+* **core-annotation:** Add default and options spelling in durchen ([`e34c157`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/e34c157faaf9e52ae866d87c25bec1d193f54ec7))
+
 ## v0.8.2 (2022-04-27)
 ### Fix
 * **corpus-download:** Pecha base path ([`155feb0`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/155feb0646b56073bf1967a1ff5fdee2fba3098d))
