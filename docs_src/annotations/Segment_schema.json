@@ -2,6 +2,10 @@
   "title": "Segment",
   "type": "object",
   "properties": {
+    "id": {
+      "title": "Id",
+      "type": "string"
+    },
     "span": {
       "$ref": "#/definitions/Span"
     },

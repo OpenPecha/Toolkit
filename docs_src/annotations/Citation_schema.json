@@ -2,6 +2,10 @@
   "title": "Citation",
   "type": "object",
   "properties": {
+    "id": {
+      "title": "Id",
+      "type": "string"
+    },
     "span": {
       "$ref": "#/definitions/Span"
     },

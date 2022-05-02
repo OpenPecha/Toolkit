@@ -49,7 +49,7 @@ def test_archaic():
 
 
 def test_durchen():
-    assert durchen.span.start == 10
+    assert durchen.span.start == 15
 
 
 def test_footnote():

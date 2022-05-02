@@ -83,7 +83,10 @@ class Archaic(BaseAnnotation):
 
 
 class Durchen(BaseAnnotation):
-    pass
+    default: str = Field(..., description="text_name of the default option")
+    options: Dict[str, str] = Field(
+        ..., description="all other spell options in dict of {text_name, option}"
+    )
 
 
 class Footnote(BaseAnnotation):
