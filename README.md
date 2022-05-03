@@ -1,13 +1,13 @@
 # OpenPecha Toolkit
 [![PyPI version](https://badge.fury.io/py/openpecha.svg)](https://badge.fury.io/py/openpecha)
-![Test](https://github.com/OpenPecha/openpecha-toolkit/workflows/Test/badge.svg)
-![Test Coverage](https://github.com/OpenPecha/openpecha-toolkit/workflows/Test%20Coverage/badge.svg)
-![Publish](https://github.com/OpenPecha/openpecha-toolkit/workflows/Publish/badge.svg)
+[![Test](https://github.com/OpenPecha-dev/openpecha-toolkit/actions/workflows/test.yml/badge.svg)](https://github.com/OpenPecha-dev/openpecha-toolkit/actions/workflows/test.yml)
+[![Test Coverage](https://github.com/OpenPecha-dev/openpecha-toolkit/actions/workflows/test-coverage.yaml/badge.svg)](https://github.com/OpenPecha-dev/openpecha-toolkit/actions/workflows/test-coverage.yaml)
+[![Publish](https://github.com/OpenPecha-dev/openpecha-toolkit/actions/workflows/publish.yaml/badge.svg)](https://github.com/OpenPecha-dev/openpecha-toolkit/actions/workflows/publish.yaml)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
 OpenPecha Toolkit allows state of the art for distributed standoff annotations on moving texts, in which Base layer can be edited without affecting annotations.
 
-- Documentation: https://dev.openpecha.org/
+- Documentation: https://dev.openpecha.org
 - If you have any problems with `openpecha-toolkit`, please open [issues](https://github.com/OpenPecha-dev/openpecha-toolkit/issues/new/choose)
 
 
