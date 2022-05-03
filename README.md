@@ -5,18 +5,11 @@
 ![Publish](https://github.com/OpenPecha/openpecha-toolkit/workflows/Publish/badge.svg)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
-OpenPecha Toolkit allows state of the art for distributed standoff annotations on moving texts, in which Base layer can be edited without affecting annotations. 
+OpenPecha Toolkit allows state of the art for distributed standoff annotations on moving texts, in which Base layer can be edited without affecting annotations.
 
-The motivation for this project it that for perfect base-text, there no big obstacles but the technical problems come in when you have to be able to edit the base-text, which can be correcting or updating the base-text. So the existing solution like using character coordinates won’t work. So we purposed the CCTV (Character Coordinate Translation Vector) to track the annotations from source base-text to edited base-text without worrying about the annotations at all. Then user can export the edited based text with updated annotations in various docuemnt format like `.md`, `.epub`, `.pdf`, etc. But currently it supports only markdown file.
+- Documentation: https://dev.openpecha.org/
+- If you have any problems with `openpecha-toolkit`, please open [issues](https://github.com/OpenPecha-dev/openpecha-toolkit/issues/new/choose)
 
-For NLP this toolkit will provide a way to have annoated corpra with minimal errors and extract a particular type of annotation or collection of different type of annotations. NLP researchers can then use these corpus to build language model, annotations to build NER model, entity linking, ect.
-
-## Prerequisite
-  - Python3, you can download from [here](https://www.python.org) 
-
-## Installation
-  - [MacOS installer](https://github.com/OpenPecha/openpecha-toolkit/blob/master/installers/openpecha_mac_installer.zip?raw=true)
-  - [Windows installer](https://github.com/OpenPecha/openpecha-toolkit/blob/master/installers/openpecha_windows_installer.zip?raw=true)
 
 ## Usage
 First, we need to download all the pecha from OpenPecha.
