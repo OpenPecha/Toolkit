@@ -5,7 +5,7 @@
 [![Publish](https://github.com/OpenPecha-dev/openpecha-toolkit/actions/workflows/publish.yaml/badge.svg)](https://github.com/OpenPecha-dev/openpecha-toolkit/actions/workflows/publish.yaml)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
-OpenPecha Toolkit allows state of the art for distributed standoff annotations on moving texts, in which Base layer can be edited without affecting annotations.
+OpenPecha Toolkit allows state of the art solution for distributed standoff annotations on moving texts, in which Base layer can be edited without affecting annotations.
 
 - Documentation: https://dev.openpecha.org
 - If you have any problems with `openpecha-toolkit`, please open [issues](https://github.com/OpenPecha-dev/openpecha-toolkit/issues/new/choose)
