@@ -16,14 +16,15 @@ OpenPecha Toolkit allows state of the art solution for distributed standoff anno
 
 
 ## Developer Installation.
-```
-$ git clone https://github.com/OpenPoti/openpecha-toolkit.git
-$ cd openpecha-toolkit
-$ pip install -r requirements.txt
-$ pip install -e .
+```bash
+git clone https://github.com/OpenPecha-dev/openpecha-toolkit.git
+cd openpecha-toolkit
+pip install -r requirements-dev.txt
+pip install -e .
+pre-commit install
 ```
 
 ## Testing
-```
-$ pytest tests
+```bash
+pytest tests
 ```
