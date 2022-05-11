@@ -19,7 +19,7 @@ OpenPecha Toolkit allows state of the art solution for distributed standoff anno
 ```
 $ git clone https://github.com/OpenPoti/openpecha-toolkit.git
 $ cd openpecha-toolkit
-$ pip install -r requirements.txt
+$ pip install -r requirements-dev.txt
 $ pip install -e .
 ```
 
