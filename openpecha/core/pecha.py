@@ -2,13 +2,14 @@ import json
 import shutil
 from collections import defaultdict
 from pathlib import Path
+from turtle import Vec2D, down
 from typing import Dict, List, Union
 
 from openpecha import blupdate, config
 from openpecha.core.annotations import BaseAnnotation, Span
 from openpecha.core.layer import Layer, LayerEnum, PechaMetaData, SpanINFO
 from openpecha.storages import GithubStorage, Storage, Storages
-from openpecha.utils import dump_yaml, load_yaml
+from openpecha.utils import download_pecha, dump_yaml, load_yaml
 
 
 class OpenPecha:
@@ -168,17 +169,35 @@ class OpenPecha:
 
 
 class OpenPechaFS(OpenPecha):
-    def __init__(self, path: str = None, storage: Storage = None, **kwargs):
-        self._opf_path = self.get_opf_path(path)
+    """Class to represent opf pecha on file-system.
+
+    Note:
+        Either use pecha_id or `path` attribute to create
+        instance, `pecha_id` for downloading/updating pecha and
+        `path` for local pecha.
+
+    Attributes:
+        pecha_id(str): id of openpecha pecha.
+        path (str): path to local pecha root or pecha .opf path.
+        storage (Storage): storage obj for saving at remote.
+    """
+
+    def __init__(
+        self, pecha_id: str = None, path: str = None, storage: Storage = None, **kwargs
+    ):
+        self._opf_path = self.get_opf_path(pecha_id, path)
         self.output_dir = None
         self.storage = storage
         super().__init__(**kwargs)
 
     @staticmethod
-    def get_opf_path(path: str) -> Path:
+    def get_opf_path(pecha_id, path: str) -> Path:
         """convert pecha path to pecha's opf path"""
+        if not pecha_id and not path:
+            return
+
         if not path:
-            return path
+            return download_pecha(pecha_id)
 
         path = Path(path)
         if path.name.endswith(".opf"):

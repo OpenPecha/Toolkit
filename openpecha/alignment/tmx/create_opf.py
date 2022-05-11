@@ -53,7 +53,7 @@ def get_base_text(text):
 
 def create_opf_repo(segmented_text, opf_path, title, lang, origin_type):
     pecha_id = opf_path.stem
-    opf = OpenPechaFS(opf_path)
+    opf = OpenPechaFS(path=opf_path)
     layers = {"0001": {LayerEnum.segment: get_segment_layer(segmented_text)}}
     base_text = get_base_text(segmented_text)
     bases = {"0001": base_text}

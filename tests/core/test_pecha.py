@@ -40,7 +40,7 @@ def test_create_pecha():
 
 
 def test_load_openpecha(opf_path):
-    pecha = OpenPechaFS(opf_path)
+    pecha = OpenPechaFS(path=opf_path)
     assert pecha.meta.id
     assert pecha.index
     assert pecha.get_base("v001")
@@ -52,7 +52,7 @@ def test_load_openpecha(opf_path):
 
 
 def test_save_layer(opf_path):
-    pecha = OpenPechaFS(opf_path)
+    pecha = OpenPechaFS(path=opf_path)
     layer_fn = pecha.save_layer(
         "v002",
         LayerEnum.citation,
@@ -63,7 +63,7 @@ def test_save_layer(opf_path):
 
 
 def test_pecha_update(opf_path):
-    pecha = OpenPechaFS(opf_path)
+    pecha = OpenPechaFS(path=opf_path)
     with tempfile.TemporaryDirectory() as tmpdirname:
         pecha.meta.id
         pecha.get_base("v001")
@@ -90,7 +90,7 @@ def test_pecha_update(opf_path):
 
 
 def test_create_empty_layer(opf_path):
-    pecha = OpenPechaFS(opf_path)
+    pecha = OpenPechaFS(path=opf_path)
     layer = pecha.get_layer("v001", LayerEnum("BookNumber"))
     assert layer.annotation_type == LayerEnum("BookNumber")
     assert layer.revision == "00001"
@@ -98,7 +98,7 @@ def test_create_empty_layer(opf_path):
 
 
 def test_reset_layer(opf_path):
-    pecha = OpenPechaFS(opf_path)
+    pecha = OpenPechaFS(path=opf_path)
     base_name, layer_name = "v001", LayerEnum.citation
     with tempfile.TemporaryDirectory() as tmpdirname:
         pecha.meta.id
@@ -113,7 +113,7 @@ def test_reset_layer(opf_path):
 
 
 def test_reset_layers(opf_path):
-    pecha = OpenPechaFS(opf_path)
+    pecha = OpenPechaFS(path=opf_path)
     base_name, layer_name_1, layer_name_2 = "v001", LayerEnum.citation, LayerEnum.author
     with tempfile.TemporaryDirectory() as tmpdirname:
         pecha.meta.id
@@ -156,7 +156,7 @@ def get_sub_string(string, span):
 
 def test_span_info_with_layers(test_pechas_path):
     opf_path = test_pechas_path / "span_info.opf"
-    pecha = OpenPechaFS(opf_path)
+    pecha = OpenPechaFS(path=opf_path)
 
     span_info = pecha.get_span_info(
         base_name="0001",
@@ -182,7 +182,7 @@ def test_span_info_with_layers(test_pechas_path):
 
 def test_span_info_without_layers(test_pechas_path):
     opf_path = test_pechas_path / "span_info.opf"
-    pecha = OpenPechaFS(opf_path)
+    pecha = OpenPechaFS(path=opf_path)
 
     span_info = pecha.get_span_info(
         base_name="0001",
@@ -191,3 +191,14 @@ def test_span_info_without_layers(test_pechas_path):
     )
 
     assert not span_info.layers
+
+
+@pytest.mark.skip(reason="external api call")
+def test_download_pecha():
+    pecha = OpenPechaFS(pecha_id="P000108")
+
+    assert pecha.opf_path.is_dir()
+
+    shutil.rmtree(str(pecha.opf_path.parent))
+
+    assert not pecha.opf_path.is_dir()

@@ -56,7 +56,7 @@ def get_segment_layer_base_and_mapping(po_dict):
 def create_opf_for_translated(
     po_dict, pecha_id, opf_path, title=None, origin_type="translation", lan=None
 ):
-    opf = OpenPechaFS(opf_path=opf_path)
+    opf = OpenPechaFS(path=opf_path)
     segment_layer, base_text, annotation_map = get_segment_layer_base_and_mapping(
         po_dict
     )
