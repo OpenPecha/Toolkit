@@ -2,6 +2,13 @@
 
 <!--next-version-placeholder-->
 
+## v0.8.4 (2022-05-11)
+### Fix
+* **core:** Pecha download ([`957c59d`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/957c59dbf13b4b8101bff2968bd46c4255003787))
+
+### Documentation
+* Fix typos ([`ac04127`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/ac041275251b12bcd402ac93bce110769c15d635))
+
 ## v0.8.3 (2022-05-02)
 ### Fix
 * **core:** Apply blupdate everytime base is upated ([`a899043`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/a8990433c64d9591e34ecea235a5d7243adf3aed))
