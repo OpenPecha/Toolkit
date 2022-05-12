@@ -143,7 +143,8 @@ class PechaMetaData(BaseModel):
     source_metadata: Optional[Dict] = {}
     created_at: datetime = None
     last_modified_at: datetime = None
-    quality: Dict[str, Union[int, float]] = None
+    statistics: Dict[str, Union[int, float, str]] = {}
+    quality: Dict[str, Union[int, float]] = {}
 
     @validator("id", pre=True, always=True)
     def set_id(cls, v):

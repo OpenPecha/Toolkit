@@ -5,9 +5,6 @@
 # URL: <https://www.nltk.org/>
 # For license information, see LICENSE.TXT
 
-from dataclasses import dataclass
-from multiprocessing.sharedctypes import Value
-from queue import Empty
 from typing import Dict
 
 from botok import WordTokenizer
@@ -23,11 +20,11 @@ class NonWordsCounter:
         self,
         text: str = None,
         tokenizer: WordTokenizer = None,
-        total_tokens: int = 0,
+        total_words: int = 0,
         total_non_words: int = 0,
         empty=False,
     ):
-        self.total_tokens: int = total_tokens
+        self.total_words: int = total_words
         self.total_non_words: int = total_non_words
         if not total_non_words and not empty:
             self.count(text, tokenizer)
@@ -37,24 +34,17 @@ class NonWordsCounter:
             raise ValueError("required text input")
         tokenizer = tokenizer if tokenizer else WordTokenizer()
         tokens = tokenizer.tokenize(text)
-        self.total_tokens = len(tokens)
+        self.total_words = len(tokens)
         for token in tokens:
             if token.pos in [WordMarkers.NON_WORD.name, WordMarkers.NO_POS.name]:
                 self.total_non_words += 1
 
     @property
     def non_word_ratio(self):
-        return round(self.total_non_words / self.total_tokens, 2)
+        return round(self.total_non_words / self.total_words, 2)
 
     def __add__(self, other):
         return NonWordsCounter(
-            total_tokens=self.total_tokens + other.total_tokens,
+            total_words=self.total_words + other.total_words,
             total_non_words=self.total_non_words + other.total_non_words,
         )
-
-    def dict(self) -> Dict:
-        return {
-            "total_tokens": self.total_tokens,
-            "total_non_words": self.total_non_words,
-            "non_words_ratio": self.non_word_ratio,
-        }
