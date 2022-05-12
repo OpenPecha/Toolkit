@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.8.5 (2022-05-12)
+### Fix
+* **corpus-quality:** Add statistics ([`6234b19`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/6234b19be946ef88fb361f290effc59b7e98698e))
+
 ## v0.8.4 (2022-05-11)
 ### Fix
 * **core:** Pecha download ([`957c59d`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/957c59dbf13b4b8101bff2968bd46c4255003787))
