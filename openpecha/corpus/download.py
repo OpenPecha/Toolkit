@@ -1,16 +1,21 @@
+import csv
 import io
 import json
 import os
 import zipfile
+from multiprocessing.sharedctypes import Value
 
 import requests
+from tqdm import tqdm
 
 from openpecha import config, utils
 from openpecha.github_utils import get_github_repo
-from tqdm import tqdm
 
 
-def get_download_token():
+def get_github_token():
+    token = os.environ.get("GITHUB_TOKEN")
+    if token:
+        return token
     github_keys_path = config.BASE_PATH / "keys" / "github.json"
     if github_keys_path.is_file():
         keys = json.load(github_keys_path.open())
@@ -58,7 +63,32 @@ def download_base_vols(output_path, pecha_id, base_vols, session):
         (pecha_dir_path / base_vol).write_text(base_text, encoding="utf-8")
 
 
-def download_corpus(corpus_name, output_path=None, replace=False):
+def get_corpus_catalog(corpus_name, session):
+    catalog_url = (
+        f"https://github.com/OpenPecha/corpus_catalog/raw/main/data/{corpus_name}.csv"
+    )
+    r = session.get(catalog_url, stream=True)
+
+    if r.status_code != requests.codes.OK:
+        ValueError(f"Corpus with name `{corpus_name}` doesn't exists")
+
+    lines = (line.decode("utf-8") for line in r.iter_lines())
+    csv_reader = csv.reader(lines)
+    next(csv_reader, None)  # skip headers
+    for row in csv_reader:
+        yield row
+
+
+def get_request_session():
+    session = requests.Session()
+    token = get_github_token()
+    session.headers["Authorization"] = f"token {token}"
+    return session
+
+
+def download_corpus(
+    corpus_name, output_path=utils._mkdir(config.BASE_PATH / "corpus"), replace=False
+):
     """download corpus from openpecha
 
     Args:
@@ -68,25 +98,19 @@ def download_corpus(corpus_name, output_path=None, replace=False):
     Return:
         path: output path
     """
-    if not output_path:
-        output_path = utils._mkdir(config.BASE_PATH / "corpus")
-    output_path = output_path / corpus_name
-
-    session = requests.Session()
-    token = get_download_token()
-    session.headers["Authorization"] = f"token {token}"
-    corpus_pecha_list = session.get(
-        f"https://raw.githubusercontent.com/OpenPecha/catalog/master/data/corpus/{corpus_name}.txt"
-    )
-    corpus_pecha_ids = corpus_pecha_list.text.splitlines()
-    for pecha_id in tqdm(corpus_pecha_ids):
-        if (output_path / pecha_id).is_dir() and not replace:
-            continue
-        pecha_repo = get_github_repo(pecha_id, org_name="OpenPecha", token=token)
-        base_vols = get_base_vol_list(pecha_repo, pecha_id)
-        download_base_vols(output_path, pecha_id, base_vols, session)
-    return output_path
+    corpus_output_path = output_path / corpus_name
+    session = get_request_session()
+    corpus_catalog = get_corpus_catalog(corpus_name, session)
+    print(list(corpus_catalog)[0])
+    # corpus_pecha_ids = corpus_pecha_list.text.splitlines()
+    # for pecha_id in tqdm(corpus_pecha_ids):
+    #     if (output_path / pecha_id).is_dir() and not replace:
+    #         continue
+    #     pecha_repo = get_github_repo(pecha_id, org_name="OpenPecha", token=token)
+    #     base_vols = get_base_vol_list(pecha_repo, pecha_id)
+    #     download_base_vols(output_path, pecha_id, base_vols, session)
+    # return output_path
 
 
 if __name__ == "__main__":
-    download_corpus("classical_bo")
+    download_corpus("literary_bo")
