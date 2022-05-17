@@ -1,15 +1,22 @@
 import csv
 import io
 import json
+import logging
 import os
+import shutil
+import sys
 import zipfile
-from multiprocessing.sharedctypes import Value
 
 import requests
 from tqdm import tqdm
 
 from openpecha import config, utils
-from openpecha.github_utils import get_github_repo
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(message)s",
+    handlers=[logging.StreamHandler(sys.stdout)],
+)
 
 
 def get_github_token():
@@ -70,7 +77,7 @@ def get_corpus_catalog(corpus_name, session):
     r = session.get(catalog_url, stream=True)
 
     if r.status_code != requests.codes.OK:
-        ValueError(f"Corpus with name `{corpus_name}` doesn't exists")
+        return ValueError(f"Corpus with name `{corpus_name}` doesn't exists")
 
     lines = (line.decode("utf-8") for line in r.iter_lines())
     csv_reader = csv.reader(lines)
@@ -79,11 +86,49 @@ def get_corpus_catalog(corpus_name, session):
         yield row
 
 
+def get_corpus_items_count(corpus_name, session):
+    url = (
+        f"https://github.com/OpenPecha/corpus_catalog/raw/main/data/{corpus_name}.count"
+    )
+    r = session.get(url)
+
+    if r.status_code != requests.codes.OK:
+        logging.info("Please contact developer to set corpus item count")
+
+    return int(r.text.strip())
+
+
 def get_request_session():
     session = requests.Session()
     token = get_github_token()
     session.headers["Authorization"] = f"token {token}"
     return session
+
+
+def download_zip_file(url, pecha_path, session=None):
+    if session:
+        r = session.get(url, stream=True)
+    else:
+        r = requests.get(url, stream=True)
+
+    if r.status_code != requests.codes.OK:
+        return
+
+    corpus_path = pecha_path.parent
+    out_fn_zip = corpus_path / f"{pecha_path.name}.zip"
+    with out_fn_zip.open("wb") as f:
+        for chunk in r.iter_content(chunk_size=512):
+            if chunk:  # filter out keep-alive new chunks
+                f.write(chunk)
+
+    # unzip the file
+    with zipfile.ZipFile(str(out_fn_zip), "r") as zip:
+        zip.extractall(corpus_path)
+        members = zip.namelist()
+
+    out_fn_zip.unlink()
+    unzipfile_path = corpus_path / members[0][:-1]
+    shutil.move(str(unzipfile_path), str(pecha_path))
 
 
 def download_corpus(
@@ -101,15 +146,14 @@ def download_corpus(
     corpus_output_path = output_path / corpus_name
     session = get_request_session()
     corpus_catalog = get_corpus_catalog(corpus_name, session)
-    print(list(corpus_catalog)[0])
-    # corpus_pecha_ids = corpus_pecha_list.text.splitlines()
-    # for pecha_id in tqdm(corpus_pecha_ids):
-    #     if (output_path / pecha_id).is_dir() and not replace:
-    #         continue
-    #     pecha_repo = get_github_repo(pecha_id, org_name="OpenPecha", token=token)
-    #     base_vols = get_base_vol_list(pecha_repo, pecha_id)
-    #     download_base_vols(output_path, pecha_id, base_vols, session)
-    # return output_path
+    corpus_items_count = get_corpus_items_count(corpus_name, session)
+    logging.info(f"Downloading `{corpus_name}` corpus...")
+    for corpus in tqdm(corpus_catalog, total=corpus_items_count):
+        pecha_id, download_url, quality = corpus
+        pecha_path = corpus_output_path / pecha_id
+        if pecha_path.is_dir() and not replace:
+            continue
+        download_zip_file(download_url, pecha_path, session)
 
 
 if __name__ == "__main__":
