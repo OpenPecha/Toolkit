@@ -2,6 +2,11 @@
 
 <!--next-version-placeholder-->
 
+## v0.8.6 (2022-05-17)
+### Fix
+* **corpus:** Refactor to download tokenized corpus ([`b68bef0`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/b68bef00d0f7168484aded5f989032714d33526e))
+* **corpus:** Lazy downloading corpus catalog csv file ([`cf24270`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/cf24270df4bbf993158cc2e0f17400138a5110e3))
+
 ## v0.8.5 (2022-05-12)
 ### Fix
 * **corpus-quality:** Add statistics ([`6234b19`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/6234b19be946ef88fb361f290effc59b7e98698e))
