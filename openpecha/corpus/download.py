@@ -8,6 +8,7 @@ import sys
 import zipfile
 
 import requests
+from genericpath import exists
 from tqdm import tqdm
 
 from openpecha import config, utils
@@ -144,6 +145,7 @@ def download_corpus(
         path: output path
     """
     corpus_output_path = output_path / corpus_name
+    corpus_output_path.mkdir(exist_ok=True, parents=True)
     session = get_request_session()
     corpus_catalog = get_corpus_catalog(corpus_name, session)
     corpus_items_count = get_corpus_items_count(corpus_name, session)
