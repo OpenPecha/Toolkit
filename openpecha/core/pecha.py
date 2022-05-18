@@ -2,13 +2,13 @@ import json
 import shutil
 from collections import defaultdict
 from pathlib import Path
-from turtle import Vec2D, down
 from typing import Dict, List, Union
 
 from openpecha import blupdate, config
+from openpecha.core import ids
 from openpecha.core.annotations import BaseAnnotation, Span
 from openpecha.core.layer import Layer, LayerEnum, PechaMetaData, SpanINFO
-from openpecha.storages import GithubStorage, Storage, Storages
+from openpecha.storages import GithubStorage, Storage
 from openpecha.utils import download_pecha, dump_yaml, load_yaml
 
 
@@ -75,10 +75,14 @@ class OpenPecha:
         self._components = self._read_components()
         return self._components
 
-    def _get_base_name(self):
-        base_name = f"{self.current_base_order:05}"
-        self.current_base_order += 1
-        return base_name
+    def _get_base_name(self) -> str:
+        return ids.get_base_id()
+
+    def _set_base_metadata(self, base_name: str, metadata: Dict) -> None:
+        metadata.update({"base_file": f"{base_name}.txt"})
+        if "base" not in self.meta.source_metadata:
+            self.meta.source_metadata["base"] = {}
+        self.meta.source_metadata["base"][base_name] = metadata
 
     def get_base(self, base_name: str) -> str:
         if base_name in self.base:
@@ -86,7 +90,10 @@ class OpenPecha:
         self.base[base_name] = self.read_base_file(base_name)
         return self.base[base_name]
 
-    def set_base(self, content: str, base_name: str = None) -> str:
+    def get_base_metadata(self, base_name: str) -> str:
+        self.meta.source_metadata["base"].get(base_name)
+
+    def set_base(self, content: str, base_name: str = None, metadata: Dict = {}) -> str:
         """Create new base with `content` if `base_name` is not
         given otherwise overwrites it and return base_name.
         """
@@ -96,6 +103,7 @@ class OpenPecha:
         else:
             base_name = self._get_base_name()
             self.base[base_name] = content
+            self._set_base_metadata(base_name, metadata)
         return base_name
 
     def get_layers(self, base_name: str) -> Layer:

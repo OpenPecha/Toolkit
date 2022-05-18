@@ -133,15 +133,32 @@ def test_reset_layers(opf_path):
 
 
 def test_set_base():
-    pecha = OpenPecha()
+    metadata = PechaMetaData(initial_creation_type=InitialCreationEnum.input)
+    pecha = OpenPecha(meta=metadata)
 
     base_name = pecha.set_base("base content")
 
     assert pecha.base[base_name] == "base content"
 
 
+def test_set_base_metadata():
+    metadata = PechaMetaData(initial_creation_type=InitialCreationEnum.input)
+    pecha = OpenPecha(meta=metadata)
+    base_metadata = {"id": "id", "title": "title"}
+
+    base_name = pecha.set_base("base content", metadata=base_metadata)
+
+    assert base_name in pecha.meta.source_metadata["base"]
+    assert pecha.meta.source_metadata["base"][base_name]["id"] == "id"
+    assert pecha.meta.source_metadata["base"][base_name]["title"] == "title"
+    assert (
+        pecha.meta.source_metadata["base"][base_name]["base_file"] == f"{base_name}.txt"
+    )
+
+
 def test_set_layer():
-    pecha = OpenPecha()
+    metadata = PechaMetaData(initial_creation_type=InitialCreationEnum.input)
+    pecha = OpenPecha(meta=metadata)
     base_name = pecha.set_base("base content")
     layer = Layer(annotation_type=LayerEnum.citation)
 

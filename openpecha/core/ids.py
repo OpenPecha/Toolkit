@@ -14,6 +14,10 @@ def get_pecha_id():
     return get_id(prefix="P", length=8)
 
 
+def get_base_id():
+    return get_id("", length=4)
+
+
 def get_work_id():
     return get_id(prefix="W", length=8)
 

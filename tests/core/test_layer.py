@@ -70,17 +70,34 @@ def test_remove_annotation():
 
 
 def test_metadata_model():
-    created_at = datetime.fromisoformat("2020-01-01T00:00:00")
+    imported_at = datetime.fromisoformat("2020-01-01T00:00:00")
     last_modified_at = datetime.fromisoformat("2020-01-01T00:00:00")
 
     metadata = PechaMetaData(
+        source="https://library.bdrc.io",
+        source_file="https://library.bdrc.io/text.json",
         initial_creation_type=InitialCreationEnum.ocr,
-        created_at=created_at,
-        last_modified_at=last_modified_at,
+        imported=imported_at,
+        last_modified=last_modified_at,
+        parser="https://github.com/OpenPecha-dev/openpecha-toolkit/blob/231bba39dd1ba393320de82d4d08a604aabe80fc/openpecha/formatters/google_orc.py",
+        source_metadata={
+            "id": "bdr:W1PD90121",
+            "title": "མའོ་རྫོང་གི་ས་ཆའི་མིང་བཏུས།",
+            "author": "author name",
+            "base": {
+                "f3c9": {
+                    "id": "I1PD90137",
+                    "title": "Volume 1 of mao wen qiang zu zi zhi xian di ming lu",
+                    "total_pages": 220,
+                    "order": 1,
+                    "base_file": "f3c9.tx",
+                }
+            },
+        },
     )
 
-    assert metadata.created_at == created_at
-    assert metadata.last_modified_at == last_modified_at
+    assert metadata.imported == imported_at
+    assert metadata.last_modified == last_modified_at
     assert metadata.initial_creation_type.value == InitialCreationEnum.ocr.value
     assert metadata.id.startswith("P")
     assert len(metadata.id) == 9
