@@ -163,18 +163,12 @@ class OpenPecha:
                 base_str = self.get_base(base_name)
                 if ann.span.start >= span.start and ann.span.end <= span.end:
                     is_ann_found = True
-                    print("In between")
-                    print(base_str[ann.span.start : ann.span.end + 1])
                 elif ann.span.end >= span.start and ann.span.start < span.start:
                     is_ann_found = True
                     ann.span.start = span.start
-                    print("Start Overlapped")
-                    print(base_str[ann.span.start : ann.span.end + 1])
                 elif ann.span.start <= span.end and ann.span.end > span.end:
                     is_ann_found = True
                     ann.span.end = span.end
-                    print("End Overlapped")
-                    print(base_str[ann.span.start : ann.span.end + 1])
 
                 if is_ann_found:
                     ann.span.start -= span.start
@@ -355,7 +349,6 @@ class OpenPechaFS(OpenPecha):
         self.update_metadata()
 
     def reset_layer(self, base_name: str, layer_name: LayerEnum):
-        print("reset->", layer_name.value)
         layer = self.get_layer(base_name, layer_name)
         layer.reset()
         self.save_layer(base_name, layer_name, layer)
