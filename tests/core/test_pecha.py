@@ -29,7 +29,7 @@ def test_create_pecha():
                 )
             }
         },
-        meta=PechaMetaData(initial_creation_type=InitialCreationEnum.ebook),
+        metadata=PechaMetaData(initial_creation_type=InitialCreationEnum.ebook),
     )
     assert openpecha.meta.id
     assert openpecha.get_base("v001")
@@ -134,7 +134,7 @@ def test_reset_layers(opf_path):
 
 def test_set_base():
     metadata = PechaMetaData(initial_creation_type=InitialCreationEnum.input)
-    pecha = OpenPecha(meta=metadata)
+    pecha = OpenPecha(metadata=metadata)
 
     base_name = pecha.set_base("base content")
 
@@ -143,7 +143,7 @@ def test_set_base():
 
 def test_set_base_metadata():
     metadata = PechaMetaData(initial_creation_type=InitialCreationEnum.input)
-    pecha = OpenPecha(meta=metadata)
+    pecha = OpenPecha(metadata=metadata)
     base_metadata = {"id": "id", "title": "title"}
 
     base_name = pecha.set_base("base content", metadata=base_metadata)
@@ -158,7 +158,7 @@ def test_set_base_metadata():
 
 def test_set_layer():
     metadata = PechaMetaData(initial_creation_type=InitialCreationEnum.input)
-    pecha = OpenPecha(meta=metadata)
+    pecha = OpenPecha(metadata=metadata)
     base_name = pecha.set_base("base content")
     layer = Layer(annotation_type=LayerEnum.citation)
 

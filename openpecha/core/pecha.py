@@ -1,5 +1,6 @@
 import json
 import shutil
+import warnings
 from collections import defaultdict
 from pathlib import Path
 from typing import Dict, List, Union
@@ -19,13 +20,14 @@ class OpenPecha:
         layers: Dict[str, Dict[LayerEnum, Layer]] = defaultdict(dict),
         index: Layer = None,
         meta: PechaMetaData = None,
+        metadata: PechaMetaData = None,
         assets: Dict[str, List[Union[str, Path]]] = {},
         components: Dict[str, List[Layer]] = {},
     ):
         self._pecha_id = None
         self.base = base
         self.layers = layers
-        self._meta = meta
+        self._meta = self.__handle_old_metadata_attr(meta, metadata)
         self._index = index
         self.assets = assets
         self._components = components
@@ -33,6 +35,20 @@ class OpenPecha:
 
     def __str__(self):
         return f"OpenPecha:{self.pecha_id}"
+
+    def __handle_old_metadata_attr(self, old, new):
+        if not old and not new:
+            return
+
+        if new:
+            return new
+
+        warnings.warn(
+            "use `metadata` attr instead of `meta` to set pecha metadata",
+            DeprecationWarning,
+            stacklevel=3,
+        )
+        return old
 
     @property
     def about(self):

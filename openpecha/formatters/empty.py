@@ -37,7 +37,7 @@ class EmptyEbook:
         openpecha = OpenPechaFS(
             base={"v001": text},
             layers={"v001": self.get_dummy_layers()},
-            meta=PechaMetaData(
+            metadata=PechaMetaData(
                 initial_creation_type=InitialCreationEnum.ebook,
                 source_metadata=self.metadata,
             ),
