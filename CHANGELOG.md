@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.8.7 (2022-05-18)
+### Fix
+* **core:** Remove prints ([`0cacb3d`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/0cacb3d267538150ece4161f05ee84ddfb62f3a0))
+* **core:** Add metadata attr to OpenPecha class ([`8c5cb98`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/8c5cb98ab0068ae0e95ece3826ecfd72b42c4e8d))
+* **core:** Set base text metadata ([`5f34da2`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/5f34da2851bb8693cc0015f58985d5e58fc42b83))
+
 ## v0.8.6 (2022-05-17)
 ### Fix
 * **corpus:** Refactor to download tokenized corpus ([`b68bef0`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/b68bef00d0f7168484aded5f989032714d33526e))
