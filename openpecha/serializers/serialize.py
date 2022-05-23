@@ -226,13 +226,13 @@ class Serialize(object):
             sub_topics = topic["parts"]
             for sub_topic_uuid, sub_topic in sub_topics.items():
                 sub_topic_ann = defaultdict(str)
-                base_id = f"v{sub_topic['span'][0]['base']:03}"
+                base_id = sub_topic['span'][0]['base']
                 sub_topic_ann["type"] = AnnType.sub_topic
                 sub_topic_ann["work_id"] = sub_topic["work_id"]
                 sub_topic_ann["span"] = sub_topic["span"][0]
                 self.apply_annotation(base_id, sub_topic_ann)
             if topic["span"]:
-                base_id = f"v{topic['span'][0]['base']:03}"
+                base_id = topic['span'][0]['base']
                 topic_ann["type"] = AnnType.topic
                 topic_ann["span"] = topic["span"][0]
                 topic_ann["work_id"] = topic["work_id"]
