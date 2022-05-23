@@ -1,5 +1,3 @@
-from turtle import up
-
 from docs_src.developer.layer import (
     add_annotation,
     bump_revision,

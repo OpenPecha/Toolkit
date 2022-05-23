@@ -5,17 +5,17 @@ annotations:
   12590fb37da14c32ba0785f7f68c6f5e:
     parts: {}
     span:
-    - vol: 1
+    - base: 1
       start: 0
       end: 180
-    - vol: 2
+    - base: 2
       start: 0
       end: 218
     work_id: D1118
   ac26bb9b4a034a0fa959ecc6af68fa0e:
     parts: {}
     span:
-    - vol: 2
+    - base: 2
       start: 218
       end: 382
     work_id: D1119
