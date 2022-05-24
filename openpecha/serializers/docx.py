@@ -335,7 +335,7 @@ class DocxSerializer(Serialize):
         pecha_title = epub_serializer.meta["source_metadata"].get("title", "")
         pecha_id = epub_serializer.meta["id"]
         results = epub_serializer.get_result()
-        for vol_id, result in results.items():
-            serialized_html = epub_serializer.get_serialized_html(result, vol_id, pecha_title)
+        for base_id, result in results.items():
+            serialized_html = epub_serializer.get_serialized_html(result, base_id, pecha_title)
             out_fn = self.create_docx(serialized_html, output_path, pecha_id)
             return out_fn

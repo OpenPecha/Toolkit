@@ -2,6 +2,15 @@
 
 <!--next-version-placeholder-->
 
+## v0.8.9 (2022-05-24)
+### Fix
+* **serializer:** Apply index updated ([`be9a831`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/be9a8311939a5b9cdfc0947e35af3b5767cddcda))
+* **serializer:** Vol id variables are renamed as base_id and vol keyword in span are changed to base ([`1d6898d`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/1d6898d9be7376963f865ec3da56547862a906c9))
+
+## v0.8.8 (2022-05-18)
+### Fix
+* **corpus:** Create corpus directory ([`7ea0b5f`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/7ea0b5fc168d68b1a0e4e37ad0b8faeb0f3cd9e1))
+
 ## v0.8.7 (2022-05-18)
 ### Fix
 * **core:** Remove prints ([`0cacb3d`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/0cacb3d267538150ece4161f05ee84ddfb62f3a0))
