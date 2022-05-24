@@ -3,7 +3,7 @@ from datetime import datetime
 
 import pytest
 
-from openpecha.core.layer import InitialCreationEnum
+from openpecha.core.metadata import InitialCreationType
 from openpecha.work import Instance, InstanceMetadata, Work
 
 
@@ -11,7 +11,7 @@ from openpecha.work import Instance, InstanceMetadata, Work
 def instance():
     metadata = InstanceMetadata(
         source_id="source_id",
-        initial_creation_type=InitialCreationEnum.ocr,
+        initial_creation_type=InitialCreationType.ocr,
         title="title",
         author="author",
         organization="https://bdrc.io",
@@ -25,7 +25,7 @@ def instance():
 def test_instance_metadata_model():
     metadata = InstanceMetadata(
         source_id="source_id",
-        initial_creation_type=InitialCreationEnum.ocr,
+        initial_creation_type=InitialCreationType.ocr,
         title="title",
         author="author",
         organization="https://bdrc.io",
@@ -39,7 +39,7 @@ def test_instance_metadata_model():
 def test_instance_model():
     metadata = InstanceMetadata(
         source_id="source_id",
-        initial_creation_type=InitialCreationEnum.ocr,
+        initial_creation_type=InitialCreationType.ocr,
         title="title",
         author="author",
         organization="https://bdrc.io",

@@ -8,7 +8,7 @@ from typing import Dict, List, Union
 from openpecha import blupdate, config
 from openpecha.core import ids
 from openpecha.core.annotations import BaseAnnotation, Span
-from openpecha.core.layer import Layer, LayerEnum, PechaMetaData, SpanINFO
+from openpecha.core.layer import Layer, LayerEnum, PechaMetadata, SpanINFO
 from openpecha.storages import GithubStorage, Storage
 from openpecha.utils import download_pecha, dump_yaml, load_yaml
 
@@ -19,8 +19,8 @@ class OpenPecha:
         base: Dict[str, str] = {},
         layers: Dict[str, Dict[LayerEnum, Layer]] = defaultdict(dict),
         index: Layer = None,
-        meta: PechaMetaData = None,
-        metadata: PechaMetaData = None,
+        meta: PechaMetadata = None,
+        metadata: PechaMetadata = None,
         assets: Dict[str, List[Union[str, Path]]] = {},
         components: Dict[str, List[Layer]] = {},
     ):
@@ -71,10 +71,10 @@ class OpenPecha:
         return self._pecha_id
 
     @property
-    def meta(self) -> PechaMetaData:
+    def meta(self) -> PechaMetadata:
         if self._meta:
             return self._meta
-        self._meta = PechaMetaData.parse_obj(self.read_meta_file())
+        self._meta = PechaMetadata.parse_obj(self.read_meta_file())
         return self._meta
 
     @property

@@ -4,7 +4,8 @@ import pytest
 from pydantic import ValidationError
 
 from openpecha.core.annotations import Citation, Span
-from openpecha.core.layer import InitialCreationEnum, Layer, LayerEnum, PechaMetaData
+from openpecha.core.layer import Layer, LayerEnum
+from openpecha.core.metadata import InitialCreationType, PechaMetadata
 
 
 def test_layer_model():
@@ -73,10 +74,10 @@ def test_metadata_model():
     imported_at = datetime.fromisoformat("2020-01-01T00:00:00")
     last_modified_at = datetime.fromisoformat("2020-01-01T00:00:00")
 
-    metadata = PechaMetaData(
+    metadata = PechaMetadata(
         source="https://library.bdrc.io",
         source_file="https://library.bdrc.io/text.json",
-        initial_creation_type=InitialCreationEnum.ocr,
+        initial_creation_type=InitialCreationType.ocr,
         imported=imported_at,
         last_modified=last_modified_at,
         parser="https://github.com/OpenPecha-dev/openpecha-toolkit/blob/231bba39dd1ba393320de82d4d08a604aabe80fc/openpecha/formatters/google_orc.py",
@@ -98,6 +99,6 @@ def test_metadata_model():
 
     assert metadata.imported == imported_at
     assert metadata.last_modified == last_modified_at
-    assert metadata.initial_creation_type.value == InitialCreationEnum.ocr.value
+    assert metadata.initial_creation_type.value == InitialCreationType.ocr.value
     assert metadata.id.startswith("P")
     assert len(metadata.id) == 9

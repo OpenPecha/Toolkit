@@ -5,7 +5,8 @@ from pathlib import Path
 import pytest
 
 from openpecha.core.annotations import Span
-from openpecha.core.layer import InitialCreationEnum, Layer, LayerEnum, PechaMetaData
+from openpecha.core.layer import Layer, LayerEnum
+from openpecha.core.metadata import InitialCreationType, PechaMetadata
 from openpecha.core.pecha import OpenPecha, OpenPechaFS
 
 
@@ -29,7 +30,7 @@ def test_create_pecha():
                 )
             }
         },
-        metadata=PechaMetaData(initial_creation_type=InitialCreationEnum.ebook),
+        metadata=PechaMetadata(initial_creation_type=InitialCreationType.ebook),
     )
     assert openpecha.meta.id
     assert openpecha.get_base("v001")
@@ -133,7 +134,7 @@ def test_reset_layers(opf_path):
 
 
 def test_set_base():
-    metadata = PechaMetaData(initial_creation_type=InitialCreationEnum.input)
+    metadata = PechaMetadata(initial_creation_type=InitialCreationType.input)
     pecha = OpenPecha(metadata=metadata)
 
     base_name = pecha.set_base("base content")
@@ -142,7 +143,7 @@ def test_set_base():
 
 
 def test_set_base_metadata():
-    metadata = PechaMetaData(initial_creation_type=InitialCreationEnum.input)
+    metadata = PechaMetadata(initial_creation_type=InitialCreationType.input)
     pecha = OpenPecha(metadata=metadata)
     base_metadata = {"id": "id", "title": "title"}
 
@@ -157,7 +158,7 @@ def test_set_base_metadata():
 
 
 def test_set_layer():
-    metadata = PechaMetaData(initial_creation_type=InitialCreationEnum.input)
+    metadata = PechaMetadata(initial_creation_type=InitialCreationType.input)
     pecha = OpenPecha(metadata=metadata)
     base_name = pecha.set_base("base content")
     layer = Layer(annotation_type=LayerEnum.citation)

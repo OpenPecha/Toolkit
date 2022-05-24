@@ -1,6 +1,7 @@
 from pathlib import Path
 
-from openpecha.core.layer import InitialCreationEnum, Layer, LayerEnum, PechaMetaData
+from openpecha.core.layer import Layer, LayerEnum
+from openpecha.core.metadata import InitialCreationType, PechaMetadata
 from openpecha.core.pecha import OpenPechaFS
 
 from .. import config
@@ -37,8 +38,8 @@ class EmptyEbook:
         openpecha = OpenPechaFS(
             base={"v001": text},
             layers={"v001": self.get_dummy_layers()},
-            metadata=PechaMetaData(
-                initial_creation_type=InitialCreationEnum.ebook,
+            metadata=PechaMetadata(
+                initial_creation_type=InitialCreationType.ebook,
                 source_metadata=self.metadata,
             ),
             assets=self.assets,

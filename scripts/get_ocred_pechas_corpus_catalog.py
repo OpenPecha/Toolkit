@@ -2,14 +2,9 @@ import multiprocessing
 
 import requests
 import yaml
-from tqdm import tqdm
 
-from openpecha.core.layer import InitialCreationEnum, PechaMetaData
-from openpecha.corpus.download import (
-    get_corpus_catalog,
-    get_corpus_items_count,
-    get_request_session,
-)
+from openpecha.core.metadata import InitialCreationType, PechaMetadata
+from openpecha.corpus.download import get_corpus_catalog, get_request_session
 
 
 def _fix_old_metadata_attrs_name(metadata: str) -> str:
@@ -18,7 +13,7 @@ def _fix_old_metadata_attrs_name(metadata: str) -> str:
     return metadata
 
 
-def get_pecha_metadata(pecha_id: str) -> PechaMetaData:
+def get_pecha_metadata(pecha_id: str) -> PechaMetadata:
     url = f"https://raw.githubusercontent.com/OpenPecha/{pecha_id}/master/{pecha_id}.opf/meta.yml"
     session = get_request_session()
     r = session.get(url)
@@ -29,16 +24,16 @@ def get_pecha_metadata(pecha_id: str) -> PechaMetaData:
     raw_metadata = _fix_old_metadata_attrs_name(r.text)
     metadata_dict = yaml.safe_load(raw_metadata)
     try:
-        metadata = PechaMetaData.parse_obj(metadata_dict)
+        metadata = PechaMetadata.parse_obj(metadata_dict)
     except Exception:
-        metadata = PechaMetaData(initial_creation_type=InitialCreationEnum.input)
+        metadata = PechaMetadata(initial_creation_type=InitialCreationType.input)
     return metadata
 
 
 def is_ocred_pecha(pecha_id: str):
     print(f"[INFO] checking {pecha_id}...")
     metadata = get_pecha_metadata(pecha_id)
-    return metadata.initial_creation_type == InitialCreationEnum.ocr
+    return metadata.initial_creation_type == InitialCreationType.ocr
 
 
 def main():

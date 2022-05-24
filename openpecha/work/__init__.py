@@ -13,7 +13,7 @@ from pydantic.networks import AnyHttpUrl
 
 from .. import config
 from ..core.ids import get_work_id
-from ..core.layer import InitialCreationEnum
+from ..core.metadata import InitialCreationType
 from ..utils import download_pecha, dump_yaml, load_yaml
 
 
@@ -21,7 +21,7 @@ class InstanceMetadata(BaseModel):
     """OpenPecha Work instance metadata."""
 
     source_id: str
-    initial_creation_type: InitialCreationEnum
+    initial_creation_type: InitialCreationType
     title: str
     author: str = None
     organization: AnyHttpUrl

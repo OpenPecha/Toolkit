@@ -1,12 +1,12 @@
 import json
-from datetime import datetime
 from enum import Enum
-from typing import Dict, List, Optional, Union
+from typing import List, Optional
 
-from pydantic import AnyHttpUrl, BaseModel, validator
+from pydantic import BaseModel, validator
 
 from .annotations import *
-from .ids import get_pecha_id, get_uuid
+from .ids import get_uuid
+from .metadata import PechaMetadata
 
 
 class LayerEnum(Enum):
@@ -34,12 +34,6 @@ class LayerEnum(Enum):
     durchen = "Durchen"
     footnote = "Footnote"
     segment = "Segment"
-
-
-class InitialCreationEnum(Enum):
-    ocr = "ocr"
-    ebook = "ebook"
-    input = "input"
 
 
 def _get_annotation_class(layer_name: LayerEnum):
@@ -137,38 +131,7 @@ class Layer(BaseModel):
             del self.annotations[annotation_id]
 
 
-class PechaMetaData(BaseModel):
-    id: str = None
-    source: str = None
-    source_file: str = None
-    initial_creation_type: InitialCreationEnum
-    imported: datetime = None
-    last_modified: datetime = None
-    parser: AnyHttpUrl = None
-    source_metadata: Optional[Dict] = {}  # place to dump any metadata from source
-    statistics: Dict[str, Union[int, float, str]] = {}
-    quality: Dict[str, Union[int, float]] = {}
-
-    @validator("id", pre=True, always=True)
-    def set_id(cls, v):
-        return v or get_pecha_id()
-
-    @validator("imported", pre=True, always=True)
-    def set_imported_date(cls, v):
-        return v or datetime.now()
-
-    @validator("last_modified", pre=True, always=True)
-    def set_last_modified_date(cls, v):
-        return v or datetime.now()
-
-    def update_last_modified_date(self):
-        self.last_modified = datetime.now()
-
-    class Config:
-        extra = Extra.forbid
-
-
 class SpanINFO(BaseModel):
     text: str
     layers: Dict[LayerEnum, List[BaseAnnotation]]
-    metadata: PechaMetaData
+    metadata: PechaMetadata

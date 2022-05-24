@@ -5,7 +5,7 @@
 {!../../docs_src/developer/pecha/create_new_pecha.py!}
 ```
 
-When we are creating a brand new pecha, first we must create an instance of `PechaMetaData`, which will automatically issue a unique id for the pecha and allow us to specify other metadata about the pecha.
+When we are creating a brand new pecha, first we must create an instance of `PechaMetadata`, which will automatically issue a unique id for the pecha and allow us to specify other metadata about the pecha.
 
 Then, we will use this metadata object to create pecha container, instance of `OpenPechaFS`.
 
