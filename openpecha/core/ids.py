@@ -10,12 +10,20 @@ def get_id(prefix, length):
     return prefix + "".join(random.choices(uuid4().hex, k=length)).upper()
 
 
+def get_source_id():
+    return get_id(prefix="S", length=8)
+
+
 def get_pecha_id():
     return get_id(prefix="P", length=8)
 
 
 def get_base_id():
     return get_id("", length=4)
+
+
+def get_diplomatic_id():
+    return get_id(prefix="D", length=8)
 
 
 def get_work_id():

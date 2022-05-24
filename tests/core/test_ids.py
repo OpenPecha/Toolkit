@@ -1,8 +1,10 @@
 from openpecha.core.ids import (
     get_alignment_id,
     get_collection_id,
+    get_diplomatic_id,
     get_id,
     get_pecha_id,
+    get_source_id,
     get_uuid,
     get_work_id,
 )
@@ -24,6 +26,20 @@ def test_get_pecha_id():
 
     assert len(pecha_id) == 9
     assert pecha_id.startswith("P")
+
+
+def test_get_source_id():
+    pecha_id = get_source_id()
+
+    assert len(pecha_id) == 9
+    assert pecha_id.startswith("S")
+
+
+def test_get_diplomatic_id():
+    pecha_id = get_diplomatic_id()
+
+    assert len(pecha_id) == 9
+    assert pecha_id.startswith("D")
 
 
 def test_get_work_id():
