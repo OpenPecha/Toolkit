@@ -2,6 +2,15 @@
 
 <!--next-version-placeholder-->
 
+## v0.8.10 (2022-05-24)
+### Fix
+* **core:** Add copyright and license in metadata ([`1db55da`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/1db55dad74631ee98b26d8d3127c598ec310c82e))
+* **core-metadata:** Typos ([`d1b44f0`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/d1b44f03a88b2275b3122bb3505b52141f59c964))
+* **core:** Move metadata model into metadata.py module ([`9f6f1a3`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/9f6f1a3c51a8b3f0b85f482393f36f4bf6d0b204))
+
+### Documentation
+* **metadata:** Add copyright and license to metadata ([`b15ab56`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/b15ab56e5acdcb055887c5ad315a8bc5473d3f07))
+
 ## v0.8.9 (2022-05-24)
 ### Fix
 * **serializer:** Apply index updated ([`be9a831`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/be9a8311939a5b9cdfc0947e35af3b5767cddcda))
