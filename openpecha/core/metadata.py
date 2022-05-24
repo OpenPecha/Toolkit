@@ -1,6 +1,6 @@
 from datetime import datetime
 from enum import Enum
-from typing import Dict, List, Optional, Union
+from typing import Dict, Optional, Union
 
 from pydantic import AnyHttpUrl, BaseModel, Extra, validator
 
@@ -21,7 +21,7 @@ class PechaMetadata(BaseModel):
     imported: datetime = None
     last_modified: datetime = None
     parser: AnyHttpUrl = None
-    source_metadata: Optional[Dict] = {}  # place to dump any metadata from source
+    source_metadata: Optional[Dict] = {}  # place to dump any metadata from the source
     statistics: Dict[str, Union[int, float, str]] = {}
     quality: Dict[str, Union[int, float]] = {}
 
