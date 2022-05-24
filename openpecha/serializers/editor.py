@@ -28,7 +28,7 @@ class AnnotationTemplate:
 
 
 class EditorSerializer(Serialize):
-    def __get_adapted_span(self, span, vol_id):
+    def __get_adapted_span(self, span, base_id):
         """Adapts the annotation span to base-text of the text
 
         Adapts the annotation span, which is based on volume base-text
@@ -36,15 +36,15 @@ class EditorSerializer(Serialize):
 
         Args:
             span (dict): span of a annotation, eg: {start:, end:}
-            vol_id (str): id of vol, where part of the text exists.
+            base_id (str): id of vol, where part of the text exists.
 
         Returns:
             adapted_start (int): adapted start based on text base-text
             adapted_end (int): adapted end based on text base-text
 
         """
-        adapted_start = span["start"] - self.text_spans[vol_id]["start"]
-        adapted_end = span["end"] - self.text_spans[vol_id]["start"]
+        adapted_start = span["start"] - self.text_spans[base_id]["start"]
+        adapted_end = span["end"] - self.text_spans[base_id]["start"]
         return adapted_start, adapted_end
 
     def get_citation_sp(self, css_class_name, ann_id):
@@ -82,11 +82,11 @@ class EditorSerializer(Serialize):
                 start_payload = f'{AnnotationTemplate.tsawa_verse_SP} id="{ann_id}">'
         return start_payload
         
-    def apply_annotation(self, vol_id, ann, uuid2localid):
+    def apply_annotation(self, base_id, ann, uuid2localid):
         """Applies annotation to specific volume base-text, where part of the text exists.
 
         Args:
-            vol_id (str): id of vol, where part of the text exists.
+            base_id (str): id of vol, where part of the text exists.
             ann (dict): annotation of any type.
 
         Returns:
@@ -139,10 +139,10 @@ class EditorSerializer(Serialize):
             start_payload = f'<a href="#fr{ann_id}>{AnnotationTemplate.footnote_marker_SP} id="fm{ann_id}">'
             end_payload = AnnotationTemplate.footnote_EP
 
-        start_cc, end_cc = self.__get_adapted_span(ann["span"], vol_id)
-        self.add_chars(vol_id, start_cc, True, start_payload)
+        start_cc, end_cc = self.__get_adapted_span(ann["span"], base_id)
+        self.add_chars(base_id, start_cc, True, start_payload)
         if not only_start_ann:
-            self.add_chars(vol_id, end_cc, False, end_payload)
+            self.add_chars(base_id, end_cc, False, end_payload)
 
     def get_footnote_references(self, footnotes):
         """Generate footnote references using footnote layer

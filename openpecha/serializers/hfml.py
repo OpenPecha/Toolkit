@@ -16,7 +16,7 @@ class HFMLSerializer(Serialize):
         except Exception:
             return ""
 
-    def apply_annotation(self, vol_id, ann, uuid2localid=None):
+    def apply_annotation(self, base_id, ann, uuid2localid=None):
         only_start_ann = False
         start_payload = "("
         end_payload = ")"
@@ -95,11 +95,11 @@ class HFMLSerializer(Serialize):
             start_payload = f"<{local_id}d"
             end_payload = "d>"
 
-        start_cc, end_cc = self._get_adapted_span(ann["span"], vol_id)
+        start_cc, end_cc = self._get_adapted_span(ann["span"], base_id)
         # start_cc -= 4
-        self.add_chars(vol_id, start_cc, True, start_payload)
+        self.add_chars(base_id, start_cc, True, start_payload)
         if not only_start_ann:
-            self.add_chars(vol_id, end_cc, False, end_payload)
+            self.add_chars(base_id, end_cc, False, end_payload)
 
     def serialize(self, output_path="./output/publication", text_id=""):
         pecha_id = self.opf_path.stem
@@ -109,11 +109,11 @@ class HFMLSerializer(Serialize):
         output_path = Path(output_path) / pecha_id
         output_path.mkdir(exist_ok=True, parents=True)
         print("[INFO] Creating HFML view")
-        for vol_id, hfml_text in results.items():
-            fn = vol2fn_manager.get_fn(vol_id) + text_id
+        for base_id, hfml_text in results.items():
+            fn = vol2fn_manager.get_fn(base_id) + text_id
             try:
                 vol_hfml_fn = output_path / fn
             except Exception:
-                vol_hfml_fn = output_path / vol_id
+                vol_hfml_fn = output_path / base_id
             print(f"[INFO]\t- saving {fn}")
             vol_hfml_fn.write_text(hfml_text)

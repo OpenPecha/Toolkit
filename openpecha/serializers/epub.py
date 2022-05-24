@@ -67,7 +67,7 @@ class Tsadra_template:
 class EpubSerializer(Serialize):
     """Epub serializer class for OpenPecha."""
 
-    def __get_adapted_span(self, span, vol_id):
+    def __get_adapted_span(self, span, base_id):
         """Adapts the annotation span to base-text of the text
 
         Adapts the annotation span, which is based on volume base-text
@@ -75,15 +75,15 @@ class EpubSerializer(Serialize):
 
         Args:
             span (dict): span of a annotation, eg: {start:, end:}
-            vol_id (str): id of vol, where part of the text exists.
+            base_id (str): id of vol, where part of the text exists.
 
         Returns:
             adapted_start (int): adapted start based on text base-text
             adapted_end (int): adapted end based on text base-text
 
         """
-        adapted_start = span["start"] - self.text_spans[vol_id]["start"]
-        adapted_end = span["end"] - self.text_spans[vol_id]["start"]
+        adapted_start = span["start"] - self.text_spans[base_id]["start"]
+        adapted_end = span["end"] - self.text_spans[base_id]["start"]
         return adapted_start, adapted_end
 
     def get_citation_sp(self, css_class_name):
@@ -121,11 +121,11 @@ class EpubSerializer(Serialize):
                 start_payload = Tsadra_template.tsawa_verse_SP
         return start_payload
 
-    def apply_annotation(self, vol_id, ann, uuid2localid):
+    def apply_annotation(self, base_id, ann, uuid2localid):
         """Applies annotation to specific volume base-text, where part of the text exists.
 
         Args:
-            vol_id (str): id of vol, where part of the text exists.
+            base_id (str): id of vol, where part of the text exists.
             ann (dict): annotation of any type.
 
         Returns:
@@ -177,10 +177,10 @@ class EpubSerializer(Serialize):
             start_payload = f'<a href="#fr{ann["id"]}">{Tsadra_template.footnote_marker_SP} id="fm{ann["id"]}">'
             end_payload = Tsadra_template.footnote_EP
 
-        start_cc, end_cc = self.__get_adapted_span(ann["span"], vol_id)
-        self.add_chars(vol_id, start_cc, True, start_payload)
+        start_cc, end_cc = self.__get_adapted_span(ann["span"], base_id)
+        self.add_chars(base_id, start_cc, True, start_payload)
         if not only_start_ann:
-            self.add_chars(vol_id, end_cc, False, end_payload)
+            self.add_chars(base_id, end_cc, False, end_payload)
 
     def p_tag_adder(self, body_text):
         """Add p tag to lines where it is missing
@@ -538,12 +538,12 @@ class EpubSerializer(Serialize):
         # new_zip_path.rename(new_zip_path.with_suffix('.epub'))
         print('INFO: Epub ready...')
 
-    def get_serialized_html(self, result, vol_id, pecha_title):
+    def get_serialized_html(self, result, base_id, pecha_title):
         """Serialize html are return using annotated text
 
         Args:
             result (str): tsadra epub annotations applied text
-            vol_id (str): volume id
+            base_id (str): volume id
             pecha_title (str): pecha title
 
         Returns:
@@ -552,7 +552,7 @@ class EpubSerializer(Serialize):
         result = f"{self.get_front_page()}{result}"
         footnote_ref_tag = ""
         if "Footnote" in self.layers:
-            footnote_fn = self.opf_path / "layers" / vol_id / "Footnote.yml"
+            footnote_fn = self.opf_path / "layers" / base_id / "Footnote.yml"
             footnote_layer = load_yaml(footnote_fn)
             footnote_ref_tag = self.get_footnote_references(
                 footnote_layer["annotations"]
@@ -589,8 +589,8 @@ class EpubSerializer(Serialize):
         self.layers = [layer for layer in self.layers if layer != "Pagination"]
 
         results = self.get_result()
-        for vol_id, result in results.items():
-            serialized_html = self.get_serialized_html(result, vol_id, pecha_title)
+        for base_id, result in results.items():
+            serialized_html = self.get_serialized_html(result, base_id, pecha_title)
             Path(out_html_fn).write_text(serialized_html)
             # Downloading css template file from ebook template repo and saving it
             template = requests.get(
