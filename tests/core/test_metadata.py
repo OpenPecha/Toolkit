@@ -44,7 +44,8 @@ def test_metadata_model():
 
 
 def test_pecha_copyright():
-    copyright_status = CopyrightStatus("Copyrighted")
+    copyright_status = CopyrightStatus.COPYRIGHTED
+
     copyright = Copyright(
         status=copyright_status,
         notice="Copyright 2022 OpenPecha",
@@ -59,7 +60,7 @@ def test_pecha_copyright():
 
 
 def test_pecha_licence():
-    license_type = LicenseType("CC BY-NC-SA")
+    license_type = LicenseType.CC_BY_NC_SA
 
     metadata = PechaMetadata(
         initial_creation_type=InitialCreationType.ocr, license=license_type
