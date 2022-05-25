@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.8.11 (2022-05-25)
+### Fix
+* **metadata:** Add seperate metadata classes for pecha types ([`904f926`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/904f9264c2e895e1ff9f9e85abb15109f70177e7))
+* **core:** Replace source id with initial id ([`ca083be`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/ca083be3f723ed3d9015b92e145c6830def16a3b))
+* **core:** Add source and diplomatic id generator ([`24549dd`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/24549dd5c710caa506c022f999ab74a197564fed))
+
 ## v0.8.10 (2022-05-24)
 ### Fix
 * **core:** Add copyright and license in metadata ([`1db55da`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/1db55dad74631ee98b26d8d3127c598ec310c82e))
