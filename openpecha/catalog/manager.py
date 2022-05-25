@@ -6,15 +6,12 @@ the catalog. Functonalities includes:
 
 """
 
-import os
-
 import yaml
 
-from openpecha.core.ids import get_pecha_id
-from openpecha.formatters import *
+from openpecha.core.ids import get_initial_pecha_id
 from openpecha.github_utils import create_readme, github_publish
 from openpecha.storages import GithubStorage, Storage
-from openpecha.utils import *
+from openpecha.utils import create_release_with_assets, ocr_result_input
 
 buildin_pipes = {
     "input": {"ocr_result_input": ocr_result_input},
@@ -78,7 +75,7 @@ class CatalogManager:
 
     def format_and_publish(self, path):
         """Convert input pecha to opf-pecha with id assigined"""
-        self.formatter.create_opf(path, get_pecha_id())
+        self.formatter.create_opf(path, get_initial_pecha_id())
         self._get_catalog_metadata(self.formatter.meta_fn)
         github_publish(
             self.formatter.pecha_path,

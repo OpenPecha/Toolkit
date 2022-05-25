@@ -1,6 +1,8 @@
 site_name: OpenPecha
 theme:
   name: material
+  features:
+  - search.highlight
 nav:
   - Introduction: index.md
   - OPF Format: opf-format.md
@@ -14,6 +16,8 @@ nav:
     - developer/layer.md
     - developer/pecha.md
     - developer/metadata.md
+repo_name: openpecha-toolkit
+repo_url: https://github.com/OpenPecha-dev/openpecha-toolkit
 markdown_extensions:
   - toc:
       permalink: true

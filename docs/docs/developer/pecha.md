@@ -24,6 +24,8 @@ After successfully parsing the input, you should be able to get base text and la
 
 Since, layers are based on the base text, first you need to set base to `pecha` with `pecha.set_base('base content`) which will return `base_name`, which is identifier for base and it's associated layers. Then you use `base_name` to set layer to `pecha`.
 
+Notice, you can also set base metadata with `metadata` argument in `pecha.set_base()` method.
+
 After adding all the bases and layer, call `pecha.save()` to save bases and layers.
 
 ## Update Base layer

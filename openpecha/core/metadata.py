@@ -4,7 +4,7 @@ from typing import Dict, Optional, Union
 
 from pydantic import AnyHttpUrl, BaseModel, Extra, validator
 
-from .ids import get_pecha_id
+from . import ids
 
 
 class InitialCreationType(Enum):
@@ -55,10 +55,6 @@ class PechaMetadata(BaseModel):
     copyright: Copyright = None
     license: LicenseType = None
 
-    @validator("id", pre=True, always=True)
-    def set_id(cls, v):
-        return v or get_pecha_id()
-
     @validator("imported", pre=True, always=True)
     def set_imported_date(cls, v):
         return v or datetime.now()
@@ -76,3 +72,21 @@ class PechaMetadata(BaseModel):
 
     class Config:
         extra = Extra.forbid
+
+
+class InitialPechaMetadata(PechaMetadata):
+    @validator("id", pre=True, always=True)
+    def set_id(cls, v):
+        return v or ids.get_initial_pecha_id()
+
+
+class OpenPechaMetadata(PechaMetadata):
+    @validator("id", pre=True, always=True)
+    def set_id(cls, v):
+        return v or ids.get_open_pecha_id()
+
+
+class DiplomaticPechaMetadata(PechaMetadata):
+    @validator("id", pre=True, always=True)
+    def set_id(cls, v):
+        return v or ids.get_diplomatic_id()

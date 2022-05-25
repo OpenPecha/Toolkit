@@ -9,7 +9,7 @@ ann = Citation(span=Span(start=10, end=20))
 layer = Layer(annotation_type=LayerEnum.citation)
 layer.set_annotation(ann)
 
-base_name = pecha.set_base("base content")
+base_name = pecha.set_base("base content", metadata={"title": "title", "order": 1})
 pecha.set_layer(base_name, layer)
 
 pecha.save()

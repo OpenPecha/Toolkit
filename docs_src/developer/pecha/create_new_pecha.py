@@ -1,10 +1,10 @@
 from openpecha.core.annotations import Citation, Span
 from openpecha.core.layer import Layer, LayerEnum
-from openpecha.core.metadata import InitialCreationType, PechaMetadata
+from openpecha.core.metadata import InitialCreationType, InitialPechaMetadata
 from openpecha.core.pecha import OpenPechaFS
 
 # create new pecha
-metadata = PechaMetadata(initial_creation_type=InitialCreationType.input)
+metadata = InitialPechaMetadata(initial_creation_type=InitialCreationType.input)
 pecha = OpenPechaFS(metadata=metadata)
 
 # create a simple layer
