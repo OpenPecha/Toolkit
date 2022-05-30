@@ -16,21 +16,21 @@ from openpecha.utils import download_pecha, dump_yaml, load_yaml
 class OpenPecha:
     def __init__(
         self,
-        base: Dict[str, str] = {},
-        layers: Dict[str, Dict[LayerEnum, Layer]] = defaultdict(dict),
+        base: Dict[str, str] = None,
+        layers: Dict[str, Dict[LayerEnum, Layer]] = None,
         index: Layer = None,
         meta: PechaMetadata = None,
         metadata: PechaMetadata = None,
-        assets: Dict[str, List[Union[str, Path]]] = {},
-        components: Dict[str, List[Layer]] = {},
+        assets: Dict[str, List[Union[str, Path]]] = None,
+        components: Dict[str, List[Layer]] = None,
     ):
         self._pecha_id = None
-        self.base = base
-        self.layers = layers
+        self.base = base if base else {}
+        self.layers = layers if layers else defaultdict(dict)
         self._meta = self.__handle_old_metadata_attr(meta, metadata)
         self._index = index
-        self.assets = assets
-        self._components = components
+        self.assets = assets if assets else {}
+        self._components = components if components else {}
         self.current_base_order = 1
 
     def __str__(self):
@@ -160,7 +160,6 @@ class OpenPecha:
             layer = self.get_layer(base_name, layer_name)
             for ann in layer.get_annotations():
                 is_ann_found = False
-                base_str = self.get_base(base_name)
                 if ann.span.start >= span.start and ann.span.end <= span.end:
                     is_ann_found = True
                 elif ann.span.end >= span.start and ann.span.start < span.start:
@@ -181,7 +180,7 @@ class OpenPecha:
         self, base_name: str, span: Span, layers: List[LayerEnum] = []
     ) -> SpanINFO:
         base_str = self.get_base(base_name)
-        span_str = base_str[span.start : span.end + 1]
+        span_str = base_str[span.start : span.end + 1]  # noqa
         layers = self.__find_span_layers(base_name, span, layers)
         return SpanINFO(text=span_str, layers=layers, metadata=self.meta)
 

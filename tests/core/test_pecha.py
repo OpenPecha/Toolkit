@@ -220,3 +220,17 @@ def test_download_pecha():
     shutil.rmtree(str(pecha.opf_path.parent))
 
     assert not pecha.opf_path.is_dir()
+
+
+def test_multi_create_pecha():
+    metadata = InitialPechaMetadata(initial_creation_type=InitialCreationType.input)
+    pecha_01 = OpenPechaFS(metadata=metadata)
+    pecha_01_base_name = pecha_01.set_base("pecha_01 base content")
+
+    assert pecha_01.base[pecha_01_base_name] == "pecha_01 base content"
+
+    pecha_02 = OpenPechaFS(metadata=metadata)
+    pecha_02_base_name = pecha_02.set_base("pecha_02 base content")
+
+    assert len(pecha_02.base) == 1
+    assert pecha_02.base[pecha_02_base_name] == "pecha_02 base content"
