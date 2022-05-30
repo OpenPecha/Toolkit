@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.8.12 (2022-05-30)
+### Fix
+* **core:** Remove empty dict as default value in OpenPecha class ([`e863543`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/e86354361807ca8dec6ed2be338c551cd378eeda))
+
 ## v0.8.11 (2022-05-25)
 ### Fix
 * **metadata:** Add seperate metadata classes for pecha types ([`904f926`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/904f9264c2e895e1ff9f9e85abb15109f70177e7))
