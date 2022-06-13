@@ -30,8 +30,7 @@ OpenPecha Toolkit allows state of the art solution for distributed standoff anno
 
 ## Owner
 
-- [@ngawangtrinley](https://github.com/ngawangtrinley)
-- [@mikkokotila](https://github.com/mikkokotila)
+- [@10zinten](https://github.com/10zinten)
 
 <!-- This section lists the owners of the repo -->
 
