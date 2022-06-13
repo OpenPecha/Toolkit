@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.8.13 (2022-06-13)
+### Fix
+* Set openpecha-data org name from env var only ([`e2e9052`](https://github.com/OpenPecha/openpecha-toolkit/commit/e2e9052827090b6e936f8d60dc3e28a2735ec4eb))
+
 ## v0.8.12 (2022-05-30)
 ### Fix
 * **core:** Remove empty dict as default value in OpenPecha class ([`e863543`](https://github.com/OpenPecha-dev/openpecha-toolkit/commit/e86354361807ca8dec6ed2be338c551cd378eeda))
