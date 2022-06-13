@@ -1,5 +1,4 @@
 import os
-import shutil
 import time
 from pathlib import Path
 from uuid import uuid4
@@ -10,23 +9,29 @@ from github import Github
 org = None
 
 
-def _get_openpecha_org(org_name, token):
+def _get_openpecha_data_org(org_name=None, token=None):
     """OpenPecha github org singleton."""
     global org
     if org is None:
+        if not token:
+            token = os.environ.get("GITHUB_TOKEN")
+            print(token)
+        if not org_name:
+            org_name = os.environ["OPENPECHA_DATA_GITHUB_ORG"]
+            print(org_name)
         g = Github(token)
         org = g.get_organization(org_name)
     return org
 
 
 def get_github_repo(repo_name, org_name, token):
-    org = _get_openpecha_org(org_name, token)
+    org = _get_openpecha_data_org(org_name, token)
     repo = org.get_repo(repo_name)
     return repo
 
 
 def create_github_repo(path, org_name, token):
-    org = _get_openpecha_org(org_name, token)
+    org = _get_openpecha_data_org(org_name, token)
     repo = org.create_repo(path.name)
     time.sleep(2)
     return repo._html_url.value
@@ -113,8 +118,8 @@ def github_publish(
     message=None,
     not_includes=None,
     layers=[],
-    org="OpenPecha",
-    token=os.environ.get("GITHUB_TOKEN"),
+    org=None,
+    token=None,
 ):
     path = Path(path)
     remote_repo_url = create_github_repo(path, org, token)
@@ -134,8 +139,8 @@ def create_file(
     content,
     msg,
     update=False,
-    org="OpenPecha",
-    token=os.environ.get("GITHUB_TOKEN"),
+    org=None,
+    token=None,
 ):
     repo = get_github_repo(repo_name, org, token)
     if update:
@@ -183,8 +188,8 @@ def create_release(
     repo_name,
     prerelease=False,
     asset_paths=[],
-    org="OpenPecha",
-    token=os.environ.get("GITHUB_TOKEN"),
+    org=None,
+    token=None,
 ):
     repo = get_github_repo(repo_name, org, token)
     if prerelease:
@@ -222,14 +227,6 @@ def create_readme(metadata, path):
 
 
 def delete_repo(repo_name):
-    org = _get_openpecha_org()
+    org = _get_openpecha_data_org()
     repo = org.get_repo(repo_name)
     repo.delete()
-
-
-if __name__ == "__main__":
-    asset_download_url = create_release(
-        "P000780", prerelease=True, asset_paths=Path("assets").iterdir()
-    )
-    print(asset_download_url)
-    create_release("P000780", asset_paths=Path("assets").iterdir())

@@ -108,7 +108,7 @@ def publish_pecha(pecha_path):
         message="initial commit",
         not_includes=[],
         layers=[],
-        org="Openpecha",
+        org=os.environ.get("OPENPECHA_DATA_GITHUB_ORG"),
         token=os.environ.get("GITHUB_TOKEN"),
     )
 

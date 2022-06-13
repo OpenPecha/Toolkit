@@ -8,8 +8,8 @@ if __name__ == "__main__":
         "catalog": {"start_id": 0, "end_id": 0},
         "token": os.environ.get("GITHUB_TOKEN"),
     }
-
-    bucket = GithubBucket("OpenPecha", config=GITHUB_BUCKET_CONFIG)
+    org_name = os.environ["OPENPECHA_DATA_GITHUB_ORG"]
+    bucket = GithubBucket(org_name, config=GITHUB_BUCKET_CONFIG)
     for pecha_id, base in bucket.get_all_pechas_base():
         print(pecha_id)
         for vol_base, vol_fn in base:

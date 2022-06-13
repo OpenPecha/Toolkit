@@ -2,12 +2,11 @@ import argparse
 
 import requests
 
-from openpecha import config
 from openpecha.github_utils import create_file
 
 
-def get_pechas(args):
-    url = f"https://raw.githubusercontent.com/OpenPecha/catalog/master/data/corpus/{args.corpus_name}.txt"
+def get_corpus_pechas(corpus_name):
+    url = f"https://raw.githubusercontent.com/OpenPecha/catalog/master/data/corpus/{corpus_name}.txt"
     r = requests.get(url)
     for pecha_id in r.text.split("\n"):
         if pecha_id:
@@ -49,14 +48,18 @@ def deploy_actions(pecha_ids, actions):
 
 def main():
     parser = argparse.ArgumentParser(description="Deploy GitHub Actions")
-    parser.add_argument("corpus_name", type=str, help="corpus name")
+    parser.add_argument("--corpus_name", type=str, help="corpus name")
+    parser.add_argument("--pecha_id", type=str, help="pecha_id")
     parser.add_argument(
         "--actions_source_pecha", type=str, help="pecha with actions", default="P000110"
     )
 
     args = parser.parse_args()
 
-    pecha_ids = get_pechas(args)
+    if args.corpus_name:
+        pecha_ids = get_corpus_pechas(args)
+    else:
+        pecha_ids = [args.pecha_id]
     actions = get_actions(args)
     deploy_actions(pecha_ids, actions)
 

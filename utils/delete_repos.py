@@ -1,12 +1,11 @@
 import argparse
 import datetime
 import os
-from pathlib import Path
 
 from github import Github
 
 g = Github(os.environ.get("GITHUB_TOKEN"))
-org = g.get_organization("OpenPecha")
+org = g.get_organization(os.environ["OPENPECHA_DATA_GITHUB_ORG"])
 
 
 if __name__ == "__main__":
