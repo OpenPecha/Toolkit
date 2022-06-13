@@ -24,8 +24,9 @@ def get_modified_content(url, session):
 
 def get_openpecha_org():
     token = os.environ["GITHUB_TOKEN"]
+    org = os.environ["OPENPECHA_DATA_GITHUB_ORG"]
     g = Github(token)
-    return g.get_organization("OpenPecha")
+    return g.get_organization(org)
 
 
 def has_branch(branch_name, repo):

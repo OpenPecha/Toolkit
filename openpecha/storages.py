@@ -3,7 +3,6 @@ import os
 import shutil
 import time
 from pathlib import Path
-from typing import Dict, List
 
 from git import Repo
 from github import Github
@@ -92,7 +91,7 @@ class GithubStorage(Storage):
         username: str = None,
         email: str = None,
     ):
-        self.org_name = _get_value(org, "GITHUB_ORG")
+        self.org_name = _get_value(org, "OPENPECHA_DATA_GITHUB_ORG")
         self.token = _get_value(token, "GITHUB_TOKEN")
         self._username = _get_value(username, "GITHUB_USERNAME", optional=True)
         self._email = _get_value(email, "GITHUB_EMAIL", optional=True)

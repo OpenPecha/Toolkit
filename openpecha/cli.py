@@ -19,8 +19,8 @@ from openpecha.catalog.storage import GithubBucket
 from openpecha.core.pecha import OpenPechaFS
 from openpecha.corpus.quality import NonWordsCounter
 from openpecha.exceptions import PechaNotFound
-from openpecha.formatters import *
-from openpecha.serializers import *
+from openpecha.formatters import GoogleOCRFormatter, HFMLFormatter
+from openpecha.serializers import EpubSerializer, HFMLSerializer
 from openpecha.storages import GithubStorage, setup_auth_for_old_repo
 
 OP_PATH = config.BASE_PATH
@@ -232,14 +232,14 @@ def export(**kwargs):
 
     opf_path = kwargs["opf_path"]
     output_path = kwargs["output_path"]
-    if not opf_path:
-        opf_path = f'{config["OP_PECHAS_PATH"]}/{pecha_id}/{pecha_id}.opf'
+    # if not opf_path:
+    #     opf_path = f'{config["OP_PECHAS_PATH"]}/{pecha_id}/{pecha_id}.opf'
 
     if kwargs["name"] == "epub":
         serializer = EpubSerializer(opf_path)
     else:
         serializer = HFMLSerializer(opf_path)
-    serializer.serialize(kwargs["output_path"])
+    serializer.serialize(output_path)
 
 
 def _get_bucket(bucket_type, bucket_name, n):
@@ -271,7 +271,7 @@ def _save_text(text, output_path, parent_path, fn):
 @cli.command()
 @click.option("--output_path", "-o", type=click.Path(exists=True), required=True)
 @click.option("--bucket_type", "-bt", type=click.Choice(["github"]), default="github")
-@click.option("--bucket_name", "-bn", type=str, default="OpenPecha")
+@click.option("--bucket_name", "-bn", type=str, default="OpenPecha-Data")
 @click.option(
     "--filter_strategy",
     "-fs",
@@ -374,7 +374,7 @@ def import_alignment(**kwargs):
             alignment_ids=get_alignment_ids(kwargs["tm_path"])
         )
     except Exception as e:
-        print(traceback.print_exc())
+        print(traceback.print_exc(), e)
         logging.info("Cleaning up")
         # shutil.rmtree(str(alignment_path))
     finally:

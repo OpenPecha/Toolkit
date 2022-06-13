@@ -1,6 +1,5 @@
 import tempfile
 from pathlib import Path
-from re import S
 
 import pytest
 

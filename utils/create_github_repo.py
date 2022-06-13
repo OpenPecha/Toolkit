@@ -7,7 +7,7 @@ from git import Repo
 from github import Github
 
 g = Github(os.environ.get("GITHUB_TOKEN"))
-org = g.get_organization("OpenPecha")
+org = g.get_organization(os.environ["OPENPECHA_DATA_GITHUB_ORG"])
 
 
 def populate_repo(repo_path, from_path):
