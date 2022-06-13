@@ -11,7 +11,7 @@
 <p align="center">
   <a href="#description">Description</a> •
   <a href="#owner">Owner</a> •
-  <a href="#integrations">Integrations</a> •
+  <a href="#floppy_disk-install">Install</a> •
   <a href="#docs">Docs</a>
 </p>
 <hr>
@@ -34,9 +34,16 @@ OpenPecha Toolkit allows state of the art solution for distributed standoff anno
 
 <!-- This section lists the owners of the repo -->
 
-## Integrations
 
-- install with `pip install openpecha`
+## :floppy_disk: Install
+Stable version:
+
+#### `pip install openpecha`
+
+Daily development version:
+
+#### `pip install git+https://github.com/OpenPecha/Openpecha-Toolkit`
+
 
 <!-- This section must list as bulleted list how this repo depends or is integrated with other repos -->
 
