@@ -216,7 +216,11 @@ class PechaBaseUpdate:
         self.context_len = context_len
 
     @property
-    def index_path(self):
+    def src_index_path(self):
+        return self.src_opf_path / "index.yml"
+    
+    @property
+    def dst_index_path(self):
         return self.dst_opf_path / "index.yml"
 
     @property
@@ -224,44 +228,51 @@ class PechaBaseUpdate:
         return self.dst_opf_path / "layers"
 
     @staticmethod
-    def get_base(opf_path, vol_id):
-        return (opf_path / "base" / f"{vol_id}.txt").read_text(encoding="utf-8")
+    def get_base(opf_path, base_name):
+        return (opf_path / "base" / f"{base_name}.txt").read_text(encoding="utf-8")
+    
 
-    def update_layers(self, vol_id, updater):
+    def get_blupdater(self, src_base_name, dst_base_name):
+        src_base = self.get_base(self.src_opf_path, src_base_name)
+        dst_base = self.get_base(self.dst_opf_path, dst_base_name)
+        updater = Blupdate(src_base, dst_base, context_len=self.context_len)
+        return updater
+
+
+
+    def update_layers(self, dst_base_name, updater):
         """
         Update all the layer annotations
         """
-        for layer_fn in (self.layer_path / vol_id).iterdir():
+        for layer_fn in (self.layer_path / dst_base_name).iterdir():
             layer = load_yaml(layer_fn)
             update_ann_layer(layer, updater)
             dump_yaml(layer, layer_fn)
 
-    def update_vol(self, vol_id):
-        src_base = self.get_base(self.src_opf_path, vol_id)
-        dst_base = self.get_base(self.dst_opf_path, vol_id)
-        self.update_layers(
-            vol_id, Blupdate(src_base, dst_base, context_len=self.context_len)
-        )
+    def update_vol(self, src_base_name, dst_base_name):
+        updater = self.get_blupdater(src_base_name, dst_base_name)
+        self.update_layers(dst_base_name, updater)
 
-    def update_text_span(self, span):
-        for span_vol in span:
-            vol_id = span_vol["vol"].split("/")[-1]
-            src_base = self.get_base(self.src_opf_path, vol_id)
-            dst_base = self.get_base(self.dst_opf_path, vol_id)
-            updater = Blupdate(src_base, dst_base, context_len=self.context_len)
-            update_span(span_vol, updater)
+    def update_text_span(self, src_spans, dst_spans):
+        for src_span, dst_span in zip(src_spans, dst_spans):
+            src_base_name = src_span["base"]
+            dst_base_name = dst_span["base"]
+            updater = self.get_blupdater(src_base_name, dst_base_name)
+            update_span(dst_span, updater)
 
     def update_index_layer(self):
-        layer = load_yaml(self.index_path)
-        for ann in layer["annotations"]:
+        src_layer = load_yaml(self.src_index_path)
+        dst_layer = load_yaml(self.dst_index_path)
+        for (id, src_ann), (_id, dst_ann) in zip(src_layer['annotations'],dst_layer["annotations"]):
+
             # update text span
-            self.update_text_span(ann["span"])
+            self.update_text_span(src_ann["span"], dst_ann['span'])
 
             # update sub-text span
-            for sub_text in ann["parts"]:
-                self.update_text_span(sub_text["span"])
+            # for sub_text in ann["parts"]:
+            #     self.update_text_span(sub_text["span"])
 
-        dump_yaml(layer, self.index_path)
+        dump_yaml(dst_layer, self.index_path)
 
     def update(self):
         for vol_fn in Path(self.dst_opf_path / "base").iterdir():
