@@ -166,7 +166,7 @@ def is_layer_same(result_layer, expected_layer):
 
 
 def is_index_same(result, expected):
-    for result_ann, expected_ann in zip(result["annotations"], expected["annotations"]):
+    for (_,result_ann), (_, expected_ann) in zip(result["annotations"].items(), expected["annotations"].items()):
         # assert span
         for result_span_vol, expected_span_vol in zip(
             result_ann["span"], expected_ann["span"]
@@ -177,8 +177,8 @@ def is_index_same(result, expected):
             assert result_span_vol["span"]["end"] == expected_span_vol["span"]["end"]
 
         # assert parts
-        for result_part, expected_part in zip(
-            result_ann["parts"], expected_ann["parts"]
+        for (_,result_part), (_,expected_part) in zip(
+            result_ann["parts"].items(), expected_ann["parts"].items()
         ):
             for result_part_span_vol, expected_part_span_vol in zip(
                 result_part["span"], expected_part["span"]
@@ -197,6 +197,7 @@ def test_update_index_layer():
     src_opf_path = data_path / "v1" / "v1.opf"
     dst_opf_path = data_path / "v1_base_edited" / "v1_base_edited.opf"
     expected_opf_path = data_path / "v2" / "v2.opf"
+    base_mapping = load_yaml((data_path / "base_mapping.yml"))
 
     # edit v1 base
     dst_opf_path.mkdir(exist_ok=True, parents=True)
@@ -208,7 +209,7 @@ def test_update_index_layer():
         str(expected_opf_path / "base"), str(dst_opf_path / "base"), dirs_exist_ok=True
     )
 
-    pecha = PechaBaseUpdate(src_opf_path, dst_opf_path)
+    pecha = PechaBaseUpdate(src_opf_path, dst_opf_path, base_mapping)
     pecha.update()
 
     # test annotations layers
