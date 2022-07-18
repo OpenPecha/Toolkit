@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.8.14 (2022-07-18)
+### Fix
+* **ocr-postprocessing:** The bounding polys are sorted before text extraction ([`3537a3f`](https://github.com/OpenPecha/Openpecha-Toolkit/commit/3537a3f76e26ea97eb1d29717172dce0fd255ed6))
+
 ## v0.8.13 (2022-06-13)
 ### Fix
 * Set openpecha-data org name from env var only ([`e2e9052`](https://github.com/OpenPecha/openpecha-toolkit/commit/e2e9052827090b6e936f8d60dc3e28a2735ec4eb))
