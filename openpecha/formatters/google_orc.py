@@ -121,6 +121,88 @@ class GoogleOCRFormatter(BaseFormatter):
         )
         return new_base
 
+    def find_centriod(self, bounding_poly):
+        """Calculate centriod of bounding poly
+
+        Args:
+            bounding_poly (dict): info regarding bounding poly such as vertices and description
+
+        Returns:
+            list: centriod coordinates
+        """
+        sum_of_x = 0
+        sum_of_y = 0
+        for vertice in bounding_poly["boundingPoly"]["vertices"]:
+            sum_of_x += vertice['x']
+            sum_of_y += vertice['y']
+        centriod = [sum_of_x/4, sum_of_y/4]
+        return centriod
+
+    def get_poly_sorted_on_y(self, bounding_poly_centriods):
+        """Sort bounding polys centriod base on y coordinates
+
+        Args:
+            bounding_poly_centriods (list): list of centriod coordinates
+
+        Returns:
+            list: list centriod coordinated sorted base on y coordinate
+        """
+        sorted_on_y_polys = sorted(bounding_poly_centriods , key=lambda k: [k[1]])
+        return sorted_on_y_polys
+
+    def get_poly_sorted_on_x(self, sorted_on_y_polys, avg_box_height):
+        """Groups box belonging in same line using average height and sort the grouped boxes base on x coordinates
+
+        Args:
+            sorted_on_y_polys (list): list of centriod
+            avg_box_height (float): average boxes height
+
+        Returns:
+            list: list of sorted centriod
+        """
+        prev_bounding_poly = sorted_on_y_polys[0]
+        lines = []
+        cur_line = []
+        sorted_polys = []
+        for bounding_poly in sorted_on_y_polys:
+            if abs(bounding_poly[1]-prev_bounding_poly[1]) < avg_box_height/10:
+                cur_line.append(bounding_poly)
+            else:
+                lines.append(cur_line)
+                cur_line = []
+                cur_line.append(bounding_poly)
+            prev_bounding_poly = bounding_poly
+        if cur_line:
+            lines.append(cur_line)
+        for line in lines:
+            sorted_line = sorted(line, key=lambda k: [k[0]])
+            for poly in sorted_line:
+                sorted_polys.append(poly)
+        return sorted_polys
+
+    def sort_bounding_polys(self, main_region_bounding_polys):
+        """Sort the bounding polys
+
+        Args:
+            main_region_bounding_polys (list): list of bounding polys
+
+        Returns:
+            list: sorted bounding poly list
+        """
+        bounding_polys = {}
+        bounding_poly_centriods = []
+        avg_box_height = self.get_avg_bounding_poly_height(main_region_bounding_polys)
+        for bounding_poly in main_region_bounding_polys:
+            centroid = self.find_centriod(bounding_poly)
+            bounding_polys[f"{centroid[0]},{centroid[1]}"] = bounding_poly
+            bounding_poly_centriods.append(centroid)
+        sorted_bounding_polys = []
+        sort_on_y_polys = self.get_poly_sorted_on_y(bounding_poly_centriods)
+        sorted_bounding_poly_centriods = self.get_poly_sorted_on_x(sort_on_y_polys, avg_box_height)
+        for bounding_poly_centriod in sorted_bounding_poly_centriods:
+            sorted_bounding_polys.append(bounding_polys[f"{bounding_poly_centriod[0]},{bounding_poly_centriod[1]}"])
+        return sorted_bounding_polys
+
     def post_process_page(self, page):
         """parse page response to generate page content by reordering the bounding polys
 
@@ -137,7 +219,8 @@ class GoogleOCRFormatter(BaseFormatter):
             print("Page empty!!")
             return postprocessed_page_content
         bounding_polys = page["textAnnotations"][1:]
-        lines = self.get_lines(bounding_polys)
+        sorted_bounding_polys = self.sort_bounding_polys(bounding_polys)
+        lines = self.get_lines(sorted_bounding_polys)
         page_content_without_space = "\n".join(lines)
         postprocessed_page_content = self.transfer_space(
             page_content, page_content_without_space
