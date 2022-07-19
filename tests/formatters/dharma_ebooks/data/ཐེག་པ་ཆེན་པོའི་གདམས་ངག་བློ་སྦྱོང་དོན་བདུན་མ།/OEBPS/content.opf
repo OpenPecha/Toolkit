@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package version="3.0" unique-identifier="bookid" prefix="ibooks: http://vocabulary.itunes.apple.com/rdf/ibooks/vocabulary-extensions-1.0/ calibre: https://calibre-ebook.com" xmlns="http://www.idpf.org/2007/opf">
+  <metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+    <dc:title id="id">ཐེག་པ་ཆེན་པོའི་གདམས་ངག་བློ་སྦྱོང་དོན་བདུན་མ།</dc:title>
+    <dc:creator id="id-1">འཆད་ཁ་བ་ཡེ་ཤེས་རྡོ་རྗེ། འཇམ་མགོན་ཀོང་སྤྲུལ་བློ་གྲོས་མཐའ་ཡས།</dc:creator>
+    <dc:identifier>calibre:181</dc:identifier>
+    <dc:identifier>uuid:96a8cb66-0f6d-445e-807b-8ddc81315bfe</dc:identifier>
+    <dc:identifier id="bookid">urn:uuid:DDA4429B-2800-4BA0-8E65-C95751B457B4</dc:identifier>
+    <dc:language>en-US</dc:language>
+    <dc:date>2017-05-30T06:20:50+00:00</dc:date>
+    <meta refines="#id" property="title-type">main</meta>
+    <meta refines="#id" property="file-as">ཐེག་པ་ཆེན་པོའི་གདམས་ངག་བློ་སྦྱོང་དོན་བདུན་མ།</meta>
+    <meta content="Adobe InDesign 12.0" name="generator" />
+    <meta property="ibooks:specified-fonts">true</meta>
+    <meta property="dcterms:modified">2018-12-13T22:05:28Z</meta>
+    <meta content="0.9.8" name="Sigil version" />
+    <meta refines="#id-1" property="role" scheme="marc:relators">aut</meta>
+    <meta refines="#id-1" property="file-as">འཇམ་མགོན་ཀོང་སྤྲུལ་བློ་གྲོས་མཐའ་ཡས།, འཆད་ཁ་བ་ཡེ་ཤེས་རྡོ་རྗེ།</meta>
+    <meta property="calibre:author_link_map">{"འཆད་ཁ་བ་ཡེ་ཤེས་རྡོ་རྗེ། འཇམ་མགོན་ཀོང་སྤྲུལ་བློ་གྲོས་མཐའ་ཡས།": ""}</meta>
+    <meta name="cover" content="x7points-tibetan.jpg" />
+  </metadata>
+  <manifest>
+    <item id="cover" href="Text/cover.xhtml" media-type="application/xhtml+xml"/>
+    <item id="Section0001.xhtml" href="Text/Section0001.xhtml" media-type="application/xhtml+xml"/>
+    <item id="Section0002.xhtml" href="Text/Section0002.xhtml" media-type="application/xhtml+xml"/>
+    <item id="RDI-SS-05" href="Text/RDI-SS-05.xhtml" media-type="application/xhtml+xml"/>
+    <item id="RDI-SS-05-8" href="Text/RDI-SS-05-8.xhtml" media-type="application/xhtml+xml"/>
+    <item id="RDI-SS-05-9" href="Text/RDI-SS-05-9.xhtml" media-type="application/xhtml+xml"/>
+    <item id="toc" href="Text/toc.xhtml" media-type="application/xhtml+xml" properties="nav"/>
+    <item id="ncx" href="toc.ncx" media-type="application/x-dtbncx+xml"/>
+    <item id="idGeneratedStyles.css" href="Styles/idGeneratedStyles.css" media-type="text/css"/>
+    <item id="MonlamUniOuChan1.ttf" href="Fonts/MonlamUniOuChan1.ttf" media-type="application/x-font-ttf"/>
+    <item id="MonlamUniOuChan2.ttf" href="Fonts/MonlamUniOuChan2.ttf" media-type="application/x-font-ttf"/>
+    <item id="x7points-tibetan.jpg" href="Images/7points-tibetan.jpg" media-type="image/jpeg"/>
+  </manifest>
+  <spine toc="ncx">
+    <itemref idref="RDI-SS-05-9"/>
+  </spine>
+  <guide>
+    <reference type="cover" title="Cover" href="Text/cover.xhtml"/>
+  </guide>
+</package>

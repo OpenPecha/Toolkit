@@ -10,6 +10,7 @@ nav:
   - Import:
     - importers/00_index.md
     - importers/hfml.md
+    - importers/dharma_ebooks.md
   - Export: exporters.md
   - Developer Guide:
     - developer/00_index.md
