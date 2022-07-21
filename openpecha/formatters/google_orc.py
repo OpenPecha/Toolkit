@@ -2,16 +2,28 @@ import gzip
 import json
 import math
 import re
+from enum import Enum
 from pathlib import Path
 
 import requests
 from antx import transfer
 
 from openpecha.core.annotation import Page, Span
+from openpecha.core.annotations import BaseAnnotation
 from openpecha.core.layer import Layer, LayerEnum
+from openpecha.core.ids import get_base_id
 from openpecha.formatters import BaseFormatter
 from openpecha.utils import dump_yaml, gzip_str
 
+
+extended_LayerEnum = [(l.name, l.value) for l in LayerEnum] + [("low_conf_box", "LowConfBox")]
+LayerEnum = Enum("LayerEnum", extended_LayerEnum)
+
+class ExtentedLayer(Layer):
+    annotation_type: LayerEnum
+
+class LowConfBox(BaseAnnotation):
+    confidence: str
 
 class GoogleOCRFormatter(BaseFormatter):
     """
@@ -23,6 +35,7 @@ class GoogleOCRFormatter(BaseFormatter):
         self.n_page_breaker_char = 3
         self.page_break = "\n" * self.n_page_breaker_char
         self.base_text = []
+        self.low_conf_ann_text = ""
         self.vols_meta = {}
 
     def text_preprocess(self, text):
@@ -38,8 +51,8 @@ class GoogleOCRFormatter(BaseFormatter):
         Returns:
             float: mid point's y coordinate of bounding poly
         """
-        y1 = bounding_poly["boundingPoly"]["vertices"][0].get("y", 0)
-        y2 = bounding_poly["boundingPoly"]["vertices"][2].get("y", 0)
+        y1 = bounding_poly["boundingBox"]["vertices"][0].get("y", 0)
+        y2 = bounding_poly["boundingBox"]["vertices"][2].get("y", 0)
         y_avg = (y1 + y2) / 2
         return y_avg
 
@@ -54,8 +67,8 @@ class GoogleOCRFormatter(BaseFormatter):
         """
         height_sum = 0
         for bounding_poly in bounding_polys:
-            y1 = bounding_poly["boundingPoly"]["vertices"][0].get("y", 0)
-            y2 = bounding_poly["boundingPoly"]["vertices"][2].get("y", 0)
+            y1 = bounding_poly["boundingBox"]["vertices"][0].get("y", 0)
+            y2 = bounding_poly["boundingBox"]["vertices"][2].get("y", 0)
             height_sum += y2 - y1
         avg_height = height_sum / len(bounding_polys)
         return avg_height
@@ -82,6 +95,12 @@ class GoogleOCRFormatter(BaseFormatter):
         else:
             return False
 
+    def get_low_confidence_ann(self, bounding_poly):
+        if bounding_poly['confidence'] >0.9:
+            return bounding_poly.get("text", "")
+        else:
+            return f"§{bounding_poly.get('text', '')}Ç{bounding_poly['confidence']}Ç§"
+
     def get_lines(self, bounding_polys):
         """Return list of lines in page using bounding polys of page
 
@@ -93,18 +112,25 @@ class GoogleOCRFormatter(BaseFormatter):
         """
         prev_bounding_poly = bounding_polys[0]
         lines = []
-        cur_line = ""
+        lines_with_ann = []
+        cur_line = ''
+        cur_line_with_ann = ''
         avg_line_height = self.get_avg_bounding_poly_height(bounding_polys)
         for bounding_poly in bounding_polys:
             if self.is_in_cur_line(prev_bounding_poly, bounding_poly, avg_line_height):
-                cur_line += bounding_poly.get("description", "")
+                cur_line += bounding_poly.get("text", "")
+                cur_line_with_ann += self.get_low_confidence_ann(bounding_poly)
             else:
                 lines.append(cur_line)
-                cur_line = bounding_poly.get("description", "")
+                lines_with_ann.append(cur_line_with_ann)
+                cur_line = bounding_poly.get("text", "")
+                cur_line_with_ann = self.get_low_confidence_ann(bounding_poly)
             prev_bounding_poly = bounding_poly
         if cur_line:
             lines.append(cur_line)
-        return lines
+        if cur_line_with_ann:
+            lines_with_ann.append(cur_line_with_ann)
+        return lines, lines_with_ann
 
     def transfer_space(self, base_with_space, base_without_space):
         """transfer space from base with space to without space
@@ -132,7 +158,7 @@ class GoogleOCRFormatter(BaseFormatter):
         """
         sum_of_x = 0
         sum_of_y = 0
-        for vertice in bounding_poly["boundingPoly"]["vertices"]:
+        for vertice in bounding_poly["boundingBox"]["vertices"]:
             sum_of_x += vertice['x']
             sum_of_y += vertice['y']
         centriod = [sum_of_x/4, sum_of_y/4]
@@ -203,6 +229,20 @@ class GoogleOCRFormatter(BaseFormatter):
             sorted_bounding_polys.append(bounding_polys[f"{bounding_poly_centriod[0]},{bounding_poly_centriod[1]}"])
         return sorted_bounding_polys
 
+    def get_char_base_bounding_polys(self, response):
+        bounding_polys = []
+        cur_word = ""
+        for page in response['fullTextAnnotation']['pages']:
+            for block in page['blocks']:
+                for paragraph in block['paragraphs']:
+                    for word in paragraph['words']:
+                        for symbol in word['symbols']:
+                            cur_word += symbol['text']
+                        word['text'] = cur_word
+                        cur_word = ""
+                        bounding_polys.append(word)
+        return bounding_polys
+
     def post_process_page(self, page):
         """parse page response to generate page content by reordering the bounding polys
 
@@ -218,15 +258,17 @@ class GoogleOCRFormatter(BaseFormatter):
         except Exception:
             print("Page empty!!")
             return postprocessed_page_content
-        bounding_polys = page["textAnnotations"][1:]
+        bounding_polys = self.get_char_base_bounding_polys(page)
         sorted_bounding_polys = self.sort_bounding_polys(bounding_polys)
-        lines = self.get_lines(sorted_bounding_polys)
+        lines, lines_with_low_conf_ann = self.get_lines(sorted_bounding_polys)
         page_content_without_space = "\n".join(lines)
+        page_with_low_conf_ann = "\n".join(lines_with_low_conf_ann)
         postprocessed_page_content = self.transfer_space(
             page_content, page_content_without_space
         )
+        postprocessed_pg_with_low_conf_ann = self.transfer_space(postprocessed_page_content, page_with_low_conf_ann)
 
-        return postprocessed_page_content + "\n"
+        return postprocessed_page_content + "\n", postprocessed_pg_with_low_conf_ann + "\n"
 
     def get_input(self, input_path):
         """
@@ -245,6 +287,31 @@ class GoogleOCRFormatter(BaseFormatter):
             except Exception:
                 yield None, None
 
+    def extract_confidence(self, chunk):
+        confidence = re.search("Ç(.+?)Ç", chunk).group(1)
+        return confidence
+
+        
+    def low_confidence_text_layer(self, low_conf_ann_text):
+        base_text = ""
+        anns = {}
+        low_conf_ann_text = low_conf_ann_text.replace("\n", "¢")
+        chunks = re.split("(§.+?§)", low_conf_ann_text)
+        for chunk in chunks:
+            if re.search("§.+?§", chunk):
+                start = len(base_text)
+                confidence = self.extract_confidence(chunk)
+                base_text += re.search("§(.+?)Ç", chunk).group(1)
+                end = len(base_text)
+                span = Span(start=start, end=end)
+                uuid = self.get_unique_id()
+                low_conf_ann = LowConfBox(span=span, confidence=confidence)
+                anns[uuid] = low_conf_ann
+            else:
+                base_text += chunk
+        layer = ExtentedLayer(annotation_type=LayerEnum.low_conf_box, annotations=anns)
+        return json.loads(layer.json(exclude_none=True))
+
     def format_layer(self, layers, base_id):
         anns = {}
         for (start, end, n_pg), page_ref in zip(layers["pages"], layers["pages_ref"]):
@@ -253,10 +320,11 @@ class GoogleOCRFormatter(BaseFormatter):
             page = Page(span=span, imgnum=n_pg, reference=page_ref)
             anns[uuid] = page
 
-        layer = Layer(annotation_type=LayerEnum("Pagination"), annotations=anns)
+        layer = ExtentedLayer(annotation_type=LayerEnum.pagination, annotations=anns)
         result = {
-            LayerEnum("Pagination").value: json.loads(layer.json(exclude_none=True))
+            LayerEnum.pagination.value: json.loads(layer.json(exclude_none=True))
         }
+        result[LayerEnum.low_conf_box.value] = self.low_confidence_text_layer(layers['low_conf_ann_text'])
 
         return result
 
@@ -273,10 +341,10 @@ class GoogleOCRFormatter(BaseFormatter):
         except KeyError:
             return None, None
 
-        text = self.post_process_page(response)
+        text, text_with_low_conf_ann = self.post_process_page(response)
         # vertices = page['boundingPoly']['vertices']  # get text box
 
-        return text, None  # self._get_coord(vertices)
+        return text, text_with_low_conf_ann  # self._get_coord(vertices)
 
     def _get_lines(self, text, last_pg_end_idx, is_first_pg):
         lines = []
@@ -330,17 +398,9 @@ class GoogleOCRFormatter(BaseFormatter):
         return img2seq
 
     def build_layers(self, responses, vol_name, base_id=None):
-        if base_id:
-            bounding_poly_vol_path = (
-                self.dirs["release_path"] / "bounding_poly" / base_id
-            )
-            low_conf_char_vol_path = (
-                self.dirs["release_path"] / "low_confidence_chars" / base_id
-            )
-            bounding_poly_vol_path.mkdir(parents=True, exist_ok=True)
-            low_conf_char_vol_path.mkdir(parents=True, exist_ok=True)
 
         pages = []
+        low_conf_ann_pages = []
         pages_ref = []
         last_pg_end_idx = 0
         img2seq = self._get_imagelist_meta(vol_name)
@@ -351,7 +411,7 @@ class GoogleOCRFormatter(BaseFormatter):
             if not response:
                 print(f"[ERROR] Failed : {n_pg}")
                 continue
-            text, _ = self._get_page(response)
+            text, text_with_low_conf_ann = self._get_page(response)
 
             # skip empty page (can be bad image)
             if not text:
@@ -363,18 +423,10 @@ class GoogleOCRFormatter(BaseFormatter):
 
             # create base_text
             self.base_text.append(text)
+            low_conf_ann_pages.append(text_with_low_conf_ann)
+        low_conf_ann_text = f"{self.page_break}".join(low_conf_ann_pages)
 
-            if base_id:
-                # save the boundingPoly to resources
-                self.save_boundingPoly(
-                    response, bounding_poly_vol_path / f"{n_pg:04}.json.gz"
-                )
-                # save low confident char and it's corresponding index
-                self.save_low_conf_char(
-                    response, low_conf_char_vol_path / f"{n_pg:04}.txt.gz"
-                )
-
-        result = {"pages": pages, "pages_ref": pages_ref}
+        result = {"pages": pages, "pages_ref": pages_ref, "low_conf_ann_text": low_conf_ann_text}
 
         return result
 
@@ -446,12 +498,10 @@ class GoogleOCRFormatter(BaseFormatter):
         input_path = Path(input_path)
         self._build_dirs(input_path, id_=pecha_id)
 
-        self.dirs["release_path"] = self.dirs["opf_path"].parent / "releases"
-        self.dirs["release_path"].mkdir(exist_ok=True, parents=True)
 
         for i, vol_path in enumerate(sorted(input_path.iterdir())):
             print(f"[INFO] Processing {input_path.name}-{vol_path.name} ...")
-            base_id = f"v{i+1:03}"
+            base_id = get_base_id()
             if (self.dirs["opf_path"] / "base" / f"{base_id}.txt").is_file():
                 continue
             responses = self.get_input(vol_path)
