@@ -49,7 +49,7 @@ Daily development version:
 
 ## Docs
 
-- Documentation: [docs](https://openpecha.github.io/openpecha-toolkit/)
+- Documentation: [docs](https://openpecha.github.io/Openpecha-Toolkit/)
 - If you have any problems with `openpecha-toolkit`, please open [issues](https://github.com/OpenPecha-dev/openpecha-toolkit/issues/new/choose)
 
 ## Developer Installation.
