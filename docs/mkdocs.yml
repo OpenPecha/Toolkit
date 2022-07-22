@@ -17,7 +17,7 @@ nav:
     - developer/pecha.md
     - developer/metadata.md
 repo_name: openpecha-toolkit
-repo_url: https://github.com/OpenPecha-dev/openpecha-toolkit
+repo_url: https://github.com/OpenPecha-dev/openpecha-toolkit/docs
 markdown_extensions:
   - toc:
       permalink: true
