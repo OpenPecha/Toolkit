@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.8.16 (2022-07-22)
+### Fix
+* **config:** Github org url of openpecha data updated ([`61a7c2c`](https://github.com/OpenPecha/Openpecha-Toolkit/commit/61a7c2c8bfdc67e677541b61920628ab85770f5c))
+
 ## v0.8.15 (2022-07-22)
 ### Fix
 * **blupdate:** Vol keywords are replaced by base name and related refactors are made ([`1eb61f3`](https://github.com/OpenPecha/Openpecha-Toolkit/commit/1eb61f368c8a58ddb454637337f3802ec8030183))
