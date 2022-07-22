@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.8.15 (2022-07-22)
+### Fix
+* **blupdate:** Vol keywords are replaced by base name and related refactors are made ([`1eb61f3`](https://github.com/OpenPecha/Openpecha-Toolkit/commit/1eb61f368c8a58ddb454637337f3802ec8030183))
+
 ## v0.8.14 (2022-07-18)
 ### Fix
 * **ocr-postprocessing:** The bounding polys are sorted before text extraction ([`3537a3f`](https://github.com/OpenPecha/Openpecha-Toolkit/commit/3537a3f76e26ea97eb1d29717172dce0fd255ed6))
