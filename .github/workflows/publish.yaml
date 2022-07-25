@@ -56,10 +56,12 @@ jobs:
     steps:
       - name: Checkout main
         uses: actions/checkout@v2
+        with:
+          path: docs
         
       - name: setup workspace
         run: |
-          echo "GITHUB_WORKSPACE=${GITHUB_WORKSPACE}/docs" >> $GITHUB_ENV
+          # echo "GITHUB_WORKSPACE=${GITHUB_WORKSPACE}/docs" >> $GITHUB_ENV
           echo ${GITHUB_WORKSPACE}
 
 #       - name: Deploy docs
