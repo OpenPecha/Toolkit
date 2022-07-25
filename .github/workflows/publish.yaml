@@ -63,5 +63,4 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           CUSTOM_DOMAIN: docs.openpecha.org
           CONFIG_FILE: docs/mkdocs.yml
-          EXTRA_PACKAGES: build-base libffi-dev libxml2 libxslt
-          REQUIREMENTS: requirements-dev.txt
+          REQUIREMENTS: requirements-docs.txt
