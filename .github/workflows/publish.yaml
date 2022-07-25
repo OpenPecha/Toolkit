@@ -56,18 +56,24 @@ jobs:
     steps:
       - name: Checkout main
         uses: actions/checkout@v2
-        with:
-          path: docs
         
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.8'
+
       - name: setup workspace
         run: |
-          # echo "GITHUB_WORKSPACE=${GITHUB_WORKSPACE}/docs" >> $GITHUB_ENV
-          echo ${GITHUB_WORKSPACE}
-
-#       - name: Deploy docs
-#         uses: mhausenblas/mkdocs-deploy-gh-pages@master
-#         env:
-#           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#           CUSTOM_DOMAIN: docs.openpecha.org
-#           CONFIG_FILE: ./config
-#           REQUIREMENTS: ../requirements-docs.txt
+          pip install -r requirements-docs.txt
+          echo docs.openpecha.org > "${GITHUB_WORKSPACE}/docs/docs/CNAME"
+          remote_repo="https://x-access-token:${GITHUB_TOKEN}@${GITHUB_DOMAIN:-"github.com"}/${GITHUB_REPOSITORY}.git"
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git config --global user.name "${GITHUB_ACTOR}"
+          git config --global user.email "${GITHUB_ACTOR}@users.noreply.${GITHUB_DOMAIN:-"github.com"}"
+          git remote rm origin
+          git remote add origin "${remote_repo}"
+          
+      - name: deploy
+        run: |
+          cd docs
+          mkdocs gh-deploy
+          
