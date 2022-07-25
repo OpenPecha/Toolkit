@@ -49,3 +49,19 @@ jobs:
       with:
         github_token: ${{ secrets.ADMIN_GITHUB_TOKEN }}
         pypi_token: ${{ secrets.PYPI_PASSWORD }}
+        
+  docs:
+    name: Deploy docs
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v2
+
+      - name: Deploy docs
+        uses: mhausenblas/mkdocs-deploy-gh-pages@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CUSTOM_DOMAIN: docs.openpecha.org
+          CONFIG_FILE: docs/mkdocs.yml
+          EXTRA_PACKAGES: build-base
+          REQUIREMENTS: requirements-dev.txt
