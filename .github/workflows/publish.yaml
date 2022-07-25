@@ -56,11 +56,12 @@ jobs:
     steps:
       - name: Checkout main
         uses: actions/checkout@v2
+        
+      - run: cd docs
 
       - name: Deploy docs
         uses: mhausenblas/mkdocs-deploy-gh-pages@master
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           CUSTOM_DOMAIN: docs.openpecha.org
-          CONFIG_FILE: docs/mkdocs.yml
-          REQUIREMENTS: requirements-docs.txt
+          REQUIREMENTS: ../requirements-docs.txt
