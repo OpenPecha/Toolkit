@@ -5,13 +5,19 @@ import re
 from enum import Enum
 from pathlib import Path
 
+import datetime
+from datetime import timezone
 import requests
 from antx import transfer
+from pathlib import Path
+from rdflib import Graph
+from rdflib.namespace import RDF, RDFS, SKOS, OWL, Namespace, NamespaceManager, XSD
 
 from openpecha.core.annotation import Page, Span
 from openpecha.core.annotations import BaseAnnotation
 from openpecha.core.layer import Layer, LayerEnum
 from openpecha.core.ids import get_base_id
+from openpecha.core.metadata import InitialPechaMetadata, InitialCreationType
 from openpecha.formatters import BaseFormatter
 from openpecha.utils import dump_yaml, gzip_str
 
@@ -36,7 +42,7 @@ class GoogleOCRFormatter(BaseFormatter):
         self.page_break = "\n" * self.n_page_breaker_char
         self.base_text = []
         self.low_conf_ann_text = ""
-        self.vols_meta = {}
+        self.base_meta = {}
 
     def text_preprocess(self, text):
 
@@ -436,7 +442,7 @@ class GoogleOCRFormatter(BaseFormatter):
 
         return base_text
 
-    def get_metadata(self, work_id):
+    def get_metadata(self, work_id, pecha_id):
         import xml.etree.ElementTree as ET
 
         import requests
@@ -450,40 +456,82 @@ class GoogleOCRFormatter(BaseFormatter):
         try:
             root = ET.fromstring(r.content.decode("utf-8"))
         except Exception:
-            metadata = {
-                "id": self.pecha_id,
-                "initial_creation_type": "ocr",
-                "source_metadata": {
-                    "id": f"{work_id}",
+            metadata = InitialPechaMetadata(
+                source='https://library.bdrc.io',
+                initial_creation_type=InitialCreationType.ocr,
+                imported=datetime.datetime.now(timezone.utc),
+                last_modified=datetime.datetime.now(timezone.utc),
+                parser=None,
+                copyright=None,
+                license=None,
+                source_metadata={
+                    "id": f"bdrc:{work_id}",
                     "title": "",
                     "author": "",
-                    "volume": {},
-                },
-            }
-            return metadata
+                    "base": self.base_meta
+                }
+            )
+            return json.loads(metadata.json())
 
         title_tag = root[0]
         author_tag = root.find("{http://www.tbrc.org/models/work#}creator")
-        metadata = {
-            "id": self.pecha_id,
-            "initial_creation_type": "ocr",
-            "source_metadata": {
-                "id": f"bdr:{work_id}",
-                "title": converter.toUnicode(title_tag.text),
-                "volumes": self.vols_meta,
-                "author": converter.toUnicode(author_tag.text) if author_tag else "",
+        metadata = InitialPechaMetadata(
+                source='https://library.bdrc.io',
+                initial_creation_type=InitialCreationType.ocr,
+                imported=datetime.datetime.now(timezone.utc),
+                last_modified=datetime.datetime.now(timezone.utc),
+                parser=None,
+                copyright=None,
+                license=None,
+                source_metadata={
+                    "id": f"bdr:{work_id}",
+                    "title": converter.toUnicode(title_tag.text),
+                    "author": converter.toUnicode(author_tag.text) if author_tag else "",
+                    "base": self.base_meta
             },
+        )
+
+        return json.loads(metadata.json())
+
+    def set_base_meta(self, meta_ttl, image_group_id, base_file_name):
+        BDR = Namespace("http://purl.bdrc.io/resource/")
+        BDO = Namespace("http://purl.bdrc.io/ontology/core/")
+        g = Graph()
+        try:
+            g.parse(data=meta_ttl, format="ttl")
+        except:
+            return {}
+        volume_number = int(g.value(BDR[image_group_id], BDO["volumeNumber"]))
+        title = g.value(BDR[image_group_id], RDFS.comment)
+        if title:
+            title = title.value
+        else:
+            title = ""
+        
+        try:
+            total_pages = int(g.value(BDR[image_group_id], BDO["volumePagesTotal"]))
+        except:
+            total_pages = 0
+        self.base_meta[base_file_name] = {
+            "image_group_id": image_group_id,
+            "title": title,
+            "total_pages": total_pages,
+            "order": volume_number,
+            "base_file": f"{base_file_name}.txt",
         }
 
-        return metadata
-
-    def set_vols_meta(self, src_vol_id, base_file_name):
-        self.vols_meta[self.get_unique_id()] = {
-            "image_group_id": src_vol_id,
-            "title": "",
-            "base_file": base_file_name,
-        }
-
+    def get_meta_ttl(self, work_id):
+        """Download ttl file of work and save in meta_ttl.
+        Args:
+            work_id (str): work id
+        """
+        try:
+            ttl = requests.get(f"http://purl.bdrc.io/graph/{work_id}.ttl")
+            return ttl.text
+        except:
+            print(' TTL not Found!!!')
+            return ""
+    
     def create_opf(self, input_path, pecha_id, meta_flag=True):
         """Create opf of google ocred pecha
 
@@ -518,13 +566,15 @@ class GoogleOCRFormatter(BaseFormatter):
             for layer, ann in formatted_layers.items():
                 layer_fn = vol_layer_path / f"{layer}.yml"
                 dump_yaml(ann, layer_fn)
-
-            self.set_vols_meta(vol_path.name, f"{base_id}.txt")
+            
+            #create base of source_metadata    
+            meta_ttl = self.get_meta_ttl(input_path.name)
+            self.set_base_meta(meta_ttl, vol_path.name, base_id)
 
         # create meta.yml
         if meta_flag:
             meta_fn = self.dirs["opf_path"] / "meta.yml"
-            dump_yaml(self.get_metadata(input_path.name), meta_fn)
+            dump_yaml(self.get_metadata(input_path.name, pecha_id), meta_fn)
 
         return self.dirs["opf_path"].parent
 
