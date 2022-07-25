@@ -61,10 +61,12 @@ jobs:
           pwd
           cd docs
           pwd
+          echo ${GITHUB_WORKSPACE}
 
 #       - name: Deploy docs
 #         uses: mhausenblas/mkdocs-deploy-gh-pages@master
 #         env:
 #           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 #           CUSTOM_DOMAIN: docs.openpecha.org
+#           CONFIG_FILE: ./config
 #           REQUIREMENTS: ../requirements-docs.txt
