@@ -57,7 +57,10 @@ jobs:
       - name: Checkout main
         uses: actions/checkout@v2
         
-      - run: cd docs
+      - run: |
+          echo pwd
+          cd docs
+          echo pwd
 
       - name: Deploy docs
         uses: mhausenblas/mkdocs-deploy-gh-pages@master
