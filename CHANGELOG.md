@@ -2,6 +2,14 @@
 
 <!--next-version-placeholder-->
 
+## v0.8.17 (2022-07-26)
+### Fix
+* Pypi release ([`31e4b47`](https://github.com/OpenPecha/Toolkit/commit/31e4b471eb0ec80f6989067ae90701604eb0abda))
+
+### Documentation
+* Add tab navigation ([`b8dad4a`](https://github.com/OpenPecha/Toolkit/commit/b8dad4aa1122a6243133f24dde59911cb1d0ecc2))
+* **gh-action:** Add job to build and deploy docs ([`dc86ea6`](https://github.com/OpenPecha/Toolkit/commit/dc86ea6c3de5aeb491e017d7628c85fdffa5a33d))
+
 ## v0.8.16 (2022-07-22)
 ### Fix
 * **config:** Github org url of openpecha data updated ([`61a7c2c`](https://github.com/OpenPecha/Openpecha-Toolkit/commit/61a7c2c8bfdc67e677541b61920628ab85770f5c))
