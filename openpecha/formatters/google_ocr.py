@@ -43,6 +43,8 @@ class GoogleOCRFormatter(BaseFormatter):
         self.base_text = []
         self.low_conf_ann_text = ""
         self.base_meta = {}
+        self.cur_base_word_confidences = []
+        self.word_confidences = []
 
     def text_preprocess(self, text):
 
@@ -249,6 +251,11 @@ class GoogleOCRFormatter(BaseFormatter):
                         bounding_polys.append(word)
         return bounding_polys
 
+    def populate_confidence(self, bounding_polys):
+        for bounding_poly in bounding_polys:
+            self.word_confidences.append(float(bounding_poly['confidence']))
+            self.cur_base_word_confidences.append(float(bounding_poly['confidence']))
+
     def post_process_page(self, page):
         """parse page response to generate page content by reordering the bounding polys
 
@@ -265,6 +272,7 @@ class GoogleOCRFormatter(BaseFormatter):
             print("Page empty!!")
             return postprocessed_page_content
         bounding_polys = self.get_char_base_bounding_polys(page)
+        self.populate_confidence(bounding_polys)
         sorted_bounding_polys = self.sort_bounding_polys(bounding_polys)
         lines, lines_with_low_conf_ann = self.get_lines(sorted_bounding_polys)
         page_content_without_space = "\n".join(lines)
@@ -453,6 +461,9 @@ class GoogleOCRFormatter(BaseFormatter):
         bdrc_metadata_url = query_url.format(work_id)
         r = requests.get(bdrc_metadata_url)
 
+        opf_word_confidence_median = self.get_median(self.word_confidences)
+        opf_word_confidence_mean = self.get_mean(self.word_confidences)
+
         try:
             root = ET.fromstring(r.content.decode("utf-8"))
         except Exception:
@@ -492,6 +503,31 @@ class GoogleOCRFormatter(BaseFormatter):
         )
 
         return json.loads(metadata.json())
+    
+    def get_median(self, list_):
+        list_.sort()
+        number_of_items = len(list_)
+        mid_index = number_of_items // 2
+        if number_of_items % 2 == 0:
+            return (list_[mid_index-1] + list_[mid_index]) / 2
+        else:
+            return list_[mid_index]
+    
+    def get_mean(self, list_):
+        grand_sum = sum(list_)
+        mean_ = grand_sum / len(list_)
+        return mean_
+
+
+    def get_base_confidence_median(self):
+        cur_base_confidences = self.cur_base_word_confidences
+        base_confidence_median = self.get_median(cur_base_confidences)
+        return base_confidence_median
+    
+    def get_base_confidence_mean(self):
+        cur_base_confidences = self.cur_base_word_confidences
+        base_confidence_mean = self.get_mean(cur_base_confidences)
+        return base_confidence_mean
 
     def set_base_meta(self, meta_ttl, image_group_id, base_file_name):
         BDR = Namespace("http://purl.bdrc.io/resource/")
@@ -512,12 +548,17 @@ class GoogleOCRFormatter(BaseFormatter):
             total_pages = int(g.value(BDR[image_group_id], BDO["volumePagesTotal"]))
         except:
             total_pages = 0
+        base_confidence_median = self.get_base_confidence_median()
+        base_confidence_mean = self.get_base_confidence_mean()
+        self.cur_word_confidences = []
         self.base_meta[base_file_name] = {
             "image_group_id": image_group_id,
             "title": title,
             "total_pages": total_pages,
             "order": volume_number,
             "base_file": f"{base_file_name}.txt",
+            "ocr_word_median_confidence_index": base_confidence_median,
+            "ocr_word_mean_confidence_index": base_confidence_mean
         }
 
     def get_meta_ttl(self, work_id):
