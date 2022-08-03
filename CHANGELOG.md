@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.8.19 (2022-08-03)
+### Fix
+* **metadata:** Refactor initial metadata ([`125b0ab`](https://github.com/OpenPecha/Toolkit/commit/125b0ab118f9b77c9c289f4a91a582a9d2b43a60))
+
 ## v0.8.18 (2022-08-03)
 ### Fix
 * **google-ocr:** Empty page bug fixed ([`9352526`](https://github.com/OpenPecha/Toolkit/commit/93525267fa6feaecfdf5db306f1511e1b587e07f))
