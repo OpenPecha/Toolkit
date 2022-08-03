@@ -2,6 +2,14 @@
 
 <!--next-version-placeholder-->
 
+## v0.8.18 (2022-08-03)
+### Fix
+* **google-ocr:** Empty page bug fixed ([`9352526`](https://github.com/OpenPecha/Toolkit/commit/93525267fa6feaecfdf5db306f1511e1b587e07f))
+
+### Documentation
+* Add dependency ([`c861e95`](https://github.com/OpenPecha/Toolkit/commit/c861e95f2f6aa70af850e561cee29c0b861d23f5))
+* Add pecha reference ([`9df1e5e`](https://github.com/OpenPecha/Toolkit/commit/9df1e5e9e6f6bc53d9d652b4622045ccf53000eb))
+
 ## v0.8.17 (2022-07-26)
 ### Fix
 * Pypi release ([`31e4b47`](https://github.com/OpenPecha/Toolkit/commit/31e4b471eb0ec80f6989067ae90701604eb0abda))
