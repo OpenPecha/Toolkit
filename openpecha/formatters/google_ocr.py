@@ -478,12 +478,14 @@ class GoogleOCRFormatter(BaseFormatter):
                 parser=None,
                 copyright=None,
                 license=None,
+                ocr_word_mean_confidence_index=opf_word_confidence_mean,
+                ocr_word_median_confidence_index=opf_word_confidence_median,
                 source_metadata={
                     "id": f"bdrc:{work_id}",
                     "title": "",
                     "author": "",
-                    "base": self.base_meta
-                }
+                },
+                base=self.base_meta
             )
             return json.loads(metadata.json())
 
@@ -497,12 +499,14 @@ class GoogleOCRFormatter(BaseFormatter):
                 parser=None,
                 copyright=None,
                 license=None,
+                ocr_word_mean_confidence_index=opf_word_confidence_mean,
+                ocr_word_median_confidence_index=opf_word_confidence_median,
                 source_metadata={
-                    "id": f"bdr:{work_id}",
-                    "title": converter.toUnicode(title_tag.text),
-                    "author": converter.toUnicode(author_tag.text) if author_tag else "",
-                    "base": self.base_meta
-            },
+                    "id": f"bdrc:{work_id}",
+                    "title": "",
+                    "author": "",
+                },
+                base=self.base_meta
         )
 
         return json.loads(metadata.json())
@@ -555,9 +559,11 @@ class GoogleOCRFormatter(BaseFormatter):
         base_confidence_mean = self.get_base_confidence_mean()
         self.cur_word_confidences = []
         self.base_meta[base_file_name] = {
-            "image_group_id": image_group_id,
-            "title": title,
-            "total_pages": total_pages,
+            "source_metadata": {
+                "image_group_id": image_group_id,
+                "title": title,
+                "total_pages": total_pages,
+            },
             "order": volume_number,
             "base_file": f"{base_file_name}.txt",
             "ocr_word_median_confidence_index": base_confidence_median,
