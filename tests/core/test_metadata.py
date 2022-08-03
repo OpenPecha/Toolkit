@@ -51,10 +51,26 @@ def test_base_pecha_metadata_model():
 def test_initial_pecha_metadata():
     metadata = InitialPechaMetadata(
         initial_creation_type=InitialCreationType.ocr,
+        ocr_word_median_confidence_index=0.9,
+        base={
+            "529C": {
+                "source_metadata": {
+                    "image_group_id": "I3CN8548",
+                    "title": "",
+                    "total_pages": 62,
+                },
+                "order": 1,
+                "base_file": "529C.txt",
+                "ocr_word_median_confidence_index": 0.9,
+            }
+        },
     )
 
     assert metadata.initial_creation_type.value == InitialCreationType.ocr.value
     assert metadata.id.startswith("I")
+
+    assert metadata.ocr_word_median_confidence_index == 0.9
+    assert "529C" in metadata.base
 
 
 def test_diplomatic_pecha_metadata():

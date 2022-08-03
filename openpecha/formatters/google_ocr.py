@@ -351,7 +351,10 @@ class GoogleOCRFormatter(BaseFormatter):
 
     def _get_page(self, response):
         try:
-            page = response["textAnnotations"][0]
+            if len(response["textAnnotations"]) != 0:
+                page = response["textAnnotations"][0]
+            else:
+                return None, None
         except KeyError:
             return None, None
 

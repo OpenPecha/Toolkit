@@ -2,7 +2,9 @@
 
 ## OpenPecha
 
-::: openpecha.core.pecha.OpenPecha
+All code references will come will soon!
+
+<!-- ::: openpecha.core.pecha.OpenPecha
     options:
         members:
             - pecha_id
@@ -40,4 +42,4 @@
             - reset_layer
             - reset_layers
             - publish
-            - remove
+            - remove -->

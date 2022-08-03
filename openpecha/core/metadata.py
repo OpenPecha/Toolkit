@@ -70,11 +70,14 @@ class PechaMetadata(BaseModel):
     def update_last_modified_date(self):
         self.last_modified = datetime.now()
 
-    class Config:
-        extra = Extra.forbid
+    # class Config:
+    #     extra = Extra.forbid
 
 
 class InitialPechaMetadata(PechaMetadata):
+    ocr_word_median_confidence_index: float = None
+    base: Optional[Dict] = {}
+
     @validator("id", pre=True, always=True)
     def set_id(cls, v):
         return v or ids.get_initial_pecha_id()
