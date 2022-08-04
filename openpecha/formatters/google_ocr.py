@@ -22,7 +22,7 @@ from openpecha.formatters import BaseFormatter
 from openpecha.utils import dump_yaml, gzip_str
 
 
-extended_LayerEnum = [(l.name, l.value) for l in LayerEnum] + [("low_conf_box", "LowConfBox")]
+extended_LayerEnum = [(l.name, l.value) for l in LayerEnum] + [("low_conf_box", "LowConfBox")] + [("language", "Language")]
 LayerEnum = Enum("LayerEnum", extended_LayerEnum)
 
 class ExtentedLayer(Layer):
@@ -30,6 +30,9 @@ class ExtentedLayer(Layer):
 
 class LowConfBox(BaseAnnotation):
     confidence: str
+
+class Language(BaseAnnotation):
+    language_code: str
 
 class GoogleOCRFormatter(BaseFormatter):
     """
@@ -108,6 +111,26 @@ class GoogleOCRFormatter(BaseFormatter):
             return bounding_poly.get("text", "")
         else:
             return f"§{bounding_poly.get('text', '')}Ç{bounding_poly['confidence']}Ç§"
+    
+    def get_language_code(self, bounding_poly):
+        language_codes = []
+        properties = bounding_poly.get("property", {})
+        if properties:
+            languages = properties.get("detectedLanguages", [])
+            if languages:
+                for language in languages:
+                    if language_code := language.get("languageCode", ""):
+                        language_codes.append(language_code)
+        return language_codes
+    
+    def get_language_code_ann(self, bounding_poly):
+        text = bounding_poly.get("text", "")
+        language_codes = self.get_language_code(bounding_poly)
+        if language_codes:
+            language_code = "-".join(language_codes)
+            return f"§{text}Ç{language_code}Ç§"
+        else:
+            return text
 
     def get_lines(self, bounding_polys):
         """Return list of lines in page using bounding polys of page
@@ -118,27 +141,42 @@ class GoogleOCRFormatter(BaseFormatter):
         Returns:
             list: list of lines in page
         """
+        lines = {
+            'base_lines': [],
+            'low_conf_annotated_lines': [],
+            'language_code_annotated_lines': []
+        }
         prev_bounding_poly = bounding_polys[0]
-        lines = []
-        lines_with_ann = []
-        cur_line = ''
-        cur_line_with_ann = ''
+        base_lines = []
+        low_conf_annotated_lines = []
+        language_code_annotated_lines = []
+        cur_base_line = ''
+        cur_low_conf_annotated_line = ''
+        cur_language_code_annotated_line = ''
         avg_line_height = self.get_avg_bounding_poly_height(bounding_polys)
         for bounding_poly in bounding_polys:
             if self.is_in_cur_line(prev_bounding_poly, bounding_poly, avg_line_height):
-                cur_line += bounding_poly.get("text", "")
-                cur_line_with_ann += self.get_low_confidence_ann(bounding_poly)
+                cur_base_line += bounding_poly.get("text", "")
+                cur_low_conf_annotated_line += self.get_low_confidence_ann(bounding_poly)
+                cur_language_code_annotated_line += self.get_language_code_ann(bounding_poly)
             else:
-                lines.append(cur_line)
-                lines_with_ann.append(cur_line_with_ann)
-                cur_line = bounding_poly.get("text", "")
-                cur_line_with_ann = self.get_low_confidence_ann(bounding_poly)
+                base_lines.append(cur_base_line)
+                low_conf_annotated_lines.append(cur_low_conf_annotated_line)
+                language_code_annotated_lines.append(cur_language_code_annotated_line)
+                cur_base_line = bounding_poly.get("text", "")
+                cur_low_conf_annotated_line = self.get_low_confidence_ann(bounding_poly)
+                cur_language_code_annotated_line = self.get_language_code_ann(bounding_poly)
             prev_bounding_poly = bounding_poly
-        if cur_line:
-            lines.append(cur_line)
-        if cur_line_with_ann:
-            lines_with_ann.append(cur_line_with_ann)
-        return lines, lines_with_ann
+        if cur_base_line:
+            base_lines.append(cur_base_line)
+        if cur_low_conf_annotated_line:
+            low_conf_annotated_lines.append(cur_low_conf_annotated_line)
+        if cur_language_code_annotated_line:
+            language_code_annotated_lines.append(cur_language_code_annotated_line)
+        lines["base_lines"] = base_lines
+        lines["low_conf_annotated_lines"] = low_conf_annotated_lines
+        lines['language_code_annotated_lines'] = language_code_annotated_lines
+        return lines
 
     def transfer_space(self, base_with_space, base_without_space):
         """transfer space from base with space to without space
@@ -265,6 +303,11 @@ class GoogleOCRFormatter(BaseFormatter):
         Returns:
             str: page content
         """
+        post_processed_pages = {
+            'base_page': '',
+            'low_conf_annotated_page': '',
+            'language_code_annotated_page': ''
+        }
         postprocessed_page_content = ""
         try:
             page_content = page["textAnnotations"][0]["description"]
@@ -274,15 +317,20 @@ class GoogleOCRFormatter(BaseFormatter):
         bounding_polys = self.get_char_base_bounding_polys(page)
         self.populate_confidence(bounding_polys)
         sorted_bounding_polys = self.sort_bounding_polys(bounding_polys)
-        lines, lines_with_low_conf_ann = self.get_lines(sorted_bounding_polys)
-        page_content_without_space = "\n".join(lines)
-        page_with_low_conf_ann = "\n".join(lines_with_low_conf_ann)
+        lines = self.get_lines(sorted_bounding_polys)
+        page_content_without_space = "\n".join(lines.get("base_lines", []))
+        page_with_low_conf_ann = "\n".join(lines.get("low_conf_annotated_lines", []))
+        page_with_language_code_ann = "\n".join(lines.get("language_code_annotated_lines", []))
         postprocessed_page_content = self.transfer_space(
             page_content, page_content_without_space
         )
         postprocessed_pg_with_low_conf_ann = self.transfer_space(postprocessed_page_content, page_with_low_conf_ann)
+        postprocessed_pg_with_language_code_ann = self.transfer_space(postprocessed_page_content, page_with_language_code_ann)
+        post_processed_pages["base_page"] = postprocessed_page_content + "\n"
+        post_processed_pages["low_conf_annotated_page"] = postprocessed_pg_with_low_conf_ann + "\n"
+        post_processed_pages["language_code_annotated_page"] = postprocessed_pg_with_language_code_ann + "\n"
+        return post_processed_pages
 
-        return postprocessed_page_content + "\n", postprocessed_pg_with_low_conf_ann + "\n"
 
     def get_input(self, input_path):
         """
@@ -304,9 +352,8 @@ class GoogleOCRFormatter(BaseFormatter):
     def extract_confidence(self, chunk):
         confidence = re.search("Ç(.+?)Ç", chunk).group(1)
         return confidence
-
         
-    def low_confidence_text_layer(self, low_conf_ann_text):
+    def format_low_confidence_box_layer(self, low_conf_ann_text):
         base_text = ""
         anns = {}
         low_conf_ann_text = low_conf_ann_text.replace("\n", "¢")
@@ -325,10 +372,127 @@ class GoogleOCRFormatter(BaseFormatter):
                 base_text += chunk
         layer = ExtentedLayer(annotation_type=LayerEnum.low_conf_box, annotations=anns)
         return json.loads(layer.json(exclude_none=True))
+    
+    def extract_language_code(self, chunk):
+        language_code = re.search("Ç(.+?)Ç", chunk).group(1)
+        return language_code
+    
+    def extract_text(self, chunk):
+        text = re.search('§(.+?)Ç.+?Ç', chunk).group(1)
+        return text
+
+    def process_first_chunk(self, chunk):
+        try:
+            cur_annotated_chunk = self.extract_text(chunk)
+        except:
+            cur_annotated_chunk = ""
+        try:
+            cur_language_code = self.extract_language_code(chunk)
+        except:
+            cur_language_code = ""
+        return cur_annotated_chunk, cur_language_code
+
+    def rm_short_ann(self, text):
+        new_text = text
+        for ann in re.findall("(§.+?§)", text):
+            text = self.extract_text(ann)
+            if len(text) < 30:
+                new_text = re.sub(ann, text, new_text, 1)
+        return new_text
+
+    def add_default_lang_code(self, text):
+        new_text = ""
+        chunks = re.split("(§.+?§)", text)
+        for chunk in chunks:
+            if chunk:
+                if re.search("(§.+?§)", chunk):
+                    new_text += chunk
+                else:
+                    new_text += f"§{chunk}ÇboÇ§"
+        return new_text
+
+    def is_mergeable_chunk(self, prev_chunk, chunk, last_lang_code):
+        if re.search("§.+?§", prev_chunk) or prev_chunk == "¢":
+            try:
+                prev_lang_code = self.extract_language_code(prev_chunk)
+            except:
+                prev_lang_code =last_lang_code
+            cur_lang_code = self.extract_language_code(chunk)
+            if prev_lang_code == cur_lang_code:
+                return True
+        return False
+
+    def merge_consecutive_ann(self, ann_text):
+        new_text = ""
+        chunks = re.split("(§.+?§)", ann_text)
+        if chunks:
+            cur_annotated_chunk, cur_language_code = self.process_first_chunk(chunks[0])
+            if not cur_annotated_chunk:
+                new_text += chunks[0]
+            prev_chunk = chunks[0]
+            for chunk in chunks[1:]:
+                if chunk:
+                    if re.search("§.+?§", chunk):
+                        if self.is_mergeable_chunk(prev_chunk, chunk, cur_language_code):
+                            if cur_annotated_chunk:
+                                cur_annotated_chunk += self.extract_text(chunk)
+                            else:
+                                cur_annotated_chunk += f"§{self.extract_text(chunk)}"
+                            cur_language_code = self.extract_language_code(chunk)
+                        else:
+                            if cur_annotated_chunk:
+                                new_text += f"{cur_annotated_chunk}Ç{cur_language_code}Ç§"
+                                cur_annotated_chunk = ""
+                                cur_language_code = ""
+                            else:
+                                cur_annotated_chunk = f"§{self.extract_text(chunk)}"
+                                cur_language_code = self.extract_language_code(chunk)
+                    elif chunk == "¢":
+                        if cur_annotated_chunk:
+                            cur_annotated_chunk += chunk
+                        else:
+                            new_text += chunk
+                    else:
+                        if cur_annotated_chunk:
+                            new_text += f"{cur_annotated_chunk}Ç{cur_language_code}Ç§"
+                            cur_annotated_chunk = ""
+                            cur_language_code = ""
+                        new_text += chunk
+                    prev_chunk = chunk
+            if cur_annotated_chunk:
+                new_text += f"{cur_annotated_chunk}Ç{cur_language_code}Ç§"
+            new_text = self.rm_short_ann(new_text)
+            new_text = self.add_default_lang_code(new_text)
+            new_text = re.sub("(¢)(Ç.+?Ç§)", "\g<2>\g<1>", new_text)
+        else:
+            new_text = ann_text
+        return new_text
+
+    def format_language_layer(self, language_code_annotated_text):
+        base_text = ""
+        anns = {}
+        language_code_annotated_text = language_code_annotated_text.replace("\n", "¢")
+        language_code_annotated_text = self.merge_consecutive_ann(language_code_annotated_text)
+        chunks = re.split("(§.+?§)", language_code_annotated_text)
+        for chunk in chunks:
+            if re.search("§.+?§", chunk):
+                start = len(base_text)
+                lanuage_code = self.extract_language_code(chunk)
+                base_text += re.search("§(.+?)Ç", chunk).group(1)
+                end = len(base_text)
+                span = Span(start=start, end=end)
+                uuid = self.get_unique_id()
+                language_ann = Language(span=span, language_code=lanuage_code)
+                anns[uuid] = language_ann
+            else:
+                base_text += chunk
+        layer = ExtentedLayer(annotation_type=LayerEnum.language, annotations=anns)
+        return json.loads(layer.json(exclude_none=True))
+
 
     def format_layer(self, layers, base_id):
         anns = {}
-        for (start, end, n_pg), page_ref in zip(layers["pages"], layers["pages_ref"]):
+        for (start, end, n_pg), page_ref in zip(layers["base_pages"], layers["pages_ref"]):
             uuid = self.get_unique_id()
             span = Span(start=start, end=end)
             page = Page(span=span, imgnum=n_pg, reference=page_ref)
@@ -338,7 +502,8 @@ class GoogleOCRFormatter(BaseFormatter):
         result = {
             LayerEnum.pagination.value: json.loads(layer.json(exclude_none=True))
         }
-        result[LayerEnum.low_conf_box.value] = self.low_confidence_text_layer(layers['low_conf_ann_text'])
+        result[LayerEnum.low_conf_box.value] = self.format_low_confidence_box_layer(layers['low_conf_ann_text'])
+        result[LayerEnum.language.value] = self.format_language_layer(layers['language_code_annotated_text'])
 
         return result
 
@@ -350,18 +515,23 @@ class GoogleOCRFormatter(BaseFormatter):
         return coord
 
     def _get_page(self, response):
+        pages = {
+            'base_page': '',
+            'low_conf_annotated_page': '',
+            'language_code_annotated_page': ''
+        }
         try:
             if len(response["textAnnotations"]) != 0:
                 page = response["textAnnotations"][0]
             else:
-                return None, None
+                return pages
         except KeyError:
-            return None, None
+            return pages
 
-        text, text_with_low_conf_ann = self.post_process_page(response)
+        pages = self.post_process_page(response)
         # vertices = page['boundingPoly']['vertices']  # get text box
 
-        return text, text_with_low_conf_ann  # self._get_coord(vertices)
+        return pages # self._get_coord(vertices)
 
     def _get_lines(self, text, last_pg_end_idx, is_first_pg):
         lines = []
@@ -416,8 +586,9 @@ class GoogleOCRFormatter(BaseFormatter):
 
     def build_layers(self, responses, vol_name, base_id=None):
 
-        pages = []
+        base_pages = []
         low_conf_ann_pages = []
+        language_code_ann_pages = []
         pages_ref = []
         last_pg_end_idx = 0
         img2seq = self._get_imagelist_meta(vol_name)
@@ -428,22 +599,32 @@ class GoogleOCRFormatter(BaseFormatter):
             if not response:
                 print(f"[ERROR] Failed : {n_pg}")
                 continue
-            text, text_with_low_conf_ann = self._get_page(response)
+            pages = self._get_page(response)
+            base_page = pages['base_page']
+            low_conf_ann_page = pages['low_conf_annotated_page']
+            language_code_ann_page = pages['language_code_annotated_page']
 
             # skip empty page (can be bad image)
-            if not text:
+            if not base_page:
                 print(f"[ERROR] empty page {n_pg}")
                 continue
-            lines, last_pg_end_idx = self._get_lines(text, last_pg_end_idx, n_pg == 1)
-            pages.append((lines[0][0], lines[-1][1], n_pg))
+            lines, last_pg_end_idx = self._get_lines(base_page, last_pg_end_idx, n_pg == 1)
+            base_pages.append((lines[0][0], lines[-1][1], n_pg))
             pages_ref.append(f"{page_ref}.{img2seq[page_ref]['ext']}")
 
             # create base_text
-            self.base_text.append(text)
-            low_conf_ann_pages.append(text_with_low_conf_ann)
+            self.base_text.append(base_page)
+            low_conf_ann_pages.append(low_conf_ann_page)
+            language_code_ann_pages.append(language_code_ann_page)
         low_conf_ann_text = f"{self.page_break}".join(low_conf_ann_pages)
+        language_code_annotated_text = f"{self.page_break}".join(language_code_ann_pages)
 
-        result = {"pages": pages, "pages_ref": pages_ref, "low_conf_ann_text": low_conf_ann_text}
+        result = {
+            "base_pages": base_pages,
+            "pages_ref": pages_ref,
+            "low_conf_ann_text": low_conf_ann_text,
+            "language_code_annotated_text": language_code_annotated_text
+            }
 
         return result
 
@@ -503,8 +684,8 @@ class GoogleOCRFormatter(BaseFormatter):
                 ocr_word_median_confidence_index=opf_word_confidence_median,
                 source_metadata={
                     "id": f"bdrc:{work_id}",
-                    "title": "",
-                    "author": "",
+                    "title": title_tag,
+                    "author": author_tag,
                 },
                 base=self.base_meta
         )
@@ -604,6 +785,7 @@ class GoogleOCRFormatter(BaseFormatter):
                 continue
             responses = self.get_input(vol_path)
             layers = self.build_layers(responses, vol_path.name, base_id)
+            Path('./language_code.txt').write_text(layers['language_code_annotated_text'], encoding='utf-8')
             formatted_layers = self.format_layer(layers, base_id)
             base_text = self.get_base_text()
 
