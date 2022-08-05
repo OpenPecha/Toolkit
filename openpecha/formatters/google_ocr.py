@@ -395,9 +395,10 @@ class GoogleOCRFormatter(BaseFormatter):
     def rm_short_ann(self, text):
         new_text = text
         for ann in re.findall("(§.+?§)", text):
-            text = self.extract_text(ann)
-            if len(text) < 30:
-                new_text = re.sub(ann, text, new_text, 1)
+            ann_text = self.extract_text(ann)
+            ann  = re.escape(ann)
+            if len(ann_text) < 30:
+                new_text = re.sub(ann, ann_text, new_text, 1)
         return new_text
 
     def add_default_lang_code(self, text):
@@ -684,8 +685,8 @@ class GoogleOCRFormatter(BaseFormatter):
                 ocr_word_median_confidence_index=opf_word_confidence_median,
                 source_metadata={
                     "id": f"bdrc:{work_id}",
-                    "title": title_tag,
-                    "author": author_tag,
+                    "title": converter.toUnicode(title_tag.text),
+                    "author": converter.toUnicode(author_tag.text) if author_tag else "",
                 },
                 base=self.base_meta
         )
