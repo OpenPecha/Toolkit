@@ -4,8 +4,10 @@ from pathlib import Path
 
 import py
 import pytest
+from openpecha.formatters import google_ocr
 
-from openpecha.formatters import GoogleOCRFormatter
+from openpecha.formatters.google_ocr import GoogleOCRFormatter
+from openpecha.utils import load_yaml
 
 
 @pytest.fixture(scope="module")
@@ -51,3 +53,14 @@ def test_with_gzip_json():
         formatter = GoogleOCRFormatter(output_path=tmpdirname)
         pecha_path = formatter.create_opf(ocr_path, 1, meta_flag=False)
         assert isinstance(pecha_path, Path) and pecha_path.is_dir()
+
+
+def test_language_layer_formatter():
+    language_annotated_text = (Path(__file__).parent / "data" / "language_code_annotated_text.txt").read_text(encoding='utf-8')
+    expected_layer = load_yaml((Path(__file__).parent / "data" / "expected_language_layer.yml"))
+    google_ocr_formatter = GoogleOCRFormatter()
+    language_layer = google_ocr_formatter.format_language_layer(language_annotated_text)
+    for (_, expected_ann), (_, lang_ann) in zip(expected_layer['annotations'].items(), language_layer['annotations'].items()):
+        del expected_ann['id']
+        del lang_ann['id']
+        assert expected_ann == lang_ann

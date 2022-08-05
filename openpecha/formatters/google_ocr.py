@@ -442,8 +442,8 @@ class GoogleOCRFormatter(BaseFormatter):
                         else:
                             if cur_annotated_chunk:
                                 new_text += f"{cur_annotated_chunk}Ç{cur_language_code}Ç§"
-                                cur_annotated_chunk = ""
-                                cur_language_code = ""
+                                cur_annotated_chunk = f"§{self.extract_text(chunk)}"
+                                cur_language_code = self.extract_language_code(chunk)
                             else:
                                 cur_annotated_chunk = f"§{self.extract_text(chunk)}"
                                 cur_language_code = self.extract_language_code(chunk)
@@ -785,7 +785,6 @@ class GoogleOCRFormatter(BaseFormatter):
                 continue
             responses = self.get_input(vol_path)
             layers = self.build_layers(responses, vol_path.name, base_id)
-            Path('./language_code.txt').write_text(layers['language_code_annotated_text'], encoding='utf-8')
             formatted_layers = self.format_layer(layers, base_id)
             base_text = self.get_base_text()
 
