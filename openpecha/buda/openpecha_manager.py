@@ -13,9 +13,8 @@ from pathlib import Path
 import requests
 from tqdm import tqdm
 
-from openpecha.buda.errors import Error
 from openpecha.buda.openpecha_git import OpenpechaGit
-from openpecha.serializers.rdf import Rdf
+from openpecha.serializers.rdf import BUDARDFSerializer
 
 
 class OpenpechaManager:
@@ -43,8 +42,7 @@ class OpenpechaManager:
             ]  # find the README to get its URL
             return tree_entry["url"]
         except IndexError:
-            Error(
-                IndexError,
+            logging.error(
                 f"The README.md file not found at the root of the openpecha git\n```{traceback.format_exc()}```",
             )
 
@@ -156,7 +154,7 @@ class OpenpechaManager:
             reader = csv.reader(codecs.iterdecode(r.iter_lines(), "utf-8"))
             for row in reader:
                 if not row[0].startswith("http://purl.bdrc.io/resource/IE0OP"):
-                    Error("store", "cannot interpret csv line starting with " + row[0])
+                    logging.error("cannot interpret csv line starting with " + row[0])
                     continue
                 res[row[0][34:]] = row[1]
         return res
@@ -203,9 +201,9 @@ class OpenpechaManager:
                 and sc != requests.codes.created
                 and sc != requests.codes.accepted
             ):
-                Error("store", "The request to Fuseki returned code " + str(r.status_code) + " for " + graphuri)
+                logging.error("The request to Fuseki returned code " + str(r.status_code) + " for " + graphuri)
         except:
-            Error("store", "The request to Fuseki had an exception for " + graphuri)
+            logging.error("The request to Fuseki had an exception for " + graphuri)
         
         
 
@@ -243,7 +241,7 @@ class OpenpechaManager:
                 if not op.is_ocr():
                     logging.info("skipping %s, not ocr", oplname)
                     continue
-                rdf = Rdf(oplname, op)
+                rdf = BUDARDFSerializer(oplname, op)
                 rdfgraph = rdf.get_graph()
                 self.send_model_to_store(rdfgraph, str(rdf.graph_r), storeurl)
                 # self.write_model_debug(rdfgraph, str(rdf.graph_r))

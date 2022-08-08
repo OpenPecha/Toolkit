@@ -92,6 +92,9 @@ def load_yaml(fn: Path) -> None:
     return yaml.load(fn.open(encoding="utf-8"), Loader=yaml.CSafeLoader)
 
 
+def load_yaml_str(s: str) -> None:
+    return yaml.load(s, Loader=yaml.CSafeLoader)
+
 def _eval_branch(repo, branch):
     """return default branch as fallback branch."""
     if branch in repo.refs or f"origin/{branch}" in repo.refs:

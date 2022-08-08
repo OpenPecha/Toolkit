@@ -1,22 +1,34 @@
 import re
 from pathlib import Path
-
-from openpecha.buda.op_bare import OpenpechaBare
-from openpecha.buda.op_fs import OpenpechaFS
+import rdflib
+from rdflib import BNode, Literal, URIRef
+from rdflib.namespace import OWL, RDF, RDFS, SKOS, XSD, Namespace, NamespaceManager
 from openpecha.buda.tibetan_easy_chunker import TibetanEasyChunker
-from openpecha.serializers.rdf_setup import *
 
+rdf = RDF
+rdfs = RDFS
+bdr = Namespace("http://purl.bdrc.io/resource/")
+bdo = Namespace("http://purl.bdrc.io/ontology/core/")
+bdg = Namespace("http://purl.bdrc.io/graph/")
+bda = Namespace("http://purl.bdrc.io/admindata/")
+adm = Namespace("http://purl.bdrc.io/ontology/admin/")
 
-class Rdf:
+nsm = NamespaceManager(rdflib.Graph())
+nsm.bind("bdr", bdr)
+nsm.bind("", bdo)
+nsm.bind("bdg", bdg)
+nsm.bind("bda", bda)
+nsm.bind("adm", adm)
+nsm.bind("rdf", rdf)
+nsm.bind("rdfs", rdfs)
+
+class BUDARDFSerializer:
     """
-    TODO:
-    - rename in BUDARDFSerializer
-    - initialize with an OpenPecha instead of a path
     """
 
-    def __init__(self, oplname, openpecha):
-        self.oplname = oplname
-        self.lname = f"IE0OP{self.oplname}"
+    def __init__(self, _pecha_id, openpecha):
+        self._pecha_id = _pecha_id
+        self.lname = f"IE0OP{self._pecha_id}"
         self.graph_r = bdg[self.lname]
         self.lod_ds = rdflib.Dataset()
         self.lod_g = self.lod_ds.graph(self.graph_r)
@@ -137,7 +149,7 @@ class Rdf:
             subject,
             rdfs.seeAlso,
             Literal(
-                f"https://github.com/OpenPecha/{self.oplname}/", datatype=XSD.anyURI
+                f"https://github.com/OpenPecha/{self._pecha_id}/", datatype=XSD.anyURI
             ),
         )
         self.set_etext_pages(volume_name)

@@ -4,16 +4,26 @@ import warnings
 from collections import defaultdict
 from pathlib import Path
 from typing import Dict, List, Union
+from git import Repo
 
 from openpecha import blupdate, config
 from openpecha.core import ids
 from openpecha.core.annotations import BaseAnnotation, Span
 from openpecha.core.layer import Layer, LayerEnum, PechaMetadata, SpanINFO
 from openpecha.storages import GithubStorage, Storage
-from openpecha.utils import download_pecha, dump_yaml, load_yaml
+from openpecha.utils import download_pecha, dump_yaml, load_yaml, load_yaml_str
 
 
 class OpenPecha:
+    """
+    The main abstract class representing an opf. The methods to implement are:
+    - read_meta_file()
+    - read_base_file(base_name)
+    - read_layers_file(base_name, layer_name)
+    - _read_components()
+    - read_index_file()
+    """
+
     def __init__(
         self,
         base: Dict[str, str] = None,
@@ -366,3 +376,73 @@ class OpenPechaFS(OpenPecha):
 
     def remove(self):
         self.storage.remove_dir_with_path(name=self.pecha_path)
+
+
+class OpenPechaBareGitRepo(OpenPecha):
+    """Class to represent opf pecha in a bare git repo on the file-system.
+    """
+
+    def __init__(
+        self, pecha_id: str = None, path: str = None, revision: str = "HEAD", repo=None, **kwargs
+    ):
+        super().__init__(**kwargs)
+        self._pecha_id = pecha_id
+        self.rev = revision
+        if repo is not None:
+            self.repo = repo
+        else:
+            self.repo = Repo(path)
+
+    def read_file_content(self, oppath):
+        return self.repo.git.show(f"{self.rev}:{self._pecha_id}.opf/" + oppath)
+
+    def read_file_content_yml(self, oppath):
+        ymlstr = self.repo.git.show(f"{self.rev}:{self._pecha_id}.opf/" + oppath)
+        return load_yaml_str(ymlstr)
+
+    def _list_paths(self):
+        """
+        Getting all the files in the bare repo
+        """
+        files = self.repo.git.ls_tree(r=self.rev).split("\n")
+        # removing the xxx.opf at the beginning
+        files = [file.split("\t")[-1] for file in files]
+        files = [
+            file[len(self._pecha_id) + 5 :]
+            for file in files
+            if file.startswith(self.lname + ".")
+            and (file.endswith(".txt") or file.endswith(".yml"))
+        ]
+        return files
+
+    def _read_components(self):
+        """
+        get all bases and layers
+        """
+        paths = self._list_paths()
+        res = {}
+
+        for f in sorted(paths):
+            path = f.split("/")
+            if len(path) > 1:
+                basename = path[-2]
+                layername = pathlib.Path(path[-1]).stem
+                if basename not in res:
+                    res[basename] = []
+                res[basename].append(layername)
+        return res
+
+    def read_base_file(self, base_name: str) -> str:
+        return self.read_file_content("base/" + base_name + ".txt")
+
+    def read_layers_file(
+        self, base_name: str, layer_name: LayerEnum
+    ) -> Union[Dict, None]:
+        return self.read_file_content_yml("layers/" + base_name + "/" + layer_name + ".yml")
+
+    def read_meta_file(self) -> Dict:
+        return self.read_file_content_yml("meta.yml")
+
+    def read_index_file(self) -> Dict:
+        return self.read_file_content_yml("index.yml")
+
