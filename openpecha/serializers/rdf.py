@@ -4,6 +4,7 @@ import rdflib
 from rdflib import BNode, Literal, URIRef
 from rdflib.namespace import OWL, RDF, RDFS, SKOS, XSD, Namespace, NamespaceManager
 from openpecha.buda.tibetan_easy_chunker import TibetanEasyChunker
+from openpecha.core.layer import Layer, LayerEnum, PechaMetadata, SpanINFO
 
 rdf = RDF
 rdfs = RDFS
@@ -26,27 +27,32 @@ class BUDARDFSerializer:
     """
     """
 
-    def __init__(self, _pecha_id, openpecha):
-        self._pecha_id = _pecha_id
+    def __init__(self, openpecha):
+        self.openpecha = openpecha
+        self._pecha_id = openpecha.meta.id
         self.lname = f"IE0OP{self._pecha_id}"
         self.graph_r = bdg[self.lname]
         self.lod_ds = rdflib.Dataset()
         self.lod_g = self.lod_ds.graph(self.graph_r)
         self.lod_g.namespace_manager = nsm
-        self.openpecha = openpecha
         self.bl_volinfo = None
 
     def add_triple(self, rdf_subject, rdf_predicate, rdf_object):
         self.lod_g.add((rdf_subject, rdf_predicate, rdf_object))
 
-    def get_graph(self):
+    # implementation of the API of Serialize
+    def apply_layers(self):
         self.set_instance()
+
+    def get_result(self):
         return self.lod_g
 
     def get_bl_volinfo(self):
         if self.bl_volinfo is not None:
             return self.bl_volinfo
-        meta = self.openpecha.get_meta()
+        bases = self.openpecha.meta.bases
+        for base, binfo in bases.items():
+
         if meta is None or "source_metadata" not in meta or "volumes" not in meta["source_metadata"]:
             self.bl_volinfo = {}
             return {}
@@ -64,52 +70,77 @@ class BUDARDFSerializer:
 
     def set_instance(self):
         self.add_triple(bdr[f"{self.lname}"], rdf.type, bdo["EtextInstance"])
-        meta = self.openpecha.get_meta()
-        if "source_metadata" in meta:
-            sour = meta["source_metadata"]["id"].split(":")
-            if sour[0] == "bdr":
+        meta = self.openpecha.meta
+        sm = meta.source_metadata
+        if sm is not None:
+            scanlname = sm["id"]
+            if scanlname.startswith("bdr:"):
+                scanlname = scanlname[4:]
+            elif scanuri.startswith("http://purl.bdrc.io/resource/"):
+                scanlname = scanlname[29:]
+            self.add_triple(
+                bdr[self.lname], bdo["instanceReproductionOf"], bdr[scanlname]
+            )
+            self.add_triple(
+                bdr[scanlname], bdo["instanceHasReproduction"], bdr[self.lname]
+            )
+        if meta.initial_creation_type == "ocr":
+            self.add_triple(
+                bdr[self.lname], bdo["contentMethod"], bdr['ContentMethod_OCR']
+            )
+        if meta.statistics is not None:
+            if "ocr_word_median_confidence_index" in meta.statistics:
                 self.add_triple(
-                    bdr[self.lname], bdo["instanceReproductionOf"], bdr["M" + sour[-1]]
+                    bdr[self.lname], bdo["OPFOCRWordMedianConfidenceIndex"], Literal(meta.statistics["ocr_word_median_confidence_index"], datatyle=XSD.float)
                 )
+            if "ocr_word_mean_confidence_index" in meta.statistics:
                 self.add_triple(
-                    bdr[self.lname], bdo["contentMethod"], bdr['ContentMethod_OCR']
+                    bdr[self.lname], bdo["OPFOCRWordMeanConfidenceIndex"], Literal(meta.statistics["ocr_word_mean_confidence_index"], datatyle=XSD.float)
                 )
-                self.add_triple(
-                    bdr["M" + sour[-1]], bdo["instanceHasReproduction"], bdr[self.lname]
-                )
-                self.add_triple(
-                    bdr[self.lname], bdo["instanceReproductionOf"], bdr[sour[-1]]
-                )
-                self.add_triple(
-                    bdr[sour[-1]], bdo["instanceHasReproduction"], bdr[self.lname]
-                )
+        if meta.legacy_id is not None and meta.legacy_id:
+            legacylname = f"IE0OP{self.legacy_id}"
+            self.add_triple(bdr[legacylname], rdf.type, bdo["EtextInstance"])
+            self.add_triple(bda[legacylname], rdf.type, adm["AdminData"])
+            self.add_triple(bda[legacylname], adm["adminAbout"], bdr[legacylname])
+            self.add_triple(bda[legacylname], adm["status"], bda['StatusWithdrawn'])
+            self.add_triple(bda[legacylname], adm["replaceWith"], bdr[self.lname])
+        if meta.ocr_import_info is not None:
+            oii = meta.ocr_import_info
+            if "source" in oii:
+                self.add_triple(bdr[legacylname], bdo["OPFOCRSource"], Literal(oii["source"]))
+            if "software" in oii:
+                self.add_triple(bdr[legacylname], bdo["OPFOCRSoftware"], Literal(oii["software"]))
+            if "batch" in oii:
+                self.add_triple(bdr[legacylname], bdo["OPFOCRBatch"], Literal(oii["batch"]))
+            if "ocr_info" in oii and "timestamp" in oii["ocr_info"]:
+                self.add_triple(bdr[legacylname], bdo["OPFOCRTimeStamp"], Literal(oii["ocr_info"]["timestamp"], XSD.dateTime))
         self.get_base_volumes()
         self.set_adm()
 
     def get_base_volumes(self):
-        for volume_name in self.openpecha.list_base():
-            volume_string = self.openpecha.get_base(volume_name)
+        for baselname, baseinfo in self.openpecha.meta.bases:
+            volume_string = self.openpecha.get_base(baselname)
             if len(volume_string) < 2:
                 continue
-            self.set_etext_asset(volume_name)
+            volume_number = 0
+            if "source_metadata" in baseinfo and "volume_number" in baseinfo["source_metadata"]:
+                volume_number = baseinfo["source_metadata"]["volume_number"]
+            elif "order" in baseinfo:
+                volume_number = baseinfo["order"]
+            else:
+                volume_number = int(re.search(r"\d+", baselname).group())
+            self.set_etext_asset(baselname, baseinfo, volume_number)
             self.add_triple(
                 bdr[self.lname],
                 bdo["instanceHasVolume"],
-                bdr[f"VL{self.lname}_{volume_name}"],
+                bdr[f"VL{self.lname}_{baselname}"],
             )
-            self.set_etext_ref(volume_name)
-            self.set_etext(volume_name)
+            self.set_etext_ref(baselname)
+            self.set_etext(baselname, baseinfo, volume_number)
 
-    def set_etext_asset(self, volume_name):
-        volume_basename = f"{self.lname}_{volume_name}"
-        volume_number = int(re.search(r"\d+", volume_name).group())
-        bl_volinfo = self.get_bl_volinfo()
-        if volume_name+".txt" in bl_volinfo:
-            vinfo = bl_volinfo[volume_name+".txt"]
-            if "volume_number" in vinfo:
-                volume_number = vinfo["volume_number"]
+    def set_etext_asset(self, baselname, baseinfo, volume_number):
+        volume_basename = f"{self.lname}_{baselname}"
         subject = bdr[f"VL{volume_basename}"]
-
         self.add_triple(subject, rdf.type, bdo["VolumeEtextAsset"])
         self.add_triple(subject, bdo["volumeHasEtext"], bdr[f"ER{volume_basename}"])
         self.add_triple(
@@ -117,34 +148,29 @@ class BUDARDFSerializer:
         )
         self.add_triple(subject, bdo["volumeOf"], bdr[f"{self.lname}"])
 
-    def set_etext_ref(self, volume_name):
-        volume_basename = f"{self.lname}_{volume_name}"
+    def set_etext_ref(self, baselname):
+        volume_basename = f"{self.lname}_{baselname}"
         subject = bdr[f"ER{volume_basename}"]
-
         self.add_triple(subject, rdf.type, bdo["EtextRef"])
         self.add_triple(subject, bdo["eTextResource"], bdr[f"UT{volume_basename}"])
         self.add_triple(subject, bdo["seqNum"], Literal(1, datatype=XSD.integer))
 
-    def set_etext(self, volume_name):
-        volume_basename = f"{self.lname}_{volume_name}"
-        volume_number = int(re.search(r"\d+", volume_name).group())
-        volume_ig = None
-        bl_volinfo = self.get_bl_volinfo()
-        if volume_name+".txt" in bl_volinfo:
-            vinfo = bl_volinfo[volume_name+".txt"]
-            if "volume_number" in vinfo:
-                volume_number = vinfo["volume_number"]
-            if "image_group_id" in vinfo:
-                volume_ig = bdr[vinfo["image_group_id"]]
+    def set_etext(self, baselname, baseinfo, volume_number):
+        volume_basename = f"{self.lname}_{baselname}"
+        volume_number = int(re.search(r"\d+", baselname).group())
+        if "source_metadata" in baseinfo and "image_group_id" in baseinfo["source_metadata"]:
+            iglname = baseinfo["source_metadata"]
+            if iglname.startswith("bdr:"):
+                iglname = iglname[4:]
+            elif iglname.startswith("http://purl.bdrc.io/resource/")
+                iglname = iglname[29:]
+            self.add_triple(subject, bdo["eTextForImageGroup"], bdr[iglname])
         subject = bdr[f"UT{volume_basename}"]
-
         self.add_triple(subject, rdf.type, bdo["Etext"])
         self.add_triple(subject, bdo["eTextInInstance"], bdr[self.lname])
         self.add_triple(
             subject, bdo["eTextIsVolume"], Literal(volume_number, datatype=XSD.integer)
         )
-        if volume_ig is not None:
-            self.add_triple(subject, bdo["eTextForImageGroup"], volume_ig)
         self.add_triple(
             subject,
             rdfs.seeAlso,
@@ -152,23 +178,15 @@ class BUDARDFSerializer:
                 f"https://github.com/OpenPecha/{self._pecha_id}/", datatype=XSD.anyURI
             ),
         )
-        self.set_etext_pages(volume_name)
-        self.set_etext_chunks(volume_name)
+        self.set_etext_pages(baselname)
+        self.set_etext_chunks(baselname)
 
-    def set_etext_pages(self, volume_name):
-        player = self.openpecha.get_layer(volume_name, "pagination")
+    def set_etext_pages(self, baselname):
+        player = self.openpecha.get_layer(baselname, LayerEnum.pagination)
         if player is None:
             return
-        if "pagination" in player:
-            player = player["pagination"]
-        if "annotations" not in player:
-            return
-        if isinstance(player["annotations"], dict):
-            for annotation_id, annotation in player["annotations"].items():
-                self.set_etext_page(annotation_id, annotation, volume_name)
-        elif isinstance(player["annotations"], list):
-            for annotation in player["annotations"]:
-                self.set_etext_page(annotation["id"], annotation, volume_name)
+        for annotation_id, annotation in player.annotations.items():
+            self.set_etext_page(annotation_id, annotation, baselname)
 
     def set_etext_page(self, annotation_id, annotation, volume_name):
         volume_basename = f"{self.lname}_{volume_name}"
@@ -236,8 +254,6 @@ class BUDARDFSerializer:
         self.add_triple(subject_r, adm["syncAgent"], bdr["SAOPT"])
         self.add_triple(subject_r, adm["metadataLegal"], bda["LD_BDRC_CC0"])
         self.add_triple(subject_r, adm["gitRevision"], Literal(rev))
-        self.add_triple(subject_r, adm["status"], bda["StatusReleased"])
-        self.add_triple(subject_r, adm["access"], bda["AccessOpen"])
 
     @staticmethod
     def get_chunk_index(string):
@@ -253,5 +269,3 @@ class BUDARDFSerializer:
     def print_rdf(self):
         print(self.lod_g.serialize(format="ttl").decode("utf-8"))
 
-    def rdf(self):
-        return self.lod_g
