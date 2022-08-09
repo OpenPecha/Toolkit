@@ -43,15 +43,19 @@ class LicenseType(Enum):
 
 class PechaMetadata(BaseModel):
     id: str = None
+    legacy_id: Optional[str] = None
+    ocr_import_info: Optional[Dict] = {}
+    default_language: str = None
     source: str = None
     source_file: str = None
     initial_creation_type: InitialCreationType
     imported: datetime = None
     last_modified: datetime = None
     parser: AnyHttpUrl = None
-    source_metadata: Optional[Dict] = {}  # place to dump any metadata from the source
+    source_metadata: Optional[Dict] = None  # place to dump any metadata from the source
     statistics: Dict[str, Union[int, float, str]] = {}
     quality: Dict[str, Union[int, float]] = {}
+    base: Dict[str, Dict] = {}
     copyright: Copyright = None
     license: LicenseType = None
 

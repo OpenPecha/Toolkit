@@ -1,7 +1,7 @@
 """Module contains all the Annotations classes
 """
 
-from typing import Dict
+from typing import Dict, Optional
 
 from pydantic import BaseModel, Extra, Field, validator
 
@@ -11,7 +11,7 @@ from .ids import get_uuid
 class Span(BaseModel):
     start: int = Field(..., ge=0)
     end: int = Field(..., ge=0)
-    errors: Dict = {}
+    errors: Optional[Dict] = None
 
     @validator("start", "end")
     def span_must_not_be_neg(cls, v):
@@ -33,7 +33,7 @@ class Span(BaseModel):
 class BaseAnnotation(BaseModel):
     id: str = None
     span: Span
-    metadata: Dict = {}
+    metadata: Optional[Dict] = None
 
     @validator("id", pre=True, always=True)
     def set_id(cls, v):
@@ -50,6 +50,10 @@ class Pagination(BaseAnnotation):
     reference: str = Field(
         None, description="can be url or just string indentifier of source page"
     )
+
+
+class Language(BaseAnnotation):
+    language: str = Field(None, description="BCP-47 tag of the language")
 
 
 class Citation(BaseAnnotation):

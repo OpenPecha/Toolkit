@@ -23,6 +23,7 @@ class LayerEnum(Enum):
     sub_topic = "SubText"
 
     pagination = "Pagination"
+    language = "Language"
     citation = "Citation"
     correction = "Correction"
     error_candidate = "ErrorCandidate"
@@ -56,6 +57,8 @@ def _get_annotation_class(layer_name: LayerEnum):
         return BaseAnnotation
     elif layer_name == LayerEnum.pagination:
         return Pagination
+    elif layer_name == LayerEnum.language:
+        return Language
     elif layer_name == LayerEnum.citation:
         return Citation
     elif layer_name == LayerEnum.correction:

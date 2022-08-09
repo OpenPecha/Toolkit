@@ -26,7 +26,7 @@ class Span(BaseModel):
 
 class AnnBase(BaseModel):
     span: Span
-    metadata: Dict = {}
+    metadata: Optional[Dict] = None
 
 
 class Page(AnnBase):
