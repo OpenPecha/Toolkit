@@ -2,7 +2,7 @@
 
 ## Why OpenPecha?
 
-Digital text is quickly becoming essential to modern daily life. The article you’re reading right now is born digital; unlike texts of the not-so-distant past, it may never be printed at all. Worldwide, the trend is clear: Digital text is on the way in, and print is on its way out. Year-by-year, more and more readers are turning to ebooks, internet news, and other forms of ereading, while generation-by-generation, print is becoming less and less relevant.
+**Digital text** is quickly becoming essential to modern daily life. The article you’re reading right now is born digital; unlike texts of the not-so-distant past, it may never be printed at all. Worldwide, the trend is clear: Digital text is on the way in, and print is on its way out. Year-by-year, more and more readers are turning to ebooks, internet news, and other forms of ereading, while generation-by-generation, print is becoming less and less relevant.
 
 These trends aren’t unique to English—to meet the demands and expectations of today’s readers, Tibetan texts, too, are being digitized by many organizations and institutions with a shared appreciation for the Tibetan literary heritage. They include a variety of secular publishers, monastic institutions, and Buddhist foundations, among others. But while these organizations share common goals for common texts, their work is all too frequently completely disconnected from the community at large.
 
