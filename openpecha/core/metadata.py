@@ -55,7 +55,7 @@ class PechaMetadata(BaseModel):
     source_metadata: Optional[Dict] = None  # place to dump any metadata from the source
     statistics: Dict[str, Union[int, float, str]] = {}
     quality: Dict[str, Union[int, float]] = {}
-    base: Dict[str, Dict] = {}
+    bases: Dict[str, Dict] = {}
     copyright: Copyright = None
     license: LicenseType = None
 
