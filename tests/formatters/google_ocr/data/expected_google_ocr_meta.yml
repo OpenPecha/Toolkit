@@ -5,29 +5,40 @@ initial_creation_type: ocr
 imported: '2022-07-25T05:23:11.536026+00:00'
 last_modified: '2022-07-25T05:23:11.536566+00:00'
 parser: null
+ocr_word_median_confidence_index: 0.9599999785423279
+ocr_word_mean_confidence_index: 0.8787125467915051
 source_metadata:
   id: bdr:W24767
   title: ལམ་འབྲས་གཞུང་རྡོ་རྗེའི་ཚིག་རྐང་གི་རྣམ་འགྲེལ་བཅུ་གཅིག
   author: ''
-  base:
-    C1C6:
+base:
+  C1C6:
+    source_metadata:
       image_group_id: I3852
       title: ''
       total_pages: 542
-      order: 1
-      base_file: C1C6.txt
-    FA25:
+    order: 1
+    base_file: C1C6.txt
+    ocr_word_median_confidence_index: 0.949999988079071
+    ocr_word_mean_confidence_index: 0.8530664433815613
+  FA25:
+    source_metadata:
       image_group_id: I3853
       title: ''
       total_pages: 504
-      order: 2
-      base_file: FA25.txt
-    2A33:
+    order: 2
+    base_file: FA25.txt
+    ocr_word_median_confidence_index: 0.9700000286102295
+    ocr_word_mean_confidence_index: 0.883611589289402
+  2A33:
+    source_metadata:
       image_group_id: I3854
       title: ''
       total_pages: 502
-      order: 3
-      base_file: 2A33.txt
+    order: 3
+    base_file: 2A33.txt
+    ocr_word_median_confidence_index: 0.9599999785423279
+    ocr_word_mean_confidence_index: 0.8787125467915051
 statistics: {}
 quality: {}
 copyright:
