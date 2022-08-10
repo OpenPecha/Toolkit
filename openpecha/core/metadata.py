@@ -76,6 +76,7 @@ class PechaMetadata(BaseModel):
 
 class InitialPechaMetadata(PechaMetadata):
     ocr_word_median_confidence_index: float = None
+    ocr_word_mean_confidence_index: float = None
     base: Optional[Dict] = {}
 
     @validator("id", pre=True, always=True)
