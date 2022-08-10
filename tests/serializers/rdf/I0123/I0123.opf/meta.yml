@@ -12,7 +12,7 @@ source_metadata:
   author: ''
   access: http://purl.bdrc.io/admindata/AccessOpen
   restrictedInChina: true
-base:
+bases:
   9C26:
     base_file: 9C26.txt
     legacy_id: v001
