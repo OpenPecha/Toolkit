@@ -1,0 +1,544 @@
+@prefix : <http://purl.bdrc.io/ontology/core/> .
+@prefix adm: <http://purl.bdrc.io/ontology/admin/> .
+@prefix bda: <http://purl.bdrc.io/admindata/> .
+@prefix bdg: <http://purl.bdrc.io/graph/> .
+@prefix bdr: <http://purl.bdrc.io/resource/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+bda:IE0OPI0123 a adm:AdminData ;
+    adm:adminAbout bdr:IE0OPI0123 ;
+    adm:graphId bdg:IE0OPI0123 ;
+    adm:metadataLegal bda:LD_BDRC_CC0 ;
+    adm:syncAgent bdr:SAOPT .
+
+bda:IE0OPP1234 a adm:AdminData ;
+    adm:adminAbout bdr:IE0OPP1234 ;
+    adm:replaceWith bdr:IE0OPI0123 ;
+    adm:status bda:StatusWithdrawn .
+
+bdr:EP00d3077d048946bdbc76d3a7d0c38338 a :EtextPage ;
+    :seqNum 16 ;
+    :sliceEndChar 8411 ;
+    :sliceStartChar 7712 .
+
+bdr:EP123aeb24782a4b01881a20f6a8b74092 a :EtextPage ;
+    :seqNum 19 ;
+    :sliceEndChar 10500 ;
+    :sliceStartChar 9805 .
+
+bdr:EP322dbee990f048d686508c67e21d0faf a :EtextPage ;
+    :seqNum 5 ;
+    :sliceEndChar 1510 ;
+    :sliceStartChar 1259 .
+
+bdr:EP44c8aeb5246b44afb279e570178c2748 a :EtextPage ;
+    :seqNum 20 ;
+    :sliceEndChar 11221 ;
+    :sliceStartChar 10505 .
+
+bdr:EP46ea5f2a75d440deaafd008d0c05c4ad a :EtextPage ;
+    :seqNum 17 ;
+    :sliceEndChar 9106 ;
+    :sliceStartChar 8416 .
+
+bdr:EP60275d354f474436bf12dc7aac8b4266 a :EtextPage ;
+    :seqNum 21 ;
+    :sliceEndChar 11564 ;
+    :sliceStartChar 11226 .
+
+bdr:EP6933009a4f584bb4bae9babe268c55cf a :EtextPage ;
+    :seqNum 13 ;
+    :sliceEndChar 6712 ;
+    :sliceStartChar 5984 .
+
+bdr:EP6ce5f61339ec491eb638b5a92d7a88ce a :EtextPage ;
+    :seqNum 3 ;
+    :sliceEndChar 1171 ;
+    :sliceStartChar 634 .
+
+bdr:EP73fdbcbb901e4ae7afa5a1f58ac905d5 a :EtextPage ;
+    :seqNum 7 ;
+    :sliceEndChar 2370 ;
+    :sliceStartChar 1625 .
+
+bdr:EP81a6c8d478834c8c994189ef50e8865a a :EtextPage ;
+    :seqNum 1 ;
+    :sliceEndChar 629 ;
+    :sliceStartChar 0 .
+
+bdr:EP8d3913324a85425993eef2ef602a22ee a :EtextPage ;
+    :seqNum 10 ;
+    :sliceEndChar 4583 ;
+    :sliceStartChar 3799 .
+
+bdr:EP93a546cd0b1b49b99a10ffddc897b46f a :EtextPage ;
+    :seqNum 14 ;
+    :sliceEndChar 6969 ;
+    :sliceStartChar 6717 .
+
+bdr:EPaa2bb9626f2b4eb38cd5de628b265314 a :EtextPage ;
+    :seqNum 4 ;
+    :sliceEndChar 1254 ;
+    :sliceStartChar 1176 .
+
+bdr:EPb158e8cc4d024437a6f9fa76002e0367 a :EtextPage ;
+    :seqNum 18 ;
+    :sliceEndChar 9800 ;
+    :sliceStartChar 9111 .
+
+bdr:EPbfac140dae5b4c83b11687d167bcb82a a :EtextPage ;
+    :seqNum 8 ;
+    :sliceEndChar 3116 ;
+    :sliceStartChar 2375 .
+
+bdr:EPc2fc7164ae0445b8b132fff52331a7f5 a :EtextPage ;
+    :seqNum 11 ;
+    :sliceEndChar 5258 ;
+    :sliceStartChar 4588 .
+
+bdr:EPca55d6fac8b648a4ad8e4127f4be527b a :EtextPage ;
+    :seqNum 12 ;
+    :sliceEndChar 5979 ;
+    :sliceStartChar 5263 .
+
+bdr:EPd4b79ce508324b36b86fec260a0be205 a :EtextPage ;
+    :seqNum 6 ;
+    :sliceEndChar 1620 ;
+    :sliceStartChar 1515 .
+
+bdr:EPde82be47e5ef4173b34768eaddb65089 a :EtextPage ;
+    :seqNum 22 ;
+    :sliceEndChar 11581 ;
+    :sliceStartChar 11569 .
+
+bdr:EPe4eea3d637714980836efc0bb73b6422 a :EtextPage ;
+    :seqNum 9 ;
+    :sliceEndChar 3794 ;
+    :sliceStartChar 3121 .
+
+bdr:EPec398aa83ce2495da5dd83d50beb5705 a :EtextPage ;
+    :seqNum 15 ;
+    :sliceEndChar 7707 ;
+    :sliceStartChar 6974 .
+
+bdr:ERIE0OPI0123_9C26 a :EtextRef ;
+    :eTextResource bdr:UTIE0OPI0123_9C26 ;
+    :seqNum 1 .
+
+bdr:IE0OPP1234 a :EtextInstance ;
+    :OPFOCRBatch "batch_2022" ;
+    :OPFOCRSoftware "google_books" ;
+    :OPFOCRSource "bdrc" ;
+    :OPFOCRTimeStamp "1977-04-22T06:00:00"^^xsd:dateTime .
+
+bdr:UTIE0OPI0123_9C26 a :Etext ;
+    :eTextForImageGroup bdr:I1KG16930 ;
+    :eTextHasChunk bdr:UTIE0OPI0123_9C26_00000,
+        bdr:UTIE0OPI0123_9C26_00002,
+        bdr:UTIE0OPI0123_9C26_00003,
+        bdr:UTIE0OPI0123_9C26_00004,
+        bdr:UTIE0OPI0123_9C26_00005 ;
+    :eTextHasPage bdr:EP00d3077d048946bdbc76d3a7d0c38338,
+        bdr:EP123aeb24782a4b01881a20f6a8b74092,
+        bdr:EP322dbee990f048d686508c67e21d0faf,
+        bdr:EP44c8aeb5246b44afb279e570178c2748,
+        bdr:EP46ea5f2a75d440deaafd008d0c05c4ad,
+        bdr:EP60275d354f474436bf12dc7aac8b4266,
+        bdr:EP6933009a4f584bb4bae9babe268c55cf,
+        bdr:EP6ce5f61339ec491eb638b5a92d7a88ce,
+        bdr:EP73fdbcbb901e4ae7afa5a1f58ac905d5,
+        bdr:EP81a6c8d478834c8c994189ef50e8865a,
+        bdr:EP8d3913324a85425993eef2ef602a22ee,
+        bdr:EP93a546cd0b1b49b99a10ffddc897b46f,
+        bdr:EPaa2bb9626f2b4eb38cd5de628b265314,
+        bdr:EPb158e8cc4d024437a6f9fa76002e0367,
+        bdr:EPbfac140dae5b4c83b11687d167bcb82a,
+        bdr:EPc2fc7164ae0445b8b132fff52331a7f5,
+        bdr:EPca55d6fac8b648a4ad8e4127f4be527b,
+        bdr:EPd4b79ce508324b36b86fec260a0be205,
+        bdr:EPde82be47e5ef4173b34768eaddb65089,
+        bdr:EPe4eea3d637714980836efc0bb73b6422,
+        bdr:EPec398aa83ce2495da5dd83d50beb5705 ;
+    :eTextInInstance bdr:IE0OPI0123 ;
+    :eTextIsVolume 9 ;
+    rdfs:seeAlso "https://github.com/OpenPecha/I0123/"^^xsd:anyURI .
+
+bdr:UTIE0OPI0123_9C26_00000 a :EtextChunk ;
+    :chunkContents """༄༅།།བོད་ཀྱི་ནང་བསྟན་དཔེ་ཚོགས་ལྟེ་གནས།།
+Tibetan Buddhist Resource Center
+Text Scan Input Form - Title Page
+Work:
+ImageGroup:
+W4CZ1042
+n/a
+11PD108817
+n/a
+LCCN:
+ISBN:
+Title:
+གཏེར་ཆོས། ་རྩ་གསུམ་གླིང་པ།
+gt"""@en ;
+    :sliceEndChar 200 ;
+    :sliceStartChar 0 .
+
+bdr:UTIE0OPI0123_9C26_00002 a :EtextChunk ;
+    :chunkContents """er chos/_rtsa gsum gling pa/
+རྩ་གསུམ་གཏེར་བདག་གླིང་པ་
+Author:
+rtsa gsum gter bdag gling pa
+n/a
+Descriptor:
+Original Publication:
+n/a;n/a
+Place:
+pharphing; kathmandu, nepal
+Publisher:
+bka' gter sri zhu e waM dpe skrun khang
+2002-2010
+Date:
+Volume:
+33
+ILI
+Total Volumes:
+TBRC Pages:
+Introductory Pages:
+Text Pages:
+Scanning Information:
+n/a
+Scanned at Tibetan Buddhist Resource Center, 150 West 17th St, New York City, NY
+10011, US.
+
+
+
+...
+-----
+---
+--
+-.-..-....
+.
+.
+.
+.....
+...
+..
+.
+-------
+...
+.
+.
+.
+.
+.
+.
+.
+.
+. .
+.
+.
+-
+.
+-
+. .
+-
+- -
+.
+-
+-
+.--.- ..
+... ... ...-.-
+-
+... -
+.. ...
+- --------
+-
+... ......-.
+-
+.. .. .
+-
+.
+-
+.
+--..
+.
+-
+....
+-
+.
+.
+. ..
+. .-
+...
+---.-
+-. ..-
+--
+-
+---.-.--.-
+.-
+.
+.-
+-.
+..
+. ..
+.
+...
+...
+.
+....
+---
+---
+--------
+-.
+-
+.
+.-
+...
+. .
+.
+.
+.
+. .
+.
+.
+.
+....
+.
+.
+.
+. .
+deasure to
+the Pre
+-
+-
+i
+7:)
+:)
+"
+'")
+Publishin
+.
+oral and
+--
+of the or
+surupes
+Omenas
+2:}
+}
+17.1
+.)
+...
+The Treasure Teachings of Narnchag
+Tsasum Lingpa
+Vol29
+---
+A
+.
+vyR
+- -.
+.
+were
+
+
+
+--
+---
+-
+-
+---
+-
+-
+--
+-
+అ
+నుమతులు అతను నన్ను న
+అను నేను
+న
+న
+న న
+న న న న న న న న
+
+
+
+མ
+སཾམཐd མས་མས་བས
+，
+༄༅། །པོད་ཉེར་དགུ་པ་སྤྲུལ་པའི་གཏེར་ཆེན་རྩ་གསུམ་གླིང་པའི་གསུང་ཐོར་བུའི་རིགས་དང་། ཕྱིས་
+བྱོན་རྣམས་ཀྱི་མཛད་པའི་གསུང་གི་ཆ་ཤས་ཟེགས་ཕྲན་ཇི་སྙེད་ཕྱོགས་གཅིག་ཏུ་བསྡུས་པ་བཞུགས་སོ།།
+. """@bo ;
+    :sliceEndChar 1450 ;
+    :sliceStartChar 200 .
+
+bdr:UTIE0OPI0123_9C26_00003 a :EtextChunk ;
+    :chunkContents """ཡ
+，
+ཐ24
+，
+| ]
+་
+་ ་
+，
+...……...
+…...…....
+.……
+.
+....
+…
+.…
+..……
+
+
+
+RE
+---
+-
+-
+-
+-
+-
+-
+------------
+--
+------....
+. ....--.
+கை
+'',
+பக
+.'
+' '
+'
+'- ' ' ' '
+'', " -"
+'!
+பற்பம்
+:
+
+
+
+| ལྷུ
+་
+༄༅། །སྤྲུལ་པའི་གཏེར་ཆེན་རྩ་གསུམ་གླིང་པའི་གསུང་ཐོར་བུའི་རིགས་དང་། གང་གི་ཐུགས་སྤྲུལ་གཉིས་པ་རིག་འཛིན་མི་འཇིགས་རྡོ་རྗེ་དང་། བཞི་པ་
+གསང་སྔགས་བསྟན་པའི་རྒྱལ་མཚན། སྐུ་སྤྲུལ་ལྔ་པ་ངེས་དོན་ཆོས་དབྱིངས་རང་གྲོལ་བཅས་དང་། ཆོས་བདག་སྒོ་སྤྲུལ་འཕགས་པ་རྒྱལ་མཚན་དང་ཕྱིས་བྱོན་པྲཉྫ་གྷོ་ཥ་སོགས་
+ཀྱི་མཛད་པའི་གསུང་གི་ཆ་ཤས་ཟེགས་ཕྲན་ཇི་སྙེད་ཕྱོགས་གཅིག་ཏུ་བསྡུས་ཏེ། འདིར་གནམ་ལྕགས་ཟབ་ཆོས་ཀྱི་ཆ་ཤས་སུ་བསྡུ་སྐྲུན་བྱས་པའི་ཐེམ་བྱང་འགོད་པ་ལ། ཀ༽ སྐུ་ -
+གསུམ་བླ་མའི་གསོལ་འདེབས་པུཎྜའི་ཕྲེང་བ་རྩ་གསུམ་གླིང་པས་མཛད་པ། 17 ཁ༽ ཧཱུྃ། འོག་མིན་ཞིང་དུ་ཀུན་བཟང་རྡོ་རྗེ་འཆང་རྩ་གླིང་གྱིས་མཛད་པ། 8-
+] ག༽ སྐུ་གསུམ་བླ་མའི་གསོལ་འདེབས་དག་སྣང་བརྒྱུད་པའི་གདུང་དབྱངས་རྩ་གླིང་གིས་མཛད་པ། 10-14 ང༽ ཨོ་རྒྱན་རྩ་གསུམ་གླིང་པའི་འཁྲུངས་རབས་གསོལ་
++
+----
+---
+ས་，-
+|
+སཾ་བ་ལ་ས་ ཆེ་བས་ཁས་མིtཨ་མམ
+，
+，，， ，，
+，
+，
+，，，
+
+
+
+2EhE
+བྱ
+19
+* f
+ཀྱིས
+ར:
+༢
+-
+，
+，
+གནམ་ལྕགས་ཐོར་བུའི་སྐོར།
+, འདེབས། 15-19 ཅ༽ ཨེ་མ། རྒྱལ་ཀུན་ངོ་བོ་ཀུན་བཟང་སྣང་རྩ་གསུམ་གླིང་པས་མཛད་པ། 20-22 ཆ༽ ཨོ་རྒྱན་རྩ་གསུམ་གླིང་པའི་ཞལ་གདམས་གསོལ་འདེབས་
+སྨོན་ལམ་ཉིད་ཀྱིས་མཛད་པ། 23-25 ཇ༽ རྩ་གསུམ་གླིང་པའི་གསོལ་འདེབས་ཁྱབ་བདག་འཁོར་ལོ་ཉིད་ཀྱིས་མཛད་པ། 26-27 ཉ༽ ཞབས་བརྟན་གསོལ་འདེབས་རྡོ་
+རྗེའི་ཁྲི་འཕང་རྩ་གླིང་གིས་མཛད་པ། 28-29 ཏ༽ སྨུག་པོ་ལྷ་བྲག་ལ་སོགས་དང་ཁྱད་པར་ཇོ་བོ་གཟེ་རྒྱལ་སོགས་གནས་ཀྱི་གསོལ་འདེབས་གཏེར་མ། 30-
+132 ཐ༽ གཏེར་ཆེན་རྩ་གསུམ་གླིང་པའི་རྒྱང་འབོད་ཨེ་མ་ཧོ། རྒྱལ་ཀུན་ངོ་བོ་ཉིད་ཀྱི་གནམ་ལྕགས་ཐུགས་སྤྲུལ་གཉིས་པ་མི་འཇིགས་རྡོ་རྗེས་གསུང་། 33-
+35 ད༽"""@bo ;
+    :sliceEndChar 2946 ;
+    :sliceStartChar 1450 .
+
+bdr:UTIE0OPI0123_9C26_00004 a :EtextChunk ;
+    :chunkContents """ བརྒྱུད་པའི་གསོལ་འདེབས་རིན་པོ་ཆེའི་མཆོད་སྡོང་མི་འཇིགས་གསུང་། 36-39 ན༽ བརྒྱུད་པའི་གསོལ་འདེབས་བསྡུས་པ་ཨེ་མ་ཧོ། སྲིད་གསུམ་སྐྱེ་དགུའི་
+，
+1，，
+t
+#
+༤:
+༡
+སུ་
+པ
+་་5
+ཞིག་ལ་
+འི་མཚོན་
+
+
+
+བ་
+ན
+༣
+，
+་ །
+ཙ་
+།མགོན་གྱུར་མི་འཇིགས་རྡོ་རྗེས་གསུང༌། 40-41 པ༽ རིག་འཛིན་མི་འཇིགས་རྡོ་རྗེའི་གསོལ་འདེབས་ཞལ་གསུང་མ། 42-
+43 ཕ༽ ཧི། རིགས་ཀུན་ཁྱབ་བདག་ཐེག་དགུའི་ཡང་རྩེ་མི་འཇིགས་རྡོ་རྗེས་མཛད་པ། 44-45 བ༽ ཨོ་རྒྱན་རྩ་གསུམ་གླིང་པའི་ཆེ་བ་དགུ་ལྡན་གྱི་གསོལ་འདེབས་སྒོ་
+ཨཆེན་སྤྲུལ་སྐུ་འཕགས་པ་རྒྱལ་མཚན་གསུང་། 46-49 མ༽ མི་འཇིགས་རྡོ་རྗེའི་ཞབས་བརྟན་ཨཱརྨ་དྷཱ་ཛའི་གསུང་། 50.51 ཙ༽ ཞབས་བརྟན་སྨོན་ལམ་ཨོཾ་སྭཱ་སྟི། རབ་
+འབྱམས་རྒྱལ་ཀུན་སྤྱི་གཟུགས་ཨཱརྱ་དྷ་ཛས་མཛད་པ། 52-55 ཚ༽ གནམ་ལྕགས་བླ་བརྒྱུད་ཀྱི་གསོལ་འདེབས་ཤེས་རབ་མཁྱེན་བརྩེས་མཛད་པ། 56-59 རྗེ༽ རྩ་གསུམ་
+གླིང་པའི་ཆོས་བདག་བཅས་པའི་གསོལ་འདེབས་རགས་བསྡུས་སུ་བཀོད་པ་འཆི་མེད་གྲུབ་པའི་དགའ་ཚལ་ཤེས་རབ་མཁྱེན་བརྩེས་གསུང་། 60-69 ཝ༽ བླ་ན་མེད་པའི་ཡང་
+:
+༢
+:
+་
+，，
+་ །
+L་: ，
+
+
+
+༢
+ཡིག :
+ནཙན༌
+1:
+་་་་་་་་་
+་
+་
+|
+གནམ་ལྕགས་ཐོར་བུའི་སྐོར།
+དག་པར་གྱུར་པའི་མཆོག་ཆེན་པོ། ཐུགས་ཀྱི་སྒྲུབ་པ་དཔལ་གསང་བ་འདུས་པ་བདེ་ཆེན་ལྷ་ཡི་དགའ་སྟོན་རྣམ་པར་རོལ་པ། 70-89 ན༽ རྩ་གསུམ་བླ་མ་སྒྲུབ་པའི་ལས་བྱང་
+ཡེ་ཤེས་སྙིང་པོ་རཱ་གའི་ཕྲེང་བ། 90-112 ཟ༽ བླ་མ་རྩ་བའི་སྒྲུབ་པ་ཡིད་བཞིན་ནོར་བུ། 113-140 འ༽ གནུབས་ལོའི་བརྒྱུད་འཛིན་ཀུན་གྱིས་བླ་མའི་རྣལ་འབྱོར་དགོས་
+འདོད་ལྷུག་སྩོལ་ཡིད་བཞིན་ནོར་མཆོག 141-154 ཡ༽ ཨོ་རྒྱན་རྩ་གསུམ་གླིང་པའི་སྐུ་ཕྲེང་ལྔ་པའི་བླ་སྒྲུབ་ཐུགས་རྗེའི་ཆར་རྒྱུན། 155-160 ༈ ཨོ་རྒྱན་རྩ་གསུམ་གླིང་
+པའི་སྐུ་སྤྲུལ་ལྔ་པ་ངེས་དོན་ཆོས་དབྱིངས་རང་གྲོལ་གྱི་གསུང་ཐོར་བུའི་སྐོར་ལ། ར༽ བླ་མ་བདེར་འདུས་ཐུགས་ཀྱི་ནོར་བུ་ལས། གསོལ་འདེབས་བྱིན་རླབས་ཆར་སྤྲིན། 161-
+162 ལ༽"""@bo ;
+    :sliceEndChar 4436 ;
+    :sliceStartChar 2946 .
+
+bdr:UTIE0OPI0123_9C26_00005 a :EtextChunk ;
+    :chunkContents """ བླ་མ་བདེར་འདུས་ཐུགས་ཀྱི་ནོར་བུ་ལས༔ གསང་སྒྲུབ་ལས་བྱང་སྙིང་གི་ཐིག་ལེ། 163-184 ཤ༽ བླ་མ་བདེར་འདུས་ཐུགས་ཀྱི་ནོར་བུ་ལས། གསང་སྒྲུབ་
+-
+-
+-
+:
+* :
+༄༅
+ཀ
+ཀ ས :
+
+
+
+༄༅། །ལས་བྱང་སྙིང་གི་ཐིག་ལེའི་བདུད་རྩི་ལག་མཆོད། 185-187 ས༽ བླ་མ་བདེར་འདུས་ཐུགས་ཀྱི་ནོར་བུ་ལས༔ བསྐང་བ་བསྡུས་པ་དྲི་མེད་ཤེལ་
+ཕྲེང་། 189-197 ཧེ༽ བླ་མ་བདེར་འདུས་ཐུགས་ཀྱི་ནོར་བུ་ལས༔ གསང་སྒྲུབ་ཚེ་ཡི་འཁོར་ལོ་ཡིད་བཞིན་ནོར་བུ། 198-211 ཨ༽ རྩ་བའི་བླ་མའི་བསང་རིག་འཛིན་
+ཨ ཀྵ ཨོ་རྒྱན་པདྨ་འབྱུང་གནས་མི་འཇིགས་རྡོ་རྗེས་མཛད་པ། 212-213 ཀི༽ རྩ་གསུམ་གླིང་པས་མཛད་པའི་མགོན་པོ་ཕྱག་བཞི་པའི་བསང་། 214-215 ཁུ༽ དཔལ་ལྡན་ལྷ་|
+མོའི་བསང་མཆོད་མི་འཇིགས་རྡོ་རྗེས་མཛད་པ། 215-216 ག༽ ཐུགས་སྤྲུལ་གསུམ་པ་གསང་སྔགས་བསྟན་པའི་རྒྱལ་མཚན་གྱིས་མཛད་པའི་དྲང་སྲོང་གཟའ་ཡི་བསང་
+| g|བསྡུས། 217-218 ངོ༽ གསང་བ་ཌཱཀྐི་ཡིད་བཞིན་ནོར་མཆོག་ལས། གཏེར་སྲུང་ལས་ཀྱི་མ་མོའི་བསང་མཆོད་ཡིད་བཞིན་གཏེར་འབྱུང་ཨཱཏྨ་དྷུ་ཛས་མཛད་པ། 219-
+དཀར་ ་ ་ གསུམ་"""@bo ;
+    :sliceEndChar 5259 ;
+    :sliceStartChar 4436 .
+
+bdr:VLIE0OPI0123_9C26 a :VolumeEtextAsset ;
+    :volumeHasEtext bdr:ERIE0OPI0123_9C26 ;
+    :volumeNumber 1 ;
+    :volumeOf bdr:IE0OPI0123 .
+
+bdr:W1KG16793 :instanceHasReproduction bdr:IE0OPI0123 .
+
+bdr:IE0OPI0123 a :EtextInstance ;
+    :OPFOCRWordMeanConfidenceIndex "0"^^xsd:float ;
+    :OPFOCRWordMedianConfidenceIndex "0"^^xsd:float ;
+    :instanceHasVolume bdr:VLIE0OPI0123_9C26 ;
+    :instanceReproductionOf bdr:W1KG16793 .

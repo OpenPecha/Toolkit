@@ -74,6 +74,8 @@ class BUDARDFSerializer:
             )
         if meta.statistics is not None:
             if "ocr_word_median_confidence_index" in meta.statistics:
+                print(meta.statistics["ocr_word_median_confidence_index"])
+                print(meta.statistics)
                 self.add_triple(
                     bdr[self.lname], bdo["OPFOCRWordMedianConfidenceIndex"], Literal(meta.statistics["ocr_word_median_confidence_index"], datatype=XSD.float)
                 )
@@ -200,22 +202,20 @@ class BUDARDFSerializer:
 
     def add_chunks(self, baselname, volume_string, language, previous_i = 0, start_cc=0, end_cc=-1):
         chunk_indexes = self.get_chunk_indexes(volume_string, language, start_cc, end_cc)
-        for i in range(0, len(chunk_indexes) - 2):
+        for i in range(0, len(chunk_indexes) - 1):
             self.set_etext_chunk(
                 previous_i + i, chunk_indexes[i], chunk_indexes[i + 1], baselname, volume_string, language
             )
-        return previous_i + len(chunk_indexes) - 2
+        return previous_i + len(chunk_indexes)
 
 
     def set_etext_chunks(self, baselname, baseinfo):
         volume_string = self.openpecha.get_base(baselname)
-        
         default_language = "bo"
         if "default_language" in baseinfo:
             default_language = baseinfo["default_language"]
         elif self.openpecha.meta.default_language is not None:
             default_language = self.openpecha.meta.default_language
-
         llayer = self.openpecha.get_layer(baselname, LayerEnum.language)
         if llayer is None:
             self.add_chunks(baselname, volume_string, default_language)
@@ -237,7 +237,6 @@ class BUDARDFSerializer:
         volume_basename = f"{self.lname}_{baselname}"
         etext = f"UT{volume_basename}"
         subject = bdr[f"UT{volume_basename}_{int(i):05}"]
-
         self.add_triple(subject, rdf.type, bdo["EtextChunk"])
         self.add_triple(
             subject,

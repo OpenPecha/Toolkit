@@ -26,48 +26,53 @@ class StringChunker:
                 if next_idx_before_target_len != -1:
                     return next_idx_before_target_len
                 return match.end()
-        return next_target
+        return next_idx_before_target_len if next_idx_before_target_len != -1 else -1
 
     def get_chunks(self):
         """
         Returns a list of indexes of the string cut up in chunks of a maximum of n length and cut up at the last
         instance of regex
         """
-        list_of_index = [0]
+        list_of_index = [self.start_cc]
         string = self.string
         index = self.start_cc
         while self.end_cc - index > self.target_len:
-            index = self.get_next_chunk_index(index)
+            found = self.get_next_chunk_index(index)
+            if found == -1:
+                found = self.string.rfind(" ", index, index+self.target_len)
+            if found == -1:
+                found = index+self.target_len
+            index = found
             list_of_index.append(index)
         if index != self.end_cc:
             list_of_index.append(self.end_cc)
         return list_of_index
 
 
-ENG_PATTERN = re.compile(r"\.")
+ENG_PATTERN = re.compile(r"\.\s")
 
 class EnglishEasyChunker(StringChunker):
-    def __init__(self, full_string, max_len, start_cc = 0, end_cc = 0):
+    def __init__(self, full_string, target_len, start_cc = 0, end_cc = 0):
         StringChunker.__init__(
             self,
             full_string,
             ENG_PATTERN,
-            max_len,
+            target_len,
             start_cc,
             end_cc
         )
 
 
-TIB_PATTERN = re.compile(r"([སའངགདནབམརལཏ]ོ།[^ཀ-ཬ]*|།།[^ཀ-ཬ༠-༩]*།[^ཀ-ཬ༠-༩]*)")
+TIB_PATTERN = re.compile(r"([སའངགདནབམརལཏ]ོ[་༌]?[།-༔][^ཀ-ཬ]*|(།།|[༎-༒])[^ཀ-ཬ༠-༩]*[།-༔][^ཀ-ཬ༠-༩]*)")
 
 
 class TibetanEasyChunker(StringChunker):
-    def __init__(self, full_string, max_len, start_cc = 0, end_cc = 0):
+    def __init__(self, full_string, target_len, start_cc = 0, end_cc = 0):
         StringChunker.__init__(
             self,
             full_string,
             TIB_PATTERN,
-            max_len,
+            target_len,
             start_cc,
             end_cc
         )

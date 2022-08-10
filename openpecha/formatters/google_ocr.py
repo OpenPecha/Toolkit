@@ -22,7 +22,7 @@ from openpecha.formatters import BaseFormatter
 from openpecha.utils import dump_yaml, gzip_str
 
 
-extended_LayerEnum = [(l.name, l.value) for l in LayerEnum] + [("low_conf_box", "LowConfBox")] + [("language", "Language")]
+extended_LayerEnum = [(l.name, l.value) for l in LayerEnum] + [("low_conf_box", "LowConfBox")]
 LayerEnum = Enum("LayerEnum", extended_LayerEnum)
 
 class ExtentedLayer(Layer):
@@ -119,7 +119,7 @@ class GoogleOCRFormatter(BaseFormatter):
             languages = properties.get("detectedLanguages", [])
             if languages:
                 for language in languages:
-                    if language_code := language.get("languageCode", ""):
+                    if language_code != language.get("languageCode", ""):
                         language_codes.append(language_code)
         return language_codes
     
