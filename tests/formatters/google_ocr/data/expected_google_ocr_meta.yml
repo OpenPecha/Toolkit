@@ -11,7 +11,8 @@ source_metadata:
   id: bdr:W24767
   title: ལམ་འབྲས་གཞུང་རྡོ་རྗེའི་ཚིག་རྐང་གི་རྣམ་འགྲེལ་བཅུ་གཅིག
   author: ''
-base:
+default_language: bo
+bases:
   C1C6:
     source_metadata:
       image_group_id: I3852

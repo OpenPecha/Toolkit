@@ -6,7 +6,7 @@ from openpecha.blupdate import *
 from openpecha.proofreading import update_index, get_old_layers, save_page, get_page
 
 def to_yaml(dict_):
-    return yaml.dump(dict_, sort_keys=False, allow_unicode=True, Dumper=yaml.CDumper)
+    return yaml.dump(dict_, sort_keys=False, allow_unicode=True)
 
 def test_update_index():
     vol_offset = 2

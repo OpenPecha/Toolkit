@@ -18,11 +18,16 @@ from openpecha.storages import GithubStorage, setup_auth_for_old_repo
 
 INFO = "[INFO] {}"
 
-# use yaml.CSafeLoader if available but don't crash if it isn't
+# use yaml.CSafeLoader / if available but don't crash if it isn't
 try:
     yaml_loader = yaml.CSafeLoader
 except (ImportError, AttributeError):
     yaml_loader = yaml.SafeLoader
+
+try:
+    yaml_dumper = yaml.CSafeDumper
+except (ImportError, AttributeError):
+    yaml_dumper = yaml.SafeDumper
 
 def gzip_str(string_):
     # taken from https://gist.github.com/Garrett-R/dc6f08fc1eab63f94d2cbb89cb61c33d
@@ -88,7 +93,7 @@ def dump_yaml(data: Dict, output_fn: Path) -> Path:
             default_flow_style=False,
             sort_keys=False,
             allow_unicode=True,
-            Dumper=yaml.CSafeDumper,
+            Dumper=yaml_dumper,
         )
     return output_fn
 

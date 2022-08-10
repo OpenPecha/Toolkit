@@ -1,6 +1,6 @@
 from pathlib import Path
 import rdflib
-from rdflib.compare import graph_diff
+from rdflib.compare import graph_diff, to_isomorphic
 
 from openpecha.serializers import BUDARDFSerializer
 from openpecha.core.pecha import OpenPechaFS
@@ -13,10 +13,11 @@ def test_buda_rdf_serializer():
     serializer = BUDARDFSerializer(op)
     serializer.apply_layers()
     results = serializer.get_result()
-    #print(results.serialize(format="ttl"))
+    print(results.serialize(format="ttl"))
     expected = rdflib.Graph().parse(str(expected_path), format="ttl")
-    print(graph_diff(results, expected)[1].serialize(format="ttl"))
-    assert results == expected
+    # to look at the differences:
+    #print(graph_diff(results, expected)[2].serialize(format="ttl"))
+    assert to_isomorphic(results) == to_isomorphic(expected)
 
 if __name__ == "__main__":
     test_buda_rdf_serializer()

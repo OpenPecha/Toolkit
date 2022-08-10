@@ -1,6 +1,8 @@
 import shutil
 import tempfile
 from pathlib import Path
+import os
+import shutil
 
 from openpecha.alignment.parsers.po import update_alignment_from_po
 from openpecha.utils import load_yaml
@@ -18,6 +20,14 @@ def get_span(segment):
         num += 1
     return final_span
 
+def copytree(src, dst):
+    for item in os.listdir(src):
+        s = os.path.join(src, item)
+        d = os.path.join(dst, item)
+        if os.path.isdir(s):
+            copytree(s, d)
+        else:
+            shutil.copy2(s, d)
 
 def test_update_alignment_from_po():
     po_path = Path("./tests/data/alignment/parsers/po/transifex_output.po")
@@ -27,7 +37,7 @@ def test_update_alignment_from_po():
     alignment_path = (
         Path(tempfile.gettempdir()) / "pechas" / "85b3e1c711244059a65911602f724a38"
     )
-    shutil.copytree(str(test_alignment_path), str(alignment_path), dirs_exist_ok=True)
+    copytree(str(test_alignment_path), str(alignment_path))
     target_pecha_path = update_alignment_from_po(po_path, alignment_path, publish=False)
     target_pecha_id = target_pecha_path.stem
     target_segment = load_yaml(

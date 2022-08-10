@@ -1,4 +1,5 @@
 import shutil
+import os
 from pathlib import Path
 
 import pytest
@@ -193,6 +194,16 @@ def is_index_same(result, expected):
                 )
 
 
+def copytree(src, dst):
+    for item in os.listdir(src):
+        s = os.path.join(src, item)
+        d = os.path.join(dst, item)
+        if os.path.isdir(s):
+            copytree(s, d)
+        else:
+            shutil.copy2(s, d)
+
+
 def test_update_index_layer():
     src_opf_path = data_path / "v1" / "v1.opf"
     dst_opf_path = data_path / "v1_base_edited" / "v1_base_edited.opf"
@@ -201,14 +212,9 @@ def test_update_index_layer():
 
     # edit v1 base
     dst_opf_path.mkdir(exist_ok=True, parents=True)
-    shutil.copytree(
-        str(src_opf_path / "layers"), str(dst_opf_path / "layers"), dirs_exist_ok=True
-    )
+    copytree(str(src_opf_path / "layers"), str(dst_opf_path / "layers"))
     shutil.copy(str(src_opf_path / "index.yml"), str(dst_opf_path / "index.yml"))
-    shutil.copytree(
-        str(expected_opf_path / "base"), str(dst_opf_path / "base"), dirs_exist_ok=True
-    )
-
+    copytree(str(expected_opf_path / "base"), str(dst_opf_path / "base"))
     pecha = PechaBaseUpdate(src_opf_path, dst_opf_path, base_mapping)
     pecha.update()
 

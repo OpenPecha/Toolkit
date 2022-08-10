@@ -126,11 +126,7 @@ bdr:ERIE0OPI0123_9C26 a :EtextRef ;
     :eTextResource bdr:UTIE0OPI0123_9C26 ;
     :seqNum 1 .
 
-bdr:IE0OPP1234 a :EtextInstance ;
-    :OPFOCRBatch "batch_2022" ;
-    :OPFOCRSoftware "google_books" ;
-    :OPFOCRSource "bdrc" ;
-    :OPFOCRTimeStamp "1977-04-22T06:00:00"^^xsd:dateTime .
+bdr:IE0OPP1234 a :EtextInstance .
 
 bdr:UTIE0OPI0123_9C26 a :Etext ;
     :eTextForImageGroup bdr:I1KG16930 ;
@@ -538,7 +534,11 @@ bdr:VLIE0OPI0123_9C26 a :VolumeEtextAsset ;
 bdr:W1KG16793 :instanceHasReproduction bdr:IE0OPI0123 .
 
 bdr:IE0OPI0123 a :EtextInstance ;
-    :OPFOCRWordMeanConfidenceIndex "0"^^xsd:float ;
-    :OPFOCRWordMedianConfidenceIndex "0"^^xsd:float ;
+    :OPFOCRBatch "batch_2022" ;
+    :OPFOCRSoftware "google_books" ;
+    :OPFOCRSource "bdrc" ;
+    :OPFOCRTimeStamp "1977-04-22T06:00:00"^^xsd:dateTime ;
+    :OPFOCRWordMeanConfidenceIndex "0.91"^^xsd:float ;
+    :OPFOCRWordMedianConfidenceIndex "0.9"^^xsd:float ;
     :instanceHasVolume bdr:VLIE0OPI0123_9C26 ;
     :instanceReproductionOf bdr:W1KG16793 .

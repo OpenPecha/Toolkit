@@ -14,7 +14,7 @@ from rdflib import Graph
 from rdflib.namespace import RDF, RDFS, SKOS, OWL, Namespace, NamespaceManager, XSD
 
 from openpecha.core.annotation import Page, Span
-from openpecha.core.annotations import BaseAnnotation
+from openpecha.core.annotations import BaseAnnotation, Language
 from openpecha.core.layer import Layer, LayerEnum
 from openpecha.core.ids import get_base_id
 from openpecha.core.metadata import InitialPechaMetadata, InitialCreationType
@@ -30,9 +30,6 @@ class ExtentedLayer(Layer):
 
 class LowConfBox(BaseAnnotation):
     confidence: str
-
-class Language(BaseAnnotation):
-    language_code: str
 
 class GoogleOCRFormatter(BaseFormatter):
     """
@@ -113,21 +110,16 @@ class GoogleOCRFormatter(BaseFormatter):
             return f"§{bounding_poly.get('text', '')}Ç{bounding_poly['confidence']}Ç§"
     
     def get_language_code(self, bounding_poly):
-        language_codes = []
-        properties = bounding_poly.get("property", {})
-        if properties:
-            languages = properties.get("detectedLanguages", [])
-            if languages:
-                for language in languages:
-                    if language_code != language.get("languageCode", ""):
-                        language_codes.append(language_code)
-        return language_codes
+        if "property" not in bounding_poly or "detectedLanguages" not in bounding_poly["property"]:
+            return None
+        # Google ocr proposes several languages, each with a confidence index
+        # we only take the first one
+        return bounding_poly["property"]["detectedLanguages"][0]["languageCode"]
     
     def get_language_code_ann(self, bounding_poly):
         text = bounding_poly.get("text", "")
-        language_codes = self.get_language_code(bounding_poly)
-        if language_codes:
-            language_code = "-".join(language_codes)
+        language_code = self.get_language_code(bounding_poly)
+        if language_code is not None:
             return f"§{text}Ç{language_code}Ç§"
         else:
             return text
@@ -478,12 +470,12 @@ class GoogleOCRFormatter(BaseFormatter):
         for chunk in chunks:
             if re.search("§.+?§", chunk):
                 start = len(base_text)
-                lanuage_code = self.extract_language_code(chunk)
+                language_code = self.extract_language_code(chunk)
                 base_text += re.search("§(.+?)Ç", chunk).group(1)
                 end = len(base_text)
                 span = Span(start=start, end=end)
                 uuid = self.get_unique_id()
-                language_ann = Language(span=span, language_code=lanuage_code)
+                language_ann = Language(span=span, language=language_code)
                 anns[uuid] = language_ann
             else:
                 base_text += chunk

@@ -26,7 +26,7 @@ class OpenPecha:
 
     def __init__(
         self,
-        base: Dict[str, str] = None,
+        bases: Dict[str, str] = None,
         layers: Dict[str, Dict[LayerEnum, Layer]] = None,
         index: Layer = None,
         meta: PechaMetadata = None,
@@ -35,7 +35,7 @@ class OpenPecha:
         components: Dict[str, List[Layer]] = None,
     ):
         self._pecha_id = None
-        self.base = base if base else {}
+        self.bases = bases if bases else {}
         self.layers = layers if layers else defaultdict(dict)
         self._meta = self.__handle_old_metadata_attr(meta, metadata)
         self._index = index
@@ -70,7 +70,7 @@ class OpenPecha:
         return ", ".join(source_metadata)
 
     def reset_base_and_layers(self):
-        self.base = {}
+        self.bases = {}
         self.layers = defaultdict(dict)
 
     @property
@@ -106,29 +106,29 @@ class OpenPecha:
 
     def _set_base_metadata(self, base_name: str, metadata: Dict) -> None:
         metadata.update({"base_file": f"{base_name}.txt"})
-        if "base" not in self.meta.source_metadata:
-            self.meta.source_metadata["base"] = {}
-        self.meta.source_metadata["base"][base_name] = metadata
+        if "bases" not in self.meta:
+            self.meta.bases = {}
+        self.meta.bases[base_name] = metadata
 
     def get_base(self, base_name: str) -> str:
-        if base_name in self.base:
-            return self.base[base_name]
-        self.base[base_name] = self.read_base_file(base_name)
-        return self.base[base_name]
+        if base_name in self.bases:
+            return self.bases[base_name]
+        self.bases[base_name] = self.read_base_file(base_name)
+        return self.bases[base_name]
 
     def get_base_metadata(self, base_name: str) -> str:
-        self.meta.source_metadata["base"].get(base_name)
+        self.meta.bases.get(base_name)
 
     def set_base(self, content: str, base_name: str = None, metadata: Dict = {}) -> str:
         """Create new base with `content` if `base_name` is not
         given otherwise overwrites it and return base_name.
         """
-        if base_name and base_name in self.base:
+        if base_name and base_name in self.bases:
             blupdate.update_single_base(self, base_name, content)
-            self.base[base_name] = content
+            self.bases[base_name] = content
         else:
             base_name = self._get_base_name()
-            self.base[base_name] = content
+            self.bases[base_name] = content
             self._set_base_metadata(base_name, metadata)
         return base_name
 
@@ -154,7 +154,7 @@ class OpenPecha:
         self.meta.update_last_modified_date()
 
     def set_layer(self, base_name: str, layer: Layer):
-        if base_name not in self.base:
+        if base_name not in self.bases:
             raise ValueError(f"set base for {base_name} first")
 
         self.layers[base_name][layer.annotation_type] = layer
@@ -301,12 +301,12 @@ class OpenPechaFS(OpenPecha):
 
     def save_single_base(self, base_name: str, content: str = None):
         if not content:
-            content = self.base[base_name]
+            content = self.bases[base_name]
         base_fn = self._mkdir(self.base_path) / f"{base_name}.txt"
         base_fn.write_text(content)
 
     def save_base(self):
-        for base_name, content in self.base.items():
+        for base_name, content in self.bases.items():
             self.save_single_base(base_name, content)
 
     def save_layer(self, base_name: str, layer_name: LayerEnum, layer: Layer):

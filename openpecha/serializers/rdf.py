@@ -74,8 +74,6 @@ class BUDARDFSerializer:
             )
         if meta.statistics is not None:
             if "ocr_word_median_confidence_index" in meta.statistics:
-                print(meta.statistics["ocr_word_median_confidence_index"])
-                print(meta.statistics)
                 self.add_triple(
                     bdr[self.lname], bdo["OPFOCRWordMedianConfidenceIndex"], Literal(meta.statistics["ocr_word_median_confidence_index"], datatype=XSD.float)
                 )
@@ -93,13 +91,13 @@ class BUDARDFSerializer:
         if meta.ocr_import_info is not None:
             oii = meta.ocr_import_info
             if "source" in oii:
-                self.add_triple(bdr[legacylname], bdo["OPFOCRSource"], Literal(oii["source"]))
+                self.add_triple(bdr[self.lname], bdo["OPFOCRSource"], Literal(oii["source"]))
             if "software" in oii:
-                self.add_triple(bdr[legacylname], bdo["OPFOCRSoftware"], Literal(oii["software"]))
+                self.add_triple(bdr[self.lname], bdo["OPFOCRSoftware"], Literal(oii["software"]))
             if "batch" in oii:
-                self.add_triple(bdr[legacylname], bdo["OPFOCRBatch"], Literal(oii["batch"]))
+                self.add_triple(bdr[self.lname], bdo["OPFOCRBatch"], Literal(oii["batch"]))
             if "ocr_info" in oii and "timestamp" in oii["ocr_info"]:
-                self.add_triple(bdr[legacylname], bdo["OPFOCRTimeStamp"], Literal(oii["ocr_info"]["timestamp"], datatype=XSD.dateTime))
+                self.add_triple(bdr[self.lname], bdo["OPFOCRTimeStamp"], Literal(oii["ocr_info"]["timestamp"], datatype=XSD.dateTime))
         self.get_base_volumes()
         self.set_adm()
 

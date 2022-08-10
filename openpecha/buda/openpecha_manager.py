@@ -13,7 +13,7 @@ from pathlib import Path
 import requests
 from tqdm import tqdm
 
-from openpecha.buda.openpecha_git import OpenpechaGit
+from openpecha.buda.openpecha_git import OpenpechaCachedGit
 from openpecha.serializers.rdf import BUDARDFSerializer
 
 

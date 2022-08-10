@@ -53,9 +53,9 @@ class PechaMetadata(BaseModel):
     last_modified: datetime = None
     parser: AnyHttpUrl = None
     source_metadata: Optional[Dict] = None  # place to dump any metadata from the source
-    statistics: Dict[str, Union[int, float, str]] = {}
-    quality: Dict[str, Union[int, float]] = {}
-    bases: Dict[str, Dict] = {}
+    statistics: Optional[Dict] = None
+    quality: Optional[Dict] = None
+    bases: Optional[Dict[str, Dict]] = {}
     copyright: Copyright = None
     license: LicenseType = None
 
@@ -81,7 +81,7 @@ class PechaMetadata(BaseModel):
 class InitialPechaMetadata(PechaMetadata):
     ocr_word_median_confidence_index: float = None
     ocr_word_mean_confidence_index: float = None
-    base: Optional[Dict] = {}
+    bases: Dict = {}
 
     @validator("id", pre=True, always=True)
     def set_id(cls, v):

@@ -22,7 +22,7 @@ def test_pechas_path():
 
 def test_create_pecha():
     openpecha = OpenPechaFS(
-        base={"v001": "this is base"},
+        bases={"v001": "this is base"},
         layers={
             "v001": {
                 LayerEnum.citation: Layer(
@@ -139,7 +139,7 @@ def test_set_base():
 
     base_name = pecha.set_base("base content")
 
-    assert pecha.base[base_name] == "base content"
+    assert pecha.bases[base_name] == "base content"
 
 
 def test_set_base_metadata():
@@ -149,11 +149,11 @@ def test_set_base_metadata():
 
     base_name = pecha.set_base("base content", metadata=base_metadata)
 
-    assert base_name in pecha.meta.source_metadata["base"]
-    assert pecha.meta.source_metadata["base"][base_name]["id"] == "id"
-    assert pecha.meta.source_metadata["base"][base_name]["title"] == "title"
+    assert base_name in pecha.meta.bases
+    assert pecha.meta.bases[base_name]["id"] == "id"
+    assert pecha.meta.bases[base_name]["title"] == "title"
     assert (
-        pecha.meta.source_metadata["base"][base_name]["base_file"] == f"{base_name}.txt"
+        pecha.meta.bases[base_name]["base_file"] == f"{base_name}.txt"
     )
 
 
@@ -227,10 +227,10 @@ def test_multi_create_pecha():
     pecha_01 = OpenPechaFS(metadata=metadata)
     pecha_01_base_name = pecha_01.set_base("pecha_01 base content")
 
-    assert pecha_01.base[pecha_01_base_name] == "pecha_01 base content"
+    assert pecha_01.bases[pecha_01_base_name] == "pecha_01 base content"
 
     pecha_02 = OpenPechaFS(metadata=metadata)
     pecha_02_base_name = pecha_02.set_base("pecha_02 base content")
 
-    assert len(pecha_02.base) == 1
-    assert pecha_02.base[pecha_02_base_name] == "pecha_02 base content"
+    assert len(pecha_02.bases) == 1
+    assert pecha_02.bases[pecha_02_base_name] == "pecha_02 base content"
