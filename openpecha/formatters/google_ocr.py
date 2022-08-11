@@ -4,6 +4,7 @@ import math
 import re
 from enum import Enum
 from pathlib import Path
+import statistics
 
 import datetime
 from datetime import timezone
@@ -20,6 +21,8 @@ from openpecha.core.ids import get_base_id
 from openpecha.core.metadata import InitialPechaMetadata, InitialCreationType
 from openpecha.formatters import BaseFormatter
 from openpecha.utils import dump_yaml, gzip_str
+
+from openpecha.buda.api import get_buda_scan_info, get_imagelist_simple
 
 
 extended_LayerEnum = [(l.name, l.value) for l in LayerEnum] + [("low_conf_box", "LowConfBox")]
@@ -119,7 +122,7 @@ class GoogleOCRFormatter(BaseFormatter):
     def get_language_code_ann(self, bounding_poly):
         text = bounding_poly.get("text", "")
         language_code = self.get_language_code(bounding_poly)
-        if language_code is not None:
+        if language_code is not None and language_code != self.default_language:
             return f"§{text}Ç{language_code}Ç§"
         else:
             return text
@@ -310,6 +313,7 @@ class GoogleOCRFormatter(BaseFormatter):
         self.populate_confidence(bounding_polys)
         sorted_bounding_polys = self.sort_bounding_polys(bounding_polys)
         lines = self.get_lines(sorted_bounding_polys)
+
         page_content_without_space = "\n".join(lines.get("base_lines", []))
         page_with_low_conf_ann = "\n".join(lines.get("low_conf_annotated_lines", []))
         page_with_language_code_ann = "\n".join(lines.get("language_code_annotated_lines", []))
@@ -568,23 +572,13 @@ class GoogleOCRFormatter(BaseFormatter):
         if low_conf_chars:
             path.write_bytes(gzip_str(low_conf_chars))
 
-    @staticmethod
-    def _get_imagelist_meta(vol_name):
-        r = requests.get(f"http://iiifpres.bdrc.io/il/v:bdr:{vol_name}")
-        img2seq = {}
-        for i, img in enumerate(r.json(), start=1):
-            name, ext = img["filename"].split(".")
-            img2seq[name] = {"num": i, "ext": ext}
-        return img2seq
-
     def build_layers(self, responses, vol_name, base_id=None):
-
         base_pages = []
         low_conf_ann_pages = []
         language_code_ann_pages = []
         pages_ref = []
         last_pg_end_idx = 0
-        img2seq = self._get_imagelist_meta(vol_name)
+        img2seq = get_imagelist_simple(vol_name)
         for response, page_ref in responses:
             n_pg = img2seq[page_ref]["num"]
 
@@ -628,141 +622,72 @@ class GoogleOCRFormatter(BaseFormatter):
         return base_text
 
     def get_metadata(self, work_id, pecha_id):
-        import xml.etree.ElementTree as ET
-
-        import requests
-        from pyewts import pyewts
-
-        converter = pyewts()
-        query_url = "https://www.tbrc.org/xmldoc?rid={}"
-        bdrc_metadata_url = query_url.format(work_id)
-        r = requests.get(bdrc_metadata_url)
-
-        opf_word_confidence_median = self.get_median(self.word_confidences)
-        opf_word_confidence_mean = self.get_mean(self.word_confidences)
+        opf_word_confidence_median = statistics.median(self.word_confidences)
+        opf_word_confidence_mean = statistics.mean(self.word_confidences)
+        bdata = None 
 
         try:
-            root = ET.fromstring(r.content.decode("utf-8"))
+            bdata = get_buda_scan_info(work_id)
         except Exception:
-            metadata = InitialPechaMetadata(
-                source='https://library.bdrc.io',
-                initial_creation_type=InitialCreationType.ocr,
-                imported=datetime.datetime.now(timezone.utc),
-                last_modified=datetime.datetime.now(timezone.utc),
-                parser=None,
-                copyright=None,
-                license=None,
-                ocr_word_mean_confidence_index=opf_word_confidence_mean,
-                ocr_word_median_confidence_index=opf_word_confidence_median,
-                source_metadata={
-                    "id": f"bdrc:{work_id}",
-                    "title": "",
-                    "author": "",
-                },
-                base=self.base_meta
-            )
-            return json.loads(metadata.json())
+            # TODO: log exception
+            pass
 
-        title_tag = root[0]
-        author_tag = root.find("{http://www.tbrc.org/models/work#}creator")
+        source_metadata = {
+            "id": f"http://purl.bdrc.io/resource/{work_id}",
+            "title": "",
+            "author": "",
+        }
+        if bdata is not None:
+            source_metadata = bdata.source_metadata
+
         metadata = InitialPechaMetadata(
-                source='https://library.bdrc.io',
-                initial_creation_type=InitialCreationType.ocr,
-                imported=datetime.datetime.now(timezone.utc),
-                last_modified=datetime.datetime.now(timezone.utc),
-                parser=None,
-                copyright=None,
-                license=None,
-                ocr_word_mean_confidence_index=opf_word_confidence_mean,
-                ocr_word_median_confidence_index=opf_word_confidence_median,
-                source_metadata={
-                    "id": f"bdrc:{work_id}",
-                    "title": converter.toUnicode(title_tag.text),
-                    "author": converter.toUnicode(author_tag.text) if author_tag else "",
-                },
-                base=self.base_meta
+            source='https://library.bdrc.io',
+            initial_creation_type=InitialCreationType.ocr,
+            imported=datetime.datetime.now(timezone.utc),
+            last_modified=datetime.datetime.now(timezone.utc),
+            parser=None,
+            copyright=None,
+            license=None,
+            statistics={
+              "ocr_word_mean_confidence_index": opf_word_confidence_mean,
+              "ocr_word_median_confidence_index": opf_word_confidence_median
+            },
+            source_metadata=source_metadata,
+            default_language=self.default_language,
+            base=self.base_meta
         )
-
         return json.loads(metadata.json())
-    
-    def get_median(self, list_):
-        list_.sort()
-        number_of_items = len(list_)
-        mid_index = number_of_items // 2
-        if number_of_items % 2 == 0:
-            return (list_[mid_index-1] + list_[mid_index]) / 2
-        else:
-            return list_[mid_index]
-    
-    def get_mean(self, list_):
-        grand_sum = sum(list_)
-        mean_ = grand_sum / len(list_)
-        return mean_
-
 
     def get_base_confidence_median(self):
         cur_base_confidences = self.cur_base_word_confidences
-        base_confidence_median = self.get_median(cur_base_confidences)
+        base_confidence_median = statistics.median(cur_base_confidences)
         return base_confidence_median
     
     def get_base_confidence_mean(self):
         cur_base_confidences = self.cur_base_word_confidences
-        base_confidence_mean = self.get_mean(cur_base_confidences)
+        base_confidence_mean = statistics.mean(cur_base_confidences)
         return base_confidence_mean
 
-    def set_base_meta(self, meta_ttl, image_group_id, base_file_name):
-        BDR = Namespace("http://purl.bdrc.io/resource/")
-        BDO = Namespace("http://purl.bdrc.io/ontology/core/")
-        g = Graph()
-        try:
-            g.parse(data=meta_ttl, format="ttl")
-        except:
-            return {}
-        volume_number = int(g.value(BDR[image_group_id], BDO["volumeNumber"]))
-        title = g.value(BDR[image_group_id], RDFS.comment)
-        if title:
-            title = title.value
-        else:
-            title = ""
-        
-        try:
-            total_pages = int(g.value(BDR[image_group_id], BDO["volumePagesTotal"]))
-        except:
-            total_pages = 0
+    def set_base_meta(self, image_group_id, base_file_name):
         base_confidence_median = self.get_base_confidence_median()
         base_confidence_mean = self.get_base_confidence_mean()
         self.cur_word_confidences = []
         self.base_meta[base_file_name] = {
-            "source_metadata": {
-                "image_group_id": image_group_id,
-                "title": title,
-                "total_pages": total_pages,
-            },
-            "order": volume_number,
+            "source_metadata": self.buda_data["image_groups"]["image_group_id"],
+            "order": self.buda_data["image_groups"]["image_group_id"]["volume_number"],
             "base_file": f"{base_file_name}.txt",
-            "ocr_word_median_confidence_index": base_confidence_median,
-            "ocr_word_mean_confidence_index": base_confidence_mean
+            "statistics": {
+              "ocr_word_median_confidence_index": base_confidence_median,
+              "ocr_word_mean_confidence_index": base_confidence_mean
+            }
         }
-
-    def get_meta_ttl(self, work_id):
-        """Download ttl file of work and save in meta_ttl.
-        Args:
-            work_id (str): work id
-        """
-        try:
-            ttl = requests.get(f"http://purl.bdrc.io/graph/{work_id}.ttl")
-            return ttl.text
-        except:
-            print(' TTL not Found!!!')
-            return ""
     
-    def create_opf(self, input_path, pecha_id, meta_flag=True):
+    def create_opf(self, input_path, pecha_id, default_language = "bo"):
         """Create opf of google ocred pecha
 
         Args:
             input_path (str): input path
             pecha_id (str): pecha id
-            meta_flag (bool, optional): True if meta data needed else false. Defaults to True.
 
         Returns:
             path: opf path
@@ -770,6 +695,8 @@ class GoogleOCRFormatter(BaseFormatter):
         input_path = Path(input_path)
         self._build_dirs(input_path, id_=pecha_id)
 
+        self.buda_data = get_buda_scan_info()
+        self.default_language = default_language
 
         for i, vol_path in enumerate(sorted(input_path.iterdir())):
             print(f"[INFO] Processing {input_path.name}-{vol_path.name} ...")
@@ -790,15 +717,10 @@ class GoogleOCRFormatter(BaseFormatter):
             for layer, ann in formatted_layers.items():
                 layer_fn = vol_layer_path / f"{layer}.yml"
                 dump_yaml(ann, layer_fn)
-            
-            #create base of source_metadata    
-            meta_ttl = self.get_meta_ttl(input_path.name)
-            self.set_base_meta(meta_ttl, vol_path.name, base_id)
+            self.set_base_meta(vol_path.name, base_id)
 
-        # create meta.yml
-        if meta_flag:
-            meta_fn = self.dirs["opf_path"] / "meta.yml"
-            dump_yaml(self.get_metadata(input_path.name, pecha_id), meta_fn)
+        meta_fn = self.dirs["opf_path"] / "meta.yml"
+        dump_yaml(self.get_metadata(input_path.name, pecha_id), meta_fn)
 
         return self.dirs["opf_path"].parent
 

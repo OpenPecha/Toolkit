@@ -9,6 +9,7 @@ import re
 import traceback
 from contextlib import closing
 from pathlib import Path
+from .api import fetch_op_commits
 
 import requests
 from tqdm import tqdm
@@ -135,31 +136,7 @@ class OpenpechaManager:
                 res[lname]["rev"] = rev
         return res
 
-    @staticmethod
-    def fetch_op_commits(ldspdibaseurl="http://ldspdi.bdrc.io/"):
-        """
-        Fetches the list of all openpecha commits on BUDA
-        """
-        res = {}
-        headers = {"Accept": "text/csv"}
-        params = {"format": "csv"}
-        with closing(
-            requests.get(
-                ldspdibaseurl + "/query/table/OP_allCommits",
-                stream=True,
-                headers=headers,
-                params=params,
-            )
-        ) as r:
-            reader = csv.reader(codecs.iterdecode(r.iter_lines(), "utf-8"))
-            for row in reader:
-                if not row[0].startswith("http://purl.bdrc.io/resource/IE0OP"):
-                    logging.error("cannot interpret csv line starting with " + row[0])
-                    continue
-                res[row[0][34:]] = row[1]
-        return res
-
-    def get_buda_op_commits(self, ldspdibaseurl, force=False):
+    def get_buda_op_commits(self, force=False):
         if self.commits is not None and not force:
             return self.commits
         path = Path(self.cache_dir, "buda-commits.json")
@@ -167,7 +144,7 @@ class OpenpechaManager:
             with open(path) as json_file:
                 self.commits = json.load(json_file)
                 return self.commits
-        commits = self.fetch_op_commits(ldspdibaseurl)
+        commits = fetch_op_commits()
         with open(path, "w") as outfile:
             json.dump(commits, outfile)
         self.commits = commits
@@ -214,10 +191,10 @@ class OpenpechaManager:
         fname = "/tmp/" + graphlname + ".ttl"
         model.serialize(destination=fname, format="turtle")
 
-    def sync_cache_to_store(self, storeurl, ldspdibaseurl, force=False, idlist=None):
+    def sync_cache_to_store(self, storeurl, force=False, idlist=None):
         buda_commits = {}
         if not force:
-            buda_commits = self.get_buda_op_commits(ldspdibaseurl, force)
+            buda_commits = self.get_buda_op_commits(force)
         for oplname, info in tqdm(
             self.get_local_poti_info(get_commit=(not force)).items(),
             ascii=True,
