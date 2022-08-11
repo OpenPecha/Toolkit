@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.8.21 (2022-08-11)
+### Fix
+* **metadata:** Add under copyright license ([`ceb9e39`](https://github.com/OpenPecha/Toolkit/commit/ceb9e39924c250fb9e0937c452ea0a174674e325))
+
 ## v0.8.20 (2022-08-10)
 ### Fix
 * **google-ocr-formatter:** Meta title and author bug fixed ([`45b5b94`](https://github.com/OpenPecha/Toolkit/commit/45b5b942e7077ce6707f4f740de75787efbc1f05))
