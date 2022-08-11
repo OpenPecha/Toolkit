@@ -47,6 +47,7 @@ class PechaMetadata(BaseModel):
     ocr_import_info: Optional[Dict] = {}
     default_language: str = None
     source: str = None
+    ocr_info: Optional[Dict] = None
     source_file: str = None
     initial_creation_type: InitialCreationType
     imported: datetime = None

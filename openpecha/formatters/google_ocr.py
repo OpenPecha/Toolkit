@@ -22,7 +22,7 @@ from openpecha.core.metadata import InitialPechaMetadata, InitialCreationType
 from openpecha.formatters import BaseFormatter
 from openpecha.utils import dump_yaml, gzip_str
 
-from openpecha.buda.api import get_buda_scan_info, get_imagelist_simple
+from openpecha.buda.api import get_buda_scan_info, get_image_list
 
 
 extended_LayerEnum = [(l.name, l.value) for l in LayerEnum] + [("low_conf_box", "LowConfBox")]
@@ -578,7 +578,7 @@ class GoogleOCRFormatter(BaseFormatter):
         language_code_ann_pages = []
         pages_ref = []
         last_pg_end_idx = 0
-        img2seq = get_imagelist_simple(vol_name)
+        img2seq = get_image_list(self.bdrc_scan_id, vol_name)
         for response, page_ref in responses:
             n_pg = img2seq[page_ref]["num"]
 
@@ -621,19 +621,16 @@ class GoogleOCRFormatter(BaseFormatter):
 
         return base_text
 
-    def get_metadata(self, work_id, pecha_id):
-        opf_word_confidence_median = statistics.median(self.word_confidences)
-        opf_word_confidence_mean = statistics.mean(self.word_confidences)
+    def get_metadata(self, pecha_id, ocr_import_info):
         bdata = None 
-
         try:
-            bdata = get_buda_scan_info(work_id)
+            bdata = get_buda_scan_info(self.bdrc_scan_id)
         except Exception:
             # TODO: log exception
             pass
 
         source_metadata = {
-            "id": f"http://purl.bdrc.io/resource/{work_id}",
+            "id": f"http://purl.bdrc.io/resource/{self.bdrc_scan_id}",
             "title": "",
             "author": "",
         }
@@ -648,13 +645,10 @@ class GoogleOCRFormatter(BaseFormatter):
             parser=None,
             copyright=None,
             license=None,
-            statistics={
-              "ocr_word_mean_confidence_index": opf_word_confidence_mean,
-              "ocr_word_median_confidence_index": opf_word_confidence_median
-            },
             source_metadata=source_metadata,
             default_language=self.default_language,
-            base=self.base_meta
+            base=self.base_meta,
+            ocr_import_info=ocr_import_info
         )
         return json.loads(metadata.json())
 
@@ -682,21 +676,35 @@ class GoogleOCRFormatter(BaseFormatter):
             }
         }
     
-    def create_opf(self, input_path, pecha_id, default_language = "bo"):
+    def create_opf(self, input_path, pecha_id, ocr_import_info = {}):
         """Create opf of google ocred pecha
 
         Args:
             input_path (str): input path
             pecha_id (str): pecha id
+            ocr_import_info (Dict): an object with the following keys:
+                bdrc_scan_id: str
+                source: str
+                ocr_info: Dict
+                batch_id: str
+                software_id: str
+                expected_default_language: str
 
         Returns:
             path: opf path
         """
+        # we assume that
         input_path = Path(input_path)
+
+        self.ocr_import_info = ocr_import_info
+
+        # if the bdrc scan id is not specified, we assume it's the directory namepecha_id
+        self.bdrc_scan_id = input_path.name if "bdrc_scan_id" not in ocr_import_info else ocr_import_info["bdrc_scan_id"]
+        self.metadata = self.get_metadata(pecha_id)
         self._build_dirs(input_path, id_=pecha_id)
 
         self.buda_data = get_buda_scan_info()
-        self.default_language = default_language
+        self.default_language = "bo" if "expected_default_language" not in ocr_import_info else ocr_import_info["expected_default_language"]
 
         for i, vol_path in enumerate(sorted(input_path.iterdir())):
             print(f"[INFO] Processing {input_path.name}-{vol_path.name} ...")
@@ -719,8 +727,14 @@ class GoogleOCRFormatter(BaseFormatter):
                 dump_yaml(ann, layer_fn)
             self.set_base_meta(vol_path.name, base_id)
 
+        # we add the statistics to metadata:
+        self.metadata['statistics'] = {
+            "ocr_word_mean_confidence_index": statistics.mean(self.word_confidences),
+            "ocr_word_median_confidence_index": statistics.median(self.word_confidences)
+        }
+
         meta_fn = self.dirs["opf_path"] / "meta.yml"
-        dump_yaml(self.get_metadata(input_path.name, pecha_id), meta_fn)
+        dump_yaml(self.metadata, meta_fn)
 
         return self.dirs["opf_path"].parent
 
