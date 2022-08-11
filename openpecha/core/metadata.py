@@ -44,10 +44,9 @@ class LicenseType(Enum):
 class PechaMetadata(BaseModel):
     id: str = None
     legacy_id: Optional[str] = None
-    ocr_import_info: Optional[Dict] = {}
+    ocr_import_info: Optional[Dict] = None
     default_language: str = None
     source: str = None
-    ocr_info: Optional[Dict] = None
     source_file: str = None
     initial_creation_type: InitialCreationType
     imported: datetime = None
@@ -80,8 +79,6 @@ class PechaMetadata(BaseModel):
 
 
 class InitialPechaMetadata(PechaMetadata):
-    ocr_word_median_confidence_index: float = None
-    ocr_word_mean_confidence_index: float = None
     bases: Dict = {}
 
     @validator("id", pre=True, always=True)

@@ -48,6 +48,10 @@ class GoogleOCRFormatter(BaseFormatter):
         self.base_meta = {}
         self.cur_base_word_confidences = []
         self.word_confidences = []
+        self.bdrc_scan_id = None
+        self.metadata = {}
+        self.default_language = None
+        self.buda_data = {}
 
     def text_preprocess(self, text):
 
@@ -460,7 +464,7 @@ class GoogleOCRFormatter(BaseFormatter):
                 new_text += f"{cur_annotated_chunk}Ç{cur_language_code}Ç§"
             new_text = self.rm_short_ann(new_text)
             new_text = self.add_default_lang_code(new_text)
-            new_text = re.sub("(¢)(Ç.+?Ç§)", "\g<2>\g<1>", new_text)
+            new_text = re.sub(r"(¢)(Ç.+?Ç§)", r"\g<2>\g<1>", new_text)
         else:
             new_text = ann_text
         return new_text
@@ -572,13 +576,22 @@ class GoogleOCRFormatter(BaseFormatter):
         if low_conf_chars:
             path.write_bytes(gzip_str(low_conf_chars))
 
+    # replace to test offline
+    def _get_image_list(self, bdrc_scan_id, vol_name):
+        il = get_image_list(bdrc_scan_id, vol_name)
+        img2seq = {}
+        for i, img in enumerate(il, start=1):
+            name, ext = img["filename"].split(".")
+            img2seq[name] = {"num": i, "ext": ext}
+        return img2seq
+
     def build_layers(self, responses, vol_name, base_id=None):
         base_pages = []
         low_conf_ann_pages = []
         language_code_ann_pages = []
         pages_ref = []
         last_pg_end_idx = 0
-        img2seq = get_image_list(self.bdrc_scan_id, vol_name)
+        img2seq = self._get_image_list(self.bdrc_scan_id, vol_name)
         for response, page_ref in responses:
             n_pg = img2seq[page_ref]["num"]
 
@@ -635,7 +648,7 @@ class GoogleOCRFormatter(BaseFormatter):
             "author": "",
         }
         if bdata is not None:
-            source_metadata = bdata.source_metadata
+            source_metadata = bdata["source_metadata"]
 
         metadata = InitialPechaMetadata(
             source='https://library.bdrc.io',
@@ -647,7 +660,6 @@ class GoogleOCRFormatter(BaseFormatter):
             license=None,
             source_metadata=source_metadata,
             default_language=self.default_language,
-            base=self.base_meta,
             ocr_import_info=ocr_import_info
         )
         return json.loads(metadata.json())
@@ -667,8 +679,8 @@ class GoogleOCRFormatter(BaseFormatter):
         base_confidence_mean = self.get_base_confidence_mean()
         self.cur_word_confidences = []
         self.base_meta[base_file_name] = {
-            "source_metadata": self.buda_data["image_groups"]["image_group_id"],
-            "order": self.buda_data["image_groups"]["image_group_id"]["volume_number"],
+            "source_metadata": self.buda_data["image_groups"][image_group_id],
+            "order": self.buda_data["image_groups"][image_group_id]["volume_number"],
             "base_file": f"{base_file_name}.txt",
             "statistics": {
               "ocr_word_median_confidence_index": base_confidence_median,
@@ -676,7 +688,7 @@ class GoogleOCRFormatter(BaseFormatter):
             }
         }
     
-    def create_opf(self, input_path, pecha_id, ocr_import_info = {}):
+    def create_opf(self, input_path, pecha_id, ocr_import_info = {}, buda_data = None):
         """Create opf of google ocred pecha
 
         Args:
@@ -696,15 +708,18 @@ class GoogleOCRFormatter(BaseFormatter):
         # we assume that
         input_path = Path(input_path)
 
-        self.ocr_import_info = ocr_import_info
-
         # if the bdrc scan id is not specified, we assume it's the directory namepecha_id
         self.bdrc_scan_id = input_path.name if "bdrc_scan_id" not in ocr_import_info else ocr_import_info["bdrc_scan_id"]
-        self.metadata = self.get_metadata(pecha_id)
+        
         self._build_dirs(input_path, id_=pecha_id)
 
-        self.buda_data = get_buda_scan_info()
+        if buda_data is None:
+            self.buda_data = get_buda_scan_info(self.bdrc_scan_id)
+        else:
+            self.buda_data = buda_data
         self.default_language = "bo" if "expected_default_language" not in ocr_import_info else ocr_import_info["expected_default_language"]
+
+        self.metadata = self.get_metadata(pecha_id, ocr_import_info)
 
         for i, vol_path in enumerate(sorted(input_path.iterdir())):
             print(f"[INFO] Processing {input_path.name}-{vol_path.name} ...")
@@ -727,7 +742,8 @@ class GoogleOCRFormatter(BaseFormatter):
                 dump_yaml(ann, layer_fn)
             self.set_base_meta(vol_path.name, base_id)
 
-        # we add the statistics to metadata:
+        # we add the rest to metadata:
+        self.metadata["bases"] = self.base_meta
         self.metadata['statistics'] = {
             "ocr_word_mean_confidence_index": statistics.mean(self.word_confidences),
             "ocr_word_median_confidence_index": statistics.median(self.word_confidences)

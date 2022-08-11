@@ -1,0 +1,9 @@
+source: bdrc
+software: google_books
+batch: batch_2022
+expected_default_language: bo
+bdrc_scan_id: W24767
+ocr_info:
+  timestamp: 1977-04-22T06:00:00Z
+  prop1: value 1
+  prop2: value 2

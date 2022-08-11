@@ -4,8 +4,13 @@ import pyewts
 import csv
 from rdflib import BNode, Literal, URIRef
 from rdflib.namespace import OWL, RDF, RDFS, SKOS, XSD, Namespace, NamespaceManager
+import boto3
+import botocore
+import gzip
+import hashlib
+import io
+import json
 
-TEST_MODE = False
 LDSPDIBASEURL = "https://ldspdi.bdrc.io/"
 CONVERTER = pyewts.pyewts()
 
@@ -80,6 +85,7 @@ def gets3blob(s3Key):
 # This has a cache mechanism
 def get_image_list_s3(wlname, image_group_lname):
     s3key = get_s3_folder_prefix(wlname, image_group_lname)+"dimensions.json"
+    print(s3key)
     blob = gets3blob(s3key)
     if blob is None:
         return None
@@ -100,11 +106,7 @@ def get_image_list(wlname, image_group_lname, source="s3", reorder_with_bvm=Fals
         il = get_image_list_s3(wlname, image_group_lname)
     else:
         il = get_image_list_iiifpres(wlname, image_group_lname)
-    img2seq = {}
-    for i, img in enumerate(il, start=1):
-        name, ext = img["filename"].split(".")
-        img2seq[name] = {"num": i, "ext": ext}
-    return img2seq
+    return il
 
 def _res_from_model(g, wlname):
     res = {
@@ -161,44 +163,19 @@ def _res_from_model(g, wlname):
         return res
 
 def get_buda_scan_info(wlname):
-    if TEST_MODE:
-        return {
-            "source_metadata": {
-              "id": "http://purl.bdrc.io/resource/"+wlname,
-              "reproduction_of": "http://purl.bdrc.io/resource/M"+wlname,
-              "title": "ཨ་གྲགས་གཟི་རྫོང་།",
-              "author": "",
-              "access": "http://purl.bdrc.io/admindata/AccessOpen",
-              "restrictedInChina": True,
-              "copyrightStatus": "http://purl.bdrc.io/resource/CopyrightUndetermined",
-              "status": "http://purl.bdrc.io/admindata/StatusReleased"
-            },
-            "image_groups": {
-              "I"+wlname[1:]: {
-                "volume_number": 1,
-                "total_pages": 72,
-                "title": "volume 1",
-                "id": "http://purl.bdrc.io/resource/I"+wlname[1:]
-              }
-            }
-        }
-
     headers = {"Accept": "text/turtle"}
     params = {"R_RES": "bdr:"+wlname}
-    res = {
-        "source_metadata": {
-            "id": "http://purl.bdrc.io/resource/"+wlname
-        },
-        "image_groups": {}
-    }
-    g = Graph()
+    res = None
+    g = rdflib.Graph()
     try:
         req = requests.get(
-            ldspdibaseurl + "/query/graph/OP_info",
+            LDSPDIBASEURL + "query/graph/OP_info",
             headers=headers,
             params=params,
         )
         g.parse(data=req.text, format="ttl")
         res = _res_from_model(g, wlname)
+    except Exception:
+        print("something went wrong")
     finally:
         return res

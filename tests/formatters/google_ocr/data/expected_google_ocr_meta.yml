@@ -1,47 +1,68 @@
-id: I91249292
+id: I0ACABB48
+legacy_id: null
+ocr_import_info:
+  source: bdrc
+  software: google_books
+  batch: batch_2022
+  expected_default_language: bo
+  bdrc_scan_id: W24767
+  ocr_info:
+    timestamp: '1977-04-22T06:00:00'
+    prop1: value 1
+    prop2: value 2
+default_language: bo
 source: https://library.bdrc.io
 source_file: null
 initial_creation_type: ocr
-imported: '2022-07-25T05:23:11.536026+00:00'
-last_modified: '2022-07-25T05:23:11.536566+00:00'
+imported: '2022-08-11T13:58:22.335684+00:00'
+last_modified: '2022-08-11T13:58:22.335696+00:00'
 parser: null
-ocr_word_median_confidence_index: 0.9599999785423279
-ocr_word_mean_confidence_index: 0.8787125467915051
 source_metadata:
-  id: bdr:W24767
+  id: http://purl.bdrc.io/resource/W24767
+  status: http://purl.bdrc.io/admindata/StatusReleased
+  access: http://purl.bdrc.io/admindata/AccessOpen
+  reproduction_of: http://purl.bdrc.io/resource/MW24767
+  copyrightStatus: http://purl.bdrc.io/resource/CopyrightPublicDomain
   title: ལམ་འབྲས་གཞུང་རྡོ་རྗེའི་ཚིག་རྐང་གི་རྣམ་འགྲེལ་བཅུ་གཅིག
-  author: ''
-default_language: bo
+  author: ས་ཆེན་ཀུན་དགའ་སྙིང་པོ།
+statistics:
+  ocr_word_mean_confidence_index: 0.8787125467915051
+  ocr_word_median_confidence_index: 0.9599999785423279
+quality: null
 bases:
-  C1C6:
+  E880:
     source_metadata:
-      image_group_id: I3852
-      title: ''
+      id: http://purl.bdrc.io/resource/I3852
       total_pages: 542
+      volume_number: 1
+      volume_pages_bdrc_intro: 2
     order: 1
-    base_file: C1C6.txt
-    ocr_word_median_confidence_index: 0.949999988079071
-    ocr_word_mean_confidence_index: 0.8530664433815613
-  FA25:
+    base_file: E880.txt
+    statistics:
+      ocr_word_median_confidence_index: 0.949999988079071
+      ocr_word_mean_confidence_index: 0.8530664433815613
+  B3E7:
     source_metadata:
-      image_group_id: I3853
-      title: ''
+      id: http://purl.bdrc.io/resource/I3853
       total_pages: 504
+      volume_number: 2
+      volume_pages_bdrc_intro: 2
     order: 2
-    base_file: FA25.txt
-    ocr_word_median_confidence_index: 0.9700000286102295
-    ocr_word_mean_confidence_index: 0.883611589289402
-  2A33:
+    base_file: B3E7.txt
+    statistics:
+      ocr_word_median_confidence_index: 0.9700000286102295
+      ocr_word_mean_confidence_index: 0.883611589289402
+  7D22:
     source_metadata:
-      image_group_id: I3854
-      title: ''
+      id: http://purl.bdrc.io/resource/I3854
       total_pages: 502
+      volume_number: 3
+      volume_pages_bdrc_intro: 2
     order: 3
-    base_file: 2A33.txt
-    ocr_word_median_confidence_index: 0.9599999785423279
-    ocr_word_mean_confidence_index: 0.8787125467915051
-statistics: {}
-quality: {}
+    base_file: 7D22.txt
+    statistics:
+      ocr_word_median_confidence_index: 0.9599999785423279
+      ocr_word_mean_confidence_index: 0.8787125467915051
 copyright:
   status: Unknown
   notice: ''

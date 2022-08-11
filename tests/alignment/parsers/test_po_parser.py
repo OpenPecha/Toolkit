@@ -21,6 +21,7 @@ def get_span(segment):
     return final_span
 
 def copytree(src, dst):
+    os.makedirs(dst, exist_ok=True)
     for item in os.listdir(src):
         s = os.path.join(src, item)
         d = os.path.join(dst, item)
