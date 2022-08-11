@@ -17,10 +17,15 @@ from openpecha.core.annotation import Page, Span
 from openpecha.core.annotations import BaseAnnotation
 from openpecha.core.layer import Layer, LayerEnum
 from openpecha.core.ids import get_base_id
-from openpecha.core.metadata import InitialPechaMetadata, InitialCreationType
+from openpecha.core.metadata import InitialPechaMetadata, InitialCreationType, LicenseType, CopyrightStatus, Copyright
 from openpecha.formatters import BaseFormatter
 from openpecha.utils import dump_yaml, gzip_str
 
+
+BDR = Namespace("http://purl.bdrc.io/resource/")
+BDO = Namespace("http://purl.bdrc.io/ontology/core/")
+BDA = Namespace("http://purl.bdrc.io/admindata/")
+ADM = Namespace("http://purl.bdrc.io/ontology/admin/")
 
 extended_LayerEnum = [(l.name, l.value) for l in LayerEnum] + [("low_conf_box", "LowConfBox")] + [("language", "Language")]
 LayerEnum = Enum("LayerEnum", extended_LayerEnum)
@@ -635,6 +640,83 @@ class GoogleOCRFormatter(BaseFormatter):
 
         return base_text
 
+    def get_resource_ttl(self, work_id):
+        try:
+            ttl = requests.get(f"https://ldspdi.bdrc.io/resource/M{work_id}.ttl")
+            return ttl.text
+        except:
+            return None
+
+    def get_copyright_and_license_info(self, work_id):
+        ttl = self.get_resource_ttl(work_id)
+        if ttl:
+            g = Graph()
+            try:
+                g.parse(data=ttl, format="ttl")
+            except:
+                return {}, None
+            
+            work = f"M{work_id}"
+            status = g.value(BDR[work], BDO['copyrightStatus'])
+            copyright_status = (str(status)).split("/")[-1]
+            
+            copyright_copyrighted = Copyright(
+                status=CopyrightStatus.COPYRIGHTED,
+                notice="Copyrighted by the original author or editor",
+                info_url="https://rightsstatements.org/page/InC/1.0/?language=en",
+            )
+            
+            copyright_unknown = Copyright(
+                status=CopyrightStatus.UNKNOWN,
+                notice="Copyright Undertermined",
+                info_url="https://rightsstatements.org/page/UND/1.0/?language=en",
+            )
+            
+            copyright_public_domain = Copyright(
+                status=CopyrightStatus.PUBLIC_DOMAIN,
+                notice="Public Domain",
+                info_url="https://wiki.creativecommons.org/wiki/Public_domain",
+            )
+            
+            if copyright_status == "CopyrightUndetermined":
+                license = LicenseType.UNDER_COPYRIGHT
+                return copyright_unknown, license
+            elif copyright_status == "None":
+                license = LicenseType.CC0
+                return copyright_public_domain, license
+            elif copyright_status == "Copyrighted":
+                license = LicenseType.UNDER_COPYRIGHT
+                return copyright_copyrighted, license
+        else:
+            return {}, None
+        
+    
+
+    def get_admindata_ttl(self, work_id):
+        try:
+            ttl = requests.get(f"http://purl.bdrc.io/admindata/{work_id}.ttl")
+            return ttl.text
+        except:
+            return None
+
+    def get_restrictedInChina_and_access_info(self, work_id):
+        ttl = self.get_admindata_ttl(work_id)
+        if ttl:
+            g = Graph()
+            try:
+                g.parse(data=ttl, format="ttl")
+            except:
+                return None, None
+            
+            restrictedInChina = (g.value(BDA[work_id], ADM['restrictedInChina'])).value
+            
+            output = g.value(BDA[work_id], ADM['access'])
+            access = (str(output)).split("/")[-1]
+            
+            return restrictedInChina, f"http://purl.bdrc.io/admindata/{access}"
+        else:
+            return None, None
+            
     def get_metadata(self, work_id, pecha_id):
         import xml.etree.ElementTree as ET
 
@@ -648,6 +730,10 @@ class GoogleOCRFormatter(BaseFormatter):
 
         opf_word_confidence_median = self.get_median(self.word_confidences)
         opf_word_confidence_mean = self.get_mean(self.word_confidences)
+        
+        restrictedInChina, access = self.get_restrictedInChina_and_access_info(work_id)
+        copyright, license = self.get_copyright_and_license_info(work_id)
+            
 
         try:
             root = ET.fromstring(r.content.decode("utf-8"))
@@ -658,14 +744,16 @@ class GoogleOCRFormatter(BaseFormatter):
                 imported=datetime.datetime.now(timezone.utc),
                 last_modified=datetime.datetime.now(timezone.utc),
                 parser=None,
-                copyright=None,
-                license=None,
+                copyright=copyright,
+                license=license,
                 ocr_word_mean_confidence_index=opf_word_confidence_mean,
                 ocr_word_median_confidence_index=opf_word_confidence_median,
                 source_metadata={
                     "id": f"bdrc:{work_id}",
                     "title": "",
                     "author": "",
+                    "restrictedInChina": restrictedInChina,
+                    "access": access
                 },
                 base=self.base_meta
             )
@@ -679,14 +767,16 @@ class GoogleOCRFormatter(BaseFormatter):
                 imported=datetime.datetime.now(timezone.utc),
                 last_modified=datetime.datetime.now(timezone.utc),
                 parser=None,
-                copyright=None,
-                license=None,
+                copyright=copyright,
+                license=license,
                 ocr_word_mean_confidence_index=opf_word_confidence_mean,
                 ocr_word_median_confidence_index=opf_word_confidence_median,
                 source_metadata={
                     "id": f"bdrc:{work_id}",
                     "title": converter.toUnicode(title_tag.text),
                     "author": converter.toUnicode(author_tag.text) if author_tag else "",
+                    "restrictedInChina": restrictedInChina,
+                    "access": access
                 },
                 base=self.base_meta
         )
