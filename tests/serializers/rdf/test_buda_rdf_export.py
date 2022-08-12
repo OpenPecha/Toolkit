@@ -13,11 +13,18 @@ def test_buda_rdf_serializer():
     serializer = BUDARDFSerializer(op)
     serializer.apply_layers()
     results = serializer.get_result()
-    print(results.serialize(format="ttl"))
+    #print(results.serialize(format="ttl"))
     expected = rdflib.Graph().parse(str(expected_path), format="ttl")
     # to look at the differences:
-    #print(graph_diff(results, expected)[2].serialize(format="ttl"))
-    assert to_isomorphic(results) == to_isomorphic(expected)
+    if to_isomorphic(results) != to_isomorphic(expected):
+        print("results differ from expectations, diff is:")
+        _, in_results, in_expected = graph_diff(results, expected)
+        print("only in results:")
+        print(in_results.serialize(format="ttl"))
+        print("only in expected:")
+        print(in_expected.serialize(format="ttl"))
+        assert False
+    assert True
 
 if __name__ == "__main__":
     test_buda_rdf_serializer()
