@@ -733,35 +733,9 @@ class GoogleOCRFormatter(BaseFormatter):
         
         restrictedInChina, access = self.get_restrictedInChina_and_access_info(work_id)
         copyright, license = self.get_copyright_and_license_info(work_id)
-            
-
-        try:
-            root = ET.fromstring(r.content.decode("utf-8"))
-        except Exception:
-            metadata = InitialPechaMetadata(
-                source='https://library.bdrc.io',
-                initial_creation_type=InitialCreationType.ocr,
-                imported=datetime.datetime.now(timezone.utc),
-                last_modified=datetime.datetime.now(timezone.utc),
-                parser=None,
-                copyright=copyright,
-                license=license,
-                ocr_word_mean_confidence_index=opf_word_confidence_mean,
-                ocr_word_median_confidence_index=opf_word_confidence_median,
-                source_metadata={
-                    "id": f"bdrc:{work_id}",
-                    "title": "",
-                    "author": "",
-                    "restrictedInChina": restrictedInChina,
-                    "access": access
-                },
-                base=self.base_meta
-            )
-            return json.loads(metadata.json())
-
-        title_tag = root[0]
-        author_tag = root.find("{http://www.tbrc.org/models/work#}creator")
+        
         metadata = InitialPechaMetadata(
+                id=pecha_id,
                 source='https://library.bdrc.io',
                 initial_creation_type=InitialCreationType.ocr,
                 imported=datetime.datetime.now(timezone.utc),
@@ -771,17 +745,31 @@ class GoogleOCRFormatter(BaseFormatter):
                 license=license,
                 ocr_word_mean_confidence_index=opf_word_confidence_mean,
                 ocr_word_median_confidence_index=opf_word_confidence_median,
-                source_metadata={
-                    "id": f"bdrc:{work_id}",
-                    "title": converter.toUnicode(title_tag.text),
-                    "author": converter.toUnicode(author_tag.text) if author_tag else "",
-                    "restrictedInChina": restrictedInChina,
-                    "access": access
-                },
+                source_metadata={},
                 base=self.base_meta
         )
 
+        try:
+            root = ET.fromstring(r.content.decode("utf-8"))
+            title_tag = root[0]
+            author_tag = root.find("{http://www.tbrc.org/models/work#}creator")
+            metadata.source_metadata={
+                "id": f"bdrc:{work_id}",
+                "title": converter.toUnicode(title_tag.text),
+                "author": converter.toUnicode(author_tag.text) if author_tag else "",
+                "restrictedInChina": restrictedInChina,
+                "access": access
+            }
+        except Exception:
+            metadata.source_metadata={
+                "id": f"bdrc:{work_id}",
+                "title": "",
+                "author": "",
+                "restrictedInChina": restrictedInChina,
+                "access": access
+            }
         return json.loads(metadata.json())
+    
     
     def get_median(self, list_):
         list_.sort()

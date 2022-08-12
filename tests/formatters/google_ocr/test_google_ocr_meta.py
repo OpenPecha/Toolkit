@@ -43,10 +43,3 @@ def test_google_ocr_metadata():
         assert output_metadata['copyright'] == expected_metadata['copyright']
         assert output_metadata['source_metadata']['access'] == expected_metadata['source_metadata']['access']
         assert output_metadata['source_metadata']['restrictedInChina'] == expected_metadata['source_metadata']['restrictedInChina']
-        
-            
-            
-            
-            
-if __name__ == "__main__":
-    test_google_ocr_metadata()
