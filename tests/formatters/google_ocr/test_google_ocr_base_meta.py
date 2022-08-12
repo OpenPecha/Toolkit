@@ -6,9 +6,9 @@ from openpecha import config
 from openpecha.utils import load_yaml
 from openpecha.formatters import GoogleOCRFormatter
 
-# TODO: by overriding self._get_image_list in the google_ocr class, it's
-# possible to run this test completely offline, it would be best
-@pytest.mark.skip(reason="currently depends on bdrc api")
+def mock_get_image_list(bdrc_scan_id, vol_name):
+    return load_yaml(Path(__file__).parent / "data" / str(vol_name+"-imgseqnum.json"))
+
 def test_google_ocr_base_meta():
     work_id = "W24767"
     pecha_id = "I123456"
@@ -22,12 +22,14 @@ def test_google_ocr_base_meta():
         buda_data = load_yaml(buda_data_path)
         ocr_import_info = load_yaml(ocr_import_info_path)
         formatter = GoogleOCRFormatter(output_path=tmpdirname)
+        formatter._get_image_list = mock_get_image_list
         pecha_path = formatter.create_opf(ocr_path, pecha_id, ocr_import_info, buda_data)
         output_metadata = load_yaml(Path(f"{pecha_path}/{pecha_path.name}.opf/meta.yml"))
         expected_metadata = load_yaml(expected_meta_path)
-        # this is more complex this there's a lot of random IDs generated in the process
-        # so the comparison is not straightforward...
-        assert output_metadata == expected_metadata
+        assert output_metadata["source_metadata"] == expected_metadata["source_metadata"]
+        assert output_metadata["ocr_import_info"] == expected_metadata["ocr_import_info"]
+        assert output_metadata["statistics"] == expected_metadata["statistics"]
+        assert output_metadata["default_language"] == expected_metadata["default_language"]
 
 if __name__ == "__main__":
     test_google_ocr_base_meta()
