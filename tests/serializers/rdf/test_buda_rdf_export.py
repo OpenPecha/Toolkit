@@ -5,16 +5,26 @@ from rdflib.compare import graph_diff, to_isomorphic
 from openpecha.serializers import BUDARDFSerializer
 from openpecha.core.pecha import OpenPechaFS
 
+def remove_dateTimes(g):
+    for s, p, o in g.triples((None, rdflib.URIRef("http://purl.bdrc.io/ontology/core/OPFOCRTimeStamp"), None)):
+        g.remove((s, p, o))
 
 def test_buda_rdf_serializer():
     opf_path = Path(__file__).parent / "I0123" / "I0123.opf"
     expected_path = Path(__file__).parent / "I0123" / "I0123-expected.ttl"
+
     op = OpenPechaFS("I0123", opf_path)
     serializer = BUDARDFSerializer(op)
     serializer.apply_layers()
     results = serializer.get_result()
-    #print(results.serialize(format="ttl"))
     expected = rdflib.Graph().parse(str(expected_path), format="ttl")
+    # remove OPFOCRTimeStamp as rdflib believes that 
+    #   "1977-04-22T06:00:00+00:00"^^xsd:dateTime and 
+    # and
+    #   "1977-04-22T06:00:00"^^xsd:dateTime
+    # are two different things
+    remove_dateTimes(results)
+    remove_dateTimes(expected)
     # to look at the differences:
     if to_isomorphic(results) != to_isomorphic(expected):
         print("results differ from expectations, diff is:")
