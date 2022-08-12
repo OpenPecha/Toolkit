@@ -22,7 +22,7 @@ source_metadata:
   status: http://purl.bdrc.io/admindata/StatusReleased
   access: http://purl.bdrc.io/admindata/AccessOpen
   reproduction_of: http://purl.bdrc.io/resource/MW24767
-  copyrightStatus: http://purl.bdrc.io/resource/CopyrightPublicDomain
+  copyright_status: http://purl.bdrc.io/resource/CopyrightPublicDomain
   title: ལམ་འབྲས་གཞུང་རྡོ་རྗེའི་ཚིག་རྐང་གི་རྣམ་འགྲེལ་བཅུ་གཅིག
   author: ས་ཆེན་ཀུན་དགའ་སྙིང་པོ།
 statistics:
@@ -64,7 +64,7 @@ bases:
       ocr_word_median_confidence_index: 0.9599999785423279
       ocr_word_mean_confidence_index: 0.8787125467915051
 copyright:
-  status: Unknown
-  notice: ''
-  info_url: null
-license: null
+  status: 'Public domain'
+  notice: 'Public domain'
+  info_url: 'https://creativecommons.org/publicdomain/mark/1.0/'
+license: 'CC0'

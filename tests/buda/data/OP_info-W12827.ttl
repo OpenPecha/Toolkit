@@ -105,7 +105,7 @@ bda:W12827  a                  adm:AdminData ;
         adm:gitRevision        "e1b570dbf911313d270802fce1bb694a51d8a2e1" ;
         adm:graphId            bdg:W12827 ;
         adm:metadataLegal      bda:LD_BDRC_CC0 ;
-        adm:restrictedInChina  false ;
+        adm:restrictedInChina  true ;
         adm:status             bda:StatusReleased ;
         bdo:isRoot             true .
 

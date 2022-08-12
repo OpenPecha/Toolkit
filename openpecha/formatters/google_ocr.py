@@ -11,19 +11,16 @@ from datetime import timezone
 import requests
 from antx import transfer
 from pathlib import Path
-from rdflib import Graph
-from rdflib.namespace import RDF, RDFS, SKOS, OWL, Namespace, NamespaceManager, XSD
 
 from openpecha.core.annotation import Page, Span
 from openpecha.core.annotations import BaseAnnotation, Language
 from openpecha.core.layer import Layer, LayerEnum
 from openpecha.core.ids import get_base_id
-from openpecha.core.metadata import InitialPechaMetadata, InitialCreationType
+from openpecha.core.metadata import InitialPechaMetadata, InitialCreationType, LicenseType, CopyrightStatus, Copyright, Copyright_copyrighted, Copyright_unknown, Copyright_public_domain
 from openpecha.formatters import BaseFormatter
 from openpecha.utils import dump_yaml, gzip_str
 
 from openpecha.buda.api import get_buda_scan_info, get_image_list
-
 
 extended_LayerEnum = [(l.name, l.value) for l in LayerEnum] + [("low_conf_box", "LowConfBox")]
 LayerEnum = Enum("LayerEnum", extended_LayerEnum)
@@ -634,21 +631,28 @@ class GoogleOCRFormatter(BaseFormatter):
 
         return base_text
 
+    def get_copyright_and_license_info(self, bdata):
+        if "copyright_status" not in bdata["source_metadata"]:
+            return {}, None
+        cs = bdata["source_metadata"]["copyright_status"]
+        if cs == "http://purl.bdrc.io/resource/CopyrightPublicDomain":
+            return Copyright_public_domain, LicenseType.CC0
+        if cs == "http://purl.bdrc.io/resource/CopyrightUndetermined":
+            return copyright_unknown, None
+        return copyright_copyrighted, LicenseType.UNDER_COPYRIGHT
+            
     def get_metadata(self, pecha_id, ocr_import_info):
-        bdata = None 
-        try:
-            bdata = get_buda_scan_info(self.bdrc_scan_id)
-        except Exception:
-            # TODO: log exception
-            pass
 
         source_metadata = {
             "id": f"http://purl.bdrc.io/resource/{self.bdrc_scan_id}",
             "title": "",
             "author": "",
         }
-        if bdata is not None:
-            source_metadata = bdata["source_metadata"]
+        copyright = {}
+        license = None
+        if self.buda_data is not None:
+            source_metadata = self.buda_data["source_metadata"]
+            copyright, license = self.get_copyright_and_license_info(self.buda_data)
 
         metadata = InitialPechaMetadata(
             source='https://library.bdrc.io',
@@ -656,8 +660,8 @@ class GoogleOCRFormatter(BaseFormatter):
             imported=datetime.datetime.now(timezone.utc),
             last_modified=datetime.datetime.now(timezone.utc),
             parser=None,
-            copyright=None,
-            license=None,
+            copyright=copyright,
+            license=license,
             source_metadata=source_metadata,
             default_language=self.default_language,
             ocr_import_info=ocr_import_info

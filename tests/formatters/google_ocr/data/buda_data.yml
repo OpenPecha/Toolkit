@@ -3,7 +3,7 @@ source_metadata:
   status: http://purl.bdrc.io/admindata/StatusReleased
   access: http://purl.bdrc.io/admindata/AccessOpen
   reproduction_of: http://purl.bdrc.io/resource/MW24767
-  copyrightStatus: http://purl.bdrc.io/resource/CopyrightPublicDomain
+  copyright_status: http://purl.bdrc.io/resource/CopyrightPublicDomain
   title: ལམ་འབྲས་གཞུང་རྡོ་རྗེའི་ཚིག་རྐང་གི་རྣམ་འགྲེལ་བཅུ་གཅིག
   author: ས་ཆེན་ཀུན་དགའ་སྙིང་པོ།
 image_groups:

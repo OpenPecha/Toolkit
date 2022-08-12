@@ -4,9 +4,10 @@
       "status":"http://purl.bdrc.io/admindata/StatusReleased",
       "access":"http://purl.bdrc.io/admindata/AccessOpen",
       "reproduction_of":"http://purl.bdrc.io/resource/MW12827",
-      "copyrightStatus":"http://purl.bdrc.io/resource/CopyrightPublicDomain",
+      "copyright_status":"http://purl.bdrc.io/resource/CopyrightPublicDomain",
       "title":"སྙིང་ཐིག་ཡ་བཞི།",
-      "author":"ཀློང་ཆེན་རབ་འབྱམས་པ་དྲི་མེད་འོད་ཟེར།"
+      "author":"ཀློང་ཆེན་རབ་འབྱམས་པ་དྲི་མེད་འོད་ཟེར།",
+      "geo_restriction": ["CN"]
    },
    "image_groups":{
       "I2072":{

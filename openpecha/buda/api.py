@@ -119,13 +119,13 @@ def _res_from_model(g, wlname):
         res["source_metadata"]["status"] = str(g.value(adm, ADM.status))
         res["source_metadata"]["access"] = str(g.value(adm, ADM.access))
         if (adm, ADM.restrictedInChina, Literal(True)) in g:
-            res["source_metadata"]["restrictedInChina"] = True
+            res["source_metadata"]["geo_restriction"] = ["CN"]
         mwres = g.value(wres, BDO.instanceReproductionOf)
         res["source_metadata"]["reproduction_of"] = str(mwres)
         for _, _, cs in g.triples((mwres, BDO.copyright, None)):
-            res["source_metadata"]["copyrightStatus"] = str(cs)
-        if "copyrightStatus" not in res["source_metadata"]:
-            res["source_metadata"]["copyrightStatus"] = "http://purl.bdrc.io/resource/CopyrightPublicDomain"
+            res["source_metadata"]["copyright_status"] = str(cs)
+        if "copyright_status" not in res["source_metadata"]:
+            res["source_metadata"]["copyright_status"] = "http://purl.bdrc.io/resource/CopyrightPublicDomain"
         res["source_metadata"]["reproduction_of"] = str(mwres)
         for _, _, l in g.triples((mwres, SKOS.prefLabel, None)):
             if l.language == "bo-x-ewts":
