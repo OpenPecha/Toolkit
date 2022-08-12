@@ -82,10 +82,8 @@ def gets3blob(s3Key):
         else:
             raise
 
-# This has a cache mechanism
 def get_image_list_s3(wlname, image_group_lname):
     s3key = get_s3_folder_prefix(wlname, image_group_lname)+"dimensions.json"
-    print(s3key)
     blob = gets3blob(s3key)
     if blob is None:
         return None
