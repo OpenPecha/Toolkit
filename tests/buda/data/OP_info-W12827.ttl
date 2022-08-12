@@ -1,0 +1,184 @@
+@prefix :      <http://purl.bdrc.io/ontology/core/> .
+@prefix aut:   <http://purl.bdrc.io/ontology/ext/auth/> .
+@prefix bdan:  <http://purl.bdrc.io/annotation/> .
+@prefix bd:    <http://www.bigdata.com/rdf#> .
+@prefix bf:    <http://id.loc.gov/ontologies/bibframe/> .
+@prefix owl:   <http://www.w3.org/2002/07/owl#> .
+@prefix tbr:   <http://purl.bdrc.io/ontology/toberemoved/> .
+@prefix bdou:  <http://purl.bdrc.io/ontology/ext/user/> .
+@prefix rsh:   <http://purl.bdrc.io/shacl/core/shape/> .
+@prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
+@prefix admin: <http://webns.net/mvcb/> .
+@prefix skos:  <http://www.w3.org/2004/02/skos/core#> .
+@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix bdac:  <http://purl.bdrc.io/anncollection/> .
+@prefix wd:    <http://www.wikidata.org/entity/> .
+@prefix dr:    <http://purl.org/swan/2.0/discourse-relationships/> .
+@prefix oa:    <http://www.w3.org/ns/oa#> .
+@prefix dila:  <http://purl.dila.edu.tw/resource/> .
+@prefix sh:    <http://www.w3.org/ns/shacl#> .
+@prefix tmp:   <http://purl.bdrc.io/ontology/tmp/> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix text:  <http://jena.apache.org/text#> .
+@prefix bda:   <http://purl.bdrc.io/admindata/> .
+@prefix foaf:  <http://xmlns.com/foaf/0.1/> .
+@prefix bdd:   <http://purl.bdrc.io/data/> .
+@prefix ad:    <http://schemas.talis.com/2005/address/schema#> .
+@prefix bdg:   <http://purl.bdrc.io/graph/> .
+@prefix f:     <java:io.bdrc.libraries.sparql.functions.> .
+@prefix vcard: <http://www.w3.org/2006/vcard/ns#> .
+@prefix adm:   <http://purl.bdrc.io/ontology/admin/> .
+@prefix bdo:   <http://purl.bdrc.io/ontology/core/> .
+@prefix iiif2: <http://iiif.io/api/presentation/2#> .
+@prefix iiif3: <http://iiif.io/api/presentation/3#> .
+@prefix adr:   <http://purl.bdrc.io/resource-nc/auth/> .
+@prefix viaf:  <http://viaf.org/viaf/> .
+@prefix bds:   <http://purl.bdrc.io/ontology/shapes/core/> .
+@prefix eftr:  <http://purl.84000.co/resource/core/> .
+@prefix bdr:   <http://purl.bdrc.io/resource/> .
+@prefix bdu:   <http://purl.bdrc.io/resource-nc/user/> .
+@prefix as:    <http://www.w3.org/ns/activitystreams#> .
+@prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix tm:    <http://def.seegrid.csiro.au/isotc211/iso19108/2002/temporal#> .
+@prefix ldp:   <http://www.w3.org/ns/ldp#> .
+
+bdr:I2062  a                      bdo:ImageGroup ;
+        bdo:volumeNumber          2 ;
+        bdo:volumeOf              bdr:W12827 ;
+        bdo:volumePagesTbrcIntro  0 ;
+        skos:prefLabel            "volume 1"@en ;
+        bdo:volumePagesTotal      493 .
+
+bdr:I2068  a                      bdo:ImageGroup ;
+        bdo:volumeNumber          8 ;
+        bdo:volumeOf              bdr:W12827 ;
+        bdo:volumePagesTbrcIntro  0 ;
+        skos:prefLabel            "pod 1"@bo-x-ewts ;
+        bdo:volumePagesTotal      535 .
+
+bdr:I2071  a                      bdo:ImageGroup ;
+        bdo:volumeNumber          11 ;
+        bdo:volumeOf              bdr:W12827 ;
+        bdo:volumePagesTbrcIntro  0 ;
+        bdo:volumePagesTotal      525 .
+
+bdr:I2061  a                      bdo:ImageGroup ;
+        bdo:volumeNumber          1 ;
+        bdo:volumeOf              bdr:W12827 ;
+        bdo:volumePagesTbrcIntro  0 ;
+        bdo:volumePagesTotal      459 .
+
+bdr:I2067  a                      bdo:ImageGroup ;
+        bdo:volumeNumber          7 ;
+        bdo:volumeOf              bdr:W12827 ;
+        bdo:volumePagesTbrcIntro  0 ;
+        bdo:volumePagesTotal      645 .
+
+bdr:I2070  a                      bdo:ImageGroup ;
+        bdo:volumeNumber          10 ;
+        bdo:volumeOf              bdr:W12827 ;
+        bdo:volumePagesTbrcIntro  0 ;
+        bdo:volumePagesTotal      547 .
+
+bdr:I2066  a                      bdo:ImageGroup ;
+        bdo:volumeNumber          6 ;
+        bdo:volumeOf              bdr:W12827 ;
+        bdo:volumePagesTbrcIntro  0 ;
+        bdo:volumePagesTotal      729 .
+
+bdr:W12827  a                       bdo:DigitalInstance , bdo:Instance , bdo:ImageInstance ;
+        bdo:inCollection            bdr:PRHD01 , bdr:PR01DOR0 , bdr:PR01JW33478 , bdr:PR1PL480 ;
+        bdo:instanceHasVolume       bdr:I2072 , bdr:I2071 , bdr:I2066 , bdr:I2073 , bdr:I2062 , bdr:I2068 , bdr:I2067 , bdr:I2064 , bdr:I2061 , bdr:I2063 , bdr:I2070 , bdr:I2069 , bdr:I2065 ;
+        bdo:instanceOf              bdr:WA12827 ;
+        bdo:instanceReproductionOf  bdr:MW12827 ;
+        bdo:isRoot                  true ;
+        bdo:numberOfVolumes         13 ;
+        tmp:thumbnailIIIFService    <https://iiif.bdrc.io/bdr:I2061::020610001.tiff> .
+
+bda:W12827  a                  adm:AdminData ;
+        adm:access             bda:AccessOpen ;
+        adm:adminAbout         bdr:W12827 ;
+        adm:contentLegal       bda:LD_BDRC_PD ;
+        adm:facetIndex         66 ;
+        adm:gitPath            "d3/W12827.trig" ;
+        adm:gitRepo            bda:GR0014 ;
+        adm:gitRevision        "e1b570dbf911313d270802fce1bb694a51d8a2e1" ;
+        adm:graphId            bdg:W12827 ;
+        adm:metadataLegal      bda:LD_BDRC_CC0 ;
+        adm:restrictedInChina  false ;
+        adm:status             bda:StatusReleased ;
+        bdo:isRoot             true .
+
+bdr:I2065  a                      bdo:ImageGroup ;
+        bdo:volumeNumber          5 ;
+        bdo:volumeOf              bdr:W12827 ;
+        bdo:volumePagesTbrcIntro  0 ;
+        bdo:volumePagesTotal      617 .
+
+bdr:WA12827  a               bdo:Work ;
+        bdo:catalogInfo      "The Nyingtik Yabzhi of Longchen Rabjam Drime Ozer (1308-1364). Collection of profound Dzogchen teachings. Consists of the Kandro Nyingtik, Kandro Yangtik, Bima Nyingtik, Lama Yangtik, and Zabmo Yangtik. Scanned with the generous support of Master Tam Shek-Wing of the Vajrayana Buddhist Association."@en ;
+        bdo:creator          bdr:CR55948F3FDC9CACD3 ;
+        bdo:isRoot           true ;
+        bdo:language         bdr:LangBo ;
+        bdo:workHasInstance  bdr:W1KG12048 , bdr:MW2PD19078 , bdr:MW1KG12048 , bdr:MW12827 , bdr:W3CN3025 , bdr:MW1KG9720 , bdr:W2PD19078 , bdr:MW4PD2049 , bdr:W4PD2043 , bdr:MW4PD2043 , bdr:W12827 , bdr:W4PD2049 , bdr:MW3CN3025 , bdr:W1KG9720 ;
+        bdo:workIsAbout      bdr:T354 , bdr:WA3JT13386 ;
+        tmp:entityScore      28 ;
+        skos:prefLabel       "snying thig ya bzhi/"@bo-x-ewts .
+
+bdr:I2064  a                      bdo:ImageGroup ;
+        bdo:volumeNumber          4 ;
+        bdo:volumeOf              bdr:W12827 ;
+        bdo:volumePagesTbrcIntro  0 ;
+        bdo:volumePagesTotal      597 .
+
+bdr:I2073  a                      bdo:ImageGroup ;
+        bdo:volumeNumber          13 ;
+        bdo:volumeOf              bdr:W12827 ;
+        bdo:volumePagesTbrcIntro  0 ;
+        bdo:volumePagesTotal      571 .
+
+bdr:P1583  skos:prefLabel  "klong chen rab 'byams pa dri med 'od zer/"@bo-x-ewts , "隆钦热降巴·赤墨俄色"@zh-hans .
+
+bdr:I2063  a                      bdo:ImageGroup ;
+        bdo:volumeNumber          3 ;
+        bdo:volumeOf              bdr:W12827 ;
+        bdo:volumePagesTbrcIntro  0 ;
+        bdo:volumePagesTotal      451 .
+
+bdr:I2069  a                      bdo:ImageGroup ;
+        bdo:volumeNumber          9 ;
+        bdo:volumeOf              bdr:W12827 ;
+        bdo:volumePagesTbrcIntro  0 ;
+        bdo:volumePagesTotal      559 .
+
+bdr:CR55948F3FDC9CACD3
+        a          bdo:AgentAsCreator ;
+        bdo:agent  bdr:P1583 ;
+        bdo:role   bdr:R0ER0019 .
+
+bdr:MW12827  a                       bdo:Instance ;
+        bf:identifiedBy              bdr:ID9E0972E23D10FF0F , bdr:ID4CF611CFA57E16D8 , bdr:IDEC1B3ED2EB801B0F ;
+        bdo:authorshipStatement      "arranged and structured by klon-chen rab-'byams-pa"@en ;
+        bdo:biblioNote               "reproduced from a set of prints from a-'dzom chos-sgar blocksv. 7-13. published by talung tsetrul pema wangyal, darjeeling, w.b."@en ;
+        bdo:extentStatement          "13 v." ;
+        bdo:hasPart                  bdr:MW12827_BB8776 , bdr:MW12827_C93AD5 , bdr:MW12827_CBDB0C , bdr:MW12827_8E3796 , bdr:MW12827_58921B ;
+        bdo:hasSourcePrintery        bdr:G3JT12503 ;
+        bdo:hasTitle                 bdr:TT7FFDCDE93527101E ;
+        bdo:instanceEvent            bdr:EVF192DCB4E6693489 ;
+        bdo:instanceHasReproduction  bdr:W12827 ;
+        bdo:instanceOf               bdr:WA12827 ;
+        bdo:isRoot                   true ;
+        bdo:note                     bdr:NT7E4CD6992DD16DE1 ;
+        bdo:numberOfVolumes          13 ;
+        bdo:printMethod              bdr:PrintMethod_Relief_WoodBlock ;
+        bdo:publisherLocation        "delhi"@en ;
+        bdo:publisherName            "sherab gyaltsen lama"@en ;
+        bdo:script                   bdr:ScriptTibt ;
+        tmp:thumbnailIIIFService     <https://iiif.bdrc.io/bdr:I2061::020610001.tiff> ;
+        skos:prefLabel               "snying thig ya bzhi/"@bo-x-ewts .
+
+bdr:I2072  a                      bdo:ImageGroup ;
+        bdo:volumeNumber          12 ;
+        bdo:volumeOf              bdr:W12827 ;
+        bdo:volumePagesTbrcIntro  0 ;
+        bdo:volumePagesTotal      489 .
