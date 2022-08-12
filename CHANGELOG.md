@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.8.22 (2022-08-12)
+### Fix
+* **google-ocr:** Add restrictedInchina, access, copyright, license to metadata ([`2055318`](https://github.com/OpenPecha/Toolkit/commit/2055318be4e77b033a586204e3fb8d9b49eec1f2))
+
 ## v0.8.21 (2022-08-11)
 ### Fix
 * **metadata:** Add under copyright license ([`ceb9e39`](https://github.com/OpenPecha/Toolkit/commit/ceb9e39924c250fb9e0937c452ea0a174674e325))
