@@ -574,21 +574,21 @@ class GoogleOCRFormatter(BaseFormatter):
             path.write_bytes(gzip_str(low_conf_chars))
 
     # replace to test offline
-    def _get_image_list(self, bdrc_scan_id, vol_name):
-        il = get_image_list(bdrc_scan_id, vol_name)
+    def _get_image_list(self, bdrc_scan_id, image_group_id):
+        il = get_image_list(bdrc_scan_id, image_group_id)
         img2seq = {}
         for i, img in enumerate(il, start=1):
             name, ext = img["filename"].split(".")
             img2seq[name] = {"num": i, "ext": ext}
         return img2seq
 
-    def build_layers(self, responses, vol_name, base_id=None):
+    def build_layers(self, responses, image_group_id, base_id=None):
         base_pages = []
         low_conf_ann_pages = []
         language_code_ann_pages = []
         pages_ref = []
         last_pg_end_idx = 0
-        img2seq = self._get_image_list(self.bdrc_scan_id, vol_name)
+        img2seq = self._get_image_list(self.bdrc_scan_id, image_group_id)
         for response, page_ref in responses:
             n_pg = img2seq[page_ref]["num"]
 
@@ -691,12 +691,21 @@ class GoogleOCRFormatter(BaseFormatter):
               "ocr_word_mean_confidence_index": base_confidence_mean
             }
         }
+
+    @staticmethod
+    def image_group_to_folder_name(scan_id, image_group_id):
+        image_group_folder_part = image_group_id
+        pre, rest = image_group_id[0], image_group_id[1:]
+        if pre == "I" and rest.isdigit() and len(rest) == 4:
+            image_group_folder_part = rest
+        return scan_id+"-"+image_group_folder_part
     
     def create_opf(self, input_path, pecha_id, ocr_import_info = {}, buda_data = None):
         """Create opf of google ocred pecha
 
         Args:
-            input_path (str): input path
+            input_path (str): input path, local folder expected to match the output/ folder on s3, ex:
+                              s3://ocr.bdrc.io/Works/60/W22084/vision/batch001/output/
             pecha_id (str): pecha id
             ocr_import_info (Dict): an object with the following keys:
                 bdrc_scan_id: str
@@ -725,13 +734,14 @@ class GoogleOCRFormatter(BaseFormatter):
 
         self.metadata = self.get_metadata(pecha_id, ocr_import_info)
 
-        for i, vol_path in enumerate(sorted(input_path.iterdir())):
-            print(f"[INFO] Processing {input_path.name}-{vol_path.name} ...")
-            base_id = get_base_id()
-            if (self.dirs["opf_path"] / "base" / f"{base_id}.txt").is_file():
+        for image_group_id, image_group_info in buda_data["image_groups"].items():
+            vol_folder = GoogleOCRFormatter.image_group_to_folder_name(self.bdrc_scan_id, image_group_id)
+            if not (input_path / vol_folder).is_dir():
+                print("[WARN] no folder for image group "+str(input_path / vol_folder)+" (nb of images in theory: "+str(image_group_info["total_pages"])+")")
                 continue
-            responses = self.get_input(vol_path)
-            layers = self.build_layers(responses, vol_path.name, base_id)
+            base_id = image_group_id
+            responses = self.get_input(input_path / vol_folder)
+            layers = self.build_layers(responses, image_group_id, base_id)
             formatted_layers = self.format_layer(layers, base_id)
             base_text = self.get_base_text()
 
@@ -744,7 +754,7 @@ class GoogleOCRFormatter(BaseFormatter):
             for layer, ann in formatted_layers.items():
                 layer_fn = vol_layer_path / f"{layer}.yml"
                 dump_yaml(ann, layer_fn)
-            self.set_base_meta(vol_path.name, base_id)
+            self.set_base_meta(image_group_id, base_id)
 
         # we add the rest to metadata:
         self.metadata["bases"] = self.base_meta

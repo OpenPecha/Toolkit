@@ -32,6 +32,7 @@ def test_google_ocr_base_meta():
         assert output_metadata["ocr_import_info"] == expected_metadata["ocr_import_info"]
         assert output_metadata["statistics"] == expected_metadata["statistics"]
         assert output_metadata["default_language"] == expected_metadata["default_language"]
+        assert output_metadata["bases"] == expected_metadata["bases"]
 
 if __name__ == "__main__":
     test_google_ocr_base_meta()
