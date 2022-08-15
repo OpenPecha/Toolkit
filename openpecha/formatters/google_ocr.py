@@ -914,8 +914,8 @@ class GoogleOCRFormatter(BaseFormatter):
         if cs == "http://purl.bdrc.io/resource/CopyrightPublicDomain":
             return Copyright_public_domain, LicenseType.CC0
         if cs == "http://purl.bdrc.io/resource/CopyrightUndetermined":
-            return copyright_unknown, None
-        return copyright_copyrighted, LicenseType.UNDER_COPYRIGHT
+            return Copyright_unknown, None
+        return Copyright_copyrighted, LicenseType.UNDER_COPYRIGHT
             
     def get_metadata(self, pecha_id, ocr_import_info):
 
