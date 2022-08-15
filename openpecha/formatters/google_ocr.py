@@ -5,6 +5,7 @@ import re
 from enum import Enum
 from pathlib import Path
 import statistics
+import logging
 
 import datetime
 from datetime import timezone
@@ -319,10 +320,11 @@ class GoogleOCRFormatter(BaseFormatter):
         Returns:
             boolean: True if the symbol has space followed by it
         """
-        if property := symbol.get('property', {}):
-            if detected_break := property.get('detectedBreak', {}):
-                if detected_break.get("type", "") == "SPACE":
-                    return True
+        if ('property' in symbol and 
+                'detectedBreak' in symbol['property'] and 
+                'type' in symbol['property']['detectedBreak'] and 
+                symbol['property']['detectedBreak']['type'] == "SPACE"):
+            return True
         return False
     
     def extract_vertices(self, word):
@@ -448,7 +450,8 @@ class GoogleOCRFormatter(BaseFormatter):
                 new_bounding_polys.append(cur_bounding_poly)
             else:
                 next_poly = bounding_polys[poly_walker+1]
-                if space_poly := self.has_space_after(cur_bounding_poly, next_poly, avg_char_width):
+                space_poly = self.has_space_after(cur_bounding_poly, next_poly, avg_char_width)
+                if space_poly:
                     new_bounding_polys.append(cur_bounding_poly)
                     new_bounding_polys.append(space_poly)
                 else:
@@ -523,7 +526,7 @@ class GoogleOCRFormatter(BaseFormatter):
         try:
             page_content = page["textAnnotations"][0]["description"]
         except Exception:
-            print("Page empty!!")
+            logging.error("Page empty!!")
             return postprocessed_page_content
         avg_char_width = self.get_avg_char_width(page)
         bounding_polys = self.get_char_base_bounding_polys(page)
@@ -870,7 +873,7 @@ class GoogleOCRFormatter(BaseFormatter):
 
             # extract annotation
             if not response:
-                print(f"[ERROR] Failed : {n_pg}")
+                logging.error(f"Failed : {n_pg}")
                 continue
             pages = self._get_page(response)
             base_page = pages['base_page']
@@ -879,7 +882,7 @@ class GoogleOCRFormatter(BaseFormatter):
 
             # skip empty page (can be bad image)
             if not base_page:
-                print(f"[ERROR] empty page {n_pg}")
+                logging.error(f"empty page {n_pg}")
                 continue
             lines, last_pg_end_idx = self._get_lines(base_page, last_pg_end_idx, n_pg == 1)
             base_pages.append((lines[0][0], lines[-1][1], n_pg))
@@ -1013,7 +1016,7 @@ class GoogleOCRFormatter(BaseFormatter):
         for image_group_id, image_group_info in buda_data["image_groups"].items():
             vol_folder = GoogleOCRFormatter.image_group_to_folder_name(self.bdrc_scan_id, image_group_id)
             if not (input_path / vol_folder).is_dir():
-                print("[WARN] no folder for image group "+str(input_path / vol_folder)+" (nb of images in theory: "+str(image_group_info["total_pages"])+")")
+                logging.warn("no folder for image group "+str(input_path / vol_folder)+" (nb of images in theory: "+str(image_group_info["total_pages"])+")")
                 continue
             base_id = image_group_id
             responses = self.get_input(input_path / vol_folder)
