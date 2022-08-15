@@ -7,7 +7,7 @@ import pytest
 from openpecha.formatters import google_ocr
 
 from openpecha.formatters.google_ocr import GoogleOCRFormatter
-from openpecha.utils import load_yaml
+from openpecha.utils import load_yaml, dump_yaml
 
 
 @pytest.fixture(scope="module")

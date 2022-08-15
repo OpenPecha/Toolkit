@@ -1,23 +1,23 @@
-§༄༅།།བོད་ཀྱི་ནང་བསྟན་དཔེ་ཚོགས་ལྟེ་གནས།།ÇboÇ§
+༄༅།།བོད་ཀྱི་ནང་བསྟན་དཔེ་ཚོགས་ལྟེ་གནས།།
 §Tibetan Buddhist Resource Center
 Text Scan Input Form - Title Page
-Work:ÇenÇ§§W18598ImageGroup:11KG10018
+Work:ÇenÇ§W18598ImageGroup:11KG10018
 LCCN:98901114ISBN:754091064x
 Title:
-བཻ་རོའི་རྣམ་ཐར་འདྲ་འབག་ཆེན་མོ།ÇboÇ§
+བཻ་རོའི་རྣམ་ཐར་འདྲ་འབག་ཆེན་མོ།
 §||bai ro'i rnam thar 'dra 'bag chen mo/ÇgdÇ§
-§Author:
+Author:
 གཡུ་སྒྲ་སྙིང་པོ
 g.yu sgra snying po
-Descriptor: ÇboÇ§§printed from computerized input
+Descriptor: §printed from computerized input
 OriginalPublication:n/a:n/a
-Place:ÇenÇ§§khreng tu'u/
+Place:ÇenÇ§khreng tu'u/
 Publisher:si khron mi rigs dpe skrun khang/
-Date:1995ÇboÇ§
+Date:1995
 §Volume:
 Total Volumes:
 TBRC Pages:
 Introductory Pages:In/a
-Text Pages:ÇenÇ§§n/aÇboÇ§
+Text Pages:ÇenÇ§n/a
 §Scanning Information:Scanned at Tibetan Buddhist Resource Center, 150 West 17th St, New York City, NY
 10011, US. Comments: 6/2011ÇenÇ§
