@@ -9,7 +9,6 @@ import statistics
 import datetime
 from datetime import timezone
 import requests
-from antx import transfer
 from pathlib import Path
 
 from openpecha.core.annotation import Page, Span
@@ -30,6 +29,35 @@ class ExtentedLayer(Layer):
 
 class LowConfBox(BaseAnnotation):
     confidence: str
+
+class BBox:
+    def __init__(self, text: str, vertices: list, confidence: float, language: str):
+
+        self.text = text
+        self.vertices = vertices
+        self.confidence = confidence
+        self.language = language
+    
+
+    
+    def get_box_height(self):
+        y1 = self.vertices[0][1]
+        y2 = self.vertices[1][1]
+        height = abs(y2-y1)
+        return height
+    
+    
+    def get_box_orientation(self):
+        x1= self.vertices[0][0]
+        x2 = self.vertices[1][0]
+        y1= self.vertices[0][1]
+        y2 = self.vertices[1][1]
+        width = abs(x2-x1)
+        length = abs(y2-y1)
+        if width > length:
+            return "landscape"
+        else:
+            return "portrait"
 
 class GoogleOCRFormatter(BaseFormatter):
     """
@@ -63,8 +91,8 @@ class GoogleOCRFormatter(BaseFormatter):
         Returns:
             float: mid point's y coordinate of bounding poly
         """
-        y1 = bounding_poly["boundingBox"]["vertices"][0].get("y", 0)
-        y2 = bounding_poly["boundingBox"]["vertices"][2].get("y", 0)
+        y1 = bounding_poly.vertices[0][1]
+        y2 = bounding_poly.vertices[2][1]
         y_avg = (y1 + y2) / 2
         return y_avg
 
@@ -79,8 +107,8 @@ class GoogleOCRFormatter(BaseFormatter):
         """
         height_sum = 0
         for bounding_poly in bounding_polys:
-            y1 = bounding_poly["boundingBox"]["vertices"][0].get("y", 0)
-            y2 = bounding_poly["boundingBox"]["vertices"][2].get("y", 0)
+            y1 = bounding_poly.vertices[0][1]
+            y2 = bounding_poly.vertices[2][1]
             height_sum += y2 - y1
         avg_height = height_sum / len(bounding_polys)
         return avg_height
@@ -108,22 +136,48 @@ class GoogleOCRFormatter(BaseFormatter):
             return False
 
     def get_low_confidence_ann(self, bounding_poly):
-        if bounding_poly['confidence'] >0.9:
-            return bounding_poly.get("text", "")
+        """Annotate poly having confidence index less than 0.9 or 90%
+
+        Args:
+            bounding_poly (bbox): bbox object
+
+        Returns:
+            text: text annotated with low confidence annotation
+        """
+        if bounding_poly.confidence >0.9:
+            return bounding_poly.text
         else:
-            return f"§{bounding_poly.get('text', '')}Ç{bounding_poly['confidence']}Ç§"
+            return f"§{bounding_poly.text}Ç{bounding_poly.confidence}Ç§"
     
     def get_language_code(self, bounding_poly):
-        if "property" not in bounding_poly or "detectedLanguages" not in bounding_poly["property"]:
-            return None
-        # Google ocr proposes several languages, each with a confidence index
-        # we only take the first one
-        return bounding_poly["property"]["detectedLanguages"][0]["languageCode"]
+        """Returns language code of the bounding poly
+
+        Args:
+            bounding_poly (dict): bounding poly info
+
+        Returns:
+            str: language code of the bounding poly it exist
+        """
+        properties = bounding_poly.get("property", {})
+        if properties:
+            languages = properties.get("detectedLanguages", [])
+            if languages:
+                return languages[0]['languageCode']
+        return ""
+
     
     def get_language_code_ann(self, bounding_poly):
-        text = bounding_poly.get("text", "")
-        language_code = self.get_language_code(bounding_poly)
-        if language_code is not None and language_code != self.default_language:
+        """Annotate language code of the poly's language is not tibetan
+
+        Args:
+            bounding_poly (bbox): bbox object
+
+        Returns:
+            str: text annotated with language code
+        """
+        text = bounding_poly.text
+        language_code = bounding_poly.language
+        if language_code and language_code != 'bo':
             return f"§{text}Ç{language_code}Ç§"
         else:
             return text
@@ -152,14 +206,14 @@ class GoogleOCRFormatter(BaseFormatter):
         avg_line_height = self.get_avg_bounding_poly_height(bounding_polys)
         for bounding_poly in bounding_polys:
             if self.is_in_cur_line(prev_bounding_poly, bounding_poly, avg_line_height):
-                cur_base_line += bounding_poly.get("text", "")
+                cur_base_line += bounding_poly.text
                 cur_low_conf_annotated_line += self.get_low_confidence_ann(bounding_poly)
                 cur_language_code_annotated_line += self.get_language_code_ann(bounding_poly)
             else:
                 base_lines.append(cur_base_line)
                 low_conf_annotated_lines.append(cur_low_conf_annotated_line)
                 language_code_annotated_lines.append(cur_language_code_annotated_line)
-                cur_base_line = bounding_poly.get("text", "")
+                cur_base_line = bounding_poly.text
                 cur_low_conf_annotated_line = self.get_low_confidence_ann(bounding_poly)
                 cur_language_code_annotated_line = self.get_language_code_ann(bounding_poly)
             prev_bounding_poly = bounding_poly
@@ -174,21 +228,6 @@ class GoogleOCRFormatter(BaseFormatter):
         lines['language_code_annotated_lines'] = language_code_annotated_lines
         return lines
 
-    def transfer_space(self, base_with_space, base_without_space):
-        """transfer space from base with space to without space
-
-        Args:
-            base_with_space (str): base with space which is extracted from page['textAnnotations'][0]['description']
-            base_without_space (str): base without space as it is generated using accumulating non space char only
-
-        Returns:
-            [str]: page content
-        """
-        new_base = transfer(
-            base_with_space, [["space", r"( )"]], base_without_space, output="txt"
-        )
-        return new_base
-
     def find_centriod(self, bounding_poly):
         """Calculate centriod of bounding poly
 
@@ -200,9 +239,9 @@ class GoogleOCRFormatter(BaseFormatter):
         """
         sum_of_x = 0
         sum_of_y = 0
-        for vertice in bounding_poly["boundingBox"]["vertices"]:
-            sum_of_x += vertice['x']
-            sum_of_y += vertice['y']
+        for vertice in bounding_poly.vertices:
+            sum_of_x += vertice[0]
+            sum_of_y += vertice[1]
         centriod = [sum_of_x/4, sum_of_y/4]
         return centriod
 
@@ -271,7 +310,60 @@ class GoogleOCRFormatter(BaseFormatter):
             sorted_bounding_polys.append(bounding_polys[f"{bounding_poly_centriod[0]},{bounding_poly_centriod[1]}"])
         return sorted_bounding_polys
 
+    def has_space_attached(self, symbol):
+        """Checks if symbol has space followed by it or not
+
+        Args:
+            symbol (dict): symbol info
+
+        Returns:
+            boolean: True if the symbol has space followed by it
+        """
+        if property := symbol.get('property', {}):
+            if detected_break := property.get('detectedBreak', {}):
+                if detected_break.get("type", "") == "SPACE":
+                    return True
+        return False
+    
+    def extract_vertices(self, word):
+        """Extract vertices of bounding poly
+
+        Args:
+            word (dict): bounding poly info of a word
+
+        Returns:
+            list: list of vertices coordinates
+        """
+        vertices = []
+        for vertice in word['boundingBox']['vertices']:
+            vertices.append([vertice['x'], vertice['y']])
+        return vertices
+
+    def dict_to_bbox(self, word):
+        """Convert bounding poly to BBox object
+
+        Args:
+            word (dict): bounding poly of a word infos
+
+        Returns:
+            obj: BBox object of bounding poly
+        """
+        text = word.get('text', '')
+        confidence = word.get('confidence', 0.0)
+        language = self.get_language_code(word)
+        vertices = self.extract_vertices(word)
+        bbox = BBox(text=text, vertices=vertices, confidence=confidence, language=language)
+        return bbox
+
     def get_char_base_bounding_polys(self, response):
+        """Return bounding polys in page response
+
+        Args:
+            response (dict): google ocr output of a page
+
+        Returns:
+            list: list of BBox object which saves required info of a bounding poly
+        """
         bounding_polys = []
         cur_word = ""
         for page in response['fullTextAnnotation']['pages']:
@@ -280,15 +372,138 @@ class GoogleOCRFormatter(BaseFormatter):
                     for word in paragraph['words']:
                         for symbol in word['symbols']:
                             cur_word += symbol['text']
+                            if self.has_space_attached(symbol):
+                                cur_word += " "
                         word['text'] = cur_word
                         cur_word = ""
-                        bounding_polys.append(word)
+                        bbox = self.dict_to_bbox(word)
+                        bounding_polys.append(bbox)
         return bounding_polys
 
     def populate_confidence(self, bounding_polys):
+        """Populate confidence of bounding polys of pecha level and image group level
+
+        Args:
+            bounding_polys (list): list of bounding polys
+        """
         for bounding_poly in bounding_polys:
-            self.word_confidences.append(float(bounding_poly['confidence']))
-            self.cur_base_word_confidences.append(float(bounding_poly['confidence']))
+            self.word_confidences.append(float(bounding_poly.confidence))
+            self.cur_base_word_confidences.append(float(bounding_poly.confidence))
+    
+    def get_space_poly_vertices(self, cur_bounding_poly, next_poly):
+        """Return space bounding poly's vertices of located in between given polys
+
+        Args:
+            cur_bounding_poly (bbox): first bbox obj
+            next_poly (bbox): second bbox obj
+
+        Returns:
+            list: list of vertices of space poly located in between
+        """
+        vertices = [
+            cur_bounding_poly.vertices[1],
+            next_poly.vertices[0],
+            next_poly.vertices[3],
+            cur_bounding_poly.vertices[2],
+        ]
+        return vertices
+        
+    def has_space_after(self, cur_bounding_poly, next_poly, avg_char_width):
+        """Checks if there is space between two poly or not if yes returns a space poly bbox object
+
+        Args:
+            cur_bounding_poly (bbox): first bbox
+            next_poly (bbox): second bbox
+            avg_char_width (float): avg width of char in page
+
+        Returns:
+            bbox or none: space bbox object
+        """
+        cur_poly_top_right_corner = cur_bounding_poly.vertices[1][0]
+        next_poly_top_left_corner = next_poly.vertices[0][0]
+        if next_poly_top_left_corner - cur_poly_top_right_corner > avg_char_width*0.75 and " " not in cur_bounding_poly.text:
+            space_poly_vertices = self.get_space_poly_vertices(cur_bounding_poly, next_poly)
+            space_box = BBox(
+                text=" ",
+                vertices=space_poly_vertices,
+                confidence=1.0,
+                language=""
+            )
+            return space_box
+        return None
+    
+    def insert_space_bounding_poly(self, bounding_polys, avg_char_width):
+        """Inserts space bounding poly if missing
+
+        Args:
+            bounding_polys (list): list of bbox objects
+            avg_char_width (float): avg width of char
+
+        Returns:
+            list: list of bbox objects
+        """
+        new_bounding_polys = []
+        for poly_walker, cur_bounding_poly in enumerate(bounding_polys):
+            if poly_walker == len(bounding_polys)-1:
+                new_bounding_polys.append(cur_bounding_poly)
+            else:
+                next_poly = bounding_polys[poly_walker+1]
+                if space_poly := self.has_space_after(cur_bounding_poly, next_poly, avg_char_width):
+                    new_bounding_polys.append(cur_bounding_poly)
+                    new_bounding_polys.append(space_poly)
+                else:
+                    new_bounding_polys.append(cur_bounding_poly)
+        return new_bounding_polys
+    
+    def is_tibetan(self, symbol):
+        """Checks if symbol content tibetan character
+
+        Args:
+            symbol (dict): symbol info
+
+        Returns:
+            boolean: True if character is Tibetan
+        """
+        if re.search("\u0F00-\u0FDA", symbol['text']):
+            return True
+        return False
+    
+    def is_non_consonant(self, symbol):
+        """Checks if tibetan character is Tibetan consonant or not
+
+        Args:
+            symbol (dict): symbol info
+
+        Returns:
+            boolean: True if character is tibetan consonant
+        """
+        if re.search('[ཀ-ཨ]', symbol['text']):
+            return False
+        return True
+
+    def get_avg_char_width(self, response):
+        """Calculate average width of box in a page, ignoring non consonant tibetan char
+
+        Args:
+            response (dict): ocr output of a page
+
+        Returns:
+            float: average box width in which character are saved
+        """
+        widths = []
+        for page in response['fullTextAnnotation']['pages']:
+            for block in page['blocks']:
+                for paragraph in block['paragraphs']:
+                    for word in paragraph['words']:
+                        for symbol in word['symbols']:
+                            if self.is_tibetan(symbol) and self.is_non_consonant(symbol):
+                                continue
+                            vertices = symbol['boundingBox']['vertices']
+                            x1 = vertices[0]['x']
+                            x2 = vertices[1]['x']
+                            width = x2-x1
+                            widths.append(width)
+        return sum(widths) / len(widths)
 
     def post_process_page(self, page):
         """parse page response to generate page content by reordering the bounding polys
@@ -297,7 +512,7 @@ class GoogleOCRFormatter(BaseFormatter):
             page (dict): page content response given by google ocr engine
 
         Returns:
-            str: page content
+            dict: base page, low confidence annotated page and language code annotated page 
         """
         post_processed_pages = {
             'base_page': '',
@@ -310,22 +525,18 @@ class GoogleOCRFormatter(BaseFormatter):
         except Exception:
             print("Page empty!!")
             return postprocessed_page_content
+        avg_char_width = self.get_avg_char_width(page)
         bounding_polys = self.get_char_base_bounding_polys(page)
         self.populate_confidence(bounding_polys)
         sorted_bounding_polys = self.sort_bounding_polys(bounding_polys)
+        sorted_bounding_polys = self.insert_space_bounding_poly(sorted_bounding_polys, avg_char_width)
         lines = self.get_lines(sorted_bounding_polys)
-
-        page_content_without_space = "\n".join(lines.get("base_lines", []))
+        base_page = "\n".join(lines.get("base_lines", []))
         page_with_low_conf_ann = "\n".join(lines.get("low_conf_annotated_lines", []))
         page_with_language_code_ann = "\n".join(lines.get("language_code_annotated_lines", []))
-        postprocessed_page_content = self.transfer_space(
-            page_content, page_content_without_space
-        )
-        postprocessed_pg_with_low_conf_ann = self.transfer_space(postprocessed_page_content, page_with_low_conf_ann)
-        postprocessed_pg_with_language_code_ann = self.transfer_space(postprocessed_page_content, page_with_language_code_ann)
-        post_processed_pages["base_page"] = postprocessed_page_content + "\n"
-        post_processed_pages["low_conf_annotated_page"] = postprocessed_pg_with_low_conf_ann + "\n"
-        post_processed_pages["language_code_annotated_page"] = postprocessed_pg_with_language_code_ann + "\n"
+        post_processed_pages["base_page"] = base_page.replace("་ ", "་")  + "\n"
+        post_processed_pages["low_conf_annotated_page"] = page_with_low_conf_ann.replace("་ ", "་")  + "\n"
+        post_processed_pages["language_code_annotated_page"] = page_with_language_code_ann.replace("་ ", "་")  + "\n"
         return post_processed_pages
 
 
@@ -347,10 +558,26 @@ class GoogleOCRFormatter(BaseFormatter):
                 yield None, None
 
     def extract_confidence(self, chunk):
+        """Extract confidence index from the low confidence annotated text
+
+        Args:
+            chunk (str): low confidence annotated text
+
+        Returns:
+            str: confidence index
+        """
         confidence = re.search("Ç(.+?)Ç", chunk).group(1)
         return confidence
         
     def format_low_confidence_box_layer(self, low_conf_ann_text):
+        """Format low confidence layer
+
+        Args:
+            low_conf_ann_text (str): text annotated with low confidence index
+
+        Returns:
+            dict: low confidence layer
+        """
         base_text = ""
         anns = {}
         low_conf_ann_text = low_conf_ann_text.replace("\n", "¢")
@@ -371,10 +598,26 @@ class GoogleOCRFormatter(BaseFormatter):
         return json.loads(layer.json(exclude_none=True))
     
     def extract_language_code(self, chunk):
+        """Extract language code from non default language annotated text
+
+        Args:
+            chunk (str): non default language annotated text
+
+        Returns:
+            str: language code
+        """
         language_code = re.search("Ç(.+?)Ç", chunk).group(1)
         return language_code
     
     def extract_text(self, chunk):
+        """Extract text from annotated text
+
+        Args:
+            chunk (str):  annotated text
+
+        Returns:
+            str: text part from the annotated text
+        """
         text = re.search('§(.+?)Ç.+?Ç', chunk).group(1)
         return text
 
@@ -390,12 +633,20 @@ class GoogleOCRFormatter(BaseFormatter):
         return cur_annotated_chunk, cur_language_code
 
     def rm_short_ann(self, text):
+        """Remove short language annotated chunk from the text
+
+        Args:
+            text (str): language code annotated text
+
+        Returns:
+            str: language code annotated text
+        """
         new_text = text
-        for ann in re.findall("(§.+?§)", text):
+        for ann in re.findall("§.+?§", text):
             ann_text = self.extract_text(ann)
-            ann  = re.escape(ann)
+            ann_pat = re.compile("§(.+?)Ç.+?Ç§")
             if len(ann_text) < 30:
-                new_text = re.sub(ann, ann_text, new_text, 1)
+                new_text = ann_pat.sub("\g<1>", new_text, 1)
         return new_text
 
     def add_default_lang_code(self, text):
@@ -410,6 +661,16 @@ class GoogleOCRFormatter(BaseFormatter):
         return new_text
 
     def is_mergeable_chunk(self, prev_chunk, chunk, last_lang_code):
+        """Checks whether current chunk can be merged with prev chunk.
+
+        Args:
+            prev_chunk (str): previous chunk
+            chunk (str): cur chunk
+            last_lang_code (str): last language code
+
+        Returns:
+            boolean: True if current chunk has same language code as prev chunk or last language code
+        """
         if re.search("§.+?§", prev_chunk) or prev_chunk == "¢":
             try:
                 prev_lang_code = self.extract_language_code(prev_chunk)
@@ -421,6 +682,14 @@ class GoogleOCRFormatter(BaseFormatter):
         return False
 
     def merge_consecutive_ann(self, ann_text):
+        """Merge all the consecutive language annotation if mergeable
+
+        Args:
+            ann_text (str): language code annotated text
+
+        Returns:
+            str: language code annotated text
+        """
         new_text = ""
         chunks = re.split("(§.+?§)", ann_text)
         if chunks:
@@ -460,13 +729,20 @@ class GoogleOCRFormatter(BaseFormatter):
             if cur_annotated_chunk:
                 new_text += f"{cur_annotated_chunk}Ç{cur_language_code}Ç§"
             new_text = self.rm_short_ann(new_text)
-            new_text = self.add_default_lang_code(new_text)
-            new_text = re.sub(r"(¢)(Ç.+?Ç§)", r"\g<2>\g<1>", new_text)
+            new_text = re.sub("(¢)(Ç.+?Ç§)", r"\g<2>\g<1>", new_text)
         else:
             new_text = ann_text
         return new_text
 
     def format_language_layer(self, language_code_annotated_text):
+        """Format language layer
+
+        Args:
+            language_code_annotated_text (str): language code annotated text
+
+        Returns:
+            dict: language layer
+        """
         base_text = ""
         anns = {}
         language_code_annotated_text = language_code_annotated_text.replace("\n", "¢")
