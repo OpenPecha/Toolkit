@@ -22,14 +22,14 @@ from openpecha.utils import dump_yaml, gzip_str
 
 from openpecha.buda.api import get_buda_scan_info, get_image_list
 
-extended_LayerEnum = [(l.name, l.value) for l in LayerEnum] + [("low_conf_box", "LowConfBox")]
+extended_LayerEnum = [(l.name, l.value) for l in LayerEnum] + [("low_conf_box", "OCRConfidence")]
 LayerEnum = Enum("LayerEnum", extended_LayerEnum)
 
 class ExtentedLayer(Layer):
     annotation_type: LayerEnum
 
-class LowConfBox(BaseAnnotation):
-    confidence: str
+class OCRConfidence(BaseAnnotation):
+    confidence: float
 
 class BBox:
     def __init__(self, text: str, vertices: list, confidence: float, language: str):
@@ -136,64 +136,7 @@ class GoogleOCRFormatter(BaseFormatter):
         else:
             return False
 
-    def get_low_confidence_ann(self, bounding_poly, char_walker):
-        """Annotate poly having confidence index less than 0.9 or 90%
-
-        Args:
-            bounding_poly (bbox): bbox object
-
-        Returns:
-            text: text annotated with low confidence annotation
-        """
-        ann = {}
-        if bounding_poly.confidence >0.9:
-            return None, char_walker + len(bounding_poly.text)
-        else:
-            end = char_walker + len(bounding_poly.text)
-            span = Span(start=char_walker, end=end)
-            uuid = self.get_unique_id()
-            low_conf_ann = LowConfBox(span=span, confidence=bounding_poly.confidence)
-            ann[uuid] = low_conf_ann
-            return ann, end
-    
-    def get_language_code(self, bounding_poly):
-        """Returns language code of the bounding poly
-
-        Args:
-            bounding_poly (dict): bounding poly info
-
-        Returns:
-            str: language code of the bounding poly it exist
-        """
-        properties = bounding_poly.get("property", {})
-        if properties:
-            languages = properties.get("detectedLanguages", [])
-            if languages:
-                return languages[0]['languageCode']
-        return ""
-
-    
-    def get_language_code_ann(self, bounding_poly, char_walker):
-        """Annotate language code of the poly's language is not tibetan
-
-        Args:
-            bounding_poly (bbox): bbox object
-
-        Returns:
-            str: text annotated with language code
-        """
-        ann = {}
-        if bounding_poly.language != "bo":
-            return None, char_walker + len(bounding_poly.text)
-        else:
-            end = char_walker + len(bounding_poly.text)
-            span = Span(start=char_walker, end=end)
-            uuid = self.get_unique_id()
-            low_conf_ann = Language(span=span, language=bounding_poly.language)
-            ann[uuid] = low_conf_ann
-            return ann, end
-
-    def get_lines(self, bounding_polys):
+    def get_poly_lines(self, bounding_polys):
         """Return list of lines in page using bounding polys of page
 
         Args:
@@ -447,31 +390,19 @@ class GoogleOCRFormatter(BaseFormatter):
                     new_bounding_polys.append(cur_bounding_poly)
         return new_bounding_polys
     
-    def is_tibetan(self, symbol):
-        """Checks if symbol content tibetan character
+    def is_tibetan_non_consonant(self, symbol):
+        """Checks if tibetan character is Tibetan but not a consonant
 
         Args:
             symbol (dict): symbol info
 
         Returns:
-            boolean: True if character is Tibetan
+            boolean: True if character is Tibetan non-consonant
         """
-        if re.search("\u0F00-\u0FDA", symbol['text']):
+        # we assume there is just one character:
+        c = ord(symbol['text'][0])
+        if (c >= ord('ༀ') and c <= ord('༿')) or (c >= ord('ཱ') and c <= ord('࿚')):
             return True
-        return False
-    
-    def is_non_consonant(self, symbol):
-        """Checks if tibetan character is Tibetan consonant or not
-
-        Args:
-            symbol (dict): symbol info
-
-        Returns:
-            boolean: True if character is tibetan consonant
-        """
-        if re.search('[ཀ-ཨ]', symbol['text']):
-            return False
-        return True
 
     def get_avg_char_width(self, response):
         """Calculate average width of box in a page, ignoring non consonant tibetan char
@@ -488,7 +419,7 @@ class GoogleOCRFormatter(BaseFormatter):
                 for paragraph in block['paragraphs']:
                     for word in paragraph['words']:
                         for symbol in word['symbols']:
-                            if self.is_tibetan(symbol) and self.is_non_consonant(symbol):
+                            if self.is_tibetan_non_consonant(symbol):
                                 continue
                             vertices = symbol['boundingBox']['vertices']
                             x1 = vertices[0]['x']
@@ -496,113 +427,6 @@ class GoogleOCRFormatter(BaseFormatter):
                             width = x2-x1
                             widths.append(width)
         return sum(widths) / len(widths)
-    
-    def get_base_page(self, line_wise_poly):
-        base_page = ""
-        for line in line_wise_poly:
-            for poly in line:
-                base_page += poly.text
-            base_page += "\n"
-        return base_page
-
-    def post_process_page(self, page):
-        """parse page response to generate page content by reordering the bounding polys
-
-        Args:
-            page (dict): page content response given by google ocr engine
-
-        Returns:
-            dict: base page, low confidence annotated page and language code annotated page 
-        """
-        post_processed_pages = {
-            'base_page': '',
-            'line_wise_poly': []
-        }
-        postprocessed_page_content = ""
-        try:
-            page_content = page["textAnnotations"][0]["description"]
-        except Exception:
-            print("Page empty!!")
-            return postprocessed_page_content
-        avg_char_width = self.get_avg_char_width(page)
-        bounding_polys = self.get_char_base_bounding_polys(page)
-        self.populate_confidence(bounding_polys)
-        sorted_bounding_polys = self.sort_bounding_polys(bounding_polys)
-        sorted_bounding_polys = self.insert_space_bounding_poly(sorted_bounding_polys, avg_char_width)
-        lines = self.get_lines(sorted_bounding_polys)
-        base_page = self.get_base_page(lines)
-        post_processed_pages["base_page"] = base_page
-        post_processed_pages["line_wise_poly"] = lines
-        return post_processed_pages
-
-
-    def get_input(self, input_path):
-        """
-        load and return all jsons in the input_path.
-        """
-        for fn in sorted(list(input_path.iterdir())):
-            if fn.name.split(".")[0] == "info":
-                continue
-            try:
-                if fn.suffix == ".gz":
-                    yield json.load(gzip.open(str(fn), "rb")), fn.stem.split(".")[0]
-                else:
-                    yield json.load(fn.open()), fn.stem
-            except GeneratorExit:
-                return None, None
-            except Exception:
-                yield None, None
-
-    def format_layer(self, layers, base_id):
-        anns = {}
-        for (start, end, n_pg), page_ref in zip(layers["base_pages"], layers["pages_ref"]):
-            uuid = self.get_unique_id()
-            span = Span(start=start, end=end)
-            page = Page(span=span, imgnum=n_pg, reference=page_ref)
-            anns[uuid] = page
-
-        layer = ExtentedLayer(annotation_type=LayerEnum.pagination, annotations=anns)
-        result = {
-            LayerEnum.pagination.value: json.loads(layer.json(exclude_none=True))
-        }
-        result[LayerEnum.low_conf_box.value] = json.loads(ExtentedLayer(annotation_type=LayerEnum.low_conf_box, annotations=layers["low_conf_anns"]).json(exclude_none=True))
-        result[LayerEnum.language.value] = json.loads(ExtentedLayer(annotation_type=LayerEnum.language, annotations=layers["language_code_anns"]).json(exclude_none=True))
-
-        return result
-
-    def _get_page(self, response):
-        pages = {
-            'base_page': '',
-            'line_wise_poly': [],
-        }
-        try:
-            if len(response["textAnnotations"]) != 0:
-                page = response["textAnnotations"][0]
-            else:
-                return pages
-        except KeyError:
-            return pages
-
-        pages = self.post_process_page(response)
-
-        return pages 
-
-    def _get_lines(self, text, last_pg_end_idx, is_first_pg):
-        lines = []
-        line_breaks = [m.start() for m in re.finditer("\n", text)]
-
-        start = last_pg_end_idx
-
-        # increase the start idx with page_breaker_char for page greater than frist page.
-        if not is_first_pg:
-            start += self.n_page_breaker_char + 1
-            line_breaks = list(map(lambda x: x + start, line_breaks))
-
-        for line in line_breaks:
-            lines.append((start, line - 1))  # skip new_line, which has 1 char length
-            start += (line - start) + 1
-
-        return lines, line
 
     def save_boundingPoly(self, response, path):
         def tlbr(vertices):
@@ -631,83 +455,146 @@ class GoogleOCRFormatter(BaseFormatter):
 
     # replace to test offline
     def _get_image_list(self, bdrc_scan_id, image_group_id):
-        il = get_image_list(bdrc_scan_id, image_group_id)
-        img2seq = {}
-        for i, img in enumerate(il, start=1):
-            name, ext = img["filename"].split(".")
-            img2seq[name] = {"num": i, "ext": ext}
-        return img2seq
+        return get_image_list(bdrc_scan_id, image_group_id)
 
-    def get_low_conf_anns(self, line_wise_poly, last_pg_idx, is_first_pg):
-        char_walker = last_pg_idx
-        if not is_first_pg:
-            char_walker += self.n_page_breaker_char
-        anns = {}
-        cur_ann = {}
-        for line in line_wise_poly:
-            for poly in line:
-                cur_ann, char_walker = self.get_low_confidence_ann(poly, char_walker)
-                if cur_ann:
-                    anns.update(cur_ann)
-            char_walker += 1
-        return anns
-    
-    def get_language_code_anns(self, line_wise_poly, last_pg_idx, is_first_pg):
-        char_walker = last_pg_idx
-        if not is_first_pg:
-            char_walker += self.n_page_breaker_char
-        anns = {}
-        cur_ann = {}
-        for line in line_wise_poly:
-            for poly in line:
-                cur_ann, char_walker = self.get_language_code_ann(poly, char_walker)
-                if cur_ann:
-                    anns.update(cur_ann)
-            char_walker += 1
-        return anns
+    def get_language_code(self, poly):
+        lang = ""
+        properties = poly.get("property", {})
+        if properties:
+            languages = properties.get("detectedLanguages", [])
+            if languages:
+                lang = languages[0]['languageCode']
+                break
+        if polang == "":
+            return default_language
+        if lang in ["bo", "en", "cn"]:
+            return poly.language
+        if lang == "dz":
+            return "bo"
+        # English is a kind of default for our purpose
+        return "en"
 
-    def build_layers(self, responses, image_group_id, base_id=None):
-        base_pages = []
-        low_conf_anns = {}
-        language_code_anns = {}
-        pages_ref = []
-        last_pg_end_idx = 0
-        char_walker = 0
-        img2seq = self._get_image_list(self.bdrc_scan_id, image_group_id)
-        for response, page_ref in responses:
-            n_pg = img2seq[page_ref]["num"]
+    def add_language(self, poly, poly_start_cc, state):
+        poly_lang = self.get_language_code(poly)
+        previous_ann = state["latest_language_annotation"]
+        poly_end_cc = state["base_layer_len"] # by construction
+        if previous_ann is not None:
+            # if poly has the same language as the latest annotation, we just lengthen the previous
+            # annotation to include this poly:
+            if poly_lang == previous_ann["language"]:
+                previous_ann.span.end = poly_end_cc
+                return
+            # if poly is the default language, we just conclude the previous annotation
+            if poly_lang == self.default_language:
+                state["latest_language_annotation"] = None
+                return
+            # else, we create a new annotation
+            annotation = {"start": poly_start_cc, "end": poly_end_cc, "lang": poly_lang}
+            state["language_annotations"].append(annotation)
+            state["latest_language_annotation"] = annotation
+            return
+        # if there's no previous annotation and language is the default language, return
+        if poly_lang == self.default_language:
+            return
+        # if there's no previous annotation and language is not the default, we create an annotation
+        annotation = {"start": poly_start_cc, "end": poly_end_cc, "lang": poly_lang}
+        state["language_annotations"].append(annotation)
+        state["latest_language_annotation"] = annotation
 
-            # extract annotation
-            if not response:
-                logging.error(f"Failed : {n_pg}")
+    def add_low_confidence(self, poly, poly_start_cc, state):
+        if bounding_poly.confidence >0.9:
+            return
+        state["low_confidence_annotations"][self.get_unique_id()] = OCRConfidence(
+            span=Span(start=poly_start_cc, end=state["base_layer_len"]), 
+            confidence=bounding_poly.confidence)
+
+    def build_page(self, ocr_object, state):
+        try:
+            page_content = ocr_object["textAnnotations"][0]["description"]
+        except Exception:
+            logging.error("OCR page is empty (no textAnnotations[0]/description)")
+            return
+        avg_char_width = self.get_avg_char_width(ocr_object)
+        bounding_polys = self.get_char_base_bounding_polys(ocr_object)
+        sorted_bounding_polys = self.sort_bounding_polys(bounding_polys)
+        sorted_bounding_polys = self.insert_space_bounding_poly(sorted_bounding_polys, avg_char_width)
+        poly_lines = self.get_poly_lines(sorted_bounding_polys)
+        page_start_cc = state["base_layer_len"]
+        previous_language = self.default_language
+        current_language_annotation = None
+        for poly_line in poly_lines:
+            for poly in poly_line:
+                state["base_layer"] += poly.text
+                start_cc = state["base_layer_len"]
+                state["base_layer_len"] += len(poly.text)
+                state["word_confidences"].append(float(bounding_poly.confidence))
+                self.add_language(poly, start_cc, state)
+                self.add_low_confidence(poly, start_cc, state)
+            # adding a line break at the end of a line
+            state["base_layer"] += "\n"
+            state["base_layer_len"] += 1
+        # add pagination annotation:
+        page_annotation_uuid = self.get_unique_id()
+        state["pagination_annotations"][self.get_unique_id()] = Page(
+            span=Span(page_start_cc, state["base_layer_len"]), 
+            imgnum=image_number, 
+            reference=imageinfo["filename"])
+        # adding another line break at the end of a page
+        state["base_layer"] += "\n"
+        state["base_layer_len"] += 1
+
+    def merge_language_annotations(self, annotation_list):
+        annotations = {}
+        # annotation list is in span order
+        for annotation in annotation_list:
+            # TODO: all annotations of less than 30 characters should be merged
+            # with the previous one
+            annotations[self.get_unique_id()] = Language(
+                span = Span(start=annotation["start"], end=annotation["end"]),
+                language = annotation["language"])
+        return annotations
+
+    def build_base(self, image_group_id, image_group_ocr_path):
+        """ The main function that takes the OCR results for an entire volume
+            and creates its base and layers
+        """
+        image_list = self._get_image_list(self.bdrc_scan_id, image_group_id)
+        state = {
+            "base_layer_len": 0,
+            "base_layer": "",
+            "low_confidence_annotations": {},
+            "language_annotations": [],
+            "pagination_annotations": {},
+            "word_confidences": [],
+            "latest_language_annotation": None
+        }
+        for image_number, imginfo in enumerate(image_list):
+            image_filename = imginfo["filename"]
+            expected_ocr_filename = image_filename[:image_filename.rfind('.')]+".json.gz"
+            expected_ocr_path = image_group_ocr_path / expected_ocr_filename
+            if not expected_ocr_path.is_file():
+                logging.warn("could not find "+str(expected_ocr_path))
                 continue
-            pages = self._get_page(response)
-            base_page = pages['base_page']
-
-            # skip empty page (can be bad image)
-            if not base_page:
-                logging.error(f"empty page {n_pg}")
+            ocr_object = None
+            try:
+                ocr_object = json.load(gzip.open(str(expected_ocr_path), "rb"))
+            except:
+                logging.error("could not read "+str(expected_ocr_path))
                 continue
-            lines, last_pg_end_idx = self._get_lines(base_page, last_pg_end_idx, n_pg == 1)
-            base_pages.append((lines[0][0], lines[-1][1], n_pg))
-            pages_ref.append(f"{page_ref}.{img2seq[page_ref]['ext']}")
+            self.build_page(ocr_object, state)
+        layers = {}
+        if state["pagination_annotations"]:
+            layer = ExtentedLayer(annotation_type=LayerEnum.pagination, annotations=state["pagination_annotations"])
+            layers["Pagination"] = layer
+        if state["language_annotations"]:
+            annotations = self.merge_language_annotations()
+            layer = ExtentedLayer(annotation_type=LayerEnum.language, annotations=annotations)
+            layers["Language"] = layer
+        if state["low_confidence_annotations"]:
+            layer = ExtentedLayer(annotation_type=LayerEnum.low_conf_box, annotations=state["low_confidence_annotations"])
+            layers["OCRConfidence"] = layer
 
-            # create base_text
-            self.base_text.append(base_page)
-            cur_page_low_conf_anns = self.get_low_conf_anns(pages['line_wise_poly'], char_walker, n_pg == 1)
-            cur_page_lang_code_anns = self.get_language_code_anns(pages['line_wise_poly'], char_walker, n_pg == 1)
-            char_walker = last_pg_end_idx
-            low_conf_anns.update(cur_page_low_conf_anns)
-            language_code_anns.update(cur_page_lang_code_anns)
-
-        result = {
-            "base_pages": base_pages,
-            "pages_ref": pages_ref,
-            "low_conf_anns": low_conf_anns,
-            "language_code_anns": language_code_anns
-            }
-
-        return result
+        return state["base_layer"], layers, state["word_confidences"]
 
     def get_base_text(self):
         base_text = f"{self.page_break}".join(self.base_text)
@@ -726,7 +613,6 @@ class GoogleOCRFormatter(BaseFormatter):
         return Copyright_copyrighted, LicenseType.UNDER_COPYRIGHT
             
     def get_metadata(self, pecha_id, ocr_import_info):
-
         source_metadata = {
             "id": f"http://purl.bdrc.io/resource/{self.bdrc_scan_id}",
             "title": "",
@@ -752,17 +638,7 @@ class GoogleOCRFormatter(BaseFormatter):
         )
         return json.loads(metadata.json())
 
-    def get_base_confidence_median(self):
-        cur_base_confidences = self.cur_base_word_confidences
-        base_confidence_median = statistics.median(cur_base_confidences)
-        return base_confidence_median
-    
-    def get_base_confidence_mean(self):
-        cur_base_confidences = self.cur_base_word_confidences
-        base_confidence_mean = statistics.mean(cur_base_confidences)
-        return base_confidence_mean
-
-    def set_base_meta(self, image_group_id, base_file_name):
+    def set_base_meta(self, image_group_id, base_file_name, word_confidence_list):
         base_confidence_median = self.get_base_confidence_median()
         base_confidence_mean = self.get_base_confidence_mean()
         self.cur_word_confidences = []
@@ -771,8 +647,8 @@ class GoogleOCRFormatter(BaseFormatter):
             "order": self.buda_data["image_groups"][image_group_id]["volume_number"],
             "base_file": f"{base_file_name}.txt",
             "statistics": {
-              "ocr_word_median_confidence_index": base_confidence_median,
-              "ocr_word_mean_confidence_index": base_confidence_mean
+              "ocr_word_median_confidence_index": statistics.median(word_confidence_list),
+              "ocr_word_mean_confidence_index": statistics.mean(word_confidence_list)
             }
         }
 
@@ -817,6 +693,7 @@ class GoogleOCRFormatter(BaseFormatter):
         self.default_language = "bo" if "expected_default_language" not in ocr_import_info else ocr_import_info["expected_default_language"]
 
         self.metadata = self.get_metadata(pecha_id, ocr_import_info)
+        total_word_confidence_list = []
 
         for image_group_id, image_group_info in self.buda_data["image_groups"].items():
             vol_folder = GoogleOCRFormatter.image_group_to_folder_name(self.bdrc_scan_id, image_group_id)
@@ -824,10 +701,7 @@ class GoogleOCRFormatter(BaseFormatter):
                 logging.warn("no folder for image group "+str(input_path / vol_folder)+" (nb of images in theory: "+str(image_group_info["total_pages"])+")")
                 continue
             base_id = image_group_id
-            responses = self.get_input(input_path / vol_folder)
-            layers = self.build_layers(responses, image_group_id, base_id)
-            formatted_layers = self.format_layer(layers, base_id)
-            base_text = self.get_base_text()
+            base_text, layers, word_confidence_list = self.build_base(image_group_id, base_id, input_path / vol_folder)
 
             # save base_text
             (self.dirs["opf_path"] / "base" / f"{base_id}.txt").write_text(base_text)
@@ -835,16 +709,18 @@ class GoogleOCRFormatter(BaseFormatter):
             # save layers
             vol_layer_path = self.dirs["layers_path"] / base_id
             vol_layer_path.mkdir(exist_ok=True)
-            for layer, ann in formatted_layers.items():
-                layer_fn = vol_layer_path / f"{layer}.yml"
-                dump_yaml(ann, layer_fn)
-            self.set_base_meta(image_group_id, base_id)
+            for layer_id, layer in layers.items():
+                layer_fn = vol_layer_path / f"{layer_id}.yml"
+                dump_yaml(layer, layer_fn)
+            self.set_base_meta(image_group_id, base_id, word_confidence_list)
+            total_word_confidence_list += word_confidence_list
 
         # we add the rest to metadata:
         self.metadata["bases"] = self.base_meta
         self.metadata['statistics'] = {
-            "ocr_word_mean_confidence_index": statistics.mean(self.word_confidences),
-            "ocr_word_median_confidence_index": statistics.median(self.word_confidences)
+            # there are probably more efficient ways to compute those
+            "ocr_word_mean_confidence_index": statistics.mean(total_word_confidence_list),
+            "ocr_word_median_confidence_index": statistics.median(total_word_confidence_list)
         }
 
         meta_fn = self.dirs["opf_path"] / "meta.yml"
