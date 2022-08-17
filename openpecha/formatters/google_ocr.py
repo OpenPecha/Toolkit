@@ -16,7 +16,7 @@ from openpecha.core.annotation import Page, Span
 from openpecha.core.annotations import BaseAnnotation, Language
 from openpecha.core.layer import Layer, LayerEnum
 from openpecha.core.ids import get_base_id
-from openpecha.core.metadata import InitialPechaMetadata, InitialCreationType, LicenseType, CopyrightStatus, Copyright, Copyright_copyrighted, Copyright_unknown, Copyright_public_domain
+from openpecha.core.metadata import InitialPechaMetadata, InitialCreationType, LicenseType, Copyright_copyrighted, Copyright_unknown, Copyright_public_domain
 from openpecha.formatters import BaseFormatter
 from openpecha.utils import dump_yaml, gzip_str
 
@@ -355,13 +355,13 @@ class GoogleOCRFormatter(BaseFormatter):
         """
         cur_poly_top_right_corner = cur_bounding_poly.vertices[1][0]
         next_poly_top_left_corner = next_poly.vertices[0][0]
-        if next_poly_top_left_corner - cur_poly_top_right_corner > avg_char_width*0.75 and " " not in cur_bounding_poly.text:
+        if next_poly_top_left_corner - cur_poly_top_right_corner > avg_char_width*0.75 and cur_bounding_poly.text[-1] not in [' ', '་']:
             space_poly_vertices = self.get_space_poly_vertices(cur_bounding_poly, next_poly)
             space_box = BBox(
                 text=" ",
                 vertices=space_poly_vertices,
                 confidence=1.0,
-                language=""
+                language=cur_bounding_poly.language
             )
             return space_box
         return None
@@ -457,32 +457,38 @@ class GoogleOCRFormatter(BaseFormatter):
     def _get_image_list(self, bdrc_scan_id, image_group_id):
         return get_image_list(bdrc_scan_id, image_group_id)
 
+    def is_english_number(self, poly):
+        if re.search("^[0-9]+$", poly['text'].strip()):
+            return True
+        return False
+
     def get_language_code(self, poly):
         lang = ""
+        if self.is_english_number(poly):
+            return "en"
         properties = poly.get("property", {})
         if properties:
             languages = properties.get("detectedLanguages", [])
             if languages:
                 lang = languages[0]['languageCode']
-                break
-        if polang == "":
-            return default_language
-        if lang in ["bo", "en", "cn"]:
-            return poly.language
+        if lang == "":
+            return self.default_language
+        if lang in ["bo", "en", "zh"]:
+            return lang
         if lang == "dz":
             return "bo"
         # English is a kind of default for our purpose
         return "en"
 
     def add_language(self, poly, poly_start_cc, state):
-        poly_lang = self.get_language_code(poly)
+        poly_lang = poly.language
         previous_ann = state["latest_language_annotation"]
         poly_end_cc = state["base_layer_len"] # by construction
         if previous_ann is not None:
             # if poly has the same language as the latest annotation, we just lengthen the previous
             # annotation to include this poly:
-            if poly_lang == previous_ann["language"]:
-                previous_ann.span.end = poly_end_cc
+            if poly_lang == previous_ann['lang']:
+                previous_ann["end"] = poly_end_cc
                 return
             # if poly is the default language, we just conclude the previous annotation
             if poly_lang == self.default_language:
@@ -502,13 +508,13 @@ class GoogleOCRFormatter(BaseFormatter):
         state["latest_language_annotation"] = annotation
 
     def add_low_confidence(self, poly, poly_start_cc, state):
-        if bounding_poly.confidence >0.9:
+        if poly.confidence >0.9:
             return
         state["low_confidence_annotations"][self.get_unique_id()] = OCRConfidence(
             span=Span(start=poly_start_cc, end=state["base_layer_len"]), 
-            confidence=bounding_poly.confidence)
+            confidence=poly.confidence)
 
-    def build_page(self, ocr_object, state):
+    def build_page(self, ocr_object, image_number, imageinfo, state):
         try:
             page_content = ocr_object["textAnnotations"][0]["description"]
         except Exception:
@@ -520,38 +526,42 @@ class GoogleOCRFormatter(BaseFormatter):
         sorted_bounding_polys = self.insert_space_bounding_poly(sorted_bounding_polys, avg_char_width)
         poly_lines = self.get_poly_lines(sorted_bounding_polys)
         page_start_cc = state["base_layer_len"]
-        previous_language = self.default_language
-        current_language_annotation = None
         for poly_line in poly_lines:
             for poly in poly_line:
                 state["base_layer"] += poly.text
                 start_cc = state["base_layer_len"]
                 state["base_layer_len"] += len(poly.text)
-                state["word_confidences"].append(float(bounding_poly.confidence))
+                state["word_confidences"].append(float(poly.confidence))
                 self.add_language(poly, start_cc, state)
                 self.add_low_confidence(poly, start_cc, state)
             # adding a line break at the end of a line
             state["base_layer"] += "\n"
             state["base_layer_len"] += 1
         # add pagination annotation:
-        page_annotation_uuid = self.get_unique_id()
         state["pagination_annotations"][self.get_unique_id()] = Page(
-            span=Span(page_start_cc, state["base_layer_len"]), 
+            span=Span(start=page_start_cc, end=state["base_layer_len"]), 
             imgnum=image_number, 
             reference=imageinfo["filename"])
         # adding another line break at the end of a page
         state["base_layer"] += "\n"
         state["base_layer_len"] += 1
+    
+    def is_short_language_annotation(self, annotation):
+        start = annotation['start']
+        end = annotation['end']
+        if end-start < 30:
+            return True
+        return False
 
-    def merge_language_annotations(self, annotation_list):
+    def merge_short_language_annotations(self, annotation_list):
         annotations = {}
         # annotation list is in span order
         for annotation in annotation_list:
-            # TODO: all annotations of less than 30 characters should be merged
-            # with the previous one
+            if self.is_short_language_annotation(annotation):
+                continue
             annotations[self.get_unique_id()] = Language(
                 span = Span(start=annotation["start"], end=annotation["end"]),
-                language = annotation["language"])
+                language = annotation["lang"])
         return annotations
 
     def build_base(self, image_group_id, image_group_ocr_path):
@@ -573,7 +583,7 @@ class GoogleOCRFormatter(BaseFormatter):
             expected_ocr_filename = image_filename[:image_filename.rfind('.')]+".json.gz"
             expected_ocr_path = image_group_ocr_path / expected_ocr_filename
             if not expected_ocr_path.is_file():
-                logging.warn("could not find "+str(expected_ocr_path))
+                logging.warning("could not find "+str(expected_ocr_path))
                 continue
             ocr_object = None
             try:
@@ -581,18 +591,18 @@ class GoogleOCRFormatter(BaseFormatter):
             except:
                 logging.error("could not read "+str(expected_ocr_path))
                 continue
-            self.build_page(ocr_object, state)
+            self.build_page(ocr_object, image_number, imginfo, state)
         layers = {}
         if state["pagination_annotations"]:
             layer = ExtentedLayer(annotation_type=LayerEnum.pagination, annotations=state["pagination_annotations"])
-            layers["Pagination"] = layer
+            layers[LayerEnum.pagination.value] = json.loads(layer.json(exclude_none=True))
         if state["language_annotations"]:
-            annotations = self.merge_language_annotations()
+            annotations = self.merge_short_language_annotations(state["language_annotations"])
             layer = ExtentedLayer(annotation_type=LayerEnum.language, annotations=annotations)
-            layers["Language"] = layer
+            layers[LayerEnum.language.value] = json.loads(layer.json(exclude_none=True))
         if state["low_confidence_annotations"]:
             layer = ExtentedLayer(annotation_type=LayerEnum.low_conf_box, annotations=state["low_confidence_annotations"])
-            layers["OCRConfidence"] = layer
+            layers[LayerEnum.low_conf_box.value] = json.loads(layer.json(exclude_none=True))
 
         return state["base_layer"], layers, state["word_confidences"]
 
@@ -625,6 +635,7 @@ class GoogleOCRFormatter(BaseFormatter):
             copyright, license = self.get_copyright_and_license_info(self.buda_data)
 
         metadata = InitialPechaMetadata(
+            id=pecha_id,
             source='https://library.bdrc.io',
             initial_creation_type=InitialCreationType.ocr,
             imported=datetime.datetime.now(timezone.utc),
@@ -639,8 +650,6 @@ class GoogleOCRFormatter(BaseFormatter):
         return json.loads(metadata.json())
 
     def set_base_meta(self, image_group_id, base_file_name, word_confidence_list):
-        base_confidence_median = self.get_base_confidence_median()
-        base_confidence_mean = self.get_base_confidence_mean()
         self.cur_word_confidences = []
         self.base_meta[base_file_name] = {
             "source_metadata": self.buda_data["image_groups"][image_group_id],
@@ -701,7 +710,7 @@ class GoogleOCRFormatter(BaseFormatter):
                 logging.warn("no folder for image group "+str(input_path / vol_folder)+" (nb of images in theory: "+str(image_group_info["total_pages"])+")")
                 continue
             base_id = image_group_id
-            base_text, layers, word_confidence_list = self.build_base(image_group_id, base_id, input_path / vol_folder)
+            base_text, layers, word_confidence_list = self.build_base(image_group_id, (input_path / vol_folder))
 
             # save base_text
             (self.dirs["opf_path"] / "base" / f"{base_id}.txt").write_text(base_text)

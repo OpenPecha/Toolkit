@@ -9,41 +9,64 @@ from openpecha.formatters import google_ocr
 from openpecha.formatters.google_ocr import GoogleOCRFormatter
 from openpecha.utils import load_yaml, dump_yaml
 
-
-@pytest.fixture(scope="module")
-def get_resources():
-
-    data_path = Path(__file__).parent / "data" / "W0001" / "I1PD95846"
-    responses = [
-        (json.load(fn.open()), fn.stem) for fn in sorted(list((data_path).iterdir()))
-    ]
-    formatter = GoogleOCRFormatter()
-    return formatter, data_path, responses
+def mock_get_image_list(bdrc_scan_id, vol_name):
+    return load_yaml(Path(__file__).parent / "data" / str(vol_name+"-imgseqnum.json"))  
 
 
-@pytest.mark.skip(reason="bdrc api failing")
-def test_get_base_text(get_resources):
-    formatter, data_path, responses = get_resources
-    formatter.build_layers(responses, "I1PD95846")
+def test_base_text():
+    work_id = "W24767"
+    pecha_id = "I123456"
+    
+    ocr_path = Path(__file__).parent / "data" / work_id
+    expected_base_text = (Path(__file__).parent / "data" / "opf_expected_datas" / "expected_base_text.txt").read_text(encoding='utf-8')
+    buda_data_path = Path(__file__).parent / "data" / "buda_data.yml"
+    ocr_import_info_path = Path(__file__).parent / "data" / "ocr_import_info.yml"
+    
+    with tempfile.TemporaryDirectory() as tmpdirname:
+        buda_data = load_yaml(buda_data_path)
+        ocr_import_info = load_yaml(ocr_import_info_path)
+        formatter = GoogleOCRFormatter(output_path=tmpdirname)
+        formatter._get_image_list = mock_get_image_list
+        pecha_path = formatter.create_opf(ocr_path, pecha_id, ocr_import_info, buda_data)
+        base_text = (pecha_path / f"{pecha_path.name}.opf" / "base" / "I3852.txt").read_text(encoding='utf-8')
+        assert expected_base_text == base_text
 
-    result = formatter.get_base_text()
-    assert result
+def test_build_layers():
+    work_id = "W24767"
+    pecha_id = "I123456"
+    
+    ocr_path = Path(__file__).parent / "data" / work_id
+    expected_pagination_layer = load_yaml((Path(__file__).parent / "data" / "opf_expected_datas" / "expected_Pagination.yml"))
+    expected_language_layer = load_yaml((Path(__file__).parent / "data" / "opf_expected_datas" / "expected_Language.yml"))
+    expected_confidence_layer = load_yaml((Path(__file__).parent / "data" / "opf_expected_datas" / "expected_OCRConfidence.yml"))
+    buda_data_path = Path(__file__).parent / "data" / "buda_data.yml"
+    ocr_import_info_path = Path(__file__).parent / "data" / "ocr_import_info.yml"
+    
+    with tempfile.TemporaryDirectory() as tmpdirname:
+        buda_data = load_yaml(buda_data_path)
+        ocr_import_info = load_yaml(ocr_import_info_path)
+        formatter = GoogleOCRFormatter(output_path=tmpdirname)
+        formatter._get_image_list = mock_get_image_list
+        pecha_path = formatter.create_opf(ocr_path, pecha_id, ocr_import_info, buda_data)
+        pagination_layer = load_yaml((pecha_path / f"{pecha_path.name}.opf" / "layers" / "I3852" / "Pagination.yml"))
+        language_layer = load_yaml((pecha_path / f"{pecha_path.name}.opf" / "layers" / "I3852" / "Language.yml"))
+        confidence_layer = load_yaml((pecha_path / f"{pecha_path.name}.opf" / "layers" / "I3852" / "OCRConfidence.yml"))
 
-    # TODO: create base-text
-    # expected = (data_path/'v001.txt').read_text()
-    # assert result == expected
-
-
-@pytest.mark.skip(reason="bdrc api failing")
-def test_build_layers(get_resources):
-    formatter, data_path, responses = get_resources
-
-    result = formatter.build_layers(responses, "I1PD95846")
-
-    expected = {"pages": [(0, 19), (24, 887), (892, 1601), (1606, 1799)]}
-
-    for result_page, expected_page in zip(result["pages"], expected["pages"]):
-        assert result_page[:2] == expected_page
+        ###Pagination layer testing
+        for (_, expected_ann), (_, ann) in zip(expected_pagination_layer['annotations'].items(), pagination_layer['annotations'].items()):
+            assert expected_ann == ann
+        
+        ###Language layer testing
+        for (_, expected_ann), (_, ann) in zip(expected_language_layer['annotations'].items(), language_layer['annotations'].items()):
+            del expected_ann['id']
+            del ann['id']
+            assert expected_ann == ann
+        
+        ###Confidence layer testing
+        for (_, expected_ann), (_, ann) in zip(expected_confidence_layer['annotations'].items(), confidence_layer['annotations'].items()):
+            del expected_ann['id']
+            del ann['id']
+            assert expected_ann == ann
 
 
 @pytest.mark.skip(reason="bdrc api failing")
@@ -53,14 +76,3 @@ def test_with_gzip_json():
         formatter = GoogleOCRFormatter(output_path=tmpdirname)
         pecha_path = formatter.create_opf(ocr_path, 1, meta_flag=False)
         assert isinstance(pecha_path, Path) and pecha_path.is_dir()
-
-
-def test_language_layer_formatter():
-    language_annotated_text = (Path(__file__).parent / "data" / "language_code_annotated_text.txt").read_text(encoding='utf-8')
-    expected_layer = load_yaml((Path(__file__).parent / "data" / "expected_language_layer.yml"))
-    google_ocr_formatter = GoogleOCRFormatter()
-    language_layer = google_ocr_formatter.format_language_layer(language_annotated_text)
-    for (_, expected_ann), (_, lang_ann) in zip(expected_layer['annotations'].items(), language_layer['annotations'].items()):
-        del expected_ann['id']
-        del lang_ann['id']
-        assert expected_ann == lang_ann

@@ -13,7 +13,7 @@ def test_google_ocr_metadata():
     pecha_id = "I123456"
     
     ocr_path = Path(__file__).parent / "data" / work_id
-    expected_meta_path = Path(__file__).parent / "data" / "expected_google_ocr_meta.yml"
+    expected_meta_path = Path(__file__).parent / "data" / "opf_expected_datas" / "expected_google_ocr_meta.yml"
     buda_data_path = Path(__file__).parent / "data" / "buda_data.yml"
     ocr_import_info_path = Path(__file__).parent / "data" / "ocr_import_info.yml"
     
