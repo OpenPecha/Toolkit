@@ -111,9 +111,8 @@ class Layer(BaseModel):
         """Yield Annotation Objects"""
         for ann_id, ann_dict in self.annotations.items():
             ann_class = _get_annotation_class(self.annotation_type)
-            ann_dict["id"] = ann_id
             ann = ann_class.parse_obj(ann_dict)
-            yield ann
+            yield ann_id, ann
 
     def get_annotation(self, annotation_id: str) -> Optional[BaseAnnotation]:
         """Retrieve annotation of id `annotation_id`"""
@@ -124,9 +123,11 @@ class Layer(BaseModel):
         ann = ann_class.parse_obj(ann_dict)
         return ann
 
-    def set_annotation(self, ann: BaseAnnotation):
-        """Add or Update annotation `ann` to the layer"""
-        self.annotations[ann.id] = json.loads(ann.json())
+    def set_annotation(self, ann: BaseAnnotation, ann_id = None):
+        """Add or Update annotation `ann` to the layer, returns the annotation id"""
+        ann_id = ann_id if ann_id is not None else get_uuid()
+        self.annotations[ann_id] = json.loads(ann.json())
+        return ann_id
 
     def remove_annotation(self, annotation_id: str):
         """Delete annotaiton of `annotation_id` from the layer"""

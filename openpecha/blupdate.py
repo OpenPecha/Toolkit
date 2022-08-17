@@ -312,6 +312,6 @@ def update_single_base(pecha, base_name: str, new_content: str):
     src_base = pecha.get_base(base_name)
     updater = Blupdate(src_base, new_content)
     for layer in pecha.get_layers(base_name):
-        for ann in layer.get_annotations():
+        for ann_id, ann in layer.get_annotations():
             ann = update_ann_span(ann, updater)
-            layer.set_annotation(ann)
+            layer.set_annotation(ann, ann_id)

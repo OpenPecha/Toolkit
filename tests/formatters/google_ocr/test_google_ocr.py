@@ -59,7 +59,7 @@ def test_build_layers():
         ###Language layer testing
         for (_, expected_ann), (_, ann) in zip(expected_language_layer['annotations'].items(), language_layer['annotations'].items()):
             assert expected_ann == ann
-        
+
         ###Confidence layer testing
         for (_, expected_ann), (_, ann) in zip(expected_confidence_layer['annotations'].items(), confidence_layer['annotations'].items()):
             assert expected_ann == ann

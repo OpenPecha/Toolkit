@@ -12,4 +12,3 @@ def test_span_end_must_not_be_less_than_start():
 def test_annotation_id():
     ann = BaseAnnotation(span=Span(start=10, end=20))
 
-    assert ann.id

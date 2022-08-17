@@ -511,6 +511,7 @@ class GoogleOCRFormatter(BaseFormatter):
         if state["latest_low_confidence_annotation"] is not None:
             # average of the confidence indexes, weighted by character length
             state["latest_low_confidence_annotation"]["weights"].append((poly_end_cc - poly_start_cc, poly.confidence))
+            state["latest_low_confidence_annotation"]["end"] = poly_end_cc
         else:
             annotation = {"start": poly_start_cc, "end": poly_end_cc, 
                 "weights": [(poly_end_cc - poly_start_cc, poly.confidence)]}

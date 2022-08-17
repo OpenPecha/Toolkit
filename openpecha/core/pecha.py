@@ -168,7 +168,7 @@ class OpenPecha:
                 result[layer_name] = []
 
             layer = self.get_layer(base_name, layer_name)
-            for ann in layer.get_annotations():
+            for _, ann in layer.get_annotations():
                 is_ann_found = False
                 if ann.span.start >= span.start and ann.span.end <= span.end:
                     is_ann_found = True
