@@ -505,10 +505,17 @@ class GoogleOCRFormatter(BaseFormatter):
 
     def add_low_confidence(self, poly, poly_start_cc, state):
         if poly.confidence > ANNOTATION_MINIMAL_CONFIDENCE:
+            state["latest_low_confidence_annotation"] = None
             return
-        state["page_low_confidence_annotations"][self.get_unique_id()] = OCRConfidence(
-            span=Span(start=poly_start_cc, end=state["base_layer_len"]), 
-            confidence=poly.confidence)
+        poly_end_cc = state["base_layer_len"] # by construction
+        if state["latest_low_confidence_annotation"] is not None:
+            # average of the confidence indexes, weighted by character length
+            state["latest_low_confidence_annotation"]["weights"].append((poly_end_cc - poly_start_cc, poly.confidence))
+        else:
+            annotation = {"start": poly_start_cc, "end": poly_end_cc, 
+                "weights": [(poly_end_cc - poly_start_cc, poly.confidence)]}
+            state["page_low_confidence_annotations"].append(annotation)
+            state["latest_low_confidence_annotation"] = annotation
 
     def build_page(self, ocr_object, image_number, imageinfo, state):
         try:
@@ -543,8 +550,8 @@ class GoogleOCRFormatter(BaseFormatter):
                 span=Span(start=page_start_cc, end=state["base_layer_len"]), 
                 confidence=mean_page_confidence)
         else:
-            state["low_confidence_annotations"] = {**state["low_confidence_annotations"], **state["page_low_confidence_annotations"]}
-            state["page_low_confidence_annotations"] = {}    
+            self.merge_low_confidence_annotations(state["page_low_confidence_annotations"], state["low_confidence_annotations"])
+            state["page_low_confidence_annotations"] = []
         # add pagination annotation:
         state["pagination_annotations"][self.get_unique_id()] = Page(
             span=Span(start=page_start_cc, end=state["base_layer_len"]), 
@@ -553,6 +560,22 @@ class GoogleOCRFormatter(BaseFormatter):
         # adding another line break at the end of a page
         state["base_layer"] += "\n"
         state["base_layer_len"] += 1
+
+    def confidence_index_from_weighted_list(self, weights):
+        sum_weights = 0
+        confidence_sum = 0
+        for weight, confidence in weights:
+            sum_weights += weight
+            confidence_sum += weight * confidence
+        return confidence_sum / sum_weights
+
+    def merge_low_confidence_annotations(self, annotation_list_src, annotations_dst):
+        for annotation in annotation_list_src:
+            average_confidence = self.confidence_index_from_weighted_list(annotation["weights"])
+            annotation = OCRConfidence(
+                span = Span(start=annotation["start"], end=annotation["end"]),
+                confidence = average_confidence)
+            annotations_dst[self.get_unique_id()] = annotation
 
     def merge_short_language_annotations(self, annotation_list):
         annotations = {}
@@ -586,7 +609,8 @@ class GoogleOCRFormatter(BaseFormatter):
             "pagination_annotations": {},
             "word_confidences": [],
             "latest_language_annotation": None,
-            "page_low_confidence_annotations": {}
+            "latest_low_confidence_annotation": None,
+            "page_low_confidence_annotations": []
         }
         for image_number, imginfo in enumerate(image_list):
             image_filename = imginfo["filename"]
