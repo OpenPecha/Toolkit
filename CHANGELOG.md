@@ -2,6 +2,15 @@
 
 <!--next-version-placeholder-->
 
+## v0.8.24 (2022-08-17)
+### Fix
+* **google-ocr-formatter:** Test case added ([`c8f2f1f`](https://github.com/OpenPecha/Toolkit/commit/c8f2f1fa003c1505707452631bfcf887b33d720b))
+* **google-ocr-formatter:** Copy rigth variable updated ([`1e247bf`](https://github.com/OpenPecha/Toolkit/commit/1e247bfb0e9c61230401a67e8a711279026e0284))
+* **google-ocr-formatter:** Code documated and test case updated ([`cb344d9`](https://github.com/OpenPecha/Toolkit/commit/cb344d9371eda2ee85ca633b079ce82cdf54aa6f))
+* **googel-ocr-formatter:** Space insertion done using rule base algo ([`a5c596a`](https://github.com/OpenPecha/Toolkit/commit/a5c596a9ad9b1b7203e3e4aa9ec7c170b5b105fb))
+* **setup:** Boto3 import added ([`0a39219`](https://github.com/OpenPecha/Toolkit/commit/0a39219290ce32bb3f5624ea2e3fe80fc0241725))
+* **tmx-create-opf:** Base saving bug fixed ([`de88f86`](https://github.com/OpenPecha/Toolkit/commit/de88f8659c2380c72394aba8be2481db3ead9ebb))
+
 ## v0.8.23 (2022-08-17)
 ### Fix
 * **core-pecha:** Find span info for all layers by default ([`973960a`](https://github.com/OpenPecha/Toolkit/commit/973960a06868c7ab16f4ef82611384cc1399f46e))
