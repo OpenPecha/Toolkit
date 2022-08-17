@@ -179,7 +179,27 @@ def test_span_info_with_layers(test_pechas_path):
     span_info = pecha.get_span_info(
         base_name="0001",
         span=Span(start=16, end=33),
-        layers=[LayerEnum.citation, LayerEnum.tsawa, LayerEnum.yigchung],
+        layers=[LayerEnum.citation, LayerEnum.tsawa],
+    )
+
+    assert (
+        get_sub_string(span_info.text, span_info.layers[LayerEnum.citation][0].span)
+        == "cc"
+    )
+
+    assert (
+        get_sub_string(span_info.text, span_info.layers[LayerEnum.tsawa][0].span)
+        == "rrrr\nrrrr"
+    )
+
+
+def test_span_info_with_all_layers(test_pechas_path):
+    opf_path = test_pechas_path / "span_info.opf"
+    pecha = OpenPechaFS(path=opf_path)
+
+    span_info = pecha.get_span_info(
+        base_name="0001",
+        span=Span(start=16, end=33),
     )
 
     assert (

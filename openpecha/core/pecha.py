@@ -181,8 +181,9 @@ class OpenPecha:
     ) -> SpanINFO:
         base_str = self.get_base(base_name)
         span_str = base_str[span.start : span.end + 1]  # noqa
-        layers = self.__find_span_layers(base_name, span, layers)
-        return SpanINFO(text=span_str, layers=layers, metadata=self.meta)
+        layers = layers if layers else self.components[base_name]
+        span_layers = self.__find_span_layers(base_name, span, layers)
+        return SpanINFO(text=span_str, layers=span_layers, metadata=self.meta)
 
 
 class OpenPechaFS(OpenPecha):
