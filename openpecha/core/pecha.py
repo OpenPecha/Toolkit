@@ -281,8 +281,16 @@ class OpenPechaFS(OpenPecha):
     def _read_components(self):
         res = {}
         for vol_dir in self.layers_path.iterdir():
+            all_layers = set(layer.value for layer in LayerEnum)
             res[vol_dir.name] = list(
-                map(lambda fn: LayerEnum(fn.stem), vol_dir.iterdir())
+                map(
+                    lambda fn: LayerEnum(fn.stem),
+                    (
+                        layer_fn
+                        for layer_fn in vol_dir.iterdir()
+                        if layer_fn.stem in all_layers
+                    ),
+                )
             )
         return res
 
