@@ -2,6 +2,11 @@
 
 <!--next-version-placeholder-->
 
+## v0.8.23 (2022-08-17)
+### Fix
+* **core-pecha:** Find span info for all layers by default ([`973960a`](https://github.com/OpenPecha/Toolkit/commit/973960a06868c7ab16f4ef82611384cc1399f46e))
+* **core-pecha:** Skip loading unsported layer ([`9e39086`](https://github.com/OpenPecha/Toolkit/commit/9e390868bc09e3342bafc6c6e9ae769d8ed6e48c))
+
 ## v0.8.22 (2022-08-12)
 ### Fix
 * **google-ocr:** Add restrictedInchina, access, copyright, license to metadata ([`2055318`](https://github.com/OpenPecha/Toolkit/commit/2055318be4e77b033a586204e3fb8d9b49eec1f2))
