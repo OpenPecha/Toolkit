@@ -58,14 +58,10 @@ def test_build_layers():
         
         ###Language layer testing
         for (_, expected_ann), (_, ann) in zip(expected_language_layer['annotations'].items(), language_layer['annotations'].items()):
-            del expected_ann['id']
-            del ann['id']
             assert expected_ann == ann
         
         ###Confidence layer testing
         for (_, expected_ann), (_, ann) in zip(expected_confidence_layer['annotations'].items(), confidence_layer['annotations'].items()):
-            del expected_ann['id']
-            del ann['id']
             assert expected_ann == ann
 
 
@@ -76,3 +72,6 @@ def test_with_gzip_json():
         formatter = GoogleOCRFormatter(output_path=tmpdirname)
         pecha_path = formatter.create_opf(ocr_path, 1, meta_flag=False)
         assert isinstance(pecha_path, Path) and pecha_path.is_dir()
+
+if __name__ == "__main__":
+    test_build_layers()

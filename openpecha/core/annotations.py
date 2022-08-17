@@ -31,13 +31,8 @@ class Span(BaseModel):
 
 
 class BaseAnnotation(BaseModel):
-    id: str = None
     span: Span
     metadata: Optional[Dict] = None
-
-    @validator("id", pre=True, always=True)
-    def set_id(cls, v):
-        return v or get_uuid()
 
     class Config:
         extra = Extra.forbid
