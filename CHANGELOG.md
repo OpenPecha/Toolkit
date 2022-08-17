@@ -2,6 +2,24 @@
 
 <!--next-version-placeholder-->
 
+## v0.8.22 (2022-08-12)
+### Fix
+* **google-ocr:** Add restrictedInchina, access, copyright, license to metadata ([`2055318`](https://github.com/OpenPecha/Toolkit/commit/2055318be4e77b033a586204e3fb8d9b49eec1f2))
+
+## v0.8.21 (2022-08-11)
+### Fix
+* **metadata:** Add under copyright license ([`ceb9e39`](https://github.com/OpenPecha/Toolkit/commit/ceb9e39924c250fb9e0937c452ea0a174674e325))
+
+## v0.8.20 (2022-08-10)
+### Fix
+* **google-ocr-formatter:** Meta title and author bug fixed ([`45b5b94`](https://github.com/OpenPecha/Toolkit/commit/45b5b942e7077ce6707f4f740de75787efbc1f05))
+* **google-ocr-formatter:** Language layer formatter test case added ([`972278b`](https://github.com/OpenPecha/Toolkit/commit/972278bc0d0737826149614d74ded3e36c32204a))
+* **google-ocr-formatter:** Language layer parser methods added ([`8f9ff0d`](https://github.com/OpenPecha/Toolkit/commit/8f9ff0da0cf8d84ec4bf65315021ba0ba633ab89))
+* **google-ocr-formatter:** The ocr confidence index is saved in meta ([`b3ccd73`](https://github.com/OpenPecha/Toolkit/commit/b3ccd73e0d075dd7d1093f8abfd652a4947ff525))
+
+### Documentation
+* Add initial pecha metadata eg. ([`f0a07b6`](https://github.com/OpenPecha/Toolkit/commit/f0a07b6a61d0eaea3e94910a3b963a44ac7dcc52))
+
 ## v0.8.19 (2022-08-03)
 ### Fix
 * **metadata:** Refactor initial metadata ([`125b0ab`](https://github.com/OpenPecha/Toolkit/commit/125b0ab118f9b77c9c289f4a91a582a9d2b43a60))

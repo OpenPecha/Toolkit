@@ -39,6 +39,8 @@ class LicenseType(Enum):
     CC_BY_NC = "CC BY-NC"
     CC_BY_NC_SA = "CC BY-NC-SA"
     CC_BY_NC_ND = "CC BY-NC-ND"
+    
+    UNDER_COPYRIGHT = "under copyright"
 
 
 class PechaMetadata(BaseModel):
@@ -76,6 +78,7 @@ class PechaMetadata(BaseModel):
 
 class InitialPechaMetadata(PechaMetadata):
     ocr_word_median_confidence_index: float = None
+    ocr_word_mean_confidence_index: float = None
     base: Optional[Dict] = {}
 
     @validator("id", pre=True, always=True)
