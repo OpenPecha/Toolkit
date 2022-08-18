@@ -1,4 +1,4 @@
-id: I0ACABB48
+id: I123456
 legacy_id: null
 ocr_import_info:
   source: bdrc
@@ -10,12 +10,14 @@ ocr_import_info:
     timestamp: '1977-04-22T06:00:00'
     prop1: value 1
     prop2: value 2
+  op_import_options: {}
+  op_import_version: 1.0.0
 default_language: bo
 source: https://library.bdrc.io
 source_file: null
 initial_creation_type: ocr
-imported: '2022-08-11T13:58:22.335684+00:00'
-last_modified: '2022-08-11T13:58:22.335696+00:00'
+imported: '2022-08-18T09:27:25.785639+00:00'
+last_modified: '2022-08-18T09:27:25.785644+00:00'
 parser: null
 source_metadata:
   id: http://purl.bdrc.io/resource/W24767
@@ -64,7 +66,7 @@ bases:
       ocr_word_median_confidence_index: 0.9800000190734863
       ocr_word_mean_confidence_index: 0.8821181606726791
 copyright:
-  status: 'Public domain'
-  notice: 'Public domain'
-  info_url: 'https://creativecommons.org/publicdomain/mark/1.0/'
-license: 'CC0'
+  status: Public domain
+  notice: Public domain
+  info_url: https://creativecommons.org/publicdomain/mark/1.0/
+license: CC0

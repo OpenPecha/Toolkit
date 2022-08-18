@@ -23,8 +23,10 @@ from openpecha.utils import dump_yaml, gzip_str
 from openpecha.buda.api import get_buda_scan_info, get_image_list
 
 ANNOTATION_MINIMAL_LEN = 20
-ANNOTATION_MINIMAL_CONFIDENCE = 0.9
+ANNOTATION_MINIMAL_CONFIDENCE = 0.8
+ANNOTATION_MAX_LOW_CONF_PER_PAGE = 10
 NOISE_PATTERN = re.compile(r'(?:\s|[-，.… }#*,+•：/|(©:;་"།=@%༔){"])+')
+GOOGLE_OCR_IMPORT_VERSION = "1.0.0"
 
 extended_LayerEnum = [(l.name, l.value) for l in LayerEnum] + [("low_conf_box", "OCRConfidence")]
 LayerEnum = Enum("LayerEnum", extended_LayerEnum)
@@ -558,12 +560,12 @@ class GoogleOCRFormatter(BaseFormatter):
         # if the whole page is below the min confidence level, we just add one
         # annotation for the page instead of annotating each word
         mean_page_confidence = statistics.mean(page_word_confidences)
-        if statistics.mean(page_word_confidences) < self.ocr_confidence_threshold:
+        if statistics.mean(page_word_confidences) < self.ocr_confidence_threshold or len(state["page_low_confidence_annotations"]) > self.max_low_conf_per_page:
             state["low_confidence_annotations"][self.get_unique_id()] = OCRConfidence(
                 span=Span(start=page_start_cc, end=state["base_layer_len"]), 
                 confidence=mean_page_confidence)
         else:
-            self.merge_low_confidence_annotations(state["page_low_confidence_annotations"], state["low_confidence_annotations"])
+            self.merge_page_low_confidence_annotations(state["page_low_confidence_annotations"], state["low_confidence_annotations"])
             state["page_low_confidence_annotations"] = []
         # add pagination annotation:
         state["pagination_annotations"][self.get_unique_id()] = Page(
@@ -582,13 +584,13 @@ class GoogleOCRFormatter(BaseFormatter):
             confidence_sum += weight * confidence
         return confidence_sum / sum_weights
 
-    def merge_low_confidence_annotations(self, annotation_list_src, annotations_dst):
+    def merge_page_low_confidence_annotations(self, annotation_list_src, annotations_dst):
         for annotation in annotation_list_src:
-            average_confidence = self.confidence_index_from_weighted_list(annotation["weights"])
-            annotation = OCRConfidence(
+            avg_confidence = self.confidence_index_from_weighted_list(annotation["weights"])
+            annotation_obj = OCRConfidence(
                 span = Span(start=annotation["start"], end=annotation["end"]),
-                confidence = average_confidence)
-            annotations_dst[self.get_unique_id()] = annotation
+                confidence = avg_confidence)
+            annotations_dst[self.get_unique_id()] = annotation_obj
 
     def merge_short_language_annotations(self, annotation_list):
         annotations = {}
@@ -736,6 +738,7 @@ class GoogleOCRFormatter(BaseFormatter):
                 language_annotation_min_len: int
                 ocr_confidence_threshold: float (use -1.0 for no OCR confidence layer)
                 remove_non_character_lines: boolean
+                max_low_conf_per_page: int
 
         Returns:
             path: opf path
@@ -747,6 +750,10 @@ class GoogleOCRFormatter(BaseFormatter):
         self.create_language_layer = opf_options["create_language_layer"] if "create_language_layer" in opf_options else True
         self.ocr_confidence_threshold = opf_options["ocr_confidence_threshold"] if "ocr_confidence_threshold" in opf_options else ANNOTATION_MINIMAL_CONFIDENCE
         self.language_annotation_min_len = opf_options["language_annotation_min_len"] if "language_annotation_min_len" in opf_options else ANNOTATION_MINIMAL_LEN
+        self.max_low_conf_per_page = opf_options["max_low_conf_per_page"] if "max_low_conf_per_page" in opf_options else ANNOTATION_MAX_LOW_CONF_PER_PAGE
+
+        ocr_import_info["op_import_options"] = opf_options
+        ocr_import_info["op_import_version"] = GOOGLE_OCR_IMPORT_VERSION
 
         # if the bdrc scan id is not specified, we assume it's the directory namepecha_id
         self.bdrc_scan_id = input_path.name if "bdrc_scan_id" not in ocr_import_info else ocr_import_info["bdrc_scan_id"]
