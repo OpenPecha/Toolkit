@@ -797,3 +797,4 @@ class GoogleOCRFormatter(BaseFormatter):
 if __name__ == "__main__":
     formatter = GoogleOCRFormatter()
     formatter.create_opf("../../Esukhia/img2opf/archive/output/W1PD95844", 300)
+

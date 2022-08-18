@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.8.25 (2022-08-18)
+### Fix
+* **googel-ocr-formatter:** Commit made to trigger githubaction to publish changes on pip ([`7f57883`](https://github.com/OpenPecha/Toolkit/commit/7f57883d84bc10351527a49ee6ce970ace404e50))
+
 ## v0.8.24 (2022-08-17)
 ### Fix
 * **google-ocr-formatter:** Test case added ([`c8f2f1f`](https://github.com/OpenPecha/Toolkit/commit/c8f2f1fa003c1505707452631bfcf887b33d720b))
