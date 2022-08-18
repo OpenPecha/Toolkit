@@ -13,8 +13,8 @@ import requests
 from pathlib import Path
 
 from openpecha.core.annotation import Page, Span
-from openpecha.core.annotations import BaseAnnotation, Language
-from openpecha.core.layer import Layer, LayerEnum
+from openpecha.core.annotations import BaseAnnotation, Language, OCRConfidence
+from openpecha.core.layer import Layer, LayerEnum, OCRConfidenceLayer
 from openpecha.core.ids import get_base_id
 from openpecha.core.metadata import InitialPechaMetadata, InitialCreationType, LicenseType, Copyright_copyrighted, Copyright_unknown, Copyright_public_domain
 from openpecha.formatters import BaseFormatter
@@ -23,16 +23,11 @@ from openpecha.utils import dump_yaml, gzip_str
 from openpecha.buda.api import get_buda_scan_info, get_image_list
 
 ANNOTATION_MINIMAL_LEN = 20
-ANNOTATION_MINIMAL_CONFIDENCE = 0.9
+ANNOTATION_MINIMAL_CONFIDENCE = 0.8
+ANNOTATION_MAX_LOW_CONF_PER_PAGE = 10
+NOISE_PATTERN = re.compile(r'(?:\s|[-，.… }#*,+•：/|(©:;་"།=@%༔){"])+')
+GOOGLE_OCR_IMPORT_VERSION = "1.0.0"
 
-extended_LayerEnum = [(l.name, l.value) for l in LayerEnum] + [("low_conf_box", "OCRConfidence")]
-LayerEnum = Enum("LayerEnum", extended_LayerEnum)
-
-class ExtentedLayer(Layer):
-    annotation_type: LayerEnum
-
-class OCRConfidence(BaseAnnotation):
-    confidence: float
 
 class BBox:
     def __init__(self, text: str, vertices: list, confidence: float, language: str):
@@ -41,8 +36,6 @@ class BBox:
         self.vertices = vertices
         self.confidence = confidence
         self.language = language
-    
-
     
     def get_box_height(self):
         y1 = self.vertices[0][1]
@@ -81,6 +74,10 @@ class GoogleOCRFormatter(BaseFormatter):
         self.metadata = {}
         self.default_language = None
         self.buda_data = {}
+        self.remove_non_character_lines = True
+        self.create_language_layer = True
+        self.ocr_confidence_threshold = ANNOTATION_MINIMAL_CONFIDENCE
+        self.language_annotation_min_len = ANNOTATION_MINIMAL_LEN
 
     def text_preprocess(self, text):
 
@@ -450,7 +447,7 @@ class GoogleOCRFormatter(BaseFormatter):
                 for paragraph in block["paragraphs"]:
                     for word in paragraph["words"]:
                         for symbol in word["symbols"]:
-                            if symbol.get("confidence", 1) < ANNOTATION_MINIMAL_CONFIDENCE:
+                            if symbol.get("confidence", 1) < self.ocr_confidence_threshold:
                                 low_conf_chars += f'{symbol["text"]} {char_idx}\n'
                             char_idx += 1
         if low_conf_chars:
@@ -504,7 +501,7 @@ class GoogleOCRFormatter(BaseFormatter):
         state["latest_language_annotation"] = annotation
 
     def add_low_confidence(self, poly, poly_start_cc, state):
-        if poly.confidence > ANNOTATION_MINIMAL_CONFIDENCE:
+        if poly.confidence > self.ocr_confidence_threshold:
             state["latest_low_confidence_annotation"] = None
             return
         poly_end_cc = state["base_layer_len"] # by construction
@@ -517,6 +514,12 @@ class GoogleOCRFormatter(BaseFormatter):
                 "weights": [(poly_end_cc - poly_start_cc, poly.confidence)]}
             state["page_low_confidence_annotations"].append(annotation)
             state["latest_low_confidence_annotation"] = annotation
+
+    def poly_line_has_characters(self, poly_line):
+        for poly in poly_line:
+            if not NOISE_PATTERN.match(poly.text):
+                return True
+        return False
 
     def build_page(self, ocr_object, image_number, imageinfo, state):
         try:
@@ -532,6 +535,8 @@ class GoogleOCRFormatter(BaseFormatter):
         page_start_cc = state["base_layer_len"]
         page_word_confidences = []
         for poly_line in poly_lines:
+            if self.remove_non_character_lines and not self.poly_line_has_characters(poly_line):
+                continue
             for poly in poly_line:
                 state["base_layer"] += poly.text
                 start_cc = state["base_layer_len"]
@@ -546,12 +551,13 @@ class GoogleOCRFormatter(BaseFormatter):
         # if the whole page is below the min confidence level, we just add one
         # annotation for the page instead of annotating each word
         mean_page_confidence = statistics.mean(page_word_confidences)
-        if statistics.mean(page_word_confidences) < ANNOTATION_MINIMAL_CONFIDENCE:
+        nb_below_threshold = len(state["page_low_confidence_annotations"])
+        if statistics.mean(page_word_confidences) < self.ocr_confidence_threshold or nb_below_threshold > self.max_low_conf_per_page:
             state["low_confidence_annotations"][self.get_unique_id()] = OCRConfidence(
                 span=Span(start=page_start_cc, end=state["base_layer_len"]), 
-                confidence=mean_page_confidence)
+                confidence=mean_page_confidence, nb_below_threshold=nb_below_threshold)
         else:
-            self.merge_low_confidence_annotations(state["page_low_confidence_annotations"], state["low_confidence_annotations"])
+            self.merge_page_low_confidence_annotations(state["page_low_confidence_annotations"], state["low_confidence_annotations"])
             state["page_low_confidence_annotations"] = []
         # add pagination annotation:
         state["pagination_annotations"][self.get_unique_id()] = Page(
@@ -570,25 +576,25 @@ class GoogleOCRFormatter(BaseFormatter):
             confidence_sum += weight * confidence
         return confidence_sum / sum_weights
 
-    def merge_low_confidence_annotations(self, annotation_list_src, annotations_dst):
+    def merge_page_low_confidence_annotations(self, annotation_list_src, annotations_dst):
         for annotation in annotation_list_src:
-            average_confidence = self.confidence_index_from_weighted_list(annotation["weights"])
-            annotation = OCRConfidence(
+            avg_confidence = self.confidence_index_from_weighted_list(annotation["weights"])
+            annotation_obj = OCRConfidence(
                 span = Span(start=annotation["start"], end=annotation["end"]),
-                confidence = average_confidence)
-            annotations_dst[self.get_unique_id()] = annotation
+                confidence = avg_confidence)
+            annotations_dst[self.get_unique_id()] = annotation_obj
 
     def merge_short_language_annotations(self, annotation_list):
         annotations = {}
         previous_annotation = None
         # annotation list is in span order
         for annotation in annotation_list:
-            if annotation['end'] - annotation['start'] < ANNOTATION_MINIMAL_LEN:
-                if previous_annotation is not None and annotation['start'] - previous_annotation.span.end < ANNOTATION_MINIMAL_LEN:
+            if annotation['end'] - annotation['start'] < self.language_annotation_min_len:
+                if previous_annotation is not None and annotation['start'] - previous_annotation.span.end < self.language_annotation_min_len:
                     previous_annotation.span.end = annotation['end']
                 continue
             if previous_annotation is not None and annotation["lang"] == previous_annotation.language:
-                if annotation['start'] - previous_annotation.span.end < ANNOTATION_MINIMAL_LEN:
+                if annotation['start'] - previous_annotation.span.end < self.language_annotation_min_len:
                     previous_annotation.span.end = annotation['end']
                     continue
             previous_annotation = Language(
@@ -630,23 +636,20 @@ class GoogleOCRFormatter(BaseFormatter):
             self.build_page(ocr_object, image_number+1, imginfo, state)
         layers = {}
         if state["pagination_annotations"]:
-            layer = ExtentedLayer(annotation_type=LayerEnum.pagination, annotations=state["pagination_annotations"])
+            layer = Layer(annotation_type=LayerEnum.pagination, annotations=state["pagination_annotations"])
             layers[LayerEnum.pagination.value] = json.loads(layer.json(exclude_none=True))
         if state["language_annotations"]:
             annotations = self.merge_short_language_annotations(state["language_annotations"])
-            layer = ExtentedLayer(annotation_type=LayerEnum.language, annotations=annotations)
+            layer = Layer(annotation_type=LayerEnum.language, annotations=annotations)
             layers[LayerEnum.language.value] = json.loads(layer.json(exclude_none=True))
         if state["low_confidence_annotations"]:
-            layer = ExtentedLayer(annotation_type=LayerEnum.low_conf_box, annotations=state["low_confidence_annotations"])
-            layers[LayerEnum.low_conf_box.value] = json.loads(layer.json(exclude_none=True))
+            layer = OCRConfidenceLayer(
+                confidence_threshold=self.ocr_confidence_threshold, 
+                annotations=state["low_confidence_annotations"]
+            )
+            layers[LayerEnum.ocr_confidence.value] = json.loads(layer.json(exclude_none=True))
 
         return state["base_layer"], layers, state["word_confidences"]
-
-    def get_base_text(self):
-        base_text = f"{self.page_break}".join(self.base_text)
-        self.base_text = []
-
-        return base_text
 
     def get_copyright_and_license_info(self, bdata):
         if "copyright_status" not in bdata["source_metadata"]:
@@ -690,12 +693,13 @@ class GoogleOCRFormatter(BaseFormatter):
         self.base_meta[base_file_name] = {
             "source_metadata": self.buda_data["image_groups"][image_group_id],
             "order": self.buda_data["image_groups"][image_group_id]["volume_number"],
-            "base_file": f"{base_file_name}.txt",
-            "statistics": {
+            "base_file": f"{base_file_name}.txt"
+            }
+        if word_confidence_list:
+            self.base_meta[base_file_name]["statistics"] = {
               "ocr_word_median_confidence_index": statistics.median(word_confidence_list),
               "ocr_word_mean_confidence_index": statistics.mean(word_confidence_list)
             }
-        }
 
     @staticmethod
     def image_group_to_folder_name(scan_id, image_group_id):
@@ -705,7 +709,7 @@ class GoogleOCRFormatter(BaseFormatter):
             image_group_folder_part = rest
         return scan_id+"-"+image_group_folder_part
     
-    def create_opf(self, input_path, pecha_id, ocr_import_info = {}, buda_data = None):
+    def create_opf(self, input_path, pecha_id, opf_options = {}, ocr_import_info = {}, buda_data = None):
         """Create opf of google ocred pecha
 
         Args:
@@ -719,12 +723,27 @@ class GoogleOCRFormatter(BaseFormatter):
                 batch_id: str
                 software_id: str
                 expected_default_language: str
+            opf_options (Dict): an object with the following keys:
+                create_language_layer: boolean
+                language_annotation_min_len: int
+                ocr_confidence_threshold: float (use -1.0 for no OCR confidence layer)
+                remove_non_character_lines: boolean
+                max_low_conf_per_page: int
 
         Returns:
             path: opf path
         """
         # we assume that
         input_path = Path(input_path)
+
+        self.remove_non_character_lines = opf_options["remove_non_character_lines"] if "remove_non_character_lines" in opf_options else True
+        self.create_language_layer = opf_options["create_language_layer"] if "create_language_layer" in opf_options else True
+        self.ocr_confidence_threshold = opf_options["ocr_confidence_threshold"] if "ocr_confidence_threshold" in opf_options else ANNOTATION_MINIMAL_CONFIDENCE
+        self.language_annotation_min_len = opf_options["language_annotation_min_len"] if "language_annotation_min_len" in opf_options else ANNOTATION_MINIMAL_LEN
+        self.max_low_conf_per_page = opf_options["max_low_conf_per_page"] if "max_low_conf_per_page" in opf_options else ANNOTATION_MAX_LOW_CONF_PER_PAGE
+
+        ocr_import_info["op_import_options"] = opf_options
+        ocr_import_info["op_import_version"] = GOOGLE_OCR_IMPORT_VERSION
 
         # if the bdrc scan id is not specified, we assume it's the directory namepecha_id
         self.bdrc_scan_id = input_path.name if "bdrc_scan_id" not in ocr_import_info else ocr_import_info["bdrc_scan_id"]
@@ -762,11 +781,12 @@ class GoogleOCRFormatter(BaseFormatter):
 
         # we add the rest to metadata:
         self.metadata["bases"] = self.base_meta
-        self.metadata['statistics'] = {
-            # there are probably more efficient ways to compute those
-            "ocr_word_mean_confidence_index": statistics.mean(total_word_confidence_list),
-            "ocr_word_median_confidence_index": statistics.median(total_word_confidence_list)
-        }
+        if total_word_confidence_list:
+            self.metadata['statistics'] = {
+                # there are probably more efficient ways to compute those
+                "ocr_word_mean_confidence_index": statistics.mean(total_word_confidence_list),
+                "ocr_word_median_confidence_index": statistics.median(total_word_confidence_list)
+            }
 
         meta_fn = self.dirs["opf_path"] / "meta.yml"
         dump_yaml(self.metadata, meta_fn)

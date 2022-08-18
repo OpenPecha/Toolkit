@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pytest
 from openpecha import config
-from openpecha.utils import load_yaml
+from openpecha.utils import load_yaml, dump_yaml
 from openpecha.formatters import GoogleOCRFormatter
 
 def mock_get_image_list(bdrc_scan_id, vol_name):
@@ -23,12 +23,12 @@ def test_google_ocr_base_meta():
         ocr_import_info = load_yaml(ocr_import_info_path)
         formatter = GoogleOCRFormatter(output_path=tmpdirname)
         formatter._get_image_list = mock_get_image_list
-        pecha_path = formatter.create_opf(ocr_path, pecha_id, ocr_import_info, buda_data)
+        pecha_path = formatter.create_opf(ocr_path, pecha_id, {}, ocr_import_info, buda_data)
         output_metadata = load_yaml(Path(f"{pecha_path}/{pecha_path.name}.opf/meta.yml"))
         expected_metadata = load_yaml(expected_meta_path)
         assert output_metadata["source_metadata"] == expected_metadata["source_metadata"]
-        del output_metadata["ocr_import_info"]["ocr_info"]
-        del expected_metadata["ocr_import_info"]["ocr_info"]
+        del output_metadata["ocr_import_info"]["ocr_info"]["timestamp"]
+        del expected_metadata["ocr_import_info"]["ocr_info"]["timestamp"]
         assert output_metadata["ocr_import_info"] == expected_metadata["ocr_import_info"]
         assert output_metadata["statistics"] == expected_metadata["statistics"]
         assert output_metadata["default_language"] == expected_metadata["default_language"]

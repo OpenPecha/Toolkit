@@ -50,6 +50,9 @@ class Pagination(BaseAnnotation):
 class Language(BaseAnnotation):
     language: str = Field(None, description="BCP-47 tag of the language")
 
+class OCRConfidence(BaseAnnotation):
+    confidence: float
+    nb_below_threshold: Optional[int]
 
 class Citation(BaseAnnotation):
     pass
