@@ -16,8 +16,8 @@ default_language: bo
 source: https://library.bdrc.io
 source_file: null
 initial_creation_type: ocr
-imported: '2022-08-18T09:27:25.785639+00:00'
-last_modified: '2022-08-18T09:27:25.785644+00:00'
+imported: '2022-08-18T12:01:41.333191+00:00'
+last_modified: '2022-08-18T12:01:41.333196+00:00'
 parser: null
 source_metadata:
   id: http://purl.bdrc.io/resource/W24767
@@ -28,7 +28,7 @@ source_metadata:
   title: ལམ་འབྲས་གཞུང་རྡོ་རྗེའི་ཚིག་རྐང་གི་རྣམ་འགྲེལ་བཅུ་གཅིག
   author: ས་ཆེན་ཀུན་དགའ་སྙིང་པོ།
 statistics:
-  ocr_word_mean_confidence_index: 0.8901463215597403
+  ocr_word_mean_confidence_index: 0.8853611839857383
   ocr_word_median_confidence_index: 0.9700000286102295
 quality: null
 bases:
@@ -42,7 +42,7 @@ bases:
     base_file: I3852.txt
     statistics:
       ocr_word_median_confidence_index: 0.9599999785423279
-      ocr_word_mean_confidence_index: 0.8677147274002707
+      ocr_word_mean_confidence_index: 0.8555886558078705
   I3853:
     source_metadata:
       id: http://purl.bdrc.io/resource/I3853

@@ -87,7 +87,6 @@ def _get_annotation_class(layer_name: LayerEnum):
     else:
         return BaseAnnotation
 
-
 class Layer(BaseModel):
     id: str = None
     annotation_type: LayerEnum
@@ -142,3 +141,8 @@ class SpanINFO(BaseModel):
     text: str
     layers: Dict[LayerEnum, List[BaseAnnotation]]
     metadata: PechaMetadata
+
+
+class OCRConfidenceLayer(Layer):
+    confidence_threshold: float
+    annotation_type: LayerEnum = LayerEnum.ocr_confidence

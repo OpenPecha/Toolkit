@@ -14,7 +14,7 @@ from pathlib import Path
 
 from openpecha.core.annotation import Page, Span
 from openpecha.core.annotations import BaseAnnotation, Language, OCRConfidence
-from openpecha.core.layer import Layer, LayerEnum
+from openpecha.core.layer import Layer, LayerEnum, OCRConfidenceLayer
 from openpecha.core.ids import get_base_id
 from openpecha.core.metadata import InitialPechaMetadata, InitialCreationType, LicenseType, Copyright_copyrighted, Copyright_unknown, Copyright_public_domain
 from openpecha.formatters import BaseFormatter
@@ -643,16 +643,13 @@ class GoogleOCRFormatter(BaseFormatter):
             layer = Layer(annotation_type=LayerEnum.language, annotations=annotations)
             layers[LayerEnum.language.value] = json.loads(layer.json(exclude_none=True))
         if state["low_confidence_annotations"]:
-            layer = Layer(annotation_type=LayerEnum.ocr_confidence, annotations=state["low_confidence_annotations"])
+            layer = OCRConfidenceLayer(
+                confidence_threshold=self.ocr_confidence_threshold, 
+                annotations=state["low_confidence_annotations"]
+            )
             layers[LayerEnum.ocr_confidence.value] = json.loads(layer.json(exclude_none=True))
 
         return state["base_layer"], layers, state["word_confidences"]
-
-    def get_base_text(self):
-        base_text = f"{self.page_break}".join(self.base_text)
-        self.base_text = []
-
-        return base_text
 
     def get_copyright_and_license_info(self, bdata):
         if "copyright_status" not in bdata["source_metadata"]:
@@ -696,12 +693,13 @@ class GoogleOCRFormatter(BaseFormatter):
         self.base_meta[base_file_name] = {
             "source_metadata": self.buda_data["image_groups"][image_group_id],
             "order": self.buda_data["image_groups"][image_group_id]["volume_number"],
-            "base_file": f"{base_file_name}.txt",
-            "statistics": {
+            "base_file": f"{base_file_name}.txt"
+            }
+        if word_confidence_list:
+            self.base_meta[base_file_name]["statistics"] = {
               "ocr_word_median_confidence_index": statistics.median(word_confidence_list),
               "ocr_word_mean_confidence_index": statistics.mean(word_confidence_list)
             }
-        }
 
     @staticmethod
     def image_group_to_folder_name(scan_id, image_group_id):
@@ -783,11 +781,12 @@ class GoogleOCRFormatter(BaseFormatter):
 
         # we add the rest to metadata:
         self.metadata["bases"] = self.base_meta
-        self.metadata['statistics'] = {
-            # there are probably more efficient ways to compute those
-            "ocr_word_mean_confidence_index": statistics.mean(total_word_confidence_list),
-            "ocr_word_median_confidence_index": statistics.median(total_word_confidence_list)
-        }
+        if total_word_confidence_list:
+            self.metadata['statistics'] = {
+                # there are probably more efficient ways to compute those
+                "ocr_word_mean_confidence_index": statistics.mean(total_word_confidence_list),
+                "ocr_word_median_confidence_index": statistics.median(total_word_confidence_list)
+            }
 
         meta_fn = self.dirs["opf_path"] / "meta.yml"
         dump_yaml(self.metadata, meta_fn)
