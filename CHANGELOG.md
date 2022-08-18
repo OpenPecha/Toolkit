@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.8.26 (2022-08-18)
+### Fix
+* **buda:** Better API logging ([`74366e6`](https://github.com/OpenPecha/Toolkit/commit/74366e693c18980b681d6fe06d027ef58047c3f3))
+
 ## v0.8.25 (2022-08-18)
 ### Fix
 * **googel-ocr-formatter:** Commit made to trigger githubaction to publish changes on pip ([`7f57883`](https://github.com/OpenPecha/Toolkit/commit/7f57883d84bc10351527a49ee6ce970ace404e50))
