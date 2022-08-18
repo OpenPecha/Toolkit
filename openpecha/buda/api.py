@@ -10,6 +10,7 @@ import gzip
 import hashlib
 import io
 import json
+import logging
 
 LDSPDIBASEURL = "https://ldspdi.bdrc.io/"
 CONVERTER = pyewts.pyewts()
@@ -173,7 +174,7 @@ def get_buda_scan_info(wlname):
         )
         g.parse(data=req.text, format="ttl")
         res = _res_from_model(g, wlname)
-    except Exception:
-        print("something went wrong")
+    except Exception as e:
+        logging.error("get_buda_scan_info failed for "+wlname+": "+str(e))
     finally:
         return res
