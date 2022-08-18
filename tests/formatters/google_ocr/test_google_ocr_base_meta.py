@@ -23,7 +23,7 @@ def test_google_ocr_base_meta():
         ocr_import_info = load_yaml(ocr_import_info_path)
         formatter = GoogleOCRFormatter(output_path=tmpdirname)
         formatter._get_image_list = mock_get_image_list
-        pecha_path = formatter.create_opf(ocr_path, pecha_id, ocr_import_info, buda_data)
+        pecha_path = formatter.create_opf(ocr_path, pecha_id, {}, ocr_import_info, buda_data)
         output_metadata = load_yaml(Path(f"{pecha_path}/{pecha_path.name}.opf/meta.yml"))
         expected_metadata = load_yaml(expected_meta_path)
         assert output_metadata["source_metadata"] == expected_metadata["source_metadata"]

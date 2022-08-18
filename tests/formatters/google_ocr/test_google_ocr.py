@@ -27,7 +27,7 @@ def test_base_text():
         ocr_import_info = load_yaml(ocr_import_info_path)
         formatter = GoogleOCRFormatter(output_path=tmpdirname)
         formatter._get_image_list = mock_get_image_list
-        pecha_path = formatter.create_opf(ocr_path, pecha_id, ocr_import_info, buda_data)
+        pecha_path = formatter.create_opf(ocr_path, pecha_id, {}, ocr_import_info, buda_data)
         base_text = (pecha_path / f"{pecha_path.name}.opf" / "base" / "I3852.txt").read_text(encoding='utf-8')
         assert expected_base_text == base_text
 
@@ -47,7 +47,7 @@ def test_build_layers():
         ocr_import_info = load_yaml(ocr_import_info_path)
         formatter = GoogleOCRFormatter(output_path=tmpdirname)
         formatter._get_image_list = mock_get_image_list
-        pecha_path = formatter.create_opf(ocr_path, pecha_id, ocr_import_info, buda_data)
+        pecha_path = formatter.create_opf(ocr_path, pecha_id, {}, ocr_import_info, buda_data)
         pagination_layer = load_yaml((pecha_path / f"{pecha_path.name}.opf" / "layers" / "I3852" / "Pagination.yml"))
         language_layer = load_yaml((pecha_path / f"{pecha_path.name}.opf" / "layers" / "I3852" / "Language.yml"))
         confidence_layer = load_yaml((pecha_path / f"{pecha_path.name}.opf" / "layers" / "I3852" / "OCRConfidence.yml"))

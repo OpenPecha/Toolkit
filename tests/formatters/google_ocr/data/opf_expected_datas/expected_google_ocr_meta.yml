@@ -26,7 +26,7 @@ source_metadata:
   title: ལམ་འབྲས་གཞུང་རྡོ་རྗེའི་ཚིག་རྐང་གི་རྣམ་འགྲེལ་བཅུ་གཅིག
   author: ས་ཆེན་ཀུན་དགའ་སྙིང་པོ།
 statistics:
-  ocr_word_mean_confidence_index: 0.8905010066724911
+  ocr_word_mean_confidence_index: 0.8901463215597403
   ocr_word_median_confidence_index: 0.9700000286102295
 quality: null
 bases:
@@ -51,7 +51,7 @@ bases:
     base_file: I3853.txt
     statistics:
       ocr_word_median_confidence_index: 0.9800000190734863
-      ocr_word_mean_confidence_index: 0.9221174707276375
+      ocr_word_mean_confidence_index: 0.9219025213201091
   I3854:
     source_metadata:
       id: http://purl.bdrc.io/resource/I3854
@@ -62,7 +62,7 @@ bases:
     base_file: I3854.txt
     statistics:
       ocr_word_median_confidence_index: 0.9800000190734863
-      ocr_word_mean_confidence_index: 0.8824677238056444
+      ocr_word_mean_confidence_index: 0.8821181606726791
 copyright:
   status: 'Public domain'
   notice: 'Public domain'
