@@ -13,7 +13,7 @@ import requests
 from pathlib import Path
 
 from openpecha.core.annotation import Page, Span
-from openpecha.core.annotations import BaseAnnotation, Language
+from openpecha.core.annotations import BaseAnnotation, Language, OCRConfidence
 from openpecha.core.layer import Layer, LayerEnum
 from openpecha.core.ids import get_base_id
 from openpecha.core.metadata import InitialPechaMetadata, InitialCreationType, LicenseType, Copyright_copyrighted, Copyright_unknown, Copyright_public_domain
@@ -28,14 +28,6 @@ ANNOTATION_MAX_LOW_CONF_PER_PAGE = 10
 NOISE_PATTERN = re.compile(r'(?:\s|[-，.… }#*,+•：/|(©:;་"།=@%༔){"])+')
 GOOGLE_OCR_IMPORT_VERSION = "1.0.0"
 
-extended_LayerEnum = [(l.name, l.value) for l in LayerEnum] + [("low_conf_box", "OCRConfidence")]
-LayerEnum = Enum("LayerEnum", extended_LayerEnum)
-
-class ExtentedLayer(Layer):
-    annotation_type: LayerEnum
-
-class OCRConfidence(BaseAnnotation):
-    confidence: float
 
 class BBox:
     def __init__(self, text: str, vertices: list, confidence: float, language: str):
@@ -44,11 +36,6 @@ class BBox:
         self.vertices = vertices
         self.confidence = confidence
         self.language = language
-        self.remove_non_character_lines = True
-        self.create_language_layer = True
-        self.ocr_confidence_threshold = ANNOTATION_MINIMAL_CONFIDENCE
-        self.language_annotation_min_len = ANNOTATION_MINIMAL_LEN
-
     
     def get_box_height(self):
         y1 = self.vertices[0][1]
@@ -87,6 +74,10 @@ class GoogleOCRFormatter(BaseFormatter):
         self.metadata = {}
         self.default_language = None
         self.buda_data = {}
+        self.remove_non_character_lines = True
+        self.create_language_layer = True
+        self.ocr_confidence_threshold = ANNOTATION_MINIMAL_CONFIDENCE
+        self.language_annotation_min_len = ANNOTATION_MINIMAL_LEN
 
     def text_preprocess(self, text):
 
@@ -560,10 +551,11 @@ class GoogleOCRFormatter(BaseFormatter):
         # if the whole page is below the min confidence level, we just add one
         # annotation for the page instead of annotating each word
         mean_page_confidence = statistics.mean(page_word_confidences)
-        if statistics.mean(page_word_confidences) < self.ocr_confidence_threshold or len(state["page_low_confidence_annotations"]) > self.max_low_conf_per_page:
+        nb_below_threshold = len(state["page_low_confidence_annotations"])
+        if statistics.mean(page_word_confidences) < self.ocr_confidence_threshold or nb_below_threshold > self.max_low_conf_per_page:
             state["low_confidence_annotations"][self.get_unique_id()] = OCRConfidence(
                 span=Span(start=page_start_cc, end=state["base_layer_len"]), 
-                confidence=mean_page_confidence)
+                confidence=mean_page_confidence, nb_below_threshold=nb_below_threshold)
         else:
             self.merge_page_low_confidence_annotations(state["page_low_confidence_annotations"], state["low_confidence_annotations"])
             state["page_low_confidence_annotations"] = []
@@ -644,15 +636,15 @@ class GoogleOCRFormatter(BaseFormatter):
             self.build_page(ocr_object, image_number+1, imginfo, state)
         layers = {}
         if state["pagination_annotations"]:
-            layer = ExtentedLayer(annotation_type=LayerEnum.pagination, annotations=state["pagination_annotations"])
+            layer = Layer(annotation_type=LayerEnum.pagination, annotations=state["pagination_annotations"])
             layers[LayerEnum.pagination.value] = json.loads(layer.json(exclude_none=True))
         if state["language_annotations"]:
             annotations = self.merge_short_language_annotations(state["language_annotations"])
-            layer = ExtentedLayer(annotation_type=LayerEnum.language, annotations=annotations)
+            layer = Layer(annotation_type=LayerEnum.language, annotations=annotations)
             layers[LayerEnum.language.value] = json.loads(layer.json(exclude_none=True))
         if state["low_confidence_annotations"]:
-            layer = ExtentedLayer(annotation_type=LayerEnum.low_conf_box, annotations=state["low_confidence_annotations"])
-            layers[LayerEnum.low_conf_box.value] = json.loads(layer.json(exclude_none=True))
+            layer = Layer(annotation_type=LayerEnum.ocr_confidence, annotations=state["low_confidence_annotations"])
+            layers[LayerEnum.ocr_confidence.value] = json.loads(layer.json(exclude_none=True))
 
         return state["base_layer"], layers, state["word_confidences"]
 

@@ -1,64 +1,66 @@
-id: 0f2cae2d18c7471fa0d780b4d4786b42
+id: 934aa0f3d1ad455083c22b8a421a4bc6
 annotation_type: OCRConfidence
 revision: '00001'
 annotations:
-  4663b4ac673a49d7a64fb5edb35beddf:
+  e03145f98c6e4cefa9594476c1fc08a8:
     span:
       start: 0
       end: 34
     confidence: 0.49705884079722795
-  d3348b989a8b473c90341a878af640ff:
+  651ba87d2c5946a29762ec6ea24d211e:
     span:
       start: 78
       end: 84
     confidence: 0.6299999952316284
-  fe03495d36454aa0b8d2170ffeb4fd5e:
+  4086e2d0ae4646599c3aaff1089c8aac:
     span:
       start: 268
       end: 276
     confidence: 0.625
-  74fc6f246d3547708e325fdffb3cb6ca:
+  3904538d0ae34eb0b04dbf2bc7cf9892:
     span:
       start: 383
       end: 391
     confidence: 0.7050000131130219
-  17abd86615c44c8294f56c150a211c80:
+  badc72490e09447391d127ce3e5557a1:
     span:
       start: 462
       end: 464
     confidence: 0.7799999713897705
-  f89fcaa5f7364b5295729999171a21c8:
+  926d9e8c3f8447769167add7acf46aca:
     span:
       start: 491
       end: 492
     confidence: 0.25999999046325684
-  e60c3595d4ed4b44b2c7638dca80fe94:
+  fe36a607678244dfa94c0ce39f4c2b20:
     span:
       start: 516
       end: 520
     confidence: 0.7400000095367432
-  d501608172934511a9b6cc9128209740:
+  ff825cd9d95f459aae087644cc2048f4:
     span:
       start: 650
       end: 653
     confidence: 0.6499999761581421
-  5f8d0405860146949c425b71cd7374f7:
+  37d987f07ead4822b06d8634db577f18:
     span:
       start: 747
       end: 754
     confidence: 0.6185714176722935
-  a4811845fb4545a28f5e41355b7f15ec:
+  f2176255595e46e382e3665a55b64add:
     span:
       start: 767
       end: 768
     confidence: 0.5199999809265137
-  86338cc529184c1da616eb95c08095b9:
+  38ede3c734fe4e03b51612dae162ff33:
     span:
       start: 783
       end: 2436
     confidence: 0.8490456462957552
-  7613e6fca37546d8919d5cda4f7c131e:
+    nb_below_threshold: 57
+  d11cf7b279e142af8518491e747cd072:
     span:
       start: 2437
       end: 2505
     confidence: 0.9507142943995339
+    nb_below_threshold: 58

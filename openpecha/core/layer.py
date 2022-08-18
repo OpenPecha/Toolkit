@@ -35,6 +35,7 @@ class LayerEnum(Enum):
     durchen = "Durchen"
     footnote = "Footnote"
     segment = "Segment"
+    ocr_confidence = "OCRConfidence"
 
 
 def _get_annotation_class(layer_name: LayerEnum):
@@ -81,6 +82,8 @@ def _get_annotation_class(layer_name: LayerEnum):
         return Footnote
     elif layer_name == LayerEnum.segment:
         return Segment
+    elif layer_name == LayerEnum.ocr_confidence:
+        return OCRConfidence
     else:
         return BaseAnnotation
 
