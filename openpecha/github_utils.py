@@ -30,9 +30,9 @@ def get_github_repo(repo_name, org_name, token):
     return repo
 
 
-def create_github_repo(path, org_name, token):
+def create_github_repo(path, org_name, token, private=False):
     org = _get_openpecha_data_org(org_name, token)
-    repo = org.create_repo(path.name)
+    repo = org.create_repo(path.name, private)
     time.sleep(2)
     return repo._html_url.value
 
@@ -120,9 +120,10 @@ def github_publish(
     layers=[],
     org=None,
     token=None,
+    private=False
 ):
     path = Path(path)
-    remote_repo_url = create_github_repo(path, org, token)
+    remote_repo_url = create_github_repo(path, org, token, private)
     local_repo = create_local_repo(path, remote_repo_url, org, token)
     commit(local_repo, message, not_includes)
     local_repo.git.checkout("-b", "review")
@@ -140,7 +141,7 @@ def create_file(
     msg,
     update=False,
     org=None,
-    token=None,
+    token=None
 ):
     repo = get_github_repo(repo_name, org, token)
     if update:
