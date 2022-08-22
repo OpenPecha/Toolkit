@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.8.27 (2022-08-22)
+### Fix
+* **github-utils:** Git hub repo visibility update function renamed ([`0e08f19`](https://github.com/OpenPecha/Toolkit/commit/0e08f194e14b8f72e55caefb81c9733349a13a0c))
+
 ## v0.8.26 (2022-08-18)
 ### Fix
 * **buda:** Better API logging ([`74366e6`](https://github.com/OpenPecha/Toolkit/commit/74366e693c18980b681d6fe06d027ef58047c3f3))
