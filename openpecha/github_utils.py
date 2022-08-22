@@ -38,7 +38,7 @@ def create_github_repo(path, org_name, token, private=False):
     return repo._html_url.value
 
 
-def update_github_repo(repo_name, org_name, token, private=False):
+def update_github_repo_visibility(repo_name, org_name, token, private=False):
     org = _get_openpecha_data_org(org_name, token)
     repo = org.get_repo(repo_name)
     repo.edit(private=private)
