@@ -270,7 +270,7 @@ class GoogleOCRFormatter(BaseFormatter):
         """
         vertices = []
         for vertice in word['boundingBox']['vertices']:
-            vertices.append([vertice['x'], vertice['y']])
+            vertices.append([vertice.get('x', 0), vertice.get('y', 0)])
         return vertices
 
     def dict_to_bbox(self, word):
@@ -422,8 +422,8 @@ class GoogleOCRFormatter(BaseFormatter):
                             if self.is_tibetan_non_consonant(symbol):
                                 continue
                             vertices = symbol['boundingBox']['vertices']
-                            x1 = vertices[0]['x']
-                            x2 = vertices[1]['x']
+                            x1 = vertices[0].get('x', 0)
+                            x2 = vertices[1].get('x', 0)
                             width = x2-x1
                             widths.append(width)
         return sum(widths) / len(widths)
@@ -550,9 +550,12 @@ class GoogleOCRFormatter(BaseFormatter):
             state["base_layer_len"] += 1
         # if the whole page is below the min confidence level, we just add one
         # annotation for the page instead of annotating each word
-        mean_page_confidence = statistics.mean(page_word_confidences)
+        if page_word_confidences:
+            mean_page_confidence = statistics.mean(page_word_confidences)
+        else:
+            mean_page_confidence = 0
         nb_below_threshold = len(state["page_low_confidence_annotations"])
-        if statistics.mean(page_word_confidences) < self.ocr_confidence_threshold or nb_below_threshold > self.max_low_conf_per_page:
+        if mean_page_confidence < self.ocr_confidence_threshold or nb_below_threshold > self.max_low_conf_per_page:
             state["low_confidence_annotations"][self.get_unique_id()] = OCRConfidence(
                 span=Span(start=page_start_cc, end=state["base_layer_len"]), 
                 confidence=mean_page_confidence, nb_below_threshold=nb_below_threshold)
