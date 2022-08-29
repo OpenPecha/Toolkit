@@ -661,7 +661,7 @@ class GoogleOCRFormatter(BaseFormatter):
             return Copyright_unknown, None
         return Copyright_copyrighted, LicenseType.UNDER_COPYRIGHT
             
-    def get_metadata(self, pecha_id, ocr_import_info):
+    def get_metadata(self, pecha_id, ocr_import_info, parser_link):
         source_metadata = {
             "id": f"http://purl.bdrc.io/resource/{self.bdrc_scan_id}",
             "title": "",
@@ -679,7 +679,7 @@ class GoogleOCRFormatter(BaseFormatter):
             initial_creation_type=InitialCreationType.ocr,
             imported=datetime.datetime.now(timezone.utc),
             last_modified=datetime.datetime.now(timezone.utc),
-            parser=None,
+            parser=parser_link,
             copyright=copyright,
             license=license,
             source_metadata=source_metadata,
@@ -709,7 +709,7 @@ class GoogleOCRFormatter(BaseFormatter):
             image_group_folder_part = rest
         return scan_id+"-"+image_group_folder_part
     
-    def create_opf(self, input_path, pecha_id, opf_options = {}, ocr_import_info = {}, buda_data = None):
+    def create_opf(self, input_path, pecha_id, opf_options = {}, ocr_import_info = {}, buda_data = None, parser_link=None):
         """Create opf of google ocred pecha
 
         Args:
@@ -756,7 +756,7 @@ class GoogleOCRFormatter(BaseFormatter):
             self.buda_data = buda_data
         self.default_language = "bo" if "expected_default_language" not in ocr_import_info else ocr_import_info["expected_default_language"]
 
-        self.metadata = self.get_metadata(pecha_id, ocr_import_info)
+        self.metadata = self.get_metadata(pecha_id, ocr_import_info, parser_link)
         total_word_confidence_list = []
 
         for image_group_id, image_group_info in self.buda_data["image_groups"].items():
