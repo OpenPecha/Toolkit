@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.8.28 (2022-08-29)
+### Fix
+* **hot-fix:** Google ocr parser link has been passed as parameter ([`9b6bc6c`](https://github.com/OpenPecha/Toolkit/commit/9b6bc6c08edc5d7ffbd2faa7e74bcb0812a2bb4b))
+
 ## v0.8.27 (2022-08-22)
 ### Fix
 * **github-utils:** Git hub repo visibility update function renamed ([`0e08f19`](https://github.com/OpenPecha/Toolkit/commit/0e08f194e14b8f72e55caefb81c9733349a13a0c))
