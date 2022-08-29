@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.8.29 (2022-08-29)
+### Fix
+* **hot-fix:** Default value of vertices are added ([`ebe82ae`](https://github.com/OpenPecha/Toolkit/commit/ebe82ae17963c24a945cdbb969ac6905a95f713c))
+
 ## v0.8.28 (2022-08-29)
 ### Fix
 * **hot-fix:** Google ocr parser link has been passed as parameter ([`9b6bc6c`](https://github.com/OpenPecha/Toolkit/commit/9b6bc6c08edc5d7ffbd2faa7e74bcb0812a2bb4b))
