@@ -626,9 +626,6 @@ class GoogleOCRFormatter(BaseFormatter):
             image_filename = imginfo["filename"]
             expected_ocr_filename = image_filename[:image_filename.rfind('.')]+".json.gz"
             expected_ocr_path = image_group_ocr_path / expected_ocr_filename
-            if not expected_ocr_path.is_file():
-                logging.warning("could not find "+str(expected_ocr_path))
-                continue
             ocr_object = None
             try:
                 ocr_object = json.load(gzip.open(str(expected_ocr_path), "rb"))
