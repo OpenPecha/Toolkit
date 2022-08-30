@@ -36,13 +36,12 @@ class BBox:
         self.vertices = vertices
         self.confidence = confidence
         self.language = language
+        self.mid_y = self.get_mid()
     
-    def get_box_height(self):
+    def get_height(self):
         y1 = self.vertices[0][1]
-        y2 = self.vertices[1][1]
-        height = abs(y2-y1)
-        return height
-    
+        y2 = self.vertices[2][1]
+        return = y2 - y1    
     
     def get_box_orientation(self):
         x1= self.vertices[0][0]
@@ -56,7 +55,49 @@ class BBox:
         else:
             return "portrait"
 
-class GoogleOCRFormatter(BaseFormatter):
+    def get_mid(self):
+        """Calculate middle of the bounding poly vertically using y coordinates of the bounding poly
+
+        Args:
+            bounding_poly (dict): bounding poly's details
+
+        Returns:
+            float: mid point's y coordinate of bounding poly
+        """
+        y1 = self.vertices[0][1]
+        y2 = self.vertices[2][1]
+        y_avg = (y1 + y2) / 2
+        return y_avg
+
+    def get_centriod(self, bounding_poly):
+        """Calculate centriod of bounding poly
+
+        Args:
+            bounding_poly (dict): info regarding bounding poly such as vertices and description
+
+        Returns:
+            list: centriod coordinates
+        """
+        sum_of_x = 0
+        sum_of_y = 0
+        for vertice in self.vertices:
+            sum_of_x += vertice[0]
+            sum_of_y += vertice[1]
+        return [sum_of_x/4, sum_of_y/4]
+
+
+class GoogleVisionFileProvider():
+    def __init__(self, ocr_import_info):
+        self.ocr_import_info = ocr_import_info
+
+    def get_image_list(self, scan_id, image_group_id):
+        return get_image_list()
+
+    def get_ocr_info(self):
+        # implement
+        pass
+
+class GoogleVisionFormatter(BaseFormatter):
     """
     OpenPecha Formatter for Google OCR JSON output of scanned pecha.
     """
@@ -80,22 +121,8 @@ class GoogleOCRFormatter(BaseFormatter):
         self.language_annotation_min_len = ANNOTATION_MINIMAL_LEN
 
     def text_preprocess(self, text):
-
         return text
 
-    def get_bounding_poly_mid(self, bounding_poly):
-        """Calculate middle of the bounding poly vertically using y coordinates of the bounding poly
-
-        Args:
-            bounding_poly (dict): bounding poly's details
-
-        Returns:
-            float: mid point's y coordinate of bounding poly
-        """
-        y1 = bounding_poly.vertices[0][1]
-        y2 = bounding_poly.vertices[2][1]
-        y_avg = (y1 + y2) / 2
-        return y_avg
 
     def get_avg_bounding_poly_height(self, bounding_polys):
         """Calculate the average height of bounding polys in page
@@ -108,9 +135,7 @@ class GoogleOCRFormatter(BaseFormatter):
         """
         height_sum = 0
         for bounding_poly in bounding_polys:
-            y1 = bounding_poly.vertices[0][1]
-            y2 = bounding_poly.vertices[2][1]
-            height_sum += y2 - y1
+            height_sum += bounding_poly.get_height()
         avg_height = height_sum / len(bounding_polys)
         return avg_height
 
@@ -128,9 +153,8 @@ class GoogleOCRFormatter(BaseFormatter):
         """
         threshold = 10
         if (
-            self.get_bounding_poly_mid(bounding_poly)
-            - self.get_bounding_poly_mid(prev_bounding_poly)
-            < avg_height / threshold
+            (bounding_poly.mid_y - prev_bounding_poly.mid_y)
+            < (avg_height / threshold)
         ):
             return True
         else:
@@ -161,22 +185,6 @@ class GoogleOCRFormatter(BaseFormatter):
             lines.append(cur_line_polys)
         return lines
 
-    def find_centriod(self, bounding_poly):
-        """Calculate centriod of bounding poly
-
-        Args:
-            bounding_poly (dict): info regarding bounding poly such as vertices and description
-
-        Returns:
-            list: centriod coordinates
-        """
-        sum_of_x = 0
-        sum_of_y = 0
-        for vertice in bounding_poly.vertices:
-            sum_of_x += vertice[0]
-            sum_of_y += vertice[1]
-        centriod = [sum_of_x/4, sum_of_y/4]
-        return centriod
 
     def get_poly_sorted_on_y(self, bounding_poly_centriods):
         """Sort bounding polys centriod base on y coordinates
@@ -233,7 +241,8 @@ class GoogleOCRFormatter(BaseFormatter):
         bounding_poly_centriods = []
         avg_box_height = self.get_avg_bounding_poly_height(main_region_bounding_polys)
         for bounding_poly in main_region_bounding_polys:
-            centroid = self.find_centriod(bounding_poly)
+            centroid = bounding_poly.get_centriod()
+            # TODO: I'm not so sure about that...
             bounding_polys[f"{centroid[0]},{centroid[1]}"] = bounding_poly
             bounding_poly_centriods.append(centroid)
         sorted_bounding_polys = []
@@ -419,6 +428,7 @@ class GoogleOCRFormatter(BaseFormatter):
                 for paragraph in block['paragraphs']:
                     for word in paragraph['words']:
                         for symbol in word['symbols']:
+                            # TODO: replace with proper diacritics detection
                             if self.is_tibetan_non_consonant(symbol):
                                 continue
                             vertices = symbol['boundingBox']['vertices']
@@ -664,7 +674,7 @@ class GoogleOCRFormatter(BaseFormatter):
             return Copyright_unknown, None
         return Copyright_copyrighted, LicenseType.UNDER_COPYRIGHT
             
-    def get_metadata(self, pecha_id, ocr_import_info, parser_link):
+    def get_metadata(self, pecha_id, ocr_import_info):
         source_metadata = {
             "id": f"http://purl.bdrc.io/resource/{self.bdrc_scan_id}",
             "title": "",
@@ -675,6 +685,8 @@ class GoogleOCRFormatter(BaseFormatter):
         if self.buda_data is not None:
             source_metadata = self.buda_data["source_metadata"]
             copyright, license = self.get_copyright_and_license_info(self.buda_data)
+
+        parser_link = ocr_import_info["parser_link"] if "parser_link" in ocr_import_info else None
 
         metadata = InitialPechaMetadata(
             id=pecha_id,
@@ -712,12 +724,11 @@ class GoogleOCRFormatter(BaseFormatter):
             image_group_folder_part = rest
         return scan_id+"-"+image_group_folder_part
     
-    def create_opf(self, input_path, pecha_id, opf_options = {}, ocr_import_info = {}, buda_data = None, parser_link=None):
+    def create_opf(self, file_provider, pecha_id, opf_options = {}, ocr_import_info = {}, buda_data = None):
         """Create opf of google ocred pecha
 
         Args:
-            input_path (str): input path, local folder expected to match the output/ folder on s3, ex:
-                              s3://ocr.bdrc.io/Works/60/W22084/vision/batch001/output/
+            file_provider (VisionFileProvider): an instance that will be used to get 
             pecha_id (str): pecha id
             ocr_import_info (Dict): an object with the following keys:
                 bdrc_scan_id: str
@@ -759,7 +770,7 @@ class GoogleOCRFormatter(BaseFormatter):
             self.buda_data = buda_data
         self.default_language = "bo" if "expected_default_language" not in ocr_import_info else ocr_import_info["expected_default_language"]
 
-        self.metadata = self.get_metadata(pecha_id, ocr_import_info, parser_link)
+        self.metadata = self.get_metadata(pecha_id, ocr_import_info)
         total_word_confidence_list = []
 
         for image_group_id, image_group_info in self.buda_data["image_groups"].items():
