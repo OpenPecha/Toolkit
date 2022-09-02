@@ -12,7 +12,6 @@ import openpecha
 from openpecha import config
 from openpecha.alignment.tmx import create_opf as alignment
 from openpecha.blupdate import PechaBaseUpdate
-from openpecha.buda.openpecha_manager import OpenpechaManager
 from openpecha.catalog import config as catalog_config
 from openpecha.catalog.filter import is_text_good_quality
 from openpecha.catalog.storage import GithubBucket
@@ -160,61 +159,6 @@ def format(**kwargs):
         formatter = HFMLFormatter(kwargs["output_path"])
 
     formatter.create_opf(kwargs["input_path"], kwargs["id"])
-
-
-@cli.command()
-@click.option("--cache-folder", "-c", help="path to the folder of the local cache")
-@click.option("--idlist", "-l", help="comma-separated list of Openpecha IDs")
-def pull_pechas(cache_folder, idlist):
-    """
-    Command to pull all the pechas in local cache
-    """
-    opm = None
-    if cache_folder is not None:
-        opm = OpenpechaManager(local_dir=cache_folder)
-    else:
-        opm = OpenpechaManager()
-    if idlist is None:
-        opm.fetch_all_pecha()
-    else:
-        opids = idlist.split(",")
-        for opid in tqdm(opids, ascii=True, desc="Cloning or pulling the pecha"):
-            opm.fetch_pecha(opid)
-
-
-@cli.command()
-@click.option("--cache-folder", "-c", help="path to the folder of the local cache")
-@click.option("--store-uri", "-s", help="Fuseki URI", required=True)
-@click.option(
-    "--force",
-    "-f",
-    help="force upload even when commit match with triple store",
-    is_flag=True,
-)
-@click.option(
-    "--ldspdi-uri", "-u", help="lds-pdi URI", default="https://ldspdi.bdrc.io/"
-)
-@click.option("--idlist", "-l", help="comma-separated list of Openpecha IDs")
-@click.option("--verbose", "-v", help="verbose", is_flag=True)
-@click.option("--debug", "-d", help="debug", is_flag=True)
-def cache_to_store(cache_folder, ldspdi_uri, store_uri, force, verbose, debug, idlist):
-    """
-    Update the cached version of synced commits
-    """
-    if debug:
-        logging.basicConfig(level=logging.DEBUG)
-    elif verbose:
-        logging.basicConfig(level=logging.INFO)
-    opm = None
-    if cache_folder is not None:
-        opm = OpenpechaManager(local_dir=cache_folder)
-    else:
-        opm = OpenpechaManager()
-    opids = None
-    if idlist is not None:
-        opids = idlist.split(",")
-    opm.sync_cache_to_store(store_uri, ldspdi_uri, force, opids)
-
 
 export_types = ["hfml(default)", "epub"]
 
