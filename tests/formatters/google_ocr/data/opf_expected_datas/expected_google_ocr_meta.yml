@@ -27,6 +27,8 @@ source_metadata:
   copyright_status: http://purl.bdrc.io/resource/CopyrightPublicDomain
   title: ལམ་འབྲས་གཞུང་རྡོ་རྗེའི་ཚིག་རྐང་གི་རྣམ་འགྲེལ་བཅུ་གཅིག
   author: ས་ཆེན་ཀུན་དགའ་སྙིང་པོ།
+  languages:
+  - bo
 statistics:
   ocr_word_mean_confidence_index: 0.8853611839857383
   ocr_word_median_confidence_index: 0.9700000286102295
