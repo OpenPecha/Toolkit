@@ -134,7 +134,11 @@ def _res_from_model(g, wlname):
                 break
             else:
                 res["source_metadata"]["title"] = l.value
+        res["source_metadata"]["languages"] = set()
         for _, _, wa in g.triples((mwres, BDO.instanceOf, None)):
+            for _, _, l in g.triples((wa, BDO.language, None)):
+                for _, _, lt in g.triples((l, BDO.langBCP47Lang, None)):
+                    res["source_metadata"]["languages"].add(lt.value)
             for _, _, aac in g.triples((wa, BDO.creator, None)):
                 if (aac, BDO.role, BDR.R0ER0009) or (aac, BDO.role, BDR.R0ER0009) in g:
                     for _, _, p in g.triples((aac, BDO.agent, None)):
@@ -144,6 +148,7 @@ def _res_from_model(g, wlname):
                                 break
                             else:
                                 res["source_metadata"]["author"] = l.value
+        res["source_metadata"]["languages"] = list(res["source_metadata"]["languages"])
         for _, _, ig in g.triples((wres, BDO.instanceHasVolume, None)):
             iglname = str(ig)[str(ig).rfind('/')+1:]
             res["image_groups"][iglname] = {}
