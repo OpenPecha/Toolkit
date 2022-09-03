@@ -178,3 +178,10 @@ def get_buda_scan_info(wlname):
         logging.error("get_buda_scan_info failed for "+wlname+": "+str(e))
     finally:
         return res
+
+def image_group_to_folder_name(scan_id, image_group_id):
+    image_group_folder_part = image_group_id
+    pre, rest = image_group_id[0], image_group_id[1:]
+    if pre == "I" and rest.isdigit() and len(rest) == 4:
+        image_group_folder_part = rest
+    return scan_id+"-"+image_group_folder_part

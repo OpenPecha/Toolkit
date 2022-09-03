@@ -20,7 +20,7 @@ from openpecha.core.metadata import InitialPechaMetadata, InitialCreationType, L
 from openpecha.formatters import BaseFormatter
 from openpecha.utils import dump_yaml, gzip_str
 
-from openpecha.buda.api import get_buda_scan_info, get_image_list
+from openpecha.buda.api import get_buda_scan_info, get_image_list, image_group_to_folder_name
 
 ANNOTATION_MINIMAL_LEN = 20
 ANNOTATION_MINIMAL_CONFIDENCE = 0.8
@@ -41,7 +41,7 @@ class BBox:
     def get_height(self):
         y1 = self.vertices[0][1]
         y2 = self.vertices[2][1]
-        return = y2 - y1    
+        return y2 - y1
     
     def get_box_orientation(self):
         x1= self.vertices[0][0]
@@ -69,7 +69,7 @@ class BBox:
         y_avg = (y1 + y2) / 2
         return y_avg
 
-    def get_centriod(self, bounding_poly):
+    def get_centriod(self):
         """Calculate centriod of bounding poly
 
         Args:
@@ -86,16 +86,37 @@ class BBox:
         return [sum_of_x/4, sum_of_y/4]
 
 
-class GoogleVisionFileProvider():
-    def __init__(self, ocr_import_info):
+class GoogleVisionBDRCFileProvider():
+    def __init__(self, bdrc_scan_id, ocr_import_info, ocr_disk_path=None, mode="local"):
+        # ocr_base_path should be the output/ folder in the case of BDRC OCR files
         self.ocr_import_info = ocr_import_info
+        self.ocr_disk_path = ocr_disk_path
+        self.bdrc_scan_id = bdrc_scan_id
+        self.mode = mode
 
-    def get_image_list(self, scan_id, image_group_id):
-        return get_image_list()
+    def get_image_list(self, image_group_id):
+        buda_il = get_image_list(self.bdrc_scan_id, image_group_id)
+        # format should be a list of image_id (/ file names)
+        return map(lambda ii: ii["filename"], buda_il)
 
-    def get_ocr_info(self):
-        # implement
-        pass
+    def get_source_info(self):
+        return get_buda_scan_info(self.bdrc_scan_id)
+
+    def get_image_data(self, image_group_id, image_id):
+        # TODO: implement the following modes:
+        #  - "s3" (just read images from s3)
+        #  - "s3-localcache" (cache s3 files on disk)
+        # TODO: handle case where only zip archives are present on s3, one per volume.
+        #       This should be indicated in self.ocr_import_info["ocr_info"]
+        vol_folder = image_group_to_folder_name(self.bdrc_scan_id, image_group_id)
+        expected_ocr_filename = image_id[:image_id.rfind('.')]+".json.gz"
+        image_ocr_path = ocr_disk_path / vol_folder / expected_ocr_filename
+        ocr_object = None
+        try:
+            ocr_object = json.load(gzip.open(str(expected_ocr_path), "rb"))
+        except:
+            logging.exception("could not read "+str(expected_ocr_path))
+        return ocr_object
 
 class GoogleVisionFormatter(BaseFormatter):
     """
@@ -114,7 +135,7 @@ class GoogleVisionFormatter(BaseFormatter):
         self.bdrc_scan_id = None
         self.metadata = {}
         self.default_language = None
-        self.buda_data = {}
+        self.source_info = {}
         self.remove_non_character_lines = True
         self.create_language_layer = True
         self.ocr_confidence_threshold = ANNOTATION_MINIMAL_CONFIDENCE
@@ -463,10 +484,6 @@ class GoogleVisionFormatter(BaseFormatter):
         if low_conf_chars:
             path.write_bytes(gzip_str(low_conf_chars))
 
-    # replace to test offline
-    def _get_image_list(self, bdrc_scan_id, image_group_id):
-        return get_image_list(bdrc_scan_id, image_group_id)
-
     def get_language_code(self, poly):
         lang = ""
         properties = poly.get("property", {})
@@ -531,7 +548,7 @@ class GoogleVisionFormatter(BaseFormatter):
                 return True
         return False
 
-    def build_page(self, ocr_object, image_number, imageinfo, state):
+    def build_page(self, ocr_object, image_number, image_filename, state):
         try:
             page_content = ocr_object["textAnnotations"][0]["description"]
         except Exception:
@@ -576,7 +593,7 @@ class GoogleVisionFormatter(BaseFormatter):
         state["pagination_annotations"][self.get_unique_id()] = Page(
             span=Span(start=page_start_cc, end=state["base_layer_len"]), 
             imgnum=image_number, 
-            reference=imageinfo["filename"])
+            reference=image_filename)
         # adding another line break at the end of a page
         state["base_layer"] += "\n"
         state["base_layer_len"] += 1
@@ -616,11 +633,11 @@ class GoogleVisionFormatter(BaseFormatter):
             annotations[self.get_unique_id()] = previous_annotation
         return annotations
 
-    def build_base(self, image_group_id, image_group_ocr_path):
+    def build_base(self, image_group_id):
         """ The main function that takes the OCR results for an entire volume
             and creates its base and layers
         """
-        image_list = self._get_image_list(self.bdrc_scan_id, image_group_id)
+        image_list = self.data_provider.get_image_list(image_group_id)
         state = {
             "base_layer_len": 0,
             "base_layer": "",
@@ -632,21 +649,10 @@ class GoogleVisionFormatter(BaseFormatter):
             "latest_low_confidence_annotation": None,
             "page_low_confidence_annotations": []
         }
-        for image_number, imginfo in enumerate(image_list):
-            image_filename = imginfo["filename"]
-            expected_ocr_filename = image_filename[:image_filename.rfind('.')]+".json.gz"
-            expected_ocr_path = image_group_ocr_path / expected_ocr_filename
-            if not expected_ocr_path.is_file():
-                logging.warning("could not find "+str(expected_ocr_path))
-                continue
-            ocr_object = None
-            try:
-                ocr_object = json.load(gzip.open(str(expected_ocr_path), "rb"))
-            except:
-                logging.error("could not read "+str(expected_ocr_path))
-                continue
+        for image_number, image_filename in enumerate(image_list):
             # enumerate starts at 0 but image numbers start at 1
-            self.build_page(ocr_object, image_number+1, imginfo, state)
+            ocr_object = self.data_provider.get_image_data(image_group_id, image_filename)
+            self.build_page(ocr_object, image_number+1, image_filename, state)
         layers = {}
         if state["pagination_annotations"]:
             layer = Layer(annotation_type=LayerEnum.pagination, annotations=state["pagination_annotations"])
@@ -682,9 +688,9 @@ class GoogleVisionFormatter(BaseFormatter):
         }
         copyright = {}
         license = None
-        if self.buda_data is not None:
-            source_metadata = self.buda_data["source_metadata"]
-            copyright, license = self.get_copyright_and_license_info(self.buda_data)
+        if self.source_info is not None:
+            source_metadata = self.source_info["source_metadata"]
+            copyright, license = self.get_copyright_and_license_info(self.source_info)
 
         parser_link = ocr_import_info["parser_link"] if "parser_link" in ocr_import_info else None
 
@@ -706,8 +712,8 @@ class GoogleVisionFormatter(BaseFormatter):
     def set_base_meta(self, image_group_id, base_file_name, word_confidence_list):
         self.cur_word_confidences = []
         self.base_meta[base_file_name] = {
-            "source_metadata": self.buda_data["image_groups"][image_group_id],
-            "order": self.buda_data["image_groups"][image_group_id]["volume_number"],
+            "source_metadata": self.source_info["image_groups"][image_group_id],
+            "order": self.source_info["image_groups"][image_group_id]["volume_number"],
             "base_file": f"{base_file_name}.txt"
             }
         if word_confidence_list:
@@ -715,21 +721,19 @@ class GoogleVisionFormatter(BaseFormatter):
               "ocr_word_median_confidence_index": statistics.median(word_confidence_list),
               "ocr_word_mean_confidence_index": statistics.mean(word_confidence_list)
             }
-
-    @staticmethod
-    def image_group_to_folder_name(scan_id, image_group_id):
-        image_group_folder_part = image_group_id
-        pre, rest = image_group_id[0], image_group_id[1:]
-        if pre == "I" and rest.isdigit() and len(rest) == 4:
-            image_group_folder_part = rest
-        return scan_id+"-"+image_group_folder_part
     
-    def create_opf(self, file_provider, pecha_id, opf_options = {}, ocr_import_info = {}, buda_data = None):
+    def create_opf(self, data_provider, pecha_id, opf_options = {}, ocr_import_info = {}):
         """Create opf of google ocred pecha
 
         Args:
-            file_provider (VisionFileProvider): an instance that will be used to get 
+            data_provider (DataProvider): an instance that will be used to get the necessary data
             pecha_id (str): pecha id
+            opf_options (Dict): an object with the following keys:
+                create_language_layer: boolean
+                language_annotation_min_len: int
+                ocr_confidence_threshold: float (use -1.0 for no OCR confidence layer)
+                remove_non_character_lines: boolean
+                max_low_conf_per_page: int
             ocr_import_info (Dict): an object with the following keys:
                 bdrc_scan_id: str
                 source: str
@@ -737,18 +741,12 @@ class GoogleVisionFormatter(BaseFormatter):
                 batch_id: str
                 software_id: str
                 expected_default_language: str
-            opf_options (Dict): an object with the following keys:
-                create_language_layer: boolean
-                language_annotation_min_len: int
-                ocr_confidence_threshold: float (use -1.0 for no OCR confidence layer)
-                remove_non_character_lines: boolean
-                max_low_conf_per_page: int
 
         Returns:
             path: opf path
         """
-        # we assume that
-        input_path = Path(input_path)
+
+        self.data_provider = data_provider
 
         self.remove_non_character_lines = opf_options["remove_non_character_lines"] if "remove_non_character_lines" in opf_options else True
         self.create_language_layer = opf_options["create_language_layer"] if "create_language_layer" in opf_options else True
@@ -759,27 +757,19 @@ class GoogleVisionFormatter(BaseFormatter):
         ocr_import_info["op_import_options"] = opf_options
         ocr_import_info["op_import_version"] = GOOGLE_OCR_IMPORT_VERSION
 
-        # if the bdrc scan id is not specified, we assume it's the directory namepecha_id
-        self.bdrc_scan_id = input_path.name if "bdrc_scan_id" not in ocr_import_info else ocr_import_info["bdrc_scan_id"]
-        
-        self._build_dirs(input_path, id_=pecha_id)
+        self._build_dirs(None, id_=pecha_id)
 
-        if buda_data is None:
-            self.buda_data = get_buda_scan_info(self.bdrc_scan_id)
-        else:
-            self.buda_data = buda_data
+        # if the bdrc scan id is not specified, we assume it's the directory namepecha_id
+        self.bdrc_scan_id = ocr_import_info["bdrc_scan_id"]
+        self.source_info = data_provider.get_source_info()
         self.default_language = "bo" if "expected_default_language" not in ocr_import_info else ocr_import_info["expected_default_language"]
 
         self.metadata = self.get_metadata(pecha_id, ocr_import_info)
         total_word_confidence_list = []
 
-        for image_group_id, image_group_info in self.buda_data["image_groups"].items():
-            vol_folder = GoogleOCRFormatter.image_group_to_folder_name(self.bdrc_scan_id, image_group_id)
-            if not (input_path / vol_folder).is_dir():
-                logging.warn("no folder for image group "+str(input_path / vol_folder)+" (nb of images in theory: "+str(image_group_info["total_pages"])+")")
-                continue
+        for image_group_id, image_group_info in self.source_info["image_groups"].items():
             base_id = image_group_id
-            base_text, layers, word_confidence_list = self.build_base(image_group_id, (input_path / vol_folder))
+            base_text, layers, word_confidence_list = self.build_base(image_group_id)
 
             # save base_text
             (self.dirs["opf_path"] / "base" / f"{base_id}.txt").write_text(base_text)
@@ -806,9 +796,3 @@ class GoogleVisionFormatter(BaseFormatter):
         dump_yaml(self.metadata, meta_fn)
 
         return self.dirs["opf_path"].parent
-
-
-if __name__ == "__main__":
-    formatter = GoogleOCRFormatter()
-    formatter.create_opf("../../Esukhia/img2opf/archive/output/W1PD95844", 300)
-
