@@ -26,7 +26,7 @@ class StringChunker:
                 if next_idx_before_target_len != -1:
                     return next_idx_before_target_len
                 return match.end()
-        return next_idx_before_target_len if next_idx_before_target_len != -1 else -1
+        return next_idx_before_target_len if next_idx_before_target_len > 0 else -1
 
     def get_chunks(self):
         """
@@ -39,7 +39,7 @@ class StringChunker:
         while self.end_cc - index > self.target_len:
             found = self.get_next_chunk_index(index)
             if found == -1:
-                found = self.string.rfind(" ", index, index+self.target_len)
+                found = self.string.rfind(" ", index+1, index+self.target_len)
             if found == -1:
                 found = index+self.target_len
             index = found
@@ -50,6 +50,7 @@ class StringChunker:
 
 
 ENG_PATTERN = re.compile(r"\.\s")
+
 
 class EnglishEasyChunker(StringChunker):
     def __init__(self, full_string, target_len, start_cc = 0, end_cc = 0):
