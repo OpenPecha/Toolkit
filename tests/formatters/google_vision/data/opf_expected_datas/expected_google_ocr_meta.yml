@@ -7,7 +7,7 @@ ocr_import_info:
   expected_default_language: bo
   bdrc_scan_id: W24767
   ocr_info:
-    timestamp: '1977-04-22T06:00:00'
+    timestamp: '1977-04-22T06:00:00+00:00'
     prop1: value 1
     prop2: value 2
   op_import_options: {}
@@ -16,8 +16,8 @@ default_language: bo
 source: https://library.bdrc.io
 source_file: null
 initial_creation_type: ocr
-imported: '2022-08-18T12:01:41.333191+00:00'
-last_modified: '2022-08-18T12:01:41.333196+00:00'
+imported: '2022-09-05T16:32:13.335176+00:00'
+last_modified: '2022-09-05T16:32:13.335184+00:00'
 parser: null
 source_metadata:
   id: http://purl.bdrc.io/resource/W24767
@@ -30,8 +30,8 @@ source_metadata:
   languages:
   - bo
 statistics:
-  ocr_word_mean_confidence_index: 0.8853611839857383
-  ocr_word_median_confidence_index: 0.9700000286102295
+  ocr_word_mean_confidence_index: 0.8739654291793503
+  ocr_word_median_confidence_index: 0.9599999785423279
 quality: null
 bases:
   I3852:
@@ -43,8 +43,8 @@ bases:
     order: 1
     base_file: I3852.txt
     statistics:
-      ocr_word_median_confidence_index: 0.9599999785423279
-      ocr_word_mean_confidence_index: 0.8555886558078705
+      ocr_word_median_confidence_index: 0.949999988079071
+      ocr_word_mean_confidence_index: 0.8404232011670042
   I3853:
     source_metadata:
       id: http://purl.bdrc.io/resource/I3853
@@ -55,7 +55,7 @@ bases:
     base_file: I3853.txt
     statistics:
       ocr_word_median_confidence_index: 0.9800000190734863
-      ocr_word_mean_confidence_index: 0.9219025213201091
+      ocr_word_mean_confidence_index: 0.915238913924214
   I3854:
     source_metadata:
       id: http://purl.bdrc.io/resource/I3854
@@ -65,8 +65,8 @@ bases:
     order: 3
     base_file: I3854.txt
     statistics:
-      ocr_word_median_confidence_index: 0.9800000190734863
-      ocr_word_mean_confidence_index: 0.8821181606726791
+      ocr_word_median_confidence_index: 0.9599999785423279
+      ocr_word_mean_confidence_index: 0.8695215366935236
 copyright:
   status: Public domain
   notice: Public domain

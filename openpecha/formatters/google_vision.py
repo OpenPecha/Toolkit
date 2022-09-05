@@ -313,7 +313,7 @@ class GoogleVisionFormatter(BaseFormatter):
             obj: BBox object of bounding poly
         """
         text = word.get('text', '')
-        confidence = word.get('confidence', 0.0)
+        confidence = word.get('confidence')
         language = self.get_language_code(word)
         vertices = self.extract_vertices(word)
         bbox = BBox(text=text, vertices=vertices, confidence=confidence, language=language)
@@ -390,8 +390,8 @@ class GoogleVisionFormatter(BaseFormatter):
             space_box = BBox(
                 text=" ",
                 vertices=space_poly_vertices,
-                confidence=1.0,
-                language=cur_bounding_poly.language
+                confidence=None,
+                language=None
             )
             return space_box
         return None
@@ -492,6 +492,8 @@ class GoogleVisionFormatter(BaseFormatter):
             if languages:
                 lang = languages[0]['languageCode']
         if lang == "":
+            # this is not always true but replacing it with None is worse
+            # with our current data
             return self.default_language
         if lang in ["bo", "en", "zh"]:
             return lang
@@ -507,7 +509,7 @@ class GoogleVisionFormatter(BaseFormatter):
         if previous_ann is not None:
             # if poly has the same language as the latest annotation, we just lengthen the previous
             # annotation to include this poly:
-            if poly_lang == previous_ann['lang']:
+            if poly_lang == previous_ann['lang'] or not poly_lang:
                 previous_ann["end"] = poly_end_cc
                 return
             # if poly is the default language, we just conclude the previous annotation
@@ -520,7 +522,7 @@ class GoogleVisionFormatter(BaseFormatter):
             state["latest_language_annotation"] = annotation
             return
         # if there's no previous annotation and language is the default language, return
-        if poly_lang == self.default_language:
+        if poly_lang == self.default_language or not poly_lang:
             return
         # if there's no previous annotation and language is not the default, we create an annotation
         annotation = {"start": poly_start_cc, "end": poly_end_cc, "lang": poly_lang}
@@ -528,6 +530,8 @@ class GoogleVisionFormatter(BaseFormatter):
         state["latest_language_annotation"] = annotation
 
     def add_low_confidence(self, poly, poly_start_cc, state):
+        if poly.confidence is None:
+            return
         if poly.confidence > self.ocr_confidence_threshold:
             state["latest_low_confidence_annotation"] = None
             return
@@ -568,10 +572,11 @@ class GoogleVisionFormatter(BaseFormatter):
                 state["base_layer"] += poly.text
                 start_cc = state["base_layer_len"]
                 state["base_layer_len"] += len(poly.text)
-                state["word_confidences"].append(float(poly.confidence))
-                page_word_confidences.append(float(poly.confidence))
+                if poly.confidence is not None:
+                    state["word_confidences"].append(float(poly.confidence))
+                    page_word_confidences.append(float(poly.confidence))
+                    self.add_low_confidence(poly, start_cc, state)
                 self.add_language(poly, start_cc, state)
-                self.add_low_confidence(poly, start_cc, state)
             # adding a line break at the end of a line
             state["base_layer"] += "\n"
             state["base_layer_len"] += 1
