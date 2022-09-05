@@ -20,7 +20,7 @@ from openpecha.core.metadata import InitialPechaMetadata, InitialCreationType, L
 from openpecha.formatters import BaseFormatter
 from openpecha.utils import dump_yaml, gzip_str
 
-from openpecha.buda.api import get_buda_scan_info, get_image_list
+from openpecha.buda.api import get_buda_scan_info, get_image_list, image_group_to_folder_name
 
 ANNOTATION_MINIMAL_LEN = 20
 ANNOTATION_MINIMAL_CONFIDENCE = 0.8
@@ -36,13 +36,12 @@ class BBox:
         self.vertices = vertices
         self.confidence = confidence
         self.language = language
+        self.mid_y = self.get_mid()
     
-    def get_box_height(self):
+    def get_height(self):
         y1 = self.vertices[0][1]
-        y2 = self.vertices[1][1]
-        height = abs(y2-y1)
-        return height
-    
+        y2 = self.vertices[2][1]
+        return y2 - y1
     
     def get_box_orientation(self):
         x1= self.vertices[0][0]
@@ -56,7 +55,70 @@ class BBox:
         else:
             return "portrait"
 
-class GoogleOCRFormatter(BaseFormatter):
+    def get_mid(self):
+        """Calculate middle of the bounding poly vertically using y coordinates of the bounding poly
+
+        Args:
+            bounding_poly (dict): bounding poly's details
+
+        Returns:
+            float: mid point's y coordinate of bounding poly
+        """
+        y1 = self.vertices[0][1]
+        y2 = self.vertices[2][1]
+        y_avg = (y1 + y2) / 2
+        return y_avg
+
+    def get_centriod(self):
+        """Calculate centriod of bounding poly
+
+        Args:
+            bounding_poly (dict): info regarding bounding poly such as vertices and description
+
+        Returns:
+            list: centriod coordinates
+        """
+        sum_of_x = 0
+        sum_of_y = 0
+        for vertice in self.vertices:
+            sum_of_x += vertice[0]
+            sum_of_y += vertice[1]
+        return [sum_of_x/4, sum_of_y/4]
+
+
+class GoogleVisionBDRCFileProvider():
+    def __init__(self, bdrc_scan_id, ocr_import_info, ocr_disk_path=None, mode="local"):
+        # ocr_base_path should be the output/ folder in the case of BDRC OCR files
+        self.ocr_import_info = ocr_import_info
+        self.ocr_disk_path = ocr_disk_path
+        self.bdrc_scan_id = bdrc_scan_id
+        self.mode = mode
+
+    def get_image_list(self, image_group_id):
+        buda_il = get_image_list(self.bdrc_scan_id, image_group_id)
+        # format should be a list of image_id (/ file names)
+        return map(lambda ii: ii["filename"], buda_il)
+
+    def get_source_info(self):
+        return get_buda_scan_info(self.bdrc_scan_id)
+
+    def get_image_data(self, image_group_id, image_id):
+        # TODO: implement the following modes:
+        #  - "s3" (just read images from s3)
+        #  - "s3-localcache" (cache s3 files on disk)
+        # TODO: handle case where only zip archives are present on s3, one per volume.
+        #       This should be indicated in self.ocr_import_info["ocr_info"]
+        vol_folder = image_group_to_folder_name(self.bdrc_scan_id, image_group_id)
+        expected_ocr_filename = image_id[:image_id.rfind('.')]+".json.gz"
+        image_ocr_path = ocr_disk_path / vol_folder / expected_ocr_filename
+        ocr_object = None
+        try:
+            ocr_object = json.load(gzip.open(str(expected_ocr_path), "rb"))
+        except:
+            logging.exception("could not read "+str(expected_ocr_path))
+        return ocr_object
+
+class GoogleVisionFormatter(BaseFormatter):
     """
     OpenPecha Formatter for Google OCR JSON output of scanned pecha.
     """
@@ -73,29 +135,15 @@ class GoogleOCRFormatter(BaseFormatter):
         self.bdrc_scan_id = None
         self.metadata = {}
         self.default_language = None
-        self.buda_data = {}
+        self.source_info = {}
         self.remove_non_character_lines = True
         self.create_language_layer = True
         self.ocr_confidence_threshold = ANNOTATION_MINIMAL_CONFIDENCE
         self.language_annotation_min_len = ANNOTATION_MINIMAL_LEN
 
     def text_preprocess(self, text):
-
         return text
 
-    def get_bounding_poly_mid(self, bounding_poly):
-        """Calculate middle of the bounding poly vertically using y coordinates of the bounding poly
-
-        Args:
-            bounding_poly (dict): bounding poly's details
-
-        Returns:
-            float: mid point's y coordinate of bounding poly
-        """
-        y1 = bounding_poly.vertices[0][1]
-        y2 = bounding_poly.vertices[2][1]
-        y_avg = (y1 + y2) / 2
-        return y_avg
 
     def get_avg_bounding_poly_height(self, bounding_polys):
         """Calculate the average height of bounding polys in page
@@ -108,9 +156,7 @@ class GoogleOCRFormatter(BaseFormatter):
         """
         height_sum = 0
         for bounding_poly in bounding_polys:
-            y1 = bounding_poly.vertices[0][1]
-            y2 = bounding_poly.vertices[2][1]
-            height_sum += y2 - y1
+            height_sum += bounding_poly.get_height()
         avg_height = height_sum / len(bounding_polys)
         return avg_height
 
@@ -128,9 +174,8 @@ class GoogleOCRFormatter(BaseFormatter):
         """
         threshold = 10
         if (
-            self.get_bounding_poly_mid(bounding_poly)
-            - self.get_bounding_poly_mid(prev_bounding_poly)
-            < avg_height / threshold
+            (bounding_poly.mid_y - prev_bounding_poly.mid_y)
+            < (avg_height / threshold)
         ):
             return True
         else:
@@ -161,22 +206,6 @@ class GoogleOCRFormatter(BaseFormatter):
             lines.append(cur_line_polys)
         return lines
 
-    def find_centriod(self, bounding_poly):
-        """Calculate centriod of bounding poly
-
-        Args:
-            bounding_poly (dict): info regarding bounding poly such as vertices and description
-
-        Returns:
-            list: centriod coordinates
-        """
-        sum_of_x = 0
-        sum_of_y = 0
-        for vertice in bounding_poly.vertices:
-            sum_of_x += vertice[0]
-            sum_of_y += vertice[1]
-        centriod = [sum_of_x/4, sum_of_y/4]
-        return centriod
 
     def get_poly_sorted_on_y(self, bounding_poly_centriods):
         """Sort bounding polys centriod base on y coordinates
@@ -233,7 +262,8 @@ class GoogleOCRFormatter(BaseFormatter):
         bounding_poly_centriods = []
         avg_box_height = self.get_avg_bounding_poly_height(main_region_bounding_polys)
         for bounding_poly in main_region_bounding_polys:
-            centroid = self.find_centriod(bounding_poly)
+            centroid = bounding_poly.get_centriod()
+            # TODO: I'm not so sure about that...
             bounding_polys[f"{centroid[0]},{centroid[1]}"] = bounding_poly
             bounding_poly_centriods.append(centroid)
         sorted_bounding_polys = []
@@ -419,6 +449,7 @@ class GoogleOCRFormatter(BaseFormatter):
                 for paragraph in block['paragraphs']:
                     for word in paragraph['words']:
                         for symbol in word['symbols']:
+                            # TODO: replace with proper diacritics detection
                             if self.is_tibetan_non_consonant(symbol):
                                 continue
                             vertices = symbol['boundingBox']['vertices']
@@ -452,10 +483,6 @@ class GoogleOCRFormatter(BaseFormatter):
                             char_idx += 1
         if low_conf_chars:
             path.write_bytes(gzip_str(low_conf_chars))
-
-    # replace to test offline
-    def _get_image_list(self, bdrc_scan_id, image_group_id):
-        return get_image_list(bdrc_scan_id, image_group_id)
 
     def get_language_code(self, poly):
         lang = ""
@@ -521,7 +548,7 @@ class GoogleOCRFormatter(BaseFormatter):
                 return True
         return False
 
-    def build_page(self, ocr_object, image_number, imageinfo, state):
+    def build_page(self, ocr_object, image_number, image_filename, state):
         try:
             page_content = ocr_object["textAnnotations"][0]["description"]
         except Exception:
@@ -566,7 +593,7 @@ class GoogleOCRFormatter(BaseFormatter):
         state["pagination_annotations"][self.get_unique_id()] = Page(
             span=Span(start=page_start_cc, end=state["base_layer_len"]), 
             imgnum=image_number, 
-            reference=imageinfo["filename"])
+            reference=image_filename)
         # adding another line break at the end of a page
         state["base_layer"] += "\n"
         state["base_layer_len"] += 1
@@ -606,11 +633,11 @@ class GoogleOCRFormatter(BaseFormatter):
             annotations[self.get_unique_id()] = previous_annotation
         return annotations
 
-    def build_base(self, image_group_id, image_group_ocr_path):
+    def build_base(self, image_group_id):
         """ The main function that takes the OCR results for an entire volume
             and creates its base and layers
         """
-        image_list = self._get_image_list(self.bdrc_scan_id, image_group_id)
+        image_list = self.data_provider.get_image_list(image_group_id)
         state = {
             "base_layer_len": 0,
             "base_layer": "",
@@ -622,18 +649,10 @@ class GoogleOCRFormatter(BaseFormatter):
             "latest_low_confidence_annotation": None,
             "page_low_confidence_annotations": []
         }
-        for image_number, imginfo in enumerate(image_list):
-            image_filename = imginfo["filename"]
-            expected_ocr_filename = image_filename[:image_filename.rfind('.')]+".json.gz"
-            expected_ocr_path = image_group_ocr_path / expected_ocr_filename
-            ocr_object = None
-            try:
-                ocr_object = json.load(gzip.open(str(expected_ocr_path), "rb"))
-            except:
-                logging.error("could not read "+str(expected_ocr_path))
-                continue
+        for image_number, image_filename in enumerate(image_list):
             # enumerate starts at 0 but image numbers start at 1
-            self.build_page(ocr_object, image_number+1, imginfo, state)
+            ocr_object = self.data_provider.get_image_data(image_group_id, image_filename)
+            self.build_page(ocr_object, image_number+1, image_filename, state)
         layers = {}
         if state["pagination_annotations"]:
             layer = Layer(annotation_type=LayerEnum.pagination, annotations=state["pagination_annotations"])
@@ -661,7 +680,7 @@ class GoogleOCRFormatter(BaseFormatter):
             return Copyright_unknown, None
         return Copyright_copyrighted, LicenseType.UNDER_COPYRIGHT
             
-    def get_metadata(self, pecha_id, ocr_import_info, parser_link):
+    def get_metadata(self, pecha_id, ocr_import_info):
         source_metadata = {
             "id": f"http://purl.bdrc.io/resource/{self.bdrc_scan_id}",
             "title": "",
@@ -669,9 +688,11 @@ class GoogleOCRFormatter(BaseFormatter):
         }
         copyright = {}
         license = None
-        if self.buda_data is not None:
-            source_metadata = self.buda_data["source_metadata"]
-            copyright, license = self.get_copyright_and_license_info(self.buda_data)
+        if self.source_info is not None:
+            source_metadata = self.source_info["source_metadata"]
+            copyright, license = self.get_copyright_and_license_info(self.source_info)
+
+        parser_link = ocr_import_info["parser_link"] if "parser_link" in ocr_import_info else None
 
         metadata = InitialPechaMetadata(
             id=pecha_id,
@@ -691,8 +712,8 @@ class GoogleOCRFormatter(BaseFormatter):
     def set_base_meta(self, image_group_id, base_file_name, word_confidence_list):
         self.cur_word_confidences = []
         self.base_meta[base_file_name] = {
-            "source_metadata": self.buda_data["image_groups"][image_group_id],
-            "order": self.buda_data["image_groups"][image_group_id]["volume_number"],
+            "source_metadata": self.source_info["image_groups"][image_group_id],
+            "order": self.source_info["image_groups"][image_group_id]["volume_number"],
             "base_file": f"{base_file_name}.txt"
             }
         if word_confidence_list:
@@ -700,22 +721,19 @@ class GoogleOCRFormatter(BaseFormatter):
               "ocr_word_median_confidence_index": statistics.median(word_confidence_list),
               "ocr_word_mean_confidence_index": statistics.mean(word_confidence_list)
             }
-
-    @staticmethod
-    def image_group_to_folder_name(scan_id, image_group_id):
-        image_group_folder_part = image_group_id
-        pre, rest = image_group_id[0], image_group_id[1:]
-        if pre == "I" and rest.isdigit() and len(rest) == 4:
-            image_group_folder_part = rest
-        return scan_id+"-"+image_group_folder_part
     
-    def create_opf(self, input_path, pecha_id, opf_options = {}, ocr_import_info = {}, buda_data = None, parser_link=None):
+    def create_opf(self, data_provider, pecha_id, opf_options = {}, ocr_import_info = {}):
         """Create opf of google ocred pecha
 
         Args:
-            input_path (str): input path, local folder expected to match the output/ folder on s3, ex:
-                              s3://ocr.bdrc.io/Works/60/W22084/vision/batch001/output/
+            data_provider (DataProvider): an instance that will be used to get the necessary data
             pecha_id (str): pecha id
+            opf_options (Dict): an object with the following keys:
+                create_language_layer: boolean
+                language_annotation_min_len: int
+                ocr_confidence_threshold: float (use -1.0 for no OCR confidence layer)
+                remove_non_character_lines: boolean
+                max_low_conf_per_page: int
             ocr_import_info (Dict): an object with the following keys:
                 bdrc_scan_id: str
                 source: str
@@ -723,18 +741,12 @@ class GoogleOCRFormatter(BaseFormatter):
                 batch_id: str
                 software_id: str
                 expected_default_language: str
-            opf_options (Dict): an object with the following keys:
-                create_language_layer: boolean
-                language_annotation_min_len: int
-                ocr_confidence_threshold: float (use -1.0 for no OCR confidence layer)
-                remove_non_character_lines: boolean
-                max_low_conf_per_page: int
 
         Returns:
             path: opf path
         """
-        # we assume that
-        input_path = Path(input_path)
+
+        self.data_provider = data_provider
 
         self.remove_non_character_lines = opf_options["remove_non_character_lines"] if "remove_non_character_lines" in opf_options else True
         self.create_language_layer = opf_options["create_language_layer"] if "create_language_layer" in opf_options else True
@@ -745,31 +757,24 @@ class GoogleOCRFormatter(BaseFormatter):
         ocr_import_info["op_import_options"] = opf_options
         ocr_import_info["op_import_version"] = GOOGLE_OCR_IMPORT_VERSION
 
-        # if the bdrc scan id is not specified, we assume it's the directory namepecha_id
-        self.bdrc_scan_id = input_path.name if "bdrc_scan_id" not in ocr_import_info else ocr_import_info["bdrc_scan_id"]
-        
-        self._build_dirs(input_path, id_=pecha_id)
+        self._build_dirs(None, id_=pecha_id)
 
-        if buda_data is None:
-            self.buda_data = get_buda_scan_info(self.bdrc_scan_id)
-        else:
-            self.buda_data = buda_data
+        # if the bdrc scan id is not specified, we assume it's the directory namepecha_id
+        self.bdrc_scan_id = ocr_import_info["bdrc_scan_id"]
+        self.source_info = data_provider.get_source_info()
+        self.default_language = "bo" if "expected_default_language" not in ocr_import_info else ocr_import_info["expected_default_language"]
         self.default_language = "bo"
         if "expected_default_language" in ocr_import_info:
             self.default_language = ocr_import_info["expected_default_language"]
         elif "languages" in buda_data and buda_data["languages"]:
             self.default_language = buda_data["languages"][0]
 
-        self.metadata = self.get_metadata(pecha_id, ocr_import_info, parser_link)
+        self.metadata = self.get_metadata(pecha_id, ocr_import_info)
         total_word_confidence_list = []
 
-        for image_group_id, image_group_info in self.buda_data["image_groups"].items():
-            vol_folder = GoogleOCRFormatter.image_group_to_folder_name(self.bdrc_scan_id, image_group_id)
-            if not (input_path / vol_folder).is_dir():
-                logging.warn("no folder for image group "+str(input_path / vol_folder)+" (nb of images in theory: "+str(image_group_info["total_pages"])+")")
-                continue
+        for image_group_id, image_group_info in self.source_info["image_groups"].items():
             base_id = image_group_id
-            base_text, layers, word_confidence_list = self.build_base(image_group_id, (input_path / vol_folder))
+            base_text, layers, word_confidence_list = self.build_base(image_group_id)
 
             # save base_text
             (self.dirs["opf_path"] / "base" / f"{base_id}.txt").write_text(base_text)
@@ -796,9 +801,3 @@ class GoogleOCRFormatter(BaseFormatter):
         dump_yaml(self.metadata, meta_fn)
 
         return self.dirs["opf_path"].parent
-
-
-if __name__ == "__main__":
-    formatter = GoogleOCRFormatter()
-    formatter.create_opf("../../Esukhia/img2opf/archive/output/W1PD95844", 300)
-

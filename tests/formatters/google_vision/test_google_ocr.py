@@ -4,13 +4,11 @@ from pathlib import Path
 
 import py
 import pytest
-from openpecha.formatters import google_ocr
+from openpecha.formatters import google_vision
 
-from openpecha.formatters.google_ocr import GoogleOCRFormatter
+from openpecha.formatters.google_vision import GoogleVisionFormatter
 from openpecha.utils import load_yaml, dump_yaml
-
-def mock_get_image_list(bdrc_scan_id, vol_name):
-    return load_yaml(Path(__file__).parent / "data" / str(vol_name+"-imgseqnum.json"))  
+from test_data_provider import GoogleVisionTestFileProvider
 
 
 def test_base_text():
@@ -21,13 +19,14 @@ def test_base_text():
     expected_base_text = (Path(__file__).parent / "data" / "opf_expected_datas" / "expected_base_text.txt").read_text(encoding='utf-8')
     buda_data_path = Path(__file__).parent / "data" / "buda_data.yml"
     ocr_import_info_path = Path(__file__).parent / "data" / "ocr_import_info.yml"
+    ocr_import_info = load_yaml(ocr_import_info_path)
+    buda_data = load_yaml(buda_data_path)
+    image_list_path = Path(__file__).parent / "data"
+    data_provider = GoogleVisionTestFileProvider(work_id, image_list_path, buda_data, ocr_import_info, ocr_path)
     
     with tempfile.TemporaryDirectory() as tmpdirname:
-        buda_data = load_yaml(buda_data_path)
-        ocr_import_info = load_yaml(ocr_import_info_path)
-        formatter = GoogleOCRFormatter(output_path=tmpdirname)
-        formatter._get_image_list = mock_get_image_list
-        pecha_path = formatter.create_opf(ocr_path, pecha_id, {}, ocr_import_info, buda_data)
+        formatter = GoogleVisionFormatter(output_path=tmpdirname)
+        pecha_path = formatter.create_opf(data_provider, pecha_id, {}, ocr_import_info)
         base_text = (pecha_path / f"{pecha_path.name}.opf" / "base" / "I3852.txt").read_text(encoding='utf-8')
         assert expected_base_text == base_text
 
@@ -41,13 +40,16 @@ def test_build_layers():
     expected_confidence_layer = load_yaml((Path(__file__).parent / "data" / "opf_expected_datas" / "expected_OCRConfidence.yml"))
     buda_data_path = Path(__file__).parent / "data" / "buda_data.yml"
     ocr_import_info_path = Path(__file__).parent / "data" / "ocr_import_info.yml"
+    ocr_import_info = load_yaml(ocr_import_info_path)
+    buda_data = load_yaml(buda_data_path)
+    image_list_path = Path(__file__).parent / "data"
+    data_provider = GoogleVisionTestFileProvider(work_id, image_list_path, buda_data, ocr_import_info, ocr_path)
+
+    opf_options = {"ocr_confidence_threshold": 0.9, "max_low_conf_per_page": 50}
     
     with tempfile.TemporaryDirectory() as tmpdirname:
-        buda_data = load_yaml(buda_data_path)
-        ocr_import_info = load_yaml(ocr_import_info_path)
-        formatter = GoogleOCRFormatter(output_path=tmpdirname)
-        formatter._get_image_list = mock_get_image_list
-        pecha_path = formatter.create_opf(ocr_path, pecha_id, {"ocr_confidence_threshold": 0.9, "max_low_conf_per_page": 50}, ocr_import_info, buda_data)
+        formatter = GoogleVisionFormatter(output_path=tmpdirname)
+        pecha_path = formatter.create_opf(data_provider, pecha_id, opf_options, ocr_import_info)
         pagination_layer = load_yaml((pecha_path / f"{pecha_path.name}.opf" / "layers" / "I3852" / "Pagination.yml"))
         language_layer = load_yaml((pecha_path / f"{pecha_path.name}.opf" / "layers" / "I3852" / "Language.yml"))
         confidence_layer = load_yaml((pecha_path / f"{pecha_path.name}.opf" / "layers" / "I3852" / "OCRConfidence.yml"))
@@ -69,7 +71,7 @@ def test_build_layers():
 def test_with_gzip_json():
     ocr_path = Path(__file__).parent / "data" / "W1PD95844"
     with tempfile.TemporaryDirectory() as tmpdirname:
-        formatter = GoogleOCRFormatter(output_path=tmpdirname)
+        formatter = GoogleVisionFormatter(output_path=tmpdirname)
         pecha_path = formatter.create_opf(ocr_path, 1, meta_flag=False)
         assert isinstance(pecha_path, Path) and pecha_path.is_dir()
 
