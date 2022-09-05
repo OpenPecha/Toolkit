@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.8.30 (2022-09-05)
+### Fix
+* **hot-fix:** Fix infinite loop ([`5a4a84d`](https://github.com/OpenPecha/Toolkit/commit/5a4a84dcb42a90d41c4e5a91446ee90f88542bce))
+
 ## v0.8.29 (2022-08-29)
 ### Fix
 * **hot-fix:** Default value of vertices are added ([`ebe82ae`](https://github.com/OpenPecha/Toolkit/commit/ebe82ae17963c24a945cdbb969ac6905a95f713c))
