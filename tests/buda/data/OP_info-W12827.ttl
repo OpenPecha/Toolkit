@@ -62,6 +62,13 @@ bdr:I2071  a                      bdo:ImageGroup ;
         bdo:volumePagesTbrcIntro  0 ;
         bdo:volumePagesTotal      525 .
 
+bdr:LangBo  a              bdo:Language , owl:Class ;
+        rdfs:seeAlso       <https://github.com/buda-base/owl-schema/issues/98> , <http://lexvo.org/id/iso639-3/bod> ;
+        rdfs:subClassOf    bdo:Language ;
+        bdo:langBCP47Lang  "bo" ;
+        bdo:langMARCCode   "tib" ;
+        skos:prefLabel     "藏文"@zh-hans , "bod yig"@bo-x-ewts , "Tibetan"@en .
+
 bdr:I2061  a                      bdo:ImageGroup ;
         bdo:volumeNumber          1 ;
         bdo:volumeOf              bdr:W12827 ;

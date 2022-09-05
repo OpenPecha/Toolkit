@@ -763,6 +763,11 @@ class GoogleVisionFormatter(BaseFormatter):
         self.bdrc_scan_id = ocr_import_info["bdrc_scan_id"]
         self.source_info = data_provider.get_source_info()
         self.default_language = "bo" if "expected_default_language" not in ocr_import_info else ocr_import_info["expected_default_language"]
+        self.default_language = "bo"
+        if "expected_default_language" in ocr_import_info:
+            self.default_language = ocr_import_info["expected_default_language"]
+        elif "languages" in buda_data and buda_data["languages"]:
+            self.default_language = buda_data["languages"][0]
 
         self.metadata = self.get_metadata(pecha_id, ocr_import_info)
         total_word_confidence_list = []

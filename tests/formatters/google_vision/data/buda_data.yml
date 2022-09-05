@@ -6,6 +6,8 @@ source_metadata:
   copyright_status: http://purl.bdrc.io/resource/CopyrightPublicDomain
   title: ལམ་འབྲས་གཞུང་རྡོ་རྗེའི་ཚིག་རྐང་གི་རྣམ་འགྲེལ་བཅུ་གཅིག
   author: ས་ཆེན་ཀུན་དགའ་སྙིང་པོ།
+  languages:
+  - bo
 image_groups:
   I3852:
     id: http://purl.bdrc.io/resource/I3852
