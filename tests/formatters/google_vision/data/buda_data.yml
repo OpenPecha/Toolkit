@@ -1,0 +1,26 @@
+source_metadata:
+  id: http://purl.bdrc.io/resource/W24767
+  status: http://purl.bdrc.io/admindata/StatusReleased
+  access: http://purl.bdrc.io/admindata/AccessOpen
+  reproduction_of: http://purl.bdrc.io/resource/MW24767
+  copyright_status: http://purl.bdrc.io/resource/CopyrightPublicDomain
+  title: ལམ་འབྲས་གཞུང་རྡོ་རྗེའི་ཚིག་རྐང་གི་རྣམ་འགྲེལ་བཅུ་གཅིག
+  author: ས་ཆེན་ཀུན་དགའ་སྙིང་པོ།
+  languages:
+  - bo
+image_groups:
+  I3852:
+    id: http://purl.bdrc.io/resource/I3852
+    total_pages: 542
+    volume_number: 1
+    volume_pages_bdrc_intro: 2
+  I3853:
+    id: http://purl.bdrc.io/resource/I3853
+    total_pages: 504
+    volume_number: 2
+    volume_pages_bdrc_intro: 2
+  I3854:
+    id: http://purl.bdrc.io/resource/I3854
+    total_pages: 502
+    volume_number: 3
+    volume_pages_bdrc_intro: 2

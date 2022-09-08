@@ -290,11 +290,17 @@ def update_single_base(pecha, base_name: str, new_content: str):
         end = updater.get_updated_coord(ann.span.end)
         error_msg = "Blupdate failed"
         if start == -1 and end == -1:
+            if ann.span.errors is None:
+                ann.span.errors = {}
             ann.span.errors[error_msg] = "both start and end char index"
         elif start == -1:
+            if ann.span.errors is None:
+                ann.span.errors = {}
             ann.span.errors[error_msg] = "start char index"
             ann.span.end = end
         elif end == -1:
+            if ann.span.errors is None:
+                ann.span.errors = {}
             ann.span.errors[error_msg] = "end char index"
             ann.span.start = start
         else:
@@ -306,6 +312,6 @@ def update_single_base(pecha, base_name: str, new_content: str):
     src_base = pecha.get_base(base_name)
     updater = Blupdate(src_base, new_content)
     for layer in pecha.get_layers(base_name):
-        for ann in layer.get_annotations():
+        for ann_id, ann in layer.get_annotations():
             ann = update_ann_span(ann, updater)
-            layer.set_annotation(ann)
+            layer.set_annotation(ann, ann_id)

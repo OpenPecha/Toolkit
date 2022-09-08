@@ -30,11 +30,18 @@ def get_github_repo(repo_name, org_name, token):
     return repo
 
 
-def create_github_repo(path, org_name, token):
+def create_github_repo(path, org_name, token, private=False):
     org = _get_openpecha_data_org(org_name, token)
-    repo = org.create_repo(path.name)
+    visibility = "private" if private else "public"
+    repo = org.create_repo(path.name, private=private, visibility=visibility, has_wiki=False, has_projects=False)
     time.sleep(2)
     return repo._html_url.value
+
+
+def update_github_repo_visibility(repo_name, org_name, token, private=False):
+    org = _get_openpecha_data_org(org_name, token)
+    repo = org.get_repo(repo_name)
+    repo.edit(private=private)
 
 
 def commit(repo_path, message, not_includes, branch="master"):
@@ -120,9 +127,10 @@ def github_publish(
     layers=[],
     org=None,
     token=None,
+    private=False
 ):
     path = Path(path)
-    remote_repo_url = create_github_repo(path, org, token)
+    remote_repo_url = create_github_repo(path, org, token, private)
     local_repo = create_local_repo(path, remote_repo_url, org, token)
     commit(local_repo, message, not_includes)
     local_repo.git.checkout("-b", "review")
@@ -140,7 +148,7 @@ def create_file(
     msg,
     update=False,
     org=None,
-    token=None,
+    token=None
 ):
     repo = get_github_repo(repo_name, org, token)
     if update:

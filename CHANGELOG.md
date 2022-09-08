@@ -2,6 +2,62 @@
 
 <!--next-version-placeholder-->
 
+## v0.8.30 (2022-09-05)
+### Fix
+* **hot-fix:** Fix infinite loop ([`5a4a84d`](https://github.com/OpenPecha/Toolkit/commit/5a4a84dcb42a90d41c4e5a91446ee90f88542bce))
+
+## v0.8.29 (2022-08-29)
+### Fix
+* **hot-fix:** Default value of vertices are added ([`ebe82ae`](https://github.com/OpenPecha/Toolkit/commit/ebe82ae17963c24a945cdbb969ac6905a95f713c))
+
+## v0.8.28 (2022-08-29)
+### Fix
+* **hot-fix:** Google ocr parser link has been passed as parameter ([`9b6bc6c`](https://github.com/OpenPecha/Toolkit/commit/9b6bc6c08edc5d7ffbd2faa7e74bcb0812a2bb4b))
+
+## v0.8.27 (2022-08-22)
+### Fix
+* **github-utils:** Git hub repo visibility update function renamed ([`0e08f19`](https://github.com/OpenPecha/Toolkit/commit/0e08f194e14b8f72e55caefb81c9733349a13a0c))
+
+## v0.8.26 (2022-08-18)
+### Fix
+* **buda:** Better API logging ([`74366e6`](https://github.com/OpenPecha/Toolkit/commit/74366e693c18980b681d6fe06d027ef58047c3f3))
+
+## v0.8.25 (2022-08-18)
+### Fix
+* **googel-ocr-formatter:** Commit made to trigger githubaction to publish changes on pip ([`7f57883`](https://github.com/OpenPecha/Toolkit/commit/7f57883d84bc10351527a49ee6ce970ace404e50))
+
+## v0.8.24 (2022-08-17)
+### Fix
+* **google-ocr-formatter:** Test case added ([`c8f2f1f`](https://github.com/OpenPecha/Toolkit/commit/c8f2f1fa003c1505707452631bfcf887b33d720b))
+* **google-ocr-formatter:** Copy rigth variable updated ([`1e247bf`](https://github.com/OpenPecha/Toolkit/commit/1e247bfb0e9c61230401a67e8a711279026e0284))
+* **google-ocr-formatter:** Code documated and test case updated ([`cb344d9`](https://github.com/OpenPecha/Toolkit/commit/cb344d9371eda2ee85ca633b079ce82cdf54aa6f))
+* **googel-ocr-formatter:** Space insertion done using rule base algo ([`a5c596a`](https://github.com/OpenPecha/Toolkit/commit/a5c596a9ad9b1b7203e3e4aa9ec7c170b5b105fb))
+* **setup:** Boto3 import added ([`0a39219`](https://github.com/OpenPecha/Toolkit/commit/0a39219290ce32bb3f5624ea2e3fe80fc0241725))
+* **tmx-create-opf:** Base saving bug fixed ([`de88f86`](https://github.com/OpenPecha/Toolkit/commit/de88f8659c2380c72394aba8be2481db3ead9ebb))
+
+## v0.8.23 (2022-08-17)
+### Fix
+* **core-pecha:** Find span info for all layers by default ([`973960a`](https://github.com/OpenPecha/Toolkit/commit/973960a06868c7ab16f4ef82611384cc1399f46e))
+* **core-pecha:** Skip loading unsported layer ([`9e39086`](https://github.com/OpenPecha/Toolkit/commit/9e390868bc09e3342bafc6c6e9ae769d8ed6e48c))
+
+## v0.8.22 (2022-08-12)
+### Fix
+* **google-ocr:** Add restrictedInchina, access, copyright, license to metadata ([`2055318`](https://github.com/OpenPecha/Toolkit/commit/2055318be4e77b033a586204e3fb8d9b49eec1f2))
+
+## v0.8.21 (2022-08-11)
+### Fix
+* **metadata:** Add under copyright license ([`ceb9e39`](https://github.com/OpenPecha/Toolkit/commit/ceb9e39924c250fb9e0937c452ea0a174674e325))
+
+## v0.8.20 (2022-08-10)
+### Fix
+* **google-ocr-formatter:** Meta title and author bug fixed ([`45b5b94`](https://github.com/OpenPecha/Toolkit/commit/45b5b942e7077ce6707f4f740de75787efbc1f05))
+* **google-ocr-formatter:** Language layer formatter test case added ([`972278b`](https://github.com/OpenPecha/Toolkit/commit/972278bc0d0737826149614d74ded3e36c32204a))
+* **google-ocr-formatter:** Language layer parser methods added ([`8f9ff0d`](https://github.com/OpenPecha/Toolkit/commit/8f9ff0da0cf8d84ec4bf65315021ba0ba633ab89))
+* **google-ocr-formatter:** The ocr confidence index is saved in meta ([`b3ccd73`](https://github.com/OpenPecha/Toolkit/commit/b3ccd73e0d075dd7d1093f8abfd652a4947ff525))
+
+### Documentation
+* Add initial pecha metadata eg. ([`f0a07b6`](https://github.com/OpenPecha/Toolkit/commit/f0a07b6a61d0eaea3e94910a3b963a44ac7dcc52))
+
 ## v0.8.19 (2022-08-03)
 ### Fix
 * **metadata:** Refactor initial metadata ([`125b0ab`](https://github.com/OpenPecha/Toolkit/commit/125b0ab118f9b77c9c289f4a91a582a9d2b43a60))

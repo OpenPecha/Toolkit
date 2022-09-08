@@ -70,7 +70,7 @@ def create_opf_repo(segmented_text, opf_path, title, lang, origin_type):
         },
     }
     opf.layers = layers
-    opf.base = bases
+    opf.bases = bases
     opf.save_base()
     opf.save_layers()
     meta_fn = Path(f"{opf_path}/meta.yml")

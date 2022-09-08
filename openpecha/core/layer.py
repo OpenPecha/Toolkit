@@ -23,6 +23,7 @@ class LayerEnum(Enum):
     sub_topic = "SubText"
 
     pagination = "Pagination"
+    language = "Language"
     citation = "Citation"
     correction = "Correction"
     error_candidate = "ErrorCandidate"
@@ -34,6 +35,7 @@ class LayerEnum(Enum):
     durchen = "Durchen"
     footnote = "Footnote"
     segment = "Segment"
+    ocr_confidence = "OCRConfidence"
 
 
 def _get_annotation_class(layer_name: LayerEnum):
@@ -56,6 +58,8 @@ def _get_annotation_class(layer_name: LayerEnum):
         return BaseAnnotation
     elif layer_name == LayerEnum.pagination:
         return Pagination
+    elif layer_name == LayerEnum.language:
+        return Language
     elif layer_name == LayerEnum.citation:
         return Citation
     elif layer_name == LayerEnum.correction:
@@ -78,9 +82,10 @@ def _get_annotation_class(layer_name: LayerEnum):
         return Footnote
     elif layer_name == LayerEnum.segment:
         return Segment
+    elif layer_name == LayerEnum.ocr_confidence:
+        return OCRConfidence
     else:
         return BaseAnnotation
-
 
 class Layer(BaseModel):
     id: str = None
@@ -108,9 +113,8 @@ class Layer(BaseModel):
         """Yield Annotation Objects"""
         for ann_id, ann_dict in self.annotations.items():
             ann_class = _get_annotation_class(self.annotation_type)
-            ann_dict["id"] = ann_id
             ann = ann_class.parse_obj(ann_dict)
-            yield ann
+            yield ann_id, ann
 
     def get_annotation(self, annotation_id: str) -> Optional[BaseAnnotation]:
         """Retrieve annotation of id `annotation_id`"""
@@ -121,9 +125,11 @@ class Layer(BaseModel):
         ann = ann_class.parse_obj(ann_dict)
         return ann
 
-    def set_annotation(self, ann: BaseAnnotation):
-        """Add or Update annotation `ann` to the layer"""
-        self.annotations[ann.id] = json.loads(ann.json())
+    def set_annotation(self, ann: BaseAnnotation, ann_id = None):
+        """Add or Update annotation `ann` to the layer, returns the annotation id"""
+        ann_id = ann_id if ann_id is not None else get_uuid()
+        self.annotations[ann_id] = json.loads(ann.json())
+        return ann_id
 
     def remove_annotation(self, annotation_id: str):
         """Delete annotaiton of `annotation_id` from the layer"""
@@ -135,3 +141,8 @@ class SpanINFO(BaseModel):
     text: str
     layers: Dict[LayerEnum, List[BaseAnnotation]]
     metadata: PechaMetadata
+
+
+class OCRConfidenceLayer(Layer):
+    confidence_threshold: float
+    annotation_type: LayerEnum = LayerEnum.ocr_confidence

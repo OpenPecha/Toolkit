@@ -28,17 +28,17 @@ def test_base_pecha_metadata_model():
         source_metadata={
             "id": "bdr:W1PD90121",
             "title": "མའོ་རྫོང་གི་ས་ཆའི་མིང་བཏུས།",
-            "author": "author name",
-            "base": {
-                "f3c9": {
-                    "id": "I1PD90137",
-                    "title": "Volume 1 of mao wen qiang zu zi zhi xian di ming lu",
-                    "total_pages": 220,
-                    "order": 1,
-                    "base_file": "f3c9.tx",
-                }
-            },
+            "author": "author name"
         },
+        base={
+            "f3c9": {
+                "id": "I1PD90137",
+                "title": "Volume 1 of mao wen qiang zu zi zhi xian di ming lu",
+                "total_pages": 220,
+                "order": 1,
+                "base_file": "f3c9.tx",
+            }
+        }
     )
 
     assert metadata.imported == imported_at
@@ -51,8 +51,10 @@ def test_base_pecha_metadata_model():
 def test_initial_pecha_metadata():
     metadata = InitialPechaMetadata(
         initial_creation_type=InitialCreationType.ocr,
-        ocr_word_median_confidence_index=0.9,
-        base={
+        statistics={
+            "ocr_word_median_confidence_index": 0.9
+        },
+        bases={
             "529C": {
                 "source_metadata": {
                     "image_group_id": "I3CN8548",
@@ -61,7 +63,9 @@ def test_initial_pecha_metadata():
                 },
                 "order": 1,
                 "base_file": "529C.txt",
-                "ocr_word_median_confidence_index": 0.9,
+                "statistics": {
+                    "ocr_word_median_confidence_index": 0.9,
+                }
             }
         },
     )
@@ -69,8 +73,8 @@ def test_initial_pecha_metadata():
     assert metadata.initial_creation_type.value == InitialCreationType.ocr.value
     assert metadata.id.startswith("I")
 
-    assert metadata.ocr_word_median_confidence_index == 0.9
-    assert "529C" in metadata.base
+    assert metadata.statistics["ocr_word_median_confidence_index"] == 0.9
+    assert "529C" in metadata.bases
 
 
 def test_diplomatic_pecha_metadata():

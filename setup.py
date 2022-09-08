@@ -31,6 +31,7 @@ setup(
     packages=find_packages(),
     install_requires=[
         "botok>=0.8.8, <1.0",
+        "boto3>=1.24.50, <2.0",
         "Click>=7.1.2, <8.0",
         "diff-match-patch==20181111",
         "polib==1.1.1, <2.0",

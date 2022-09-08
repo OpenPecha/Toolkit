@@ -4,19 +4,29 @@ import warnings
 from collections import defaultdict
 from pathlib import Path
 from typing import Dict, List, Union
+from git import Repo
 
 from openpecha import blupdate, config
 from openpecha.core import ids
 from openpecha.core.annotations import BaseAnnotation, Span
 from openpecha.core.layer import Layer, LayerEnum, PechaMetadata, SpanINFO
 from openpecha.storages import GithubStorage, Storage
-from openpecha.utils import download_pecha, dump_yaml, load_yaml
+from openpecha.utils import download_pecha, dump_yaml, load_yaml, load_yaml_str
 
 
 class OpenPecha:
+    """
+    The main abstract class representing an opf. The methods to implement are:
+    - read_meta_file()
+    - read_base_file(base_name)
+    - read_layers_file(base_name, layer_name)
+    - _read_components()
+    - read_index_file()
+    """
+
     def __init__(
         self,
-        base: Dict[str, str] = None,
+        bases: Dict[str, str] = None,
         layers: Dict[str, Dict[LayerEnum, Layer]] = None,
         index: Layer = None,
         meta: PechaMetadata = None,
@@ -25,7 +35,7 @@ class OpenPecha:
         components: Dict[str, List[Layer]] = None,
     ):
         self._pecha_id = None
-        self.base = base if base else {}
+        self.bases = bases if bases else {}
         self.layers = layers if layers else defaultdict(dict)
         self._meta = self.__handle_old_metadata_attr(meta, metadata)
         self._index = index
@@ -60,7 +70,7 @@ class OpenPecha:
         return ", ".join(source_metadata)
 
     def reset_base_and_layers(self):
-        self.base = {}
+        self.bases = {}
         self.layers = defaultdict(dict)
 
     @property
@@ -96,29 +106,29 @@ class OpenPecha:
 
     def _set_base_metadata(self, base_name: str, metadata: Dict) -> None:
         metadata.update({"base_file": f"{base_name}.txt"})
-        if "base" not in self.meta.source_metadata:
-            self.meta.source_metadata["base"] = {}
-        self.meta.source_metadata["base"][base_name] = metadata
+        if "bases" not in self.meta:
+            self.meta.bases = {}
+        self.meta.bases[base_name] = metadata
 
     def get_base(self, base_name: str) -> str:
-        if base_name in self.base:
-            return self.base[base_name]
-        self.base[base_name] = self.read_base_file(base_name)
-        return self.base[base_name]
+        if base_name in self.bases:
+            return self.bases[base_name]
+        self.bases[base_name] = self.read_base_file(base_name)
+        return self.bases[base_name]
 
     def get_base_metadata(self, base_name: str) -> str:
-        self.meta.source_metadata["base"].get(base_name)
+        self.meta.bases.get(base_name)
 
     def set_base(self, content: str, base_name: str = None, metadata: Dict = {}) -> str:
         """Create new base with `content` if `base_name` is not
         given otherwise overwrites it and return base_name.
         """
-        if base_name and base_name in self.base:
+        if base_name and base_name in self.bases:
             blupdate.update_single_base(self, base_name, content)
-            self.base[base_name] = content
+            self.bases[base_name] = content
         else:
             base_name = self._get_base_name()
-            self.base[base_name] = content
+            self.bases[base_name] = content
             self._set_base_metadata(base_name, metadata)
         return base_name
 
@@ -144,7 +154,7 @@ class OpenPecha:
         self.meta.update_last_modified_date()
 
     def set_layer(self, base_name: str, layer: Layer):
-        if base_name not in self.base:
+        if base_name not in self.bases:
             raise ValueError(f"set base for {base_name} first")
 
         self.layers[base_name][layer.annotation_type] = layer
@@ -158,7 +168,7 @@ class OpenPecha:
                 result[layer_name] = []
 
             layer = self.get_layer(base_name, layer_name)
-            for ann in layer.get_annotations():
+            for _, ann in layer.get_annotations():
                 is_ann_found = False
                 if ann.span.start >= span.start and ann.span.end <= span.end:
                     is_ann_found = True
@@ -181,8 +191,9 @@ class OpenPecha:
     ) -> SpanINFO:
         base_str = self.get_base(base_name)
         span_str = base_str[span.start : span.end + 1]  # noqa
-        layers = self.__find_span_layers(base_name, span, layers)
-        return SpanINFO(text=span_str, layers=layers, metadata=self.meta)
+        layers = layers if layers else self.components[base_name]
+        span_layers = self.__find_span_layers(base_name, span, layers)
+        return SpanINFO(text=span_str, layers=span_layers, metadata=self.meta)
 
 
 class OpenPechaFS(OpenPecha):
@@ -281,8 +292,16 @@ class OpenPechaFS(OpenPecha):
     def _read_components(self):
         res = {}
         for vol_dir in self.layers_path.iterdir():
+            all_layers = set(layer.value for layer in LayerEnum)
             res[vol_dir.name] = list(
-                map(lambda fn: LayerEnum(fn.stem), vol_dir.iterdir())
+                map(
+                    lambda fn: LayerEnum(fn.stem),
+                    (
+                        layer_fn
+                        for layer_fn in vol_dir.iterdir()
+                        if layer_fn.stem in all_layers
+                    ),
+                )
             )
         return res
 
@@ -291,12 +310,12 @@ class OpenPechaFS(OpenPecha):
 
     def save_single_base(self, base_name: str, content: str = None):
         if not content:
-            content = self.base[base_name]
+            content = self.bases[base_name]
         base_fn = self._mkdir(self.base_path) / f"{base_name}.txt"
         base_fn.write_text(content)
 
     def save_base(self):
-        for base_name, content in self.base.items():
+        for base_name, content in self.bases.items():
             self.save_single_base(base_name, content)
 
     def save_layer(self, base_name: str, layer_name: LayerEnum, layer: Layer):
@@ -366,3 +385,73 @@ class OpenPechaFS(OpenPecha):
 
     def remove(self):
         self.storage.remove_dir_with_path(name=self.pecha_path)
+
+
+class OpenPechaBareGitRepo(OpenPecha):
+    """Class to represent opf pecha in a bare git repo on the file-system.
+    """
+
+    def __init__(
+        self, pecha_id: str = None, path: str = None, revision: str = "HEAD", repo=None, **kwargs
+    ):
+        super().__init__(**kwargs)
+        self._pecha_id = pecha_id
+        self.rev = revision
+        if repo is not None:
+            self.repo = repo
+        else:
+            self.repo = Repo(path)
+
+    def read_file_content(self, oppath):
+        return self.repo.git.show(f"{self.rev}:{self._pecha_id}.opf/" + oppath)
+
+    def read_file_content_yml(self, oppath):
+        ymlstr = self.repo.git.show(f"{self.rev}:{self._pecha_id}.opf/" + oppath)
+        return load_yaml_str(ymlstr)
+
+    def _list_paths(self):
+        """
+        Getting all the files in the bare repo
+        """
+        files = self.repo.git.ls_tree(r=self.rev).split("\n")
+        # removing the xxx.opf at the beginning
+        files = [file.split("\t")[-1] for file in files]
+        files = [
+            file[len(self._pecha_id) + 5 :]
+            for file in files
+            if file.startswith(self.lname + ".")
+            and (file.endswith(".txt") or file.endswith(".yml"))
+        ]
+        return files
+
+    def _read_components(self):
+        """
+        get all bases and layers
+        """
+        paths = self._list_paths()
+        res = {}
+
+        for f in sorted(paths):
+            path = f.split("/")
+            if len(path) > 1:
+                basename = path[-2]
+                layername = pathlib.Path(path[-1]).stem
+                if basename not in res:
+                    res[basename] = []
+                res[basename].append(layername)
+        return res
+
+    def read_base_file(self, base_name: str) -> str:
+        return self.read_file_content("base/" + base_name + ".txt")
+
+    def read_layers_file(
+        self, base_name: str, layer_name: LayerEnum
+    ) -> Union[Dict, None]:
+        return self.read_file_content_yml("layers/" + base_name + "/" + layer_name + ".yml")
+
+    def read_meta_file(self) -> Dict:
+        return self.read_file_content_yml("meta.yml")
+
+    def read_index_file(self) -> Dict:
+        return self.read_file_content_yml("index.yml")
+

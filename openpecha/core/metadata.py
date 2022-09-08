@@ -15,8 +15,8 @@ class InitialCreationType(Enum):
 
 class CopyrightStatus(Enum):
     UNKNOWN = "Unknown"
-    COPYRIGHTED = "Copyrighted"
-    PUBLIC_DOMAIN = "Public Domain"
+    COPYRIGHTED = "In copyright"
+    PUBLIC_DOMAIN = "Public domain"
 
 
 class Copyright(BaseModel):
@@ -27,6 +27,23 @@ class Copyright(BaseModel):
     class Config:
         extra = Extra.forbid
 
+Copyright_copyrighted = Copyright(
+    status=CopyrightStatus.COPYRIGHTED,
+    notice="In copyright by the original author or editor",
+    info_url="http://rightsstatements.org/vocab/InC/1.0/",
+)
+
+Copyright_unknown = Copyright(
+    status=CopyrightStatus.UNKNOWN,
+    notice="Copyright Undertermined",
+    info_url="http://rightsstatements.org/vocab/UND/1.0/",
+)
+
+Copyright_public_domain = Copyright(
+    status=CopyrightStatus.PUBLIC_DOMAIN,
+    notice="Public domain",
+    info_url="https://creativecommons.org/publicdomain/mark/1.0/",
+)
 
 class LicenseType(Enum):
     # based on https://creativecommons.org/licenses/
@@ -39,19 +56,25 @@ class LicenseType(Enum):
     CC_BY_NC = "CC BY-NC"
     CC_BY_NC_SA = "CC BY-NC-SA"
     CC_BY_NC_ND = "CC BY-NC-ND"
+    
+    UNDER_COPYRIGHT = "under copyright"
 
 
 class PechaMetadata(BaseModel):
     id: str = None
+    legacy_id: Optional[str] = None
+    ocr_import_info: Optional[Dict] = None
+    default_language: str = None
     source: str = None
     source_file: str = None
     initial_creation_type: InitialCreationType
     imported: datetime = None
     last_modified: datetime = None
     parser: AnyHttpUrl = None
-    source_metadata: Optional[Dict] = {}  # place to dump any metadata from the source
-    statistics: Dict[str, Union[int, float, str]] = {}
-    quality: Dict[str, Union[int, float]] = {}
+    source_metadata: Optional[Dict] = None  # place to dump any metadata from the source
+    statistics: Optional[Dict] = None
+    quality: Optional[Dict] = None
+    bases: Optional[Dict[str, Dict]] = {}
     copyright: Copyright = None
     license: LicenseType = None
 
@@ -75,8 +98,7 @@ class PechaMetadata(BaseModel):
 
 
 class InitialPechaMetadata(PechaMetadata):
-    ocr_word_median_confidence_index: float = None
-    base: Optional[Dict] = {}
+    bases: Dict = {}
 
     @validator("id", pre=True, always=True)
     def set_id(cls, v):
