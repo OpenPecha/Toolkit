@@ -48,24 +48,39 @@ class BBox:
     
 
     @property
-    def box_height(self):
+    def get_height(self):
         y1 = self.vertices[0][1]
         y2 = self.vertices[1][1]
-        height = abs(y2-y1)
+        height = abs(y2 - y1)
         return height
     
     @property
-    def box_orientation(self):
-        x1= self.vertices[0][0]
-        x2 = self.vertices[1][0]
-        y1= self.vertices[0][1]
-        y2 = self.vertices[1][1]
-        width = abs(x2-x1)
-        length = abs(y2-y1)
-        if width > length:
-            return "landscape"
-        else:
-            return "portrait"
+    def get_mid(self):
+        """Calculate middle of the bounding poly vertically using y coordinates of the bounding poly
+        Args:
+            bounding_poly (dict): bounding poly's details
+        Returns:
+            float: mid point's y coordinate of bounding poly
+        """
+        y1 = self.vertices[0][1]
+        y2 = self.vertices[2][1]
+        y_avg = (y1 + y2) / 2
+        return y_avg
+    
+    @property
+    def get_centriod(self):
+        """Calculate centriod of bounding poly
+        Args:
+            bounding_poly (dict): info regarding bounding poly such as vertices and description
+        Returns:
+            list: centriod coordinates
+        """
+        sum_of_x = 0
+        sum_of_y = 0
+        for vertice in self.vertices:
+            sum_of_x += vertice[0]
+            sum_of_y += vertice[1]
+        return [sum_of_x/4, sum_of_y/4]
 
 
 class GoogleBooksBDRCFileProvider():
@@ -120,8 +135,8 @@ class Hocr_Parser():
         vertices_info = vertices_info.replace("bbox ", "")
         vertices_coordinates = vertices_info.split(" ")
         vertices = [
-            [vertices_coordinates[0], vertices_coordinates[1]],
-            [vertices_coordinates[2], vertices_coordinates[3]]
+            [int(vertices_coordinates[0]), int(vertices_coordinates[1])],
+            [int(vertices_coordinates[2]), int(vertices_coordinates[3])]
             ]
         return vertices
 
@@ -218,7 +233,7 @@ class GoogleBooksFormatter(BaseFormatter):
         """
         height_sum = 0
         for bounding_poly in bounding_polys:
-            height_sum += bounding_poly.get_height()
+            height_sum += bounding_poly.get_height
         avg_height = height_sum / len(bounding_polys)
         return avg_height
 
@@ -324,7 +339,7 @@ class GoogleBooksFormatter(BaseFormatter):
         bounding_poly_centriods = []
         avg_box_height = self.get_avg_bounding_poly_height(main_region_bounding_polys)
         for bounding_poly in main_region_bounding_polys:
-            centroid = bounding_poly.get_centriod()
+            centroid = bounding_poly.get_centriod
             # TODO: I'm not so sure about that...
             bounding_polys[f"{centroid[0]},{centroid[1]}"] = bounding_poly
             bounding_poly_centriods.append(centroid)
@@ -381,30 +396,6 @@ class GoogleBooksFormatter(BaseFormatter):
         bbox = BBox(text=text, vertices=vertices, confidence=confidence, language=language)
         return bbox
 
-    def get_char_base_bounding_polys(self, response):
-        """Return bounding polys in page response
-
-        Args:
-            response (dict): google ocr output of a page
-
-        Returns:
-            list: list of BBox object which saves required info of a bounding poly
-        """
-        bounding_polys = []
-        cur_word = ""
-        for page in response['fullTextAnnotation']['pages']:
-            for block in page['blocks']:
-                for paragraph in block['paragraphs']:
-                    for word in paragraph['words']:
-                        for symbol in word['symbols']:
-                            cur_word += symbol['text']
-                            if self.has_space_attached(symbol):
-                                cur_word += " "
-                        word['text'] = cur_word
-                        cur_word = ""
-                        bbox = self.dict_to_bbox(word)
-                        bounding_polys.append(bbox)
-        return bounding_polys
 
     def populate_confidence(self, bounding_polys):
         """Populate confidence of bounding polys of pecha level and image group level
@@ -482,39 +473,6 @@ class GoogleBooksFormatter(BaseFormatter):
                     new_bounding_polys.append(cur_bounding_poly)
         return new_bounding_polys
     
-    def is_tibetan_non_consonant(self, symbol):
-        """Checks if tibetan character is Tibetan but not a consonant
-
-        Args:
-            symbol (dict): symbol info
-
-        Returns:
-            boolean: True if character is Tibetan non-consonant
-        """
-        # we assume there is just one character:
-        c = ord(symbol['text'][0])
-        if (c >= ord('ༀ') and c <= ord('༿')) or (c >= ord('ཱ') and c <= ord('࿚')):
-            return True
-
-    def get_avg_char_width(self, response):
-        """Calculate average width of box in a page, ignoring non consonant tibetan char
-
-        Args:
-            response (dict): ocr output of a page
-
-        Returns:
-            float: average box width in which character are saved
-        """
-        widths = []
-        for bbox_info in response:
-            if self.is_tibetan_non_consonant(bbox_info):
-                continue
-            vertices = bbox_info['vertices']
-            x1 = vertices[0].get('x', 0)
-            x2 = vertices[1].get('x', 0)
-            width = x2-x1
-            widths.append(width)
-        return sum(widths) / len(widths)
 
     def save_boundingPoly(self, response, path):
         def tlbr(vertices):
@@ -609,11 +567,10 @@ class GoogleBooksFormatter(BaseFormatter):
                 return True
         return False
 
-    def build_page(self, ocr_object, image_number, image_filename, state):
-        if ocr_object == []:
+    def build_page(self, bounding_polys, image_number, image_filename, state):
+        if bounding_polys == []:
             logging.error("OCR page is empty (no textAnnotations[0]/description)")
             return
-        bounding_polys = self.get_char_base_bounding_polys(ocr_object)
         sorted_bounding_polys = self.sort_bounding_polys(bounding_polys)
         # sorted_bounding_polys = self.insert_space_bounding_poly(sorted_bounding_polys, avg_char_width)
         poly_lines = self.get_poly_lines(sorted_bounding_polys)
@@ -710,8 +667,8 @@ class GoogleBooksFormatter(BaseFormatter):
         }
         for image_number, image_filename in enumerate(image_list):
             # enumerate starts at 0 but image numbers start at 1
-            ocr_object = self.data_provider.get_image_bounding_polys(image_group_id, image_filename)
-            self.build_page(ocr_object, image_number+1, image_filename, state)
+            bounding_polys = self.data_provider.get_image_bounding_polys(image_group_id, image_filename)
+            self.build_page(bounding_polys, image_number+1, image_filename, state)
         layers = {}
         if state["pagination_annotations"]:
             layer = Layer(annotation_type=LayerEnum.pagination, annotations=state["pagination_annotations"])
