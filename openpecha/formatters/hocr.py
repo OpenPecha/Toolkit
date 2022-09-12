@@ -45,16 +45,15 @@ class BBox:
         self.vertices = vertices
         self.confidence = confidence
         self.language = language
-    
+        self.mid_y = self.get_mid()
 
     @property
     def get_height(self):
         y1 = self.vertices[0][1]
-        y2 = self.vertices[1][1]
+        y2 = self.vertices[1]
         height = abs(y2 - y1)
         return height
     
-    @property
     def get_mid(self):
         """Calculate middle of the bounding poly vertically using y coordinates of the bounding poly
         Args:
@@ -84,12 +83,11 @@ class BBox:
 
 
 class GoogleBooksBDRCFileProvider():
-    def __init__(self, bdrc_scan_id, ocr_import_info, ocr_disk_path=None, mode="local"):
-        # ocr_base_path should be the output/ folder in the case of BDRC OCR files
+    def __init__(self, bdrc_scan_id, buda_data, ocr_import_info, ocr_disk_path=None):
         self.ocr_import_info = ocr_import_info
         self.ocr_disk_path = ocr_disk_path
         self.bdrc_scan_id = bdrc_scan_id
-        self.mode = mode
+        self.buda_data = buda_data
         self.image_info = {}
     
     def get_image_list(self, image_group_id):
@@ -103,7 +101,7 @@ class GoogleBooksBDRCFileProvider():
         return image_list
 
     def get_source_info(self):
-        return get_buda_scan_info(self.bdrc_scan_id)
+        return self.buda_data
 
     def get_hocr_filename(self, image_id, image_group_id):
         for filename, img_ref in self.images_info.items():
@@ -119,8 +117,9 @@ class GoogleBooksBDRCFileProvider():
         try:
             parser = Hocr_Parser()
             bounding_polys = parser.parse_hocr(image_hocr_path)
-        except:
+        except Exception as e:
             logging.exception("could not read "+str(image_hocr_path))
+            print(e)
         return bounding_polys
 
 class Hocr_Parser():
@@ -725,6 +724,12 @@ class GoogleBooksFormatter(BaseFormatter):
         """
         self.data_provider = data_provider
         self._build_dirs(None, id_=pecha_id)
+        
+        self.remove_non_character_lines = opf_options["remove_non_character_lines"] if "remove_non_character_lines" in opf_options else True
+        self.create_language_layer = opf_options["create_language_layer"] if "create_language_layer" in opf_options else True
+        self.ocr_confidence_threshold = opf_options["ocr_confidence_threshold"] if "ocr_confidence_threshold" in opf_options else ANNOTATION_MINIMAL_CONFIDENCE
+        self.language_annotation_min_len = opf_options["language_annotation_min_len"] if "language_annotation_min_len" in opf_options else ANNOTATION_MINIMAL_LEN
+        self.max_low_conf_per_page = opf_options["max_low_conf_per_page"] if "max_low_conf_per_page" in opf_options else ANNOTATION_MAX_LOW_CONF_PER_PAGE
 
         # if the bdrc scan id is not specified, we assume it's the directory namepecha_id
         self.bdrc_scan_id = ocr_import_info["bdrc_scan_id"]
@@ -794,10 +799,9 @@ if __name__ == "__main__":
     work_id = "W2PD17457"
     pecha_id = "I1234567"
     output_path = Path(f"./")
-    ocr_disk_path = Path(f"./W2PD17457/")
-    ocr_import_info = get_ocr_import_info(work_id, "batch_2022", ocr_disk_path)
-    input_files = list(Path(f"./W2PD17457/google_books/batch_2022/output/W2PD17457-I4PD423").iterdir())
+    ocr_disk_path = Path(f"./tests/formatters/hocr/data/W2PD17457/")
     buda_data = get_buda_scan_info(work_id)
-    data_provider = GoogleBooksBDRCFileProvider(work_id, ocr_import_info, ocr_disk_path) 
+    ocr_import_info = get_ocr_import_info(work_id, "batch_2022", ocr_disk_path)
+    data_provider = GoogleBooksBDRCFileProvider(work_id, buda_data, ocr_import_info, ocr_disk_path) 
     formatter = GoogleBooksFormatter(output_path)
     formatter.create_opf(data_provider, pecha_id, opf_options={}, ocr_import_info=ocr_import_info)

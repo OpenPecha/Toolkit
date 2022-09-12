@@ -1,0 +1,71 @@
+id: I123456
+legacy_id: null
+ocr_import_info:
+  source: bdrc
+  software: google_books
+  batch: batch_2022
+  expected_default_language: bo
+  bdrc_scan_id: W2PD17457
+  ocr_info:
+    timestamp: '2022-08-05T09:34:20Z'
+  op_import_options: {}
+  op_import_version: 1.0.0
+default_language: bo
+source: https://library.bdrc.io
+source_file: null
+initial_creation_type: ocr
+imported: '2022-09-05T16:32:13.335176+00:00'
+last_modified: '2022-09-05T16:32:13.335184+00:00'
+parser: null
+source_metadata:
+  id: http://purl.bdrc.io/resource/W2PD17457
+  status: http://purl.bdrc.io/admindata/StatusReleased
+  access: http://purl.bdrc.io/admindata/AccessOpen
+  reproduction_of: http://purl.bdrc.io/resource/MW2PD17457
+  copyright_status: http://purl.bdrc.io/resource/CopyrightPublicDomain
+  title: སྔ་འགྱུར་བྱང་གཏེར་ཆོས་སྐོར་ཕྱོགས་བསྒྲིགས།
+  languages:
+  - bo
+statistics:
+  ocr_word_mean_confidence_index: 
+  ocr_word_median_confidence_index: 
+quality: null
+bases:
+  I4PD423:
+    source_metadata:
+      id: http://purl.bdrc.io/resource/I4PD423
+      total_pages: 880
+      volume_number: 1
+      volume_pages_bdrc_intro: 2
+    order: 1
+    base_file: I4PD423.txt
+    statistics:
+      ocr_word_median_confidence_index: 
+      ocr_word_mean_confidence_index:
+  I4PD424:
+    source_metadata:
+      id: http://purl.bdrc.io/resource/I4PD424
+      total_pages: 1074
+      volume_number: 2
+      volume_pages_bdrc_intro: 2
+    order: 2
+    base_file: I4PD424.txt
+    statistics:
+      ocr_word_median_confidence_index: 
+      ocr_word_mean_confidence_index:
+  I4PD453:
+    source_metadata:
+      id: http://purl.bdrc.io/resource/I4PD425
+      total_pages: 604
+      volume_number: 3
+      volume_pages_bdrc_intro: 2
+    order: 3
+    base_file: I4PD425.txt
+    statistics:
+      ocr_word_median_confidence_index: 
+      ocr_word_mean_confidence_index:
+copyright:
+    status: UNKNOWN
+    notice: Copyright Undertermined
+    info_url: http://rightsstatements.org/vocab/UND/1.0/
+license: CC0
