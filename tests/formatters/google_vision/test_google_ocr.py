@@ -4,9 +4,9 @@ from pathlib import Path
 
 import py
 import pytest
-from openpecha.formatters import google_vision
+from openpecha.formatters.ocr import google_vision
 
-from openpecha.formatters.google_vision import GoogleVisionFormatter
+from openpecha.formatters.ocr.google_vision import GoogleVisionFormatter
 from openpecha.utils import load_yaml, dump_yaml
 from test_data_provider import GoogleVisionTestFileProvider
 

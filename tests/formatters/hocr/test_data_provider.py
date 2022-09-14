@@ -1,6 +1,6 @@
 from openpecha.buda.api import image_group_to_folder_name
 from openpecha.utils import load_yaml
-from openpecha.formatters.hocr import Hocr_Parser
+from openpecha.formatters.ocr.hocr import Hocr_Parser
 from pathlib import Path
 import logging
 

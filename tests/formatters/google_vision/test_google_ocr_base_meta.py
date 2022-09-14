@@ -4,7 +4,7 @@ from pathlib import Path
 import pytest
 from openpecha import config
 from openpecha.utils import load_yaml, dump_yaml
-from openpecha.formatters.google_vision import GoogleVisionFormatter
+from openpecha.formatters.ocr.google_vision import GoogleVisionFormatter
 from test_data_provider import GoogleVisionTestFileProvider
 
 def mock_get_image_list(bdrc_scan_id, vol_name):

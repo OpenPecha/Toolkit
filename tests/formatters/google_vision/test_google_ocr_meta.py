@@ -3,7 +3,7 @@ from pathlib import Path
 
 from openpecha import config
 from openpecha.utils import load_yaml
-from openpecha.formatters.google_vision import GoogleVisionFormatter, GoogleVisionBDRCFileProvider
+from openpecha.formatters.ocr.google_vision import GoogleVisionFormatter, GoogleVisionBDRCFileProvider
 from test_data_provider import GoogleVisionTestFileProvider
    
 def test_google_ocr_metadata():

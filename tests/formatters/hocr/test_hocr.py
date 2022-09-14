@@ -4,9 +4,9 @@ from pathlib import Path
 
 import py
 import pytest
-from openpecha.formatters import hocr
+from openpecha.formatters.ocr import hocr
 
-from openpecha.formatters.hocr import GoogleBooksFormatter
+from openpecha.formatters.ocr.hocr import GoogleBooksFormatter
 from openpecha.utils import load_yaml, dump_yaml
 from test_data_provider import GoogleBooksTestFileProvider
 

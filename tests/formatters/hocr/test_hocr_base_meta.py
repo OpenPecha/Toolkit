@@ -4,7 +4,7 @@ from pathlib import Path
 import pytest
 from openpecha import config
 from openpecha.utils import load_yaml, dump_yaml
-from openpecha.formatters.hocr import GoogleBooksFormatter
+from openpecha.formatters.ocr.hocr import GoogleBooksFormatter
 from test_data_provider import GoogleBooksTestFileProvider
 
 def mock_get_image_list(bdrc_scan_id, vol_name):

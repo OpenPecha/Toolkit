@@ -3,7 +3,7 @@ from pathlib import Path
 
 from openpecha import config
 from openpecha.utils import load_yaml
-from openpecha.formatters.hocr import GoogleBooksFormatter, GoogleBooksBDRCFileProvider
+from openpecha.formatters.ocr.hocr import GoogleBooksFormatter, GoogleBooksBDRCFileProvider
 from test_data_provider import GoogleBooksTestFileProvider
    
 def test_google_ocr_metadata():
