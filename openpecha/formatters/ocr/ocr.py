@@ -20,107 +20,63 @@ from openpecha.core.metadata import InitialPechaMetadata, InitialCreationType, L
 from openpecha.formatters import BaseFormatter
 from openpecha.utils import dump_yaml, gzip_str
 
-from openpecha.buda.api import get_buda_scan_info, get_image_list, image_group_to_folder_name
-
 ANNOTATION_MINIMAL_LEN = 20
 ANNOTATION_MINIMAL_CONFIDENCE = 0.8
 ANNOTATION_MAX_LOW_CONF_PER_PAGE = 10
 NOISE_PATTERN = re.compile(r'(?:\s|[-，.… }#*,+•：/|(©:;་"།=@%༔){"])+')
-GOOGLE_OCR_IMPORT_VERSION = "1.0.0"
-
 
 class BBox:
-    def __init__(self, text: str, vertices: list, confidence: float, language: str):
-
+    def __init__(self, x1: int, x2: int, y1: int, y2: int, text: str = None, confidence: float = None, language: str = None):
         self.text = text
-        self.vertices = vertices
+        self.x1 = x1
+        self.x2 = x2
+        self.y1 = y1
+        self.y2 = y2
         self.confidence = confidence
         self.language = language
-        self.mid_y = self.get_mid()
+        self.mid_y = (y1 + y2) / 2
+        self.mid_x = (x1 + x2) / 2
     
     def get_height(self):
-        y1 = self.vertices[0][1]
-        y2 = self.vertices[2][1]
-        return y2 - y1
+        return self.y2 - self.y1
     
     def get_box_orientation(self):
-        x1= self.vertices[0][0]
-        x2 = self.vertices[1][0]
-        y1= self.vertices[0][1]
-        y2 = self.vertices[1][1]
-        width = abs(x2-x1)
-        length = abs(y2-y1)
+        width = self.x2 - self.x1
+        length = self.y2 - self.y1
         if width > length:
             return "landscape"
         else:
             return "portrait"
 
-    def get_mid(self):
-        """Calculate middle of the bounding poly vertically using y coordinates of the bounding poly
-
-        Args:
-            bounding_poly (dict): bounding poly's details
-
-        Returns:
-            float: mid point's y coordinate of bounding poly
-        """
-        y1 = self.vertices[0][1]
-        y2 = self.vertices[2][1]
-        y_avg = (y1 + y2) / 2
-        return y_avg
+    def get_y_mid(self):
+        return self.mid_y
 
     def get_centriod(self):
-        """Calculate centriod of bounding poly
-
-        Args:
-            bounding_poly (dict): info regarding bounding poly such as vertices and description
-
-        Returns:
-            list: centriod coordinates
-        """
-        sum_of_x = 0
-        sum_of_y = 0
-        for vertice in self.vertices:
-            sum_of_x += vertice[0]
-            sum_of_y += vertice[1]
-        return [sum_of_x/4, sum_of_y/4]
+        return [self.mid_x, self.mid_y]
 
 
-class GoogleVisionBDRCFileProvider():
-    def __init__(self, bdrc_scan_id, ocr_import_info, ocr_disk_path=None, mode="local"):
-        # ocr_base_path should be the output/ folder in the case of BDRC OCR files
+class OCRFileProvider():
+    def __init__(self, ocr_import_info: str):
         self.ocr_import_info = ocr_import_info
-        self.ocr_disk_path = ocr_disk_path
-        self.bdrc_scan_id = bdrc_scan_id
-        self.mode = mode
 
-    def get_image_list(self, image_group_id):
-        buda_il = get_image_list(self.bdrc_scan_id, image_group_id)
-        # format should be a list of image_id (/ file names)
-        return map(lambda ii: ii["filename"], buda_il)
+    def get_image_list(self, image_group_id: str):
+        # to be implemented by sub classes
+        # must return a simple list of image ids
+        pass
 
     def get_source_info(self):
-        return get_buda_scan_info(self.bdrc_scan_id)
+        # to be implemented by sub classes
+        # must return an dict in the same format as buda.get_buda_scan_info
+        pass
 
     def get_image_data(self, image_group_id, image_id):
-        # TODO: implement the following modes:
-        #  - "s3" (just read images from s3)
-        #  - "s3-localcache" (cache s3 files on disk)
-        # TODO: handle case where only zip archives are present on s3, one per volume.
-        #       This should be indicated in self.ocr_import_info["ocr_info"]
-        vol_folder = image_group_to_folder_name(self.bdrc_scan_id, image_group_id)
-        expected_ocr_filename = image_id[:image_id.rfind('.')]+".json.gz"
-        image_ocr_path = self.ocr_disk_path / vol_folder / expected_ocr_filename
-        ocr_object = None
-        try:
-            ocr_object = json.load(gzip.open(str(expected_ocr_path), "rb"))
-        except:
-            logging.exception("could not read "+str(expected_ocr_path))
-        return ocr_object
+        # to be implemented by sub classes
+        # must return a list of BBox
+        pass
 
 class OCRFormatter(BaseFormatter):
     """
-    OpenPecha Formatter for Google OCR JSON output of scanned pecha.
+    General OpenPecha Formatter for OCR, must 
     """
 
     def __init__(self, output_path=None, metadata=None):
@@ -145,280 +101,200 @@ class OCRFormatter(BaseFormatter):
         return text
 
 
-    def get_avg_bounding_poly_height(self, bounding_polys):
-        """Calculate the average height of bounding polys in page
+    def get_avg_bbox_height(self, bboxes):
+        """Calculate the average height of bounding bboxs in page
 
         Args:
-            bounding_polys (list): list of boundingpolys
+            bboxes (list): list of boundingbboxs
 
         Returns:
             float: average height of bounding ploys
         """
         height_sum = 0
-        for bounding_poly in bounding_polys:
-            height_sum += bounding_poly.get_height()
-        avg_height = height_sum / len(bounding_polys)
+        for bbox in bboxes:
+            height_sum += bbox.get_height()
+        avg_height = height_sum / len(bboxes)
         return avg_height
 
-    def is_in_cur_line(self, prev_bounding_poly, bounding_poly, avg_height):
-        """Check if bounding poly is in same line as previous bounding poly
+    def is_on_same_line(self, prev_bbox, bbox, avg_height):
+        """Check if bounding bbox is in same line as previous bounding bbox
         a threshold to check the conditions set to 10 but it can varies for pecha to pecha
 
         Args:
-            prev_bounding_poly (dict): previous bounding poly
-            bounding_poly (dict): current bounding poly
-            avg_height (float): average height of all the bounding polys in page
+            prev_bbox (dict): previous bounding bbox
+            bbox (dict): current bounding bbox
+            avg_height (float): average height of all the bounding bboxs in page
 
         Returns:
-            boolean: true if bouding poly is in same line as previous bounding poly else false
+            boolean: true if bouding bbox is in same line as previous bounding bbox else false
         """
         threshold = 10
         if (
-            (bounding_poly.mid_y - prev_bounding_poly.mid_y)
+            (bbox.mid_y - prev_bbox.mid_y)
             < (avg_height / threshold)
         ):
             return True
         else:
             return False
 
-    def get_poly_lines(self, bounding_polys):
-        """Return list of lines in page using bounding polys of page
+    def get_bbox_lines(self, bboxes):
+        """Return list of lines in page using bounding bboxs of page
 
         Args:
-            bounding_polys (list): list of all the bounding polys
+            bboxes (list): list of all the bounding bboxs
 
         Returns:
             list: list of lines in page
         """
         lines = []
-        cur_line_polys = []
-        prev_bounding_poly = bounding_polys[0]
-        avg_line_height = self.get_avg_bounding_poly_height(bounding_polys)
-        for bounding_poly in bounding_polys:
-            if self.is_in_cur_line(prev_bounding_poly, bounding_poly, avg_line_height):
-                cur_line_polys.append(bounding_poly)
+        cur_line_bboxs = []
+        prev_bbox = bboxes[0]
+        avg_line_height = self.get_avg_bbox_height(bboxes)
+        for bbox in bboxes:
+            if self.is_on_same_line(prev_bbox, bbox, avg_line_height):
+                cur_line_bboxs.append(bbox)
             else:
-                lines.append(cur_line_polys)
-                cur_line_polys  = []
-                cur_line_polys.append(bounding_poly)
-            prev_bounding_poly = bounding_poly
-        if cur_line_polys:
-            lines.append(cur_line_polys)
+                lines.append(cur_line_bboxs)
+                cur_line_bboxs  = []
+                cur_line_bboxs.append(bbox)
+            prev_bbox = bbox
+        if cur_line_bboxs:
+            lines.append(cur_line_bboxs)
         return lines
 
 
-    def get_poly_sorted_on_y(self, bounding_poly_centriods):
-        """Sort bounding polys centriod base on y coordinates
+    def get_bbox_sorted_on_y(self, bbox_centriods):
+        """Sort bounding bboxs centriod base on y coordinates
 
         Args:
-            bounding_poly_centriods (list): list of centriod coordinates
+            bbox_centriods (list): list of centriod coordinates
 
         Returns:
             list: list centriod coordinated sorted base on y coordinate
         """
-        sorted_on_y_polys = sorted(bounding_poly_centriods , key=lambda k: [k[1]])
-        return sorted_on_y_polys
+        bboxes_sorted_on_y = sorted(bbox_centriods , key=lambda k: [k[1]])
+        return bboxes_sorted_on_y
 
-    def get_poly_sorted_on_x(self, sorted_on_y_polys, avg_box_height):
+    def get_bbox_sorted_on_x(self, bboxes_sorted_on_y, avg_box_height):
         """Groups box belonging in same line using average height and sort the grouped boxes base on x coordinates
 
         Args:
-            sorted_on_y_polys (list): list of centriod
+            bboxes_sorted_on_y (list): list of centriod
             avg_box_height (float): average boxes height
 
         Returns:
             list: list of sorted centriod
         """
-        prev_bounding_poly = sorted_on_y_polys[0]
+        prev_bbox = bboxes_sorted_on_y[0]
         lines = []
         cur_line = []
-        sorted_polys = []
-        for bounding_poly in sorted_on_y_polys:
-            if abs(bounding_poly[1]-prev_bounding_poly[1]) < avg_box_height/10:
-                cur_line.append(bounding_poly)
+        sorted_bboxes = []
+        for bbox in bboxes_sorted_on_y:
+            if abs(bbox[1]-prev_bbox[1]) < avg_box_height/10:
+                cur_line.append(bbox)
             else:
                 lines.append(cur_line)
                 cur_line = []
-                cur_line.append(bounding_poly)
-            prev_bounding_poly = bounding_poly
+                cur_line.append(bbox)
+            prev_bbox = bbox
         if cur_line:
             lines.append(cur_line)
         for line in lines:
             sorted_line = sorted(line, key=lambda k: [k[0]])
-            for poly in sorted_line:
-                sorted_polys.append(poly)
-        return sorted_polys
+            for bbox in sorted_line:
+                sorted_bboxes.append(bbox)
+        return sorted_bboxes
 
-    def sort_bounding_polys(self, main_region_bounding_polys):
-        """Sort the bounding polys
+    def sort_bboxes(self, main_region_bboxes):
+        """Sort the bounding bboxs
 
         Args:
-            main_region_bounding_polys (list): list of bounding polys
+            main_region_bboxes (list): list of bounding bboxs
 
         Returns:
-            list: sorted bounding poly list
+            list: sorted bounding bbox list
         """
-        bounding_polys = {}
-        bounding_poly_centriods = []
-        avg_box_height = self.get_avg_bounding_poly_height(main_region_bounding_polys)
-        for bounding_poly in main_region_bounding_polys:
-            centroid = bounding_poly.get_centriod()
+        bboxes = {}
+        bbox_centriods = []
+        avg_box_height = self.get_avg_bbox_height(main_region_bboxes)
+        for bbox in main_region_bboxes:
+            centroid = bbox.get_centriod()
             # TODO: I'm not so sure about that...
-            bounding_polys[f"{centroid[0]},{centroid[1]}"] = bounding_poly
-            bounding_poly_centriods.append(centroid)
-        sorted_bounding_polys = []
-        sort_on_y_polys = self.get_poly_sorted_on_y(bounding_poly_centriods)
-        sorted_bounding_poly_centriods = self.get_poly_sorted_on_x(sort_on_y_polys, avg_box_height)
-        for bounding_poly_centriod in sorted_bounding_poly_centriods:
-            sorted_bounding_polys.append(bounding_polys[f"{bounding_poly_centriod[0]},{bounding_poly_centriod[1]}"])
-        return sorted_bounding_polys
+            bboxes[f"{centroid[0]},{centroid[1]}"] = bbox
+            bbox_centriods.append(centroid)
+        sorted_bboxes = []
+        sort_on_y_bboxs = self.get_bbox_sorted_on_y(bbox_centriods)
+        sorted_bbox_centriods = self.get_bbox_sorted_on_x(sort_on_y_bboxs, avg_box_height)
+        for bbox_centriod in sorted_bbox_centriods:
+            sorted_bboxes.append(bboxes[f"{bbox_centriod[0]},{bbox_centriod[1]}"])
+        return sorted_bboxes
 
     def has_space_attached(self, symbol):
-        """Checks if symbol has space followed by it or not
-
-        Args:
-            symbol (dict): symbol info
-
-        Returns:
-            boolean: True if the symbol has space followed by it
-        """
-        if ('property' in symbol and 
-                'detectedBreak' in symbol['property'] and 
-                'type' in symbol['property']['detectedBreak'] and 
-                symbol['property']['detectedBreak']['type'] == "SPACE"):
-            return True
+        # must be overriden if the format has that kind of information
         return False
-    
-    def extract_vertices(self, word):
-        """Extract vertices of bounding poly
+
+    def populate_confidence(self, bboxes):
+        """Populate confidence of bounding bboxs of pecha level and image group level
 
         Args:
-            word (dict): bounding poly info of a word
-
-        Returns:
-            list: list of vertices coordinates
+            bboxes (list): list of bounding bboxs
         """
-        vertices = []
-        for vertice in word['boundingBox']['vertices']:
-            vertices.append([vertice.get('x', 0), vertice.get('y', 0)])
-        return vertices
+        for bbox in bboxes:
+            self.word_confidences.append(float(bbox.confidence))
+            self.cur_base_word_confidences.append(float(bbox.confidence))
 
-    def dict_to_bbox(self, word):
-        """Convert bounding poly to BBox object
-
-        Args:
-            word (dict): bounding poly of a word infos
-
-        Returns:
-            obj: BBox object of bounding poly
-        """
-        text = word.get('text', '')
-        confidence = word.get('confidence')
-        language = self.get_language_code(word)
-        vertices = self.extract_vertices(word)
-        bbox = BBox(text=text, vertices=vertices, confidence=confidence, language=language)
-        return bbox
-
-    def get_char_base_bounding_polys(self, response):
-        """Return bounding polys in page response
-
-        Args:
-            response (dict): google ocr output of a page
-
-        Returns:
-            list: list of BBox object which saves required info of a bounding poly
-        """
-        bounding_polys = []
-        cur_word = ""
-        for page in response['fullTextAnnotation']['pages']:
-            for block in page['blocks']:
-                for paragraph in block['paragraphs']:
-                    for word in paragraph['words']:
-                        for symbol in word['symbols']:
-                            cur_word += symbol['text']
-                            if self.has_space_attached(symbol):
-                                cur_word += " "
-                        word['text'] = cur_word
-                        cur_word = ""
-                        bbox = self.dict_to_bbox(word)
-                        bounding_polys.append(bbox)
-        return bounding_polys
-
-    def populate_confidence(self, bounding_polys):
-        """Populate confidence of bounding polys of pecha level and image group level
-
-        Args:
-            bounding_polys (list): list of bounding polys
-        """
-        for bounding_poly in bounding_polys:
-            self.word_confidences.append(float(bounding_poly.confidence))
-            self.cur_base_word_confidences.append(float(bounding_poly.confidence))
-    
-    def get_space_poly_vertices(self, cur_bounding_poly, next_poly):
-        """Return space bounding poly's vertices of located in between given polys
-
-        Args:
-            cur_bounding_poly (bbox): first bbox obj
-            next_poly (bbox): second bbox obj
-
-        Returns:
-            list: list of vertices of space poly located in between
-        """
-        vertices = [
-            cur_bounding_poly.vertices[1],
-            next_poly.vertices[0],
-            next_poly.vertices[3],
-            cur_bounding_poly.vertices[2],
-        ]
-        return vertices
+    def bbox_can_have_space_after(self, bbox):
+        if bbox.text[-1] in [' ', '་']:
+            return False
+        return True
         
-    def has_space_after(self, cur_bounding_poly, next_poly, avg_char_width):
-        """Checks if there is space between two poly or not if yes returns a space poly bbox object
+    def has_space_after(self, cur_bbox, next_bbox, avg_char_width):
+        """Checks if there is space between two bbox or not if yes returns a space bbox bbox object
 
         Args:
-            cur_bounding_poly (bbox): first bbox
-            next_poly (bbox): second bbox
+            cur_bbox (bbox): first bbox
+            next_bbox (bbox): second bbox
             avg_char_width (float): avg width of char in page
 
         Returns:
             bbox or none: space bbox object
         """
-        cur_poly_top_right_corner = cur_bounding_poly.vertices[1][0]
-        next_poly_top_left_corner = next_poly.vertices[0][0]
-        if next_poly_top_left_corner - cur_poly_top_right_corner > avg_char_width*0.75 and cur_bounding_poly.text[-1] not in [' ', '་']:
-            space_poly_vertices = self.get_space_poly_vertices(cur_bounding_poly, next_poly)
+        if next_bbox.x1 - cur_bbox.x2 > avg_char_width*0.75 and self.bbox_can_have_space_after(cur_bbox):
             space_box = BBox(
+                cur_bbox.x2,
+                next_bbox.x1,
+                cur_bbox.y1, # the y coordinates are kind of arbitrary
+                cur_bbox.y2,
                 text=" ",
-                vertices=space_poly_vertices,
                 confidence=None,
                 language=None
             )
             return space_box
         return None
     
-    def insert_space_bounding_poly(self, bounding_polys, avg_char_width):
-        """Inserts space bounding poly if missing
+    def insert_space_bbox(self, bboxes, avg_char_width):
+        """Inserts space bounding bbox if missing
 
         Args:
-            bounding_polys (list): list of bbox objects
+            bboxes (list): list of bbox objects
             avg_char_width (float): avg width of char
 
         Returns:
             list: list of bbox objects
         """
-        new_bounding_polys = []
-        for poly_walker, cur_bounding_poly in enumerate(bounding_polys):
-            if poly_walker == len(bounding_polys)-1:
-                new_bounding_polys.append(cur_bounding_poly)
+        new_bboxes = []
+        for bbox_walker, cur_bbox in enumerate(bboxes):
+            if bbox_walker == len(bboxes)-1:
+                new_bboxes.append(cur_bbox)
             else:
-                next_poly = bounding_polys[poly_walker+1]
-                space_poly = self.has_space_after(cur_bounding_poly, next_poly, avg_char_width)
-                if space_poly:
-                    new_bounding_polys.append(cur_bounding_poly)
-                    new_bounding_polys.append(space_poly)
+                next_bbox = bboxes[bbox_walker+1]
+                space_bbox = self.has_space_after(cur_bbox, next_bbox, avg_char_width)
+                if space_bbox:
+                    new_bboxes.append(cur_bbox)
+                    new_bboxes.append(space_bbox)
                 else:
-                    new_bounding_polys.append(cur_bounding_poly)
-        return new_bounding_polys
+                    new_bboxes.append(cur_bbox)
+        return new_bboxes
     
     def is_tibetan_non_consonant(self, symbol):
         """Checks if tibetan character is Tibetan but not a consonant
@@ -434,7 +310,7 @@ class OCRFormatter(BaseFormatter):
         if (c >= ord('ༀ') and c <= ord('༿')) or (c >= ord('ཱ') and c <= ord('࿚')):
             return True
 
-    def get_avg_char_width(self, response):
+    def get_avg_char_width(self, bboxes):
         """Calculate average width of box in a page, ignoring non consonant tibetan char
 
         Args:
@@ -444,139 +320,79 @@ class OCRFormatter(BaseFormatter):
             float: average box width in which character are saved
         """
         widths = []
-        for page in response['fullTextAnnotation']['pages']:
-            for block in page['blocks']:
-                for paragraph in block['paragraphs']:
-                    for word in paragraph['words']:
-                        for symbol in word['symbols']:
-                            # TODO: replace with proper diacritics detection
-                            if self.is_tibetan_non_consonant(symbol):
-                                continue
-                            vertices = symbol['boundingBox']['vertices']
-                            x1 = vertices[0].get('x', 0)
-                            x2 = vertices[1].get('x', 0)
-                            width = x2-x1
-                            widths.append(width)
-        return sum(widths) / len(widths)
+        for bbox in bboxes:
+            widths.append(bbox.x2 - bbox.x1)
+        return statistics.mean(widths)
 
-    def save_boundingPoly(self, response, path):
-        def tlbr(vertices):
-            return {"tl": vertices[0], "br": vertices[2]}
-
-        boundingPolies = {}
-        for ann in response["textAnnotations"]:
-            boundingPolies[ann["description"]] = tlbr(ann["boundingPoly"]["vertices"])
-
-        zipped_boundingPolies = gzip_str(json.dumps(boundingPolies))
-        path.write_bytes(zipped_boundingPolies)
-
-    def save_low_conf_char(self, response, path):
-        char_idx = 0
-        low_conf_chars = ""
-        for page in response["fullTextAnnotation"]["pages"]:
-            for block in page["blocks"]:
-                for paragraph in block["paragraphs"]:
-                    for word in paragraph["words"]:
-                        for symbol in word["symbols"]:
-                            if symbol.get("confidence", 1) < self.ocr_confidence_threshold:
-                                low_conf_chars += f'{symbol["text"]} {char_idx}\n'
-                            char_idx += 1
-        if low_conf_chars:
-            path.write_bytes(gzip_str(low_conf_chars))
-
-    def get_language_code(self, poly):
-        lang = ""
-        properties = poly.get("property", {})
-        if properties:
-            languages = properties.get("detectedLanguages", [])
-            if languages:
-                lang = languages[0]['languageCode']
-        if lang == "":
-            # this is not always true but replacing it with None is worse
-            # with our current data
-            return self.default_language
-        if lang in ["bo", "en", "zh"]:
-            return lang
-        if lang == "dz":
-            return "bo"
-        # English is a kind of default for our purpose
-        return "en"
-
-    def add_language(self, poly, poly_start_cc, state):
-        poly_lang = poly.language
+    def add_language(self, bbox, bbox_start_cc, state):
+        bbox_lang = bbox.language
         previous_ann = state["latest_language_annotation"]
-        poly_end_cc = state["base_layer_len"] # by construction
+        bbox_end_cc = state["base_layer_len"] # by construction
         if previous_ann is not None:
-            # if poly has the same language as the latest annotation, we just lengthen the previous
-            # annotation to include this poly:
-            if poly_lang == previous_ann['lang'] or not poly_lang:
-                previous_ann["end"] = poly_end_cc
+            # if bbox has the same language as the latest annotation, we just lengthen the previous
+            # annotation to include this bbox:
+            if bbox_lang == previous_ann['lang'] or not bbox_lang:
+                previous_ann["end"] = bbox_end_cc
                 return
-            # if poly is the default language, we just conclude the previous annotation
-            if poly_lang == self.default_language:
+            # if bbox is the default language, we just conclude the previous annotation
+            if bbox_lang == self.default_language:
                 state["latest_language_annotation"] = None
                 return
             # else, we create a new annotation
-            annotation = {"start": poly_start_cc, "end": poly_end_cc, "lang": poly_lang}
+            annotation = {"start": bbox_start_cc, "end": bbox_end_cc, "lang": bbox_lang}
             state["language_annotations"].append(annotation)
             state["latest_language_annotation"] = annotation
             return
         # if there's no previous annotation and language is the default language, return
-        if poly_lang == self.default_language or not poly_lang:
+        if bbox_lang == self.default_language or not bbox_lang:
             return
         # if there's no previous annotation and language is not the default, we create an annotation
-        annotation = {"start": poly_start_cc, "end": poly_end_cc, "lang": poly_lang}
+        annotation = {"start": bbox_start_cc, "end": bbox_end_cc, "lang": bbox_lang}
         state["language_annotations"].append(annotation)
         state["latest_language_annotation"] = annotation
 
-    def add_low_confidence(self, poly, poly_start_cc, state):
-        if poly.confidence is None:
+    def add_low_confidence(self, bbox, bbox_start_cc, state):
+        if bbox.confidence is None:
             return
-        if poly.confidence > self.ocr_confidence_threshold:
+        if bbox.confidence > self.ocr_confidence_threshold:
             state["latest_low_confidence_annotation"] = None
             return
-        poly_end_cc = state["base_layer_len"] # by construction
+        bbox_end_cc = state["base_layer_len"] # by construction
         if state["latest_low_confidence_annotation"] is not None:
             # average of the confidence indexes, weighted by character length
-            state["latest_low_confidence_annotation"]["weights"].append((poly_end_cc - poly_start_cc, poly.confidence))
-            state["latest_low_confidence_annotation"]["end"] = poly_end_cc
+            state["latest_low_confidence_annotation"]["weights"].append((bbox_end_cc - bbox_start_cc, bbox.confidence))
+            state["latest_low_confidence_annotation"]["end"] = bbox_end_cc
         else:
-            annotation = {"start": poly_start_cc, "end": poly_end_cc, 
-                "weights": [(poly_end_cc - poly_start_cc, poly.confidence)]}
+            annotation = {"start": bbox_start_cc, "end": bbox_end_cc, 
+                "weights": [(bbox_end_cc - bbox_start_cc, bbox.confidence)]}
             state["page_low_confidence_annotations"].append(annotation)
             state["latest_low_confidence_annotation"] = annotation
 
-    def poly_line_has_characters(self, poly_line):
-        for poly in poly_line:
-            if not NOISE_PATTERN.match(poly.text):
+    def bbox_line_has_characters(self, bbox_line):
+        for bbox in bbox_line:
+            if not NOISE_PATTERN.match(bbox.text):
                 return True
         return False
 
-    def build_page(self, ocr_object, image_number, image_filename, state):
-        try:
-            page_content = ocr_object["textAnnotations"][0]["description"]
-        except Exception:
-            logging.error("OCR page is empty (no textAnnotations[0]/description)")
-            return
-        avg_char_width = self.get_avg_char_width(ocr_object)
-        bounding_polys = self.get_char_base_bounding_polys(ocr_object)
-        sorted_bounding_polys = self.sort_bounding_polys(bounding_polys)
-        sorted_bounding_polys = self.insert_space_bounding_poly(sorted_bounding_polys, avg_char_width)
-        poly_lines = self.get_poly_lines(sorted_bounding_polys)
+    def build_page(self, bboxes, image_number, image_filename, state):
+        avg_char_width = self.get_avg_char_width(bboxes)
+        sorted_bboxes = self.sort_bboxes(bboxes)
+        sorted_bboxes = self.insert_space_bbox(sorted_bboxes, avg_char_width)
+        bbox_lines = self.get_bbox_lines(sorted_bboxes)
         page_start_cc = state["base_layer_len"]
         page_word_confidences = []
-        for poly_line in poly_lines:
-            if self.remove_non_character_lines and not self.poly_line_has_characters(poly_line):
+        for bbox_line in bbox_lines:
+            if self.remove_non_character_lines and not self.bbox_line_has_characters(bbox_line):
                 continue
-            for poly in poly_line:
-                state["base_layer"] += poly.text
+            for bbox in bbox_line:
+                state["base_layer"] += bbox.text
                 start_cc = state["base_layer_len"]
-                state["base_layer_len"] += len(poly.text)
-                if poly.confidence is not None:
-                    state["word_confidences"].append(float(poly.confidence))
-                    page_word_confidences.append(float(poly.confidence))
-                    self.add_low_confidence(poly, start_cc, state)
-                self.add_language(poly, start_cc, state)
+                state["base_layer_len"] += len(bbox.text)
+                if bbox.confidence is not None:
+                    state["word_confidences"].append(float(bbox.confidence))
+                    page_word_confidences.append(float(bbox.confidence))
+                    self.add_low_confidence(bbox, start_cc, state)
+                self.add_language(bbox, start_cc, state)
             # adding a line break at the end of a line
             state["base_layer"] += "\n"
             state["base_layer_len"] += 1
@@ -638,6 +454,10 @@ class OCRFormatter(BaseFormatter):
             annotations[self.get_unique_id()] = previous_annotation
         return annotations
 
+    def get_bboxes_for_page(self, image_group_id, image_filename):
+        # needs to be implemented by inheriting classes
+        pass
+
     def build_base(self, image_group_id):
         """ The main function that takes the OCR results for an entire volume
             and creates its base and layers
@@ -656,8 +476,8 @@ class OCRFormatter(BaseFormatter):
         }
         for image_number, image_filename in enumerate(image_list):
             # enumerate starts at 0 but image numbers start at 1
-            ocr_object = self.data_provider.get_image_data(image_group_id, image_filename)
-            self.build_page(ocr_object, image_number+1, image_filename, state)
+            bboxes = self.get_bboxes_for_page(image_group_id, image_filename)
+            self.build_page(bboxes, image_number+1, image_filename, state)
         layers = {}
         if state["pagination_annotations"]:
             layer = Layer(annotation_type=LayerEnum.pagination, annotations=state["pagination_annotations"])
@@ -728,7 +548,7 @@ class OCRFormatter(BaseFormatter):
             }
     
     def create_opf(self, data_provider, pecha_id, opf_options = {}, ocr_import_info = {}):
-        """Create opf of google ocred pecha
+        """Create opf
 
         Args:
             data_provider (DataProvider): an instance that will be used to get the necessary data
@@ -760,7 +580,6 @@ class OCRFormatter(BaseFormatter):
         self.max_low_conf_per_page = opf_options["max_low_conf_per_page"] if "max_low_conf_per_page" in opf_options else ANNOTATION_MAX_LOW_CONF_PER_PAGE
 
         ocr_import_info["op_import_options"] = opf_options
-        ocr_import_info["op_import_version"] = GOOGLE_OCR_IMPORT_VERSION
 
         self._build_dirs(None, id_=pecha_id)
 
