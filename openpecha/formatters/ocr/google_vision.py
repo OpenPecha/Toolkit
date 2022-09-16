@@ -1,25 +1,8 @@
 import gzip
 import json
-import math
-import re
-from enum import Enum
-from pathlib import Path
-import statistics
 import logging
 
-import datetime
-from datetime import timezone
-import requests
-from pathlib import Path
-
-from openpecha.core.annotation import Page, Span
-from openpecha.core.annotations import BaseAnnotation, Language, OCRConfidence
-from openpecha.core.layer import Layer, LayerEnum, OCRConfidenceLayer
-from openpecha.core.ids import get_base_id
-from openpecha.core.metadata import InitialPechaMetadata, InitialCreationType, LicenseType, Copyright_copyrighted, Copyright_unknown, Copyright_public_domain
-from openpecha.formatters import BaseFormatter
-from openpecha.utils import dump_yaml, gzip_str
-
+from openpecha.formatters.ocr.ocr import OCRFileProvider, OCRFormatter, BBox
 from openpecha.buda.api import get_buda_scan_info, get_image_list, image_group_to_folder_name
 
 class GoogleVisionBDRCFileProvider(OCRFileProvider):
@@ -46,7 +29,7 @@ class GoogleVisionBDRCFileProvider(OCRFileProvider):
         #       This should be indicated in self.ocr_import_info["ocr_info"]
         vol_folder = image_group_to_folder_name(self.bdrc_scan_id, image_group_id)
         expected_ocr_filename = image_id[:image_id.rfind('.')]+".json.gz"
-        image_ocr_path = ocr_disk_path / vol_folder / expected_ocr_filename
+        expected_ocr_path = self.ocr_disk_path / vol_folder / expected_ocr_filename
         ocr_object = None
         try:
             ocr_object = json.load(gzip.open(str(expected_ocr_path), "rb"))
@@ -85,7 +68,7 @@ class GoogleVisionFormatter(OCRFormatter):
             languages = properties.get("detectedLanguages", [])
             if languages:
                 lang = languages[0]['languageCode']
-        if lang == "" || lang == "und":
+        if lang == "" | lang == "und":
             # this is not always true but replacing it with None is worse
             # with our current data
             return self.default_language
@@ -111,7 +94,7 @@ class GoogleVisionFormatter(OCRFormatter):
         if 'boundingBox' not in word or 'vertices' not in word['boundingBox']:
             return None
         vertices = word['boundingBox']['vertices']
-        if len(vertices != 4) or 'x' not in vertices[0] or 'x' not in vertices[1] or 'y' not in vertices[0] or 'y' not n vertices[2]:
+        if len(vertices != 4) or 'x' not in vertices[0] or 'x' not in vertices[1] or 'y' not in vertices[0] or 'y' not in vertices[2]:
             return None
         return BBox(vertices[0]['x'], vertices[1]['x'], vertices[0]['y'], vertices[2]['y'], text=text, confidence=confidence, language=language)
 

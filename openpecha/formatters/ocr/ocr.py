@@ -11,6 +11,7 @@ import datetime
 from datetime import timezone
 import requests
 from pathlib import Path
+from abc import abstractmethod
 
 from openpecha.core.annotation import Page, Span
 from openpecha.core.annotations import BaseAnnotation, Language, OCRConfidence
@@ -453,7 +454,8 @@ class OCRFormatter(BaseFormatter):
                 language = annotation["lang"])
             annotations[self.get_unique_id()] = previous_annotation
         return annotations
-
+    
+    @abstractmethod
     def get_bboxes_for_page(self, image_group_id, image_filename):
         # needs to be implemented by inheriting classes
         pass
@@ -477,7 +479,8 @@ class OCRFormatter(BaseFormatter):
         for image_number, image_filename in enumerate(image_list):
             # enumerate starts at 0 but image numbers start at 1
             bboxes = self.get_bboxes_for_page(image_group_id, image_filename)
-            self.build_page(bboxes, image_number+1, image_filename, state)
+            if bboxes:
+                self.build_page(bboxes, image_number+1, image_filename, state)
         layers = {}
         if state["pagination_annotations"]:
             layer = Layer(annotation_type=LayerEnum.pagination, annotations=state["pagination_annotations"])
