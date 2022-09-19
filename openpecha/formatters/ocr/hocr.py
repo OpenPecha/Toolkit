@@ -53,6 +53,27 @@ class HOCRBDRCFileProvider():
         image_hocr_path = Path(f"{self.ocr_disk_path}") / "google_books" / "batch_2022" / "output" / vol_folder / f"{hocr_filename}.html"
         hocr_html = image_hocr_path.read_text(encoding='utf-8')
         return hocr_html
+
+class HOCRIAFileProvider():
+    def __init__(self, bdrc_scan_id, buda_data, ocr_import_info, ocr_disk_path=None):
+        self.ocr_import_info = ocr_import_info
+        self.ocr_disk_path = ocr_disk_path
+        self.bdrc_scan_id = bdrc_scan_id
+        self.buda_data = buda_data
+        self.images_info = {}
+    
+
+    def get_image_list(self, image_group_id):
+        buda_il = get_image_list(self.bdrc_scan_id, image_group_id)
+        # format should be a list of image_id (/ file names)
+        return map(lambda ii: ii["filename"], buda_il)
+
+    def get_source_info(self):
+        return self.buda_data
+    
+
+    def get_image_data(self, image_group_id, image_filename):
+        pass
     
     
 class HOCRFormatter(OCRFormatter):
@@ -128,3 +149,5 @@ class HOCRFormatter(OCRFormatter):
         if hocr_page_html:
             bboxes = self.get_boxes(hocr_page_html)
         return bboxes
+
+    

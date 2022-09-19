@@ -1,9 +1,0 @@
-id: 56800eb4d4b14d1c85e749875d7f16d8
-annotation_type: Language
-revision: '00001'
-annotations:
-  bba045cc658a418ca440e1f943bf576e:
-    span:
-      start: 2252
-      end: 2502
-    language: unknown

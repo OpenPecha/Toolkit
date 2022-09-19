@@ -4,20 +4,20 @@ from pathlib import Path
 from openpecha import config
 from openpecha.utils import load_yaml
 from openpecha.formatters.ocr.hocr import HOCRFormatter
-from test_data_provider import HOCRTestFileProvider
+from test_data_provider import HOCRIATestFileProvider
    
 def test_google_ocr_metadata():
-    work_id = "W2PD17457"
-    pecha_id = "I123456"
+    work_id = "W22084"
+    pecha_id = "I9876543"
     
-    ocr_path = Path(__file__).parent / "data" / "file_per_page" / work_id
-    expected_meta_path = Path(__file__).parent / "data" / "file_per_page" / "opf_expected_datas" / "expected_hocr_meta.yml"
-    buda_data_path = Path(__file__).parent / "data" / "file_per_page" / "buda_data.yml"
-    ocr_import_info_path = Path(__file__).parent / "data" / "file_per_page" / "ocr_import_info.yml"
+    ocr_path = Path(__file__).parent / "data" / "file_per_volume" / work_id
+    expected_meta_path = Path(__file__).parent / "data" / "file_per_volume" / "opf_expected_datas" / "expected_hocr_meta.yml"
+    buda_data_path = Path(__file__).parent / "data" / "file_per_volume" / "buda_data.yml"
+    ocr_import_info_path = Path(__file__).parent / "data" / "file_per_volume" / "ocr_import_info.yml"
     ocr_import_info = load_yaml(ocr_import_info_path)
     buda_data = load_yaml(buda_data_path)
-    bdrc_image_list_path = Path(__file__).parent / "data" / "file_per_page" / work_id / "google_books" / "batch_2022" / "output"
-    data_provider = HOCRTestFileProvider(work_id, bdrc_image_list_path, buda_data, ocr_import_info, ocr_path)
+    bdrc_image_list_path = Path(__file__).parent / "data" / "file_per_volume" / work_id
+    data_provider = HOCRIATestFileProvider(work_id, bdrc_image_list_path, buda_data, ocr_import_info, ocr_path)
     
     with tempfile.TemporaryDirectory() as tmpdirname:
         formatter = HOCRFormatter(output_path=tmpdirname)
