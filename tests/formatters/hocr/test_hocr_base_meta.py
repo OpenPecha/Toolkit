@@ -7,9 +7,6 @@ from openpecha.utils import load_yaml, dump_yaml
 from openpecha.formatters.ocr.hocr import HOCRFormatter
 from test_data_provider import HOCRTestFileProvider
 
-def mock_get_image_list(bdrc_scan_id, vol_name):
-    return load_yaml(Path(__file__).parent / "data" / str(vol_name+"-imgseqnum.json"))
-
 def test_google_ocr_base_meta():
     work_id = "W2PD17457"
     pecha_id = "I123456"

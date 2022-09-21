@@ -6,13 +6,15 @@ ocr_import_info:
   batch: batch_2022
   expected_default_language: bo
   bdrc_scan_id: W22084
+  ocr_info:
+    timestamp: None
   op_import_options: {}
 default_language: bo
 source: https://library.bdrc.io
 source_file: null
 initial_creation_type: ocr
-imported: '2022-09-16T11:01:05.994514+00:00'
-last_modified: '2022-09-16T11:01:05.994526+00:00'
+imported: '2022-09-21T06:56:45.945843+00:00'
+last_modified: '2022-09-21T06:56:45.945855+00:00'
 parser: null
 source_metadata:
   id: http://purl.bdrc.io/resource/W22084
@@ -24,21 +26,10 @@ source_metadata:
   languages:
   - bo
 statistics:
-  ocr_word_mean_confidence_index: 
-  ocr_word_median_confidence_index: 
+  ocr_word_mean_confidence_index: 0.34243346007604564
+  ocr_word_median_confidence_index: 0.29
 quality: null
 bases:
-  I0886:
-    source_metadata:
-      id: http://purl.bdrc.io/resource/I0886
-      total_pages: 624
-      volume_number: 1
-      volume_pages_bdrc_intro: 2
-    order: 1
-    base_file: I0886.txt
-    statistics:
-      ocr_word_median_confidence_index: 
-      ocr_word_mean_confidence_index: 
   I0887:
     source_metadata:
       id: http://purl.bdrc.io/resource/I0887
@@ -48,8 +39,19 @@ bases:
     order: 2
     base_file: I0887.txt
     statistics:
-      ocr_word_median_confidence_index: 
-      ocr_word_mean_confidence_index:   
+      ocr_word_median_confidence_index: 0.27
+      ocr_word_mean_confidence_index: 0.33008474576271185
+  I0886:
+    source_metadata:
+      id: http://purl.bdrc.io/resource/I0886
+      total_pages: 624
+      volume_number: 1
+      volume_pages_bdrc_intro: 2
+    order: 1
+    base_file: I0886.txt
+    statistics:
+      ocr_word_median_confidence_index: 0.3
+      ocr_word_mean_confidence_index: 0.356836902800659
 copyright:
   status: Public domain
   notice: Public domain

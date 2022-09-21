@@ -5,12 +5,10 @@ from openpecha.utils import load_yaml, dump_yaml
 from openpecha.formatters.ocr.hocr import HOCRFormatter
 from test_data_provider import HOCRIATestFileProvider
 
-def mock_get_image_list(bdrc_scan_id, vol_name):
-    return load_yaml(Path(__file__).parent / "data" / str(vol_name+"-imgseqnum.json"))
-
 def test_google_ocr_base_meta():
     work_id = "W22084"
     pecha_id = "I9876543"
+    mode = "IA"
     
     ocr_path = Path(__file__).parent / "data" / "file_per_volume" / work_id
     expected_meta_path = Path(__file__).parent / "data" / "file_per_volume" / "opf_expected_datas" / "expected_hocr_meta.yml"
@@ -22,7 +20,7 @@ def test_google_ocr_base_meta():
     data_provider = HOCRIATestFileProvider(work_id, bdrc_image_list_path, buda_data, ocr_import_info, ocr_path)
     
     with tempfile.TemporaryDirectory() as tmpdirname:
-        formatter = HOCRFormatter(output_path=tmpdirname)
+        formatter = HOCRFormatter(mode=mode, output_path=tmpdirname)
         pecha_path = formatter.create_opf(data_provider, pecha_id, {}, ocr_import_info)
         output_metadata = load_yaml(Path(f"{pecha_path}/{pecha_path.name}.opf/meta.yml"))
         expected_metadata = load_yaml(expected_meta_path)

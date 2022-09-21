@@ -9,6 +9,7 @@ from test_data_provider import HOCRIATestFileProvider
 def test_google_ocr_metadata():
     work_id = "W22084"
     pecha_id = "I9876543"
+    mode = "IA"
     
     ocr_path = Path(__file__).parent / "data" / "file_per_volume" / work_id
     expected_meta_path = Path(__file__).parent / "data" / "file_per_volume" / "opf_expected_datas" / "expected_hocr_meta.yml"
@@ -20,7 +21,7 @@ def test_google_ocr_metadata():
     data_provider = HOCRIATestFileProvider(work_id, bdrc_image_list_path, buda_data, ocr_import_info, ocr_path)
     
     with tempfile.TemporaryDirectory() as tmpdirname:
-        formatter = HOCRFormatter(output_path=tmpdirname)
+        formatter = HOCRFormatter(mode=mode, output_path=tmpdirname)
         pecha_path = formatter.create_opf(data_provider, pecha_id, {}, ocr_import_info)
         output_metadata = load_yaml(Path(f"{pecha_path}/{pecha_path.name}.opf/meta.yml"))
         expected_metadata = load_yaml(expected_meta_path)

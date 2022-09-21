@@ -8,6 +8,7 @@ import logging
 import datetime
 import statistics
 from datetime import timezone
+from langcodes import *
 from bs4 import BeautifulSoup
 
 from openpecha.formatters.ocr.ocr import OCRFormatter, BBox
@@ -55,33 +56,68 @@ class HOCRBDRCFileProvider():
         return hocr_html
 
 class HOCRIAFileProvider():
-    def __init__(self, bdrc_scan_id, buda_data, ocr_import_info, ocr_disk_path=None):
+    def __init__(self, bdrc_scan_id, bdrc_image_list_path, buda_data, ocr_import_info, ocr_disk_path=None):
         self.ocr_import_info = ocr_import_info
         self.ocr_disk_path = ocr_disk_path
         self.bdrc_scan_id = bdrc_scan_id
         self.buda_data = buda_data
-        self.images_info = {}
-    
+        self.bdrc_image_list_path = bdrc_image_list_path
+        self.image_info = {}
+
 
     def get_image_list(self, image_group_id):
+        self.get_images_info(image_group_id)
         buda_il = get_image_list(self.bdrc_scan_id, image_group_id)
         # format should be a list of image_id (/ file names)
         return map(lambda ii: ii["filename"], buda_il)
-
+    
+    
+    def get_images_info(self, image_group_id):
+        curr_image = {}
+        image_list = get_image_list(self.bdrc_scan_id, image_group_id)
+        image_group_hocr = self.get_image_group_hocr(image_group_id)
+        if image_group_hocr :
+            hocr_html = BeautifulSoup(image_group_hocr, 'html.parser')
+            pages_hocr = hocr_html.find_all("div", {"class": "ocr_page"})
+            for image_number, image_filename in enumerate (image_list):
+                filename = image_filename['filename']
+                for page_hocr in pages_hocr:
+                    if int(page_hocr['id'][5:]) == image_number:
+                        curr_image[filename] = {
+                            'page_info': page_hocr
+                        }
+                        self.image_info.update(curr_image)
+                        curr_image = {}
+                
+        
+    
+    def get_image_group_hocr(self, image_group_id):
+        vol_num = self.source_info['image_groups'][image_group_id]['volume_number']
+        image_group_hocr_path = Path(f"{self.bdrc_image_list_path}") / f"bdrc-{self.bdrc_scan_id}-{vol_num}_hocr.html"
+        try:
+            hocr_html = image_group_hocr_path.read_text(encoding='utf-8')
+            return hocr_html
+        except:
+            return
+    
     def get_source_info(self):
         return self.buda_data
+        
     
-
     def get_image_data(self, image_group_id, image_filename):
-        pass
-    
+        try:
+            page_hocr = self.image_info[image_filename]['page_info']
+            return page_hocr
+        except:
+            return
     
 class HOCRFormatter(OCRFormatter):
     """
     OpenPecha Formatter for Google OCR HOCR output of scanned pecha.
     """
-    def __init__(self, output_path=None, metadata=None):
+    def __init__(self, mode=None, output_path=None, metadata=None):
         super().__init__(output_path, metadata)
+        self.mode = mode
         self.word_span = 0
 
     def get_confidence(self, word_box):
@@ -142,12 +178,29 @@ class HOCRFormatter(OCRFormatter):
             for word_box in word_boxes:
                 boxes.append(self.parse_box(line_box,word_box, language))
         return boxes
+    
+    def get_boxes_for_IA(self, page_html):
+        boxes = []
+        paragraphs_html = page_html.find_all("p", {"class": "ocr_par"})
+        for paragraph_html in paragraphs_html:
+            language = standardize_tag(paragraph_html['lang'])
+            line_boxes = paragraph_html.find_all("span", {"class": "ocr_line"})
+            for line_box in line_boxes:
+                self.word_span = 0
+                word_boxes = line_box.find_all("span", {"class": "ocrx_word"})
+                for word_box in word_boxes:
+                    boxes.append(self.parse_box(line_box, word_box, language))
+        return boxes
+
 
     def get_bboxes_for_page(self, image_group_id, image_filename):
         bboxes = []
         hocr_page_html = self.data_provider.get_image_data(image_group_id, image_filename)
         if hocr_page_html:
-            bboxes = self.get_boxes(hocr_page_html)
+            if self.mode == "IA":
+                bboxes = self.get_boxes_for_IA(hocr_page_html)
+            else:
+                bboxes = self.get_boxes(hocr_page_html)
         return bboxes
 
     
