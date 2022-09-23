@@ -9,7 +9,9 @@ from openpecha.formatters.ocr import google_vision
 from openpecha.formatters.ocr.google_vision import GoogleVisionFormatter
 from openpecha.utils import load_yaml, dump_yaml
 from test_gv_data_provider import GoogleVisionTestFileProvider
+import logging
 
+logging.basicConfig(level=logging.DEBUG)
 
 def test_base_text():
     work_id = "W24767"
@@ -28,6 +30,7 @@ def test_base_text():
         formatter = GoogleVisionFormatter(output_path=tmpdirname)
         pecha_path = formatter.create_opf(data_provider, pecha_id, {}, ocr_import_info)
         base_text = (pecha_path / f"{pecha_path.name}.opf" / "base" / "I3852.txt").read_text(encoding='utf-8')
+        print(base_text)
         assert expected_base_text == base_text
 
 def test_build_layers():
@@ -76,4 +79,4 @@ def test_with_gzip_json():
         assert isinstance(pecha_path, Path) and pecha_path.is_dir()
 
 if __name__ == "__main__":
-    test_build_layers()
+    test_base_text()

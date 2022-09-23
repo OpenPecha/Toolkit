@@ -25,7 +25,9 @@ from openpecha.utils import dump_yaml, gzip_str
 ANNOTATION_MINIMAL_LEN = 20
 ANNOTATION_MINIMAL_CONFIDENCE = 0.8
 ANNOTATION_MAX_LOW_CONF_PER_PAGE = 10
-NOISE_PATTERN = re.compile(r'(?:\s|[-，.… }#*,+•：/|(©:;་"།=@%༔){"])+')
+NO_SPACE_AFTER_PATTERN = re.compile(r"(?:\s|[༌་])$")
+# mapping between script tags detected from the text and language recorded
+# in the Language layer
 DEFAULT_SCRIPT_TO_LANG_MAPPING = {
     "Tibt": "bo",
     "Deva": "sa-Deva",
@@ -39,9 +41,12 @@ DEFAULT_SCRIPT_TO_LANG_MAPPING = {
 }
 NO_LANG = ""
 UNKNOWN_LANG = "und"
+# Unicode character categories taken into account when computing width:
+UNICODE_CHARCAT_FOR_WIDTH = ["Ll", "Lu", "Lo", "Nd", "No", "Nl", "Lt"]
+UNICODE_CHARCAT_NOT_NOISE = ["Ll", "Lu", "Lo", "Nd", "No", "Nl", "Lt"]
 
 class BBox:
-    def __init__(self, x1: int, x2: int, y1: int, y2: int, text: str = None, confidence: float = None, language: str = NO_LANG):
+    def __init__(self, x1: int, x2: int, y1: int, y2: int, text: str = None, confidence: float = None, language: str = NO_LANG, unicharcat = "Lo"):
         self.text = text
         self.x1 = x1
         self.x2 = x2
@@ -49,6 +54,7 @@ class BBox:
         self.y2 = y2
         self.confidence = confidence
         self.language = language
+        self.unicharcat = unicharcat
         self.mid_y = (y1 + y2) / 2
         self.mid_x = (x1 + x2) / 2
     
@@ -129,6 +135,7 @@ class OCRFormatter(BaseFormatter):
         for bbox in bboxes:
             height_sum += bbox.get_height()
         avg_height = height_sum / len(bboxes)
+        logging.debug("average bbox height: %f", avg_height)
         return avg_height
 
     def is_on_same_line(self, prev_bbox, bbox, avg_height):
@@ -259,7 +266,7 @@ class OCRFormatter(BaseFormatter):
             self.cur_base_word_confidences.append(float(bbox.confidence))
 
     def bbox_can_have_space_after(self, bbox):
-        if bbox.text[-1] in [' ', '་']:
+        if NO_SPACE_AFTER_PATTERN.search(bbox.text):
             return False
         return True
         
@@ -282,7 +289,8 @@ class OCRFormatter(BaseFormatter):
                 cur_bbox.y2,
                 text=" ",
                 confidence=None,
-                language=None
+                language=None,
+                unicharcat="Zs"
             )
             return space_box
         return None
@@ -310,20 +318,6 @@ class OCRFormatter(BaseFormatter):
                 else:
                     new_bboxes.append(cur_bbox)
         return new_bboxes
-    
-    def is_tibetan_non_consonant(self, symbol):
-        """Checks if tibetan character is Tibetan but not a consonant
-
-        Args:
-            symbol (dict): symbol info
-
-        Returns:
-            boolean: True if character is Tibetan non-consonant
-        """
-        # we assume there is just one character:
-        c = ord(symbol['text'][0])
-        if (c >= ord('ༀ') and c <= ord('༿')) or (c >= ord('ཱ') and c <= ord('࿚')):
-            return True
 
     def get_avg_char_width(self, bboxes):
         """Calculate average width of box in a page, ignoring non consonant tibetan char
@@ -336,8 +330,11 @@ class OCRFormatter(BaseFormatter):
         """
         widths = []
         for bbox in bboxes:
-            widths.append(bbox.x2 - bbox.x1)
-        return statistics.mean(widths)
+            if bbox.unicharcat in UNICODE_CHARCAT_FOR_WIDTH:
+                widths.append(bbox.x2 - bbox.x1)
+        res = statistics.mean(widths)
+        logging.debug("average char width %f" % res)
+        return res
     
     def get_main_script_tag(text: str):
         """
@@ -360,6 +357,16 @@ class OCRFormatter(BaseFormatter):
         if main_script == "Zyyy" or main_script == "Zxxx":
             return NO_LANG
         return UNKNOWN_LANG
+
+    def get_unicharcat(self, text):
+        """returns the main unicode character category for the text
+
+        Args:
+            string (str): text from wordbox.text
+        """
+        if len(text) == "0":
+            return "Cc" # ?
+        return unicodedata.category(text[0])
 
     def add_language(self, bbox, bbox_start_cc, state):
         bbox_lang = bbox.language
@@ -408,7 +415,7 @@ class OCRFormatter(BaseFormatter):
 
     def bbox_line_has_characters(self, bbox_line):
         for bbox in bbox_line:
-            if bbox.language != UNKNOWN_LANG and bbox.language != NO_LANG and not NOISE_PATTERN.match(bbox.text):
+            if bbox.language not in [UNKNOWN_LANG, NO_LANG] and bbox.unicharcat in UNICODE_CHARCAT_NOT_NOISE:
                 return True
         return False
 

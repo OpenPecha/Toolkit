@@ -61,9 +61,9 @@ class GoogleVisionFormatter(OCRFormatter):
             return True
         return False
 
-    def get_language_code_from_bbox(self, bbox):
+    def get_language_code_from_gv_poly(self, gv_poly):
         lang = ""
-        properties = bbox.get("property", {})
+        properties = gv_poly.get("property", {})
         if properties:
             languages = properties.get("detectedLanguages", [])
             if languages:
@@ -83,7 +83,7 @@ class GoogleVisionFormatter(OCRFormatter):
         """Convert bounding bbox to BBox object
 
         Args:
-            word (dict): bounding bbox of a word infos
+            word (dict): bounding gv_poly of a word infos
 
         Returns:
             obj: BBox object of bounding bbox
@@ -91,15 +91,20 @@ class GoogleVisionFormatter(OCRFormatter):
         text = word.get('text', '')
         confidence = word.get('confidence')
         # the language returned by Google OCR is not particularly helpful
-        # language = self.get_language_code(word)
+        # language = self.get_language_code_from_gv_poly(word)
         # instead we use our custom detection system
+        unicharcat = self.get_unicharcat(text)
         language = self.get_language_code(text)
         if 'boundingBox' not in word or 'vertices' not in word['boundingBox']:
             return None
         vertices = word['boundingBox']['vertices']
         if len(vertices) != 4 or 'x' not in vertices[0] or 'x' not in vertices[1] or 'y' not in vertices[0] or 'y' not in vertices[2]:
             return None
-        return BBox(vertices[0]['x'], vertices[1]['x'], vertices[0]['y'], vertices[2]['y'], text=text, confidence=confidence, language=language)
+        return BBox(vertices[0]['x'], vertices[1]['x'], vertices[0]['y'], vertices[2]['y'], 
+            text=text, 
+            confidence=confidence, 
+            language=language,
+            unicharcat=unicharcat)
 
     def get_char_base_bboxes(self, response):
         """Return bounding bboxs in page response

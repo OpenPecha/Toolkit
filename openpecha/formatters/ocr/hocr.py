@@ -151,14 +151,15 @@ class HOCRFormatter(OCRFormatter):
         y2 = int(vertices_coordinates[4])
         confidence = self.get_confidence(word_box)
         language = self.get_language_code(word_box.text)
+        unicharcat = self.get_unicharcat(word_box.text)
         text = self.get_word_text_with_space(line_text, word_box)
         box = BBox(x1, x2, y1, y2,
             text=text,
             confidence=confidence,
-            language=language
+            language=language,
+            unicharcat=unicharcat
         )
         return box
-
     
     def get_boxes(self, hocr_page_html):
         boxes = []
