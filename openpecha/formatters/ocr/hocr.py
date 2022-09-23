@@ -19,8 +19,9 @@ from openpecha.buda.api import get_buda_scan_info, get_image_list, image_group_t
 
 
 class HOCRBDRCFileProvider():
-    def __init__(self, bdrc_scan_id, buda_data, ocr_import_info, ocr_disk_path=None):
+    def __init__(self, bdrc_scan_id, buda_data, ocr_import_info, ocr_disk_path):
         self.ocr_import_info = ocr_import_info
+        # disk path is the path to a directory that contains "info" and "output" subfolders
         self.ocr_disk_path = ocr_disk_path
         self.bdrc_scan_id = bdrc_scan_id
         self.buda_data = buda_data
@@ -35,7 +36,7 @@ class HOCRBDRCFileProvider():
     
     def get_images_info(self, image_group_id):
         vol_folder = image_group_to_folder_name(self.bdrc_scan_id, image_group_id)
-        image_info_path = Path(f"{self.ocr_disk_path}") / "google_books" / "batch_2022" / "info" / vol_folder / "gb-bdrc-map.json"
+        image_info_path = Path(f"{self.ocr_disk_path}") / "info" / vol_folder / "gb-bdrc-map.json"
         self.images_info = load_yaml(image_info_path)
 
     def get_source_info(self):
@@ -50,7 +51,7 @@ class HOCRBDRCFileProvider():
     def get_image_data(self, image_group_id, image_filename):
         vol_folder = image_group_to_folder_name(self.bdrc_scan_id, image_group_id)
         hocr_filename = self.get_hocr_filename(image_filename)
-        image_hocr_path = Path(f"{self.ocr_disk_path}") / "google_books" / "batch_2022" / "output" / vol_folder / f"{hocr_filename}.html"
+        image_hocr_path = Path(f"{self.ocr_disk_path}") / "output" / vol_folder / f"{hocr_filename}.html"
         hocr_html = image_hocr_path.read_text(encoding='utf-8')
         return hocr_html
 
