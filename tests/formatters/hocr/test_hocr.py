@@ -20,8 +20,8 @@ def test_base_text():
     data_provider = HOCRTestFileProvider(work_id, bdrc_image_list_path, buda_data, ocr_import_info, ocr_path)
     
     with tempfile.TemporaryDirectory() as tmpdirname:
+        tmpdirname = Path(f"./")
         formatter = HOCRFormatter(output_path=tmpdirname)
-        print(tmpdirname)
         pecha_path = formatter.create_opf(data_provider, pecha_id, {}, ocr_import_info)
         base_text = (pecha_path / f"{pecha_path.name}.opf" / "base" / "I4PD423.txt").read_text(encoding='utf-8')
         assert expected_base_text == base_text
@@ -63,5 +63,5 @@ def test_build_layers():
             assert expected_ann == ann
 
 if __name__ == "__main__":
-    # test_base_text()
+    test_base_text()
     test_build_layers()

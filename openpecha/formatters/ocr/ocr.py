@@ -11,6 +11,7 @@ import datetime
 from datetime import timezone
 import requests
 from pathlib import Path
+from fontTools import unicodedata
 from abc import abstractmethod
 
 from openpecha.core.annotation import Page, Span
@@ -324,6 +325,54 @@ class OCRFormatter(BaseFormatter):
         for bbox in bboxes:
             widths.append(bbox.x2 - bbox.x1)
         return statistics.mean(widths)
+    
+    def parse_text_for_language_tag(self, text):
+        """returns the language tag for the text
+
+        Args:
+            string (str): text from wordbox.text
+        """
+        def update_span(type, range):
+            curr = {}
+            if len(range) == 0:
+                curr = {
+                    'type': type,
+                    'start': 0,
+                    'end': 1
+                }
+                range.append(curr)
+            else:
+                prev_type = range[-1]['type']
+                if prev_type == type:
+                    range[-1]['end'] += 1 
+                else:
+                    curr = {
+                        'type': type,
+                        'start': range[-1]['end'],
+                        'end': range[-1]['end'] + 1
+                    }
+                    range.append(curr)
+            return range
+    
+        range = []
+        for _, char in enumerate(text):
+            code = unicodedata.script(char)
+            script_name = unicodedata.script_name(code, default=KeyError)
+            if script_name == 'Tibetan':
+                range = update_span('bo', range)
+            elif script_name == "Latin":
+                range = update_span('en',range)
+            elif script_name == "Han":
+                range = update_span('zh', range)
+            elif script_name == "Devanagari":
+                range = update_span('sa-Deva', range)
+            else:
+                range = update_span(self.default_language, range)
+        if len(range) == 1:
+            return range[0]['type']
+        else:
+            return None
+
 
     def add_language(self, bbox, bbox_start_cc, state):
         bbox_lang = bbox.language
@@ -351,6 +400,7 @@ class OCRFormatter(BaseFormatter):
         annotation = {"start": bbox_start_cc, "end": bbox_end_cc, "lang": bbox_lang}
         state["language_annotations"].append(annotation)
         state["latest_language_annotation"] = annotation
+
 
     def add_low_confidence(self, bbox, bbox_start_cc, state):
         if bbox.confidence is None:

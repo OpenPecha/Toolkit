@@ -125,9 +125,6 @@ class HOCRFormatter(OCRFormatter):
         confidence = float(int(re.search(r"x_wconf (\d+)", confidence_info).group(1))/100)
         return confidence
 
-    def get_lang(self, word_box):
-        language = word_box.get('lang', "")
-        return language
     
     def get_word_text_with_space(self, line_text, word_box):
         text = word_box.text
@@ -141,7 +138,7 @@ class HOCRFormatter(OCRFormatter):
                 text = text + " "
         return text
         
-    def parse_box(self, line_box, word_box, language):
+    def parse_box(self, line_box, word_box):
         line_text = line_box.text
         try:
             vertices_info = word_box['title'].split(';')[0]
@@ -153,6 +150,7 @@ class HOCRFormatter(OCRFormatter):
         x2 = int(vertices_coordinates[3])
         y2 = int(vertices_coordinates[4])
         confidence = self.get_confidence(word_box)
+        language = self.parse_text_for_language_tag(word_box.text)
         text = self.get_word_text_with_space(line_text, word_box)
         box = BBox(x1, x2, y1, y2,
             text=text,
@@ -161,35 +159,28 @@ class HOCRFormatter(OCRFormatter):
         )
         return box
 
-    def get_page_language(self, hocr_html):
-        page_box = hocr_html.find_all("div", {"class": "ocr_page"})
-        lang_info = page_box[0]['title']
-        language = re.search(r"ocrp_lang ([a-z]+)", lang_info).group(1)
-        return language 
     
     def get_boxes(self, hocr_page_html):
         boxes = []
         hocr_html = BeautifulSoup(hocr_page_html, 'html.parser')
-        language = self.get_page_language(hocr_html)
         line_boxes = hocr_html.find_all("span", {"class": "ocr_line"})
         for line_box in line_boxes:
             self.word_span = 0
             word_boxes = line_box.find_all("span", {"class": "ocrx_word"})
             for word_box in word_boxes:
-                boxes.append(self.parse_box(line_box,word_box, language))
+                boxes.append(self.parse_box(line_box,word_box))
         return boxes
     
     def get_boxes_for_IA(self, page_html):
         boxes = []
         paragraphs_html = page_html.find_all("p", {"class": "ocr_par"})
         for paragraph_html in paragraphs_html:
-            language = standardize_tag(paragraph_html['lang'])
             line_boxes = paragraph_html.find_all("span", {"class": "ocr_line"})
             for line_box in line_boxes:
                 self.word_span = 0
                 word_boxes = line_box.find_all("span", {"class": "ocrx_word"})
                 for word_box in word_boxes:
-                    boxes.append(self.parse_box(line_box, word_box, language))
+                    boxes.append(self.parse_box(line_box, word_box))
         return boxes
 
 
