@@ -26,9 +26,22 @@ ANNOTATION_MINIMAL_LEN = 20
 ANNOTATION_MINIMAL_CONFIDENCE = 0.8
 ANNOTATION_MAX_LOW_CONF_PER_PAGE = 10
 NOISE_PATTERN = re.compile(r'(?:\s|[-，.… }#*,+•：/|(©:;་"།=@%༔){"])+')
+DEFAULT_SCRIPT_TO_LANG_MAPPING = {
+    "Tibt": "bo",
+    "Deva": "sa-Deva",
+    "Hani": "zh",
+    "Hans": "zh",
+    "Hant": "zh",
+    "Latn": "en",
+    "Mong": "mn-Mong",
+    "Newa": "sa-Newa",
+    "Soyo": "mn-Soyo"
+}
+NO_LANG = ""
+UNKNOWN_LANG = "und"
 
 class BBox:
-    def __init__(self, x1: int, x2: int, y1: int, y2: int, text: str = None, confidence: float = None, language: str = None):
+    def __init__(self, x1: int, x2: int, y1: int, y2: int, text: str = None, confidence: float = None, language: str = NO_LANG):
         self.text = text
         self.x1 = x1
         self.x2 = x2
@@ -326,53 +339,27 @@ class OCRFormatter(BaseFormatter):
             widths.append(bbox.x2 - bbox.x1)
         return statistics.mean(widths)
     
-    def parse_text_for_language_tag(self, text):
+    def get_main_script_tag(text: str):
+        """
+        return the ISO 15924 tag of the main script used
+        in a string
+        """
+        if len(text) == "0":
+            return "Zyyy"
+        return unicodedata.script(text[0])
+
+    def get_language_code(self, text):
         """returns the language tag for the text
 
         Args:
             string (str): text from wordbox.text
         """
-        def update_span(type, range):
-            curr = {}
-            if len(range) == 0:
-                curr = {
-                    'type': type,
-                    'start': 0,
-                    'end': 1
-                }
-                range.append(curr)
-            else:
-                prev_type = range[-1]['type']
-                if prev_type == type:
-                    range[-1]['end'] += 1 
-                else:
-                    curr = {
-                        'type': type,
-                        'start': range[-1]['end'],
-                        'end': range[-1]['end'] + 1
-                    }
-                    range.append(curr)
-            return range
-    
-        range = []
-        for _, char in enumerate(text):
-            code = unicodedata.script(char)
-            script_name = unicodedata.script_name(code, default=KeyError)
-            if script_name == 'Tibetan':
-                range = update_span('bo', range)
-            elif script_name == "Latin":
-                range = update_span('en',range)
-            elif script_name == "Han":
-                range = update_span('zh', range)
-            elif script_name == "Devanagari":
-                range = update_span('sa-Deva', range)
-            else:
-                range = update_span(self.default_language, range)
-        if len(range) == 1:
-            return range[0]['type']
-        else:
-            return None
-
+        main_script = OCRFormatter.get_main_script_tag(text)
+        if main_script in self.script_to_lang_map:
+            return self.script_to_lang_map[main_script]
+        if main_script == "Zyyy" or main_script == "Zxxx":
+            return NO_LANG
+        return UNKNOWN_LANG
 
     def add_language(self, bbox, bbox_start_cc, state):
         bbox_lang = bbox.language
@@ -394,7 +381,7 @@ class OCRFormatter(BaseFormatter):
             state["latest_language_annotation"] = annotation
             return
         # if there's no previous annotation and language is the default language, return
-        if bbox_lang == self.default_language or not bbox_lang:
+        if bbox_lang == self.default_language or bbox_lang == NO_LANG or not bbox_lang:
             return
         # if there's no previous annotation and language is not the default, we create an annotation
         annotation = {"start": bbox_start_cc, "end": bbox_end_cc, "lang": bbox_lang}
@@ -421,7 +408,7 @@ class OCRFormatter(BaseFormatter):
 
     def bbox_line_has_characters(self, bbox_line):
         for bbox in bbox_line:
-            if not NOISE_PATTERN.match(bbox.text):
+            if bbox.language != UNKNOWN_LANG and bbox.language != NO_LANG and not NOISE_PATTERN.match(bbox.text):
                 return True
         return False
 
@@ -545,7 +532,6 @@ class OCRFormatter(BaseFormatter):
                 annotations=state["low_confidence_annotations"]
             )
             layers[LayerEnum.ocr_confidence.value] = json.loads(layer.json(exclude_none=True))
-
         return state["base_layer"], layers, state["word_confidences"]
 
     def get_copyright_and_license_info(self, bdata):
@@ -631,6 +617,7 @@ class OCRFormatter(BaseFormatter):
         self.ocr_confidence_threshold = opf_options["ocr_confidence_threshold"] if "ocr_confidence_threshold" in opf_options else ANNOTATION_MINIMAL_CONFIDENCE
         self.language_annotation_min_len = opf_options["language_annotation_min_len"] if "language_annotation_min_len" in opf_options else ANNOTATION_MINIMAL_LEN
         self.max_low_conf_per_page = opf_options["max_low_conf_per_page"] if "max_low_conf_per_page" in opf_options else ANNOTATION_MAX_LOW_CONF_PER_PAGE
+        self.script_to_lang_map = opf_options["script_to_lang_map"] if "script_to_lang_map" in opf_options else DEFAULT_SCRIPT_TO_LANG_MAPPING
 
         ocr_import_info["op_import_options"] = opf_options
 

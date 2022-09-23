@@ -8,7 +8,6 @@ import logging
 import datetime
 import statistics
 from datetime import timezone
-from langcodes import *
 from bs4 import BeautifulSoup
 
 from openpecha.formatters.ocr.ocr import OCRFormatter, BBox
@@ -150,7 +149,7 @@ class HOCRFormatter(OCRFormatter):
         x2 = int(vertices_coordinates[3])
         y2 = int(vertices_coordinates[4])
         confidence = self.get_confidence(word_box)
-        language = self.parse_text_for_language_tag(word_box.text)
+        language = self.get_language_code(word_box.text)
         text = self.get_word_text_with_space(line_text, word_box)
         box = BBox(x1, x2, y1, y2,
             text=text,

@@ -3,7 +3,7 @@ from pathlib import Path
 
 from openpecha.formatters.ocr.hocr import HOCRFormatter
 from openpecha.utils import load_yaml, dump_yaml
-from test_data_provider import HOCRTestFileProvider
+from test_hocr_data_provider import HOCRTestFileProvider
 
 
 def test_base_text():

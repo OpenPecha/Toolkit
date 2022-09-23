@@ -5,7 +5,7 @@ import pytest
 from openpecha import config
 from openpecha.utils import load_yaml, dump_yaml
 from openpecha.formatters.ocr.hocr import HOCRFormatter
-from test_data_provider import HOCRTestFileProvider
+from test_hocr_data_provider import HOCRTestFileProvider
 
 def test_google_ocr_base_meta():
     work_id = "W2PD17457"

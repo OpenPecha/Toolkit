@@ -1,16 +1,12 @@
 import tempfile
 from pathlib import Path
 
-import pytest
 from openpecha import config
-from openpecha.utils import load_yaml, dump_yaml
-from openpecha.formatters.ocr.google_vision import GoogleVisionFormatter
-from test_data_provider import GoogleVisionTestFileProvider
-
-def mock_get_image_list(bdrc_scan_id, vol_name):
-    return load_yaml(Path(__file__).parent / "data" / str(vol_name+"-imgseqnum.json"))
-
-def test_google_ocr_base_meta():
+from openpecha.utils import load_yaml
+from openpecha.formatters.ocr.google_vision import GoogleVisionFormatter, GoogleVisionBDRCFileProvider
+from test_gv_data_provider import GoogleVisionTestFileProvider
+   
+def test_google_ocr_metadata():
     work_id = "W24767"
     pecha_id = "I123456"
     
@@ -28,13 +24,11 @@ def test_google_ocr_base_meta():
         pecha_path = formatter.create_opf(data_provider, pecha_id, {}, ocr_import_info)
         output_metadata = load_yaml(Path(f"{pecha_path}/{pecha_path.name}.opf/meta.yml"))
         expected_metadata = load_yaml(expected_meta_path)
-        assert output_metadata["source_metadata"] == expected_metadata["source_metadata"]
-        del output_metadata["ocr_import_info"]["ocr_info"]["timestamp"]
-        del expected_metadata["ocr_import_info"]["ocr_info"]["timestamp"]
-        assert output_metadata["ocr_import_info"] == expected_metadata["ocr_import_info"]
-        assert output_metadata["statistics"] == expected_metadata["statistics"]
-        assert output_metadata["default_language"] == expected_metadata["default_language"]
-        assert output_metadata["bases"] == expected_metadata["bases"]
+        assert output_metadata['license'] == expected_metadata['license']
+        assert output_metadata['copyright'] == expected_metadata['copyright']
+        assert output_metadata['source_metadata']['access'] == expected_metadata['source_metadata']['access']
+        assert output_metadata['source_metadata'].get('geo_restriction') == expected_metadata['source_metadata'].get('geo_restriction')
 
+            
 if __name__ == "__main__":
-    test_google_ocr_base_meta()
+    test_google_ocr_metadata()

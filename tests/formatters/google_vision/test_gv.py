@@ -8,7 +8,7 @@ from openpecha.formatters.ocr import google_vision
 
 from openpecha.formatters.ocr.google_vision import GoogleVisionFormatter
 from openpecha.utils import load_yaml, dump_yaml
-from test_data_provider import GoogleVisionTestFileProvider
+from test_gv_data_provider import GoogleVisionTestFileProvider
 
 
 def test_base_text():

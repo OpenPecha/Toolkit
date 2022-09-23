@@ -61,9 +61,9 @@ class GoogleVisionFormatter(OCRFormatter):
             return True
         return False
 
-    def get_language_code(self, poly):
+    def get_language_code_from_bbox(self, bbox):
         lang = ""
-        properties = poly.get("property", {})
+        properties = bbox.get("property", {})
         if properties:
             languages = properties.get("detectedLanguages", [])
             if languages:
@@ -80,32 +80,35 @@ class GoogleVisionFormatter(OCRFormatter):
         return "en"
 
     def dict_to_bbox(self, word):
-        """Convert bounding poly to BBox object
+        """Convert bounding bbox to BBox object
 
         Args:
-            word (dict): bounding poly of a word infos
+            word (dict): bounding bbox of a word infos
 
         Returns:
-            obj: BBox object of bounding poly
+            obj: BBox object of bounding bbox
         """
         text = word.get('text', '')
         confidence = word.get('confidence')
-        language = self.get_language_code(word)
+        # the language returned by Google OCR is not particularly helpful
+        # language = self.get_language_code(word)
+        # instead we use our custom detection system
+        language = self.get_language_code(text)
         if 'boundingBox' not in word or 'vertices' not in word['boundingBox']:
             return None
         vertices = word['boundingBox']['vertices']
-        if len(vertices != 4) or 'x' not in vertices[0] or 'x' not in vertices[1] or 'y' not in vertices[0] or 'y' not in vertices[2]:
+        if len(vertices) != 4 or 'x' not in vertices[0] or 'x' not in vertices[1] or 'y' not in vertices[0] or 'y' not in vertices[2]:
             return None
         return BBox(vertices[0]['x'], vertices[1]['x'], vertices[0]['y'], vertices[2]['y'], text=text, confidence=confidence, language=language)
 
     def get_char_base_bboxes(self, response):
-        """Return bounding polys in page response
+        """Return bounding bboxs in page response
 
         Args:
             response (dict): google ocr output of a page
 
         Returns:
-            list: list of BBox object which saves required info of a bounding poly
+            list: list of BBox object which saves required info of a bounding bbox
         """
         bboxes = []
         cur_word = ""

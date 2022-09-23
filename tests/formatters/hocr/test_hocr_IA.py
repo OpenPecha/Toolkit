@@ -1,12 +1,10 @@
 import tempfile
 from pathlib import Path
 
-from test_data_provider import HOCRIATestFileProvider
+from test_hocr_data_provider import HOCRIATestFileProvider
 from openpecha.formatters.ocr.hocr import HOCRFormatter
 
 from openpecha.utils import load_yaml, dump_yaml
-
-
 
 def test_base_text():
     work_id = "W22084"

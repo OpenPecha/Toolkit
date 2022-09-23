@@ -4,7 +4,7 @@ from pathlib import Path
 from openpecha import config
 from openpecha.utils import load_yaml
 from openpecha.formatters.ocr.hocr import HOCRFormatter
-from test_data_provider import HOCRIATestFileProvider
+from test_hocr_data_provider import HOCRIATestFileProvider
    
 def test_google_ocr_metadata():
     work_id = "W22084"
