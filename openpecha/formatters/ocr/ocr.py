@@ -44,6 +44,7 @@ UNKNOWN_LANG = "und"
 # Unicode character categories taken into account when computing width:
 UNICODE_CHARCAT_FOR_WIDTH = ["Ll", "Lu", "Lo", "Nd", "No", "Nl", "Lt"]
 UNICODE_CHARCAT_NOT_NOISE = ["Ll", "Lu", "Lo", "Nd", "No", "Nl", "Lt"]
+SAME_LINE_PERCENT_THRESHOLD = 7.0
 
 class BBox:
     def __init__(self, x1: int, x2: int, y1: int, y2: int, text: str = None, confidence: float = None, language: str = NO_LANG, unicharcat = "Lo"):
@@ -134,11 +135,12 @@ class OCRFormatter(BaseFormatter):
         height_sum = 0
         for bbox in bboxes:
             height_sum += bbox.get_height()
-        avg_height = height_sum / len(bboxes)
-        logging.debug("average bbox height: %f", avg_height)
+        len_bboxes = len(bboxes)
+        avg_height = height_sum / len_bboxes
+        logging.debug("average bbox height: %f (%d, %d)", avg_height, height_sum, len_bboxes)
         return avg_height
 
-    def is_on_same_line(self, prev_bbox, bbox, avg_height):
+    def is_on_same_line(self, prev_bbox, bbox, y_diff_threshold):
         """Check if bounding bbox is in same line as previous bounding bbox
         a threshold to check the conditions set to 10 but it can varies for pecha to pecha
 
@@ -150,14 +152,7 @@ class OCRFormatter(BaseFormatter):
         Returns:
             boolean: true if bouding bbox is in same line as previous bounding bbox else false
         """
-        threshold = 10
-        if (
-            (bbox.mid_y - prev_bbox.mid_y)
-            < (avg_height / threshold)
-        ):
-            return True
-        else:
-            return False
+        return (bbox.mid_y - prev_bbox.mid_y) < y_diff_threshold
 
     def get_bbox_lines(self, bboxes):
         """Return list of lines in page using bounding bboxs of page
@@ -172,8 +167,9 @@ class OCRFormatter(BaseFormatter):
         cur_line_bboxs = []
         prev_bbox = bboxes[0]
         avg_line_height = self.get_avg_bbox_height(bboxes)
+        y_diff_threshold = avg_line_height / self.same_line_percent_threshold
         for bbox in bboxes:
-            if self.is_on_same_line(prev_bbox, bbox, avg_line_height):
+            if self.is_on_same_line(prev_bbox, bbox, y_diff_threshold):
                 cur_line_bboxs.append(bbox)
             else:
                 lines.append(cur_line_bboxs)
@@ -241,7 +237,6 @@ class OCRFormatter(BaseFormatter):
         avg_box_height = self.get_avg_bbox_height(main_region_bboxes)
         for bbox in main_region_bboxes:
             centroid = bbox.get_centriod()
-            # TODO: I'm not so sure about that...
             bboxes[f"{centroid[0]},{centroid[1]}"] = bbox
             bbox_centriods.append(centroid)
         sorted_bboxes = []
@@ -289,8 +284,7 @@ class OCRFormatter(BaseFormatter):
                 cur_bbox.y2,
                 text=" ",
                 confidence=None,
-                language=None,
-                unicharcat="Zs"
+                language=None
             )
             return space_box
         return None
@@ -378,7 +372,6 @@ class OCRFormatter(BaseFormatter):
         state["language_annotations"].append(annotation)
         state["latest_language_annotation"] = annotation
 
-
     def add_low_confidence(self, bbox, bbox_start_cc, state):
         if bbox.confidence is None:
             return
@@ -398,7 +391,7 @@ class OCRFormatter(BaseFormatter):
 
     def bbox_line_has_characters(self, bbox_line):
         for bbox in bbox_line:
-            if bbox.language not in [UNKNOWN_LANG, NO_LANG] and bbox.unicharcat in UNICODE_CHARCAT_NOT_NOISE:
+            if bbox.language != UNKNOWN_LANG and self.get_unicharcat(bbox.text) in UNICODE_CHARCAT_NOT_NOISE:
                 return True
         if logging.DEBUG >= logging.root.level:
             line = ''
@@ -409,14 +402,14 @@ class OCRFormatter(BaseFormatter):
 
     def build_page(self, bboxes, image_number, image_filename, state, avg_char_width=None):
         sorted_bboxes = self.sort_bboxes(bboxes)
-        if avg_char_width:
-            sorted_bboxes = self.insert_space_bbox(sorted_bboxes, avg_char_width)
         bbox_lines = self.get_bbox_lines(sorted_bboxes)
         page_start_cc = state["base_layer_len"]
         page_word_confidences = []
         for bbox_line in bbox_lines:
             if self.remove_non_character_lines and not self.bbox_line_has_characters(bbox_line):
                 continue
+            if avg_char_width:
+                bbox_line = self.insert_space_bbox(bbox_line, avg_char_width)
             for bbox in bbox_line:
                 state["base_layer"] += bbox.text
                 start_cc = state["base_layer_len"]
@@ -613,6 +606,7 @@ class OCRFormatter(BaseFormatter):
         self.language_annotation_min_len = opf_options["language_annotation_min_len"] if "language_annotation_min_len" in opf_options else ANNOTATION_MINIMAL_LEN
         self.max_low_conf_per_page = opf_options["max_low_conf_per_page"] if "max_low_conf_per_page" in opf_options else ANNOTATION_MAX_LOW_CONF_PER_PAGE
         self.script_to_lang_map = opf_options["script_to_lang_map"] if "script_to_lang_map" in opf_options else DEFAULT_SCRIPT_TO_LANG_MAPPING
+        self.same_line_percent_threshold = opf_options["same_line_percent_threshold"] if "same_line_percent_threshold" in opf_options else SAME_LINE_PERCENT_THRESHOLD
 
         ocr_import_info["op_import_options"] = opf_options
 

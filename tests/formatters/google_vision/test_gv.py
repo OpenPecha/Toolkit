@@ -10,7 +10,7 @@ from openpecha.utils import load_yaml, dump_yaml
 from test_gv_data_provider import GoogleVisionTestFileProvider
 import logging
 
-logging.basicConfig(level=logging.DEBUG)
+#logging.basicConfig(level=logging.DEBUG)
 
 def test_base_text():
     work_id = "W24767"

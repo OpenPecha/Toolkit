@@ -69,7 +69,7 @@ class GoogleVisionFormatter(OCRFormatter):
             languages = properties.get("detectedLanguages", [])
             if languages:
                 lang = languages[0]['languageCode']
-        if lang == "" | lang == "und":
+        if lang == "" or lang == "und":
             # this is not always true but replacing it with None is worse
             # with our current data
             return self.default_language
@@ -94,7 +94,6 @@ class GoogleVisionFormatter(OCRFormatter):
         # the language returned by Google OCR is not particularly helpful
         # language = self.get_language_code_from_gv_poly(word)
         # instead we use our custom detection system
-        unicharcat = self.get_unicharcat(text)
         language = self.get_language_code(text)
         if 'boundingBox' not in word or 'vertices' not in word['boundingBox']:
             return None
@@ -104,8 +103,7 @@ class GoogleVisionFormatter(OCRFormatter):
         return BBox(vertices[0]['x'], vertices[1]['x'], vertices[0]['y'], vertices[2]['y'], 
             text=text, 
             confidence=confidence, 
-            language=language,
-            unicharcat=unicharcat)
+            language=language)
 
     def get_char_base_bboxes_and_avg_width(self, response):
         """Return bounding bboxs in page response

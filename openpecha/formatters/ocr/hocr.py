@@ -156,8 +156,7 @@ class HOCRFormatter(OCRFormatter):
         box = BBox(x1, x2, y1, y2,
             text=text,
             confidence=confidence,
-            language=language,
-            unicharcat=unicharcat
+            language=language
         )
         return box
     
