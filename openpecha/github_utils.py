@@ -30,10 +30,9 @@ def get_github_repo(repo_name, org_name, token):
     return repo
 
 
-def create_github_repo(path, org_name, token, private=False):
+def create_github_repo(path, org_name, token, private=False, description=None):
     org = _get_openpecha_data_org(org_name, token)
-    visibility = "private" if private else "public"
-    repo = org.create_repo(path.name, private=private, visibility=visibility, has_wiki=False, has_projects=False)
+    repo = org.create_repo(path.name, description=description, private=private, has_wiki=False, has_projects=False)
     time.sleep(2)
     return repo._html_url.value
 

@@ -2,11 +2,19 @@ import enum
 import os
 import shutil
 import time
+import yaml
 from pathlib import Path
 
 from git import Repo
 from github import Github
 
+from openpecha.github_utils import create_github_repo
+
+
+try:
+    yaml_loader = yaml.CSafeLoader
+except (ImportError, AttributeError):
+    yaml_loader = yaml.SafeLoader
 
 class Storages(enum.Enum):
     GITHUB = enum.auto()
@@ -118,17 +126,24 @@ class GithubStorage(Storage):
         repo.config_writer().set_value("user", "email", self.email).release()
         return repo
 
-    def _init_remote_repo(self, name: str, description: str):
+    def _init_remote_repo(self, path: Path, description: str):
         """Creates remote repo in Github and returns it's url."""
-
-        repo = self.org.create_repo(name)
-        time.sleep(2)
-        return repo._html_url.value
+        meta_path = Path(f"{path}") / f"{path.name}.opf" / "meta.yml"
+        meta_data = yaml.load(meta_path.open(encoding="utf-8"), Loader=yaml_loader)
+        
+        source_metadata = meta_data.get("source_metadata", "")
+        if source_metadata.get("geo_restriction", [""])[0] == "CN":
+            private = True
+        else:
+            private = False
+        
+        remote_repo_url = create_github_repo(path=path, org_name=self.org_name, token=self.token, private=private, description=description)
+        return remote_repo_url        
 
     def add_dir(self, path: Path, description: str):
         """dir local dir to github."""
         remote_repo_url = self._init_remote_repo(
-            name=path.name, description=description
+            path=path, description=description
         )
         local_repo = self._init_local_repo(path=path, remote_url=remote_repo_url)
         commit_and_push(repo=local_repo, message="Initial commit")
