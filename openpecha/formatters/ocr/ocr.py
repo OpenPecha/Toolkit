@@ -44,7 +44,7 @@ UNKNOWN_LANG = "und"
 # Unicode character categories taken into account when computing width:
 UNICODE_CHARCAT_FOR_WIDTH = ["Ll", "Lu", "Lo", "Nd", "No", "Nl", "Lt"]
 UNICODE_CHARCAT_NOT_NOISE = ["Ll", "Lu", "Lo", "Nd", "No", "Nl", "Lt"]
-SAME_LINE_PERCENT_THRESHOLD = 7.0
+SAME_LINE_PERCENT_THRESHOLD = 6.0
 
 class BBox:
     def __init__(self, x1: int, x2: int, y1: int, y2: int, text: str = None, confidence: float = None, language: str = NO_LANG, unicharcat = "Lo"):
@@ -133,11 +133,14 @@ class OCRFormatter(BaseFormatter):
             float: average height of bounding ploys
         """
         height_sum = 0
+        bboxeslen = 0
         for bbox in bboxes:
-            height_sum += bbox.get_height()
-        len_bboxes = len(bboxes)
-        avg_height = height_sum / len_bboxes
-        logging.debug("average bbox height: %f (%d, %d)", avg_height, height_sum, len_bboxes)
+            # weigh by number of characters
+            bboxlen = len(bbox.text)
+            bboxeslen += bboxlen
+            height_sum += bbox.get_height()*bboxlen
+        avg_height = height_sum / bboxeslen
+        logging.debug("average bbox height: %f (%d, %d)", avg_height, height_sum, bboxeslen)
         return avg_height
 
     def is_on_same_line(self, prev_bbox, bbox, y_diff_threshold):
@@ -167,7 +170,7 @@ class OCRFormatter(BaseFormatter):
         cur_line_bboxs = []
         prev_bbox = bboxes[0]
         avg_line_height = self.get_avg_bbox_height(bboxes)
-        y_diff_threshold = avg_line_height / self.same_line_percent_threshold
+        y_diff_threshold = int(avg_line_height / self.same_line_percent_threshold)
         for bbox in bboxes:
             if self.is_on_same_line(prev_bbox, bbox, y_diff_threshold):
                 cur_line_bboxs.append(bbox)
