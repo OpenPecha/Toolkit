@@ -44,7 +44,7 @@ UNKNOWN_LANG = "und"
 # Unicode character categories taken into account when computing width:
 UNICODE_CHARCAT_FOR_WIDTH = ["Ll", "Lu", "Lo", "Nd", "No", "Nl", "Lt"]
 UNICODE_CHARCAT_NOT_NOISE = ["Ll", "Lu", "Lo", "Nd", "No", "Nl", "Lt"]
-SAME_LINE_PERCENT_THRESHOLD = 6.0
+SAME_LINE_RATIO_THRESHOLD = 0.17
 
 class BBox:
     def __init__(self, x1: int, x2: int, y1: int, y2: int, text: str = None, confidence: float = None, language: str = NO_LANG, unicharcat = "Lo"):
@@ -61,6 +61,9 @@ class BBox:
     
     def get_height(self):
         return self.y2 - self.y1
+
+    def get_width(self):
+        return self.x2 - self.x1
     
     def get_box_orientation(self):
         width = self.x2 - self.x1
@@ -133,14 +136,14 @@ class OCRFormatter(BaseFormatter):
             float: average height of bounding ploys
         """
         height_sum = 0
-        bboxeslen = 0
+        bboxeswidth = 0
         for bbox in bboxes:
             # weigh by number of characters
-            bboxlen = len(bbox.text)
-            bboxeslen += bboxlen
-            height_sum += bbox.get_height()*bboxlen
-        avg_height = height_sum / bboxeslen
-        logging.debug("average bbox height: %f (%d, %d)", avg_height, height_sum, bboxeslen)
+            bboxwidth = bbox.get_width()
+            bboxeswidth += bboxwidth
+            height_sum += bbox.get_height()*bboxwidth
+        avg_height = height_sum / bboxeswidth
+        logging.debug("average bbox height: %f (%d, %d)", avg_height, height_sum, bboxeswidth)
         return avg_height
 
     def is_on_same_line(self, prev_bbox, bbox, y_diff_threshold):
@@ -170,7 +173,7 @@ class OCRFormatter(BaseFormatter):
         cur_line_bboxs = []
         prev_bbox = bboxes[0]
         avg_line_height = self.get_avg_bbox_height(bboxes)
-        y_diff_threshold = int(avg_line_height / self.same_line_percent_threshold)
+        y_diff_threshold = int(avg_line_height * self.same_line_ratio_threshold)
         for bbox in bboxes:
             if self.is_on_same_line(prev_bbox, bbox, y_diff_threshold):
                 cur_line_bboxs.append(bbox)
@@ -609,7 +612,7 @@ class OCRFormatter(BaseFormatter):
         self.language_annotation_min_len = opf_options["language_annotation_min_len"] if "language_annotation_min_len" in opf_options else ANNOTATION_MINIMAL_LEN
         self.max_low_conf_per_page = opf_options["max_low_conf_per_page"] if "max_low_conf_per_page" in opf_options else ANNOTATION_MAX_LOW_CONF_PER_PAGE
         self.script_to_lang_map = opf_options["script_to_lang_map"] if "script_to_lang_map" in opf_options else DEFAULT_SCRIPT_TO_LANG_MAPPING
-        self.same_line_percent_threshold = opf_options["same_line_percent_threshold"] if "same_line_percent_threshold" in opf_options else SAME_LINE_PERCENT_THRESHOLD
+        self.same_line_ratio_threshold = opf_options["same_line_ratio_threshold"] if "same_line_ratio_threshold" in opf_options else SAME_LINE_RATIO_THRESHOLD
 
         ocr_import_info["op_import_options"] = opf_options
 
