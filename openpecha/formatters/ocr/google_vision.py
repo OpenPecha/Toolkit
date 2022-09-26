@@ -1,8 +1,9 @@
 import gzip
 import json
 import logging
+import statistics
 
-from openpecha.formatters.ocr.ocr import OCRFileProvider, OCRFormatter, BBox
+from openpecha.formatters.ocr.ocr import OCRFileProvider, OCRFormatter, BBox, UNICODE_CHARCAT_FOR_WIDTH
 from openpecha.buda.api import get_buda_scan_info, get_image_list, image_group_to_folder_name
 
 class GoogleVisionBDRCFileProvider(OCRFileProvider):
@@ -106,7 +107,7 @@ class GoogleVisionFormatter(OCRFormatter):
             language=language,
             unicharcat=unicharcat)
 
-    def get_char_base_bboxes(self, response):
+    def get_char_base_bboxes_and_avg_width(self, response):
         """Return bounding bboxs in page response
 
         Args:
@@ -117,11 +118,20 @@ class GoogleVisionFormatter(OCRFormatter):
         """
         bboxes = []
         cur_word = ""
+        widths = []
         for page in response['fullTextAnnotation']['pages']:
             for block in page['blocks']:
                 for paragraph in block['paragraphs']:
                     for word in paragraph['words']:
                         for symbol in word['symbols']:
+                            symbolunicat = self.get_unicharcat(symbol['text'])
+                            if symbolunicat in UNICODE_CHARCAT_FOR_WIDTH:
+                                vertices = symbol['boundingBox']['vertices']
+                                if len(vertices) < 2 or 'x' not in vertices[0] or 'x' not in vertices[1]:
+                                    logging.debug("symbol box with no coodinates, ignore for average width")
+                                    continue
+                                logging.debug("consider '%s' (cat %s) for avg width", symbol['text'], symbolunicat)
+                                widths.append(vertices[1]['x'] - vertices[0]['x'])
                             cur_word += symbol['text']
                             if self.has_space_attached(symbol):
                                 cur_word += " "
@@ -129,7 +139,9 @@ class GoogleVisionFormatter(OCRFormatter):
                         cur_word = ""
                         bbox = self.dict_to_bbox(word)
                         bboxes.append(bbox)
-        return bboxes
+        avg_width = statistics.mean(widths)
+        logging.debug("average char width: %f", avg_width)
+        return bboxes, avg_width
 
     def get_bboxes_for_page(self, image_group_id, image_filename):
         ocr_object = self.data_provider.get_image_data(image_group_id, image_filename)
@@ -138,5 +150,4 @@ class GoogleVisionFormatter(OCRFormatter):
         except Exception:
             logging.error("OCR page is empty (no textAnnotations[0]/description)")
             return
-        bboxes = self.get_char_base_bboxes(ocr_object)
-        return bboxes
+        return self.get_char_base_bboxes_and_avg_width(ocr_object)

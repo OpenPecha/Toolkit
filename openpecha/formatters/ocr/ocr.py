@@ -319,23 +319,6 @@ class OCRFormatter(BaseFormatter):
                     new_bboxes.append(cur_bbox)
         return new_bboxes
 
-    def get_avg_char_width(self, bboxes):
-        """Calculate average width of box in a page, ignoring non consonant tibetan char
-
-        Args:
-            response (dict): ocr output of a page
-
-        Returns:
-            float: average box width in which character are saved
-        """
-        widths = []
-        for bbox in bboxes:
-            if bbox.unicharcat in UNICODE_CHARCAT_FOR_WIDTH:
-                widths.append(bbox.x2 - bbox.x1)
-        res = statistics.mean(widths)
-        logging.debug("average char width %f" % res)
-        return res
-    
     def get_main_script_tag(text: str):
         """
         return the ISO 15924 tag of the main script used
@@ -417,12 +400,17 @@ class OCRFormatter(BaseFormatter):
         for bbox in bbox_line:
             if bbox.language not in [UNKNOWN_LANG, NO_LANG] and bbox.unicharcat in UNICODE_CHARCAT_NOT_NOISE:
                 return True
+        if logging.DEBUG >= logging.root.level:
+            line = ''
+            for bbox in bbox_line:
+                line += bbox.text
+            logging.debug("ignoring line '%s', detected as noise", line)
         return False
 
-    def build_page(self, bboxes, image_number, image_filename, state):
-        avg_char_width = self.get_avg_char_width(bboxes)
+    def build_page(self, bboxes, image_number, image_filename, state, avg_char_width=None):
         sorted_bboxes = self.sort_bboxes(bboxes)
-        sorted_bboxes = self.insert_space_bbox(sorted_bboxes, avg_char_width)
+        if avg_char_width:
+            sorted_bboxes = self.insert_space_bbox(sorted_bboxes, avg_char_width)
         bbox_lines = self.get_bbox_lines(sorted_bboxes)
         page_start_cc = state["base_layer_len"]
         page_word_confidences = []
@@ -522,9 +510,9 @@ class OCRFormatter(BaseFormatter):
         }
         for image_number, image_filename in enumerate(image_list):
             # enumerate starts at 0 but image numbers start at 1
-            bboxes = self.get_bboxes_for_page(image_group_id, image_filename)
+            bboxes, avg_char_width = self.get_bboxes_for_page(image_group_id, image_filename)
             if bboxes:
-                self.build_page(bboxes, image_number+1, image_filename, state)
+                self.build_page(bboxes, image_number+1, image_filename, state, avg_char_width)
         layers = {}
         if state["pagination_annotations"]:
             layer = Layer(annotation_type=LayerEnum.pagination, annotations=state["pagination_annotations"])

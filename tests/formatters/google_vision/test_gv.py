@@ -3,10 +3,9 @@ import tempfile
 from pathlib import Path
 
 import py
-import pytest
-from openpecha.formatters.ocr import google_vision
+import pytest   
 
-from openpecha.formatters.ocr.google_vision import GoogleVisionFormatter
+from openpecha.formatters.ocr import GoogleVisionFormatter
 from openpecha.utils import load_yaml, dump_yaml
 from test_gv_data_provider import GoogleVisionTestFileProvider
 import logging

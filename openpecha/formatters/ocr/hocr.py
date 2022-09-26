@@ -193,6 +193,6 @@ class HOCRFormatter(OCRFormatter):
                 bboxes = self.get_boxes_for_IA(hocr_page_html)
             else:
                 bboxes = self.get_boxes(hocr_page_html)
-        return bboxes
+        return bboxes, None
 
     
