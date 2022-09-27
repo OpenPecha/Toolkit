@@ -1,5 +1,6 @@
 from pydoc import pager
 import re
+import os
 from enum import Enum
 from pathlib import Path
 
@@ -36,8 +37,12 @@ class HOCRBDRCFileProvider():
     
     def get_images_info(self, image_group_id):
         vol_folder = image_group_to_folder_name(self.bdrc_scan_id, image_group_id)
-        image_info_path = Path(f"{self.ocr_disk_path}") / "info" / vol_folder / "gb-bdrc-map.json"
-        self.images_info = load_yaml(image_info_path)
+        vol_path = Path(f"{self.ocr_disk_path}") / "info" / vol_folder
+        if os.path.isdir(vol_path):
+            image_info_path = Path(vol_path) / "gb-bdrc-map.json"
+            self.images_info = load_yaml(image_info_path)
+        else:
+            return
 
     def get_source_info(self):
         return self.buda_data
@@ -52,8 +57,11 @@ class HOCRBDRCFileProvider():
         vol_folder = image_group_to_folder_name(self.bdrc_scan_id, image_group_id)
         hocr_filename = self.get_hocr_filename(image_filename)
         image_hocr_path = Path(f"{self.ocr_disk_path}") / "output" / vol_folder / f"{hocr_filename}.html"
-        hocr_html = image_hocr_path.read_text(encoding='utf-8')
-        return hocr_html
+        if os.path.isfile(image_hocr_path):
+            hocr_html = image_hocr_path.read_text(encoding='utf-8')
+            return hocr_html
+        else:
+            return
 
 class HOCRIAFileProvider():
     def __init__(self, bdrc_scan_id, bdrc_image_list_path, buda_data, ocr_import_info, ocr_disk_path=None):

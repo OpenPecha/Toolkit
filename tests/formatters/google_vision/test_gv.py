@@ -79,3 +79,4 @@ def test_with_gzip_json():
 
 if __name__ == "__main__":
     test_base_text()
+    test_build_layers()

@@ -16,7 +16,7 @@ def test_google_ocr_metadata():
     ocr_import_info_path = Path(__file__).parent / "data" / "file_per_page" / "ocr_import_info.yml"
     ocr_import_info = load_yaml(ocr_import_info_path)
     buda_data = load_yaml(buda_data_path)
-    bdrc_image_list_path = Path(__file__).parent / "data" / "file_per_page" / work_id / "google_books" / "batch_2022" / "output"
+    bdrc_image_list_path = Path(__file__).parent / "data" / "file_per_page" / work_id / "output"
     data_provider = HOCRTestFileProvider(work_id, bdrc_image_list_path, buda_data, ocr_import_info, ocr_path)
     
     with tempfile.TemporaryDirectory() as tmpdirname:

@@ -29,7 +29,7 @@ class HOCRTestFileProvider():
     
     def get_images_info(self, image_group_id):
         vol_folder = image_group_to_folder_name(self.bdrc_scan_id, image_group_id)
-        image_info_path = Path(f"{self.ocr_disk_path}") / "google_books" / "batch_2022" / "info" / vol_folder / "gb-bdrc-map.json"
+        image_info_path = Path(f"{self.ocr_disk_path}") / "info" / vol_folder / "gb-bdrc-map.json"
         self.images_info = load_yaml(image_info_path)
         
     
@@ -53,7 +53,7 @@ class HOCRTestFileProvider():
     def get_image_data(self, image_group_id, image_filename):
         vol_folder = image_group_to_folder_name(self.bdrc_scan_id, image_group_id)
         hocr_filename = self.get_hocr_filename(image_filename)
-        image_hocr_path = Path(f"{self.ocr_disk_path}") / "google_books" / "batch_2022" / "output" / vol_folder / f"{hocr_filename}.html"
+        image_hocr_path = Path(f"{self.ocr_disk_path}") / "output" / vol_folder / f"{hocr_filename}.html"
         try:
             hocr_html = image_hocr_path.read_text(encoding='utf-8')
             return hocr_html

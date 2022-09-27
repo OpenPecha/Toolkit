@@ -21,7 +21,6 @@ def test_base_text():
     data_provider = HOCRIATestFileProvider(work_id, bdrc_image_list_path, buda_data, ocr_import_info, ocr_path)
     
     with tempfile.TemporaryDirectory() as tmpdirname:
-        tmpdirname = Path(f"./")
         formatter = HOCRFormatter(mode=mode, output_path=tmpdirname)
         pecha_path = formatter.create_opf(data_provider, pecha_id, {}, ocr_import_info)
         base_text = (pecha_path / f"{pecha_path.name}.opf" / "base" / "I0886.txt").read_text(encoding='utf-8')

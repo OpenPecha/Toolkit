@@ -615,7 +615,7 @@ class OCRFormatter(BaseFormatter):
         self.same_line_ratio_threshold = opf_options["same_line_ratio_threshold"] if "same_line_ratio_threshold" in opf_options else SAME_LINE_RATIO_THRESHOLD
 
         ocr_import_info["op_import_options"] = opf_options
-
+        ocr_import_info["op_import_version"] = "1.0.0"
         self._build_dirs(None, id_=pecha_id)
 
         # if the bdrc scan id is not specified, we assume it's the directory namepecha_id

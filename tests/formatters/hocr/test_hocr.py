@@ -16,11 +16,10 @@ def test_base_text():
     ocr_import_info_path = Path(__file__).parent / "data" / "file_per_page" / "ocr_import_info.yml"
     ocr_import_info = load_yaml(ocr_import_info_path)
     buda_data = load_yaml(buda_data_path)
-    bdrc_image_list_path = Path(__file__).parent / "data" / "file_per_page" / work_id / "google_books" / "batch_2022" / "output"
+    bdrc_image_list_path = Path(__file__).parent / "data" / "file_per_page" / work_id / "output"
     data_provider = HOCRTestFileProvider(work_id, bdrc_image_list_path, buda_data, ocr_import_info, ocr_path)
     
     with tempfile.TemporaryDirectory() as tmpdirname:
-        tmpdirname = Path(f"./")
         formatter = HOCRFormatter(output_path=tmpdirname)
         pecha_path = formatter.create_opf(data_provider, pecha_id, {}, ocr_import_info)
         base_text = (pecha_path / f"{pecha_path.name}.opf" / "base" / "I4PD423.txt").read_text(encoding='utf-8')
@@ -38,7 +37,7 @@ def test_build_layers():
     ocr_import_info_path = Path(__file__).parent / "data" / "file_per_page" / "ocr_import_info.yml"
     ocr_import_info = load_yaml(ocr_import_info_path)
     buda_data = load_yaml(buda_data_path)
-    image_list_path = Path(__file__).parent / "data" / "file_per_page" / work_id / "google_books" / "batch_2022" / "output"
+    image_list_path = Path(__file__).parent / "data" / "file_per_page" / work_id / "output"
     data_provider = HOCRTestFileProvider(work_id, image_list_path, buda_data, ocr_import_info, ocr_path)
 
     opf_options = {"ocr_confidence_threshold": 0.9, "max_low_conf_per_page": 50}
