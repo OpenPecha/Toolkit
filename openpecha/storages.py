@@ -132,7 +132,7 @@ class GithubStorage(Storage):
         meta_data = yaml.load(meta_path.open(encoding="utf-8"), Loader=yaml_loader)
         
         source_metadata = meta_data.get("source_metadata", "")
-        if source_metadata.get("geo_restriction", [""])[0] == "CN":
+        if "CN" in source_metadata.get("geo_restriction", []):
             private = True
         else:
             private = False

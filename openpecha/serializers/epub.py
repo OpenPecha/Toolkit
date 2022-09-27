@@ -565,7 +565,7 @@ class EpubSerializer(Serialize):
         serialized_html += f"{result}{footnote_ref_tag}</body>\n</html>"
         return serialized_html
 
-    def serialize(self,  output_path="./output/epub_output", toc_levels={}) -> Path:
+    def serialize(self,  output_path="./output/epub_output", toc_levels={}, css_template=None) -> Path:
         """
         This module serialize .opf file to other format such as .epub etc. In case of epub,
         we are using calibre ebook-convert command to do the conversion by passing our custom css template
@@ -593,10 +593,12 @@ class EpubSerializer(Serialize):
             serialized_html = self.get_serialized_html(result, base_id, pecha_title)
             Path(out_html_fn).write_text(serialized_html)
             # Downloading css template file from ebook template repo and saving it
-            template = requests.get(
-                "https://raw.githubusercontent.com/OpenPecha/ebook-template/master/tsadra_template.css"
-            )
-            Path("template.css").write_bytes(template.content)
+            if not css_template:
+                css_template = requests.get(
+                    "https://github.com/OpenPecha-Data/ebook-template/blob/master/tsadra_template.css"
+                )
+                css_template = str(css_template.content)
+            Path("template.css").write_text(css_template)
             # Running ebook-convert command to convert html file to .epub (From calibre)
             # XPath expression to detect chapter titles.
             if not toc_levels:

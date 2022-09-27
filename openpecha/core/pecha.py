@@ -1,4 +1,5 @@
 import json
+import os
 import shutil
 import warnings
 from collections import defaultdict
@@ -10,6 +11,7 @@ from openpecha import blupdate, config
 from openpecha.core import ids
 from openpecha.core.annotations import BaseAnnotation, Span
 from openpecha.core.layer import Layer, LayerEnum, PechaMetadata, SpanINFO
+from openpecha.github_utils import create_release
 from openpecha.storages import GithubStorage, Storage
 from openpecha.utils import download_pecha, dump_yaml, load_yaml, load_yaml_str
 
@@ -249,6 +251,8 @@ class OpenPechaFS(OpenPecha):
 
     @property
     def pecha_path(self) -> Path:
+        if self._opf_path:
+            return self._opf_path.parent
         return self.output_dir / self.pecha_id
 
     @property
@@ -378,10 +382,20 @@ class OpenPechaFS(OpenPecha):
                 continue
             self.reset_layer(base_name, layer_name)
 
-    def publish(self):
+    def publish(self, asset_path:Path=None, asset_name:str=None):
+        asset_paths = []
         if not self.storage:
             self.storage = GithubStorage()
         self.storage.add_dir(path=self.pecha_path, description=self.about)
+
+        # Publishing assets in release
+        if asset_path:
+            repo_name = self.pecha_id
+            shutil.make_archive(asset_path, "zip", asset_path)
+            asset_paths.append(f"{asset_name}.zip")
+            create_release(
+                repo_name, prerelease=False, asset_paths=asset_paths, org=os.environ["OPENPECHA_DATA_GITHUB_ORG"], token=os.environ.get("GITHUB_TOKEN")
+            )
 
     def remove(self):
         self.storage.remove_dir_with_path(name=self.pecha_path)
