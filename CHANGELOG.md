@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.8.31 (2022-09-28)
+### Fix
+* **rdf:** Wrong volume number in export ([`2f87e37`](https://github.com/OpenPecha/Toolkit/commit/2f87e37537a60fdbdeba431b910c63a2ab7d8976))
+
 ## v0.8.30 (2022-09-05)
 ### Fix
 * **hot-fix:** Fix infinite loop ([`5a4a84d`](https://github.com/OpenPecha/Toolkit/commit/5a4a84dcb42a90d41c4e5a91446ee90f88542bce))
