@@ -141,7 +141,6 @@ class BUDARDFSerializer:
 
     def set_etext(self, baselname, baseinfo, volume_number):
         volume_basename = f"{self.lname}_{baselname}"
-        volume_number = int(re.search(r"\d+", baselname).group())
         subject = bdr[f"UT{volume_basename}"]
         if "source_metadata" in baseinfo and "image_group_id" in baseinfo["source_metadata"]:
             iglname = baseinfo["source_metadata"]["image_group_id"]
