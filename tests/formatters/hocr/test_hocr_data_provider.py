@@ -1,4 +1,4 @@
-from openpecha.buda.api import image_group_to_folder_name, get_image_list
+from openpecha.buda.api import image_group_to_folder_name
 from openpecha.utils import load_yaml
 from pathlib import Path
 from bs4 import BeautifulSoup
@@ -6,7 +6,7 @@ import logging
 import re
 
 class HOCRTestFileProvider():
-    def __init__(self, bdrc_scan_id, bdrc_image_list_path, buda_data, ocr_import_info, ocr_disk_path=None):
+    def __init__(self, bdrc_scan_id, bdrc_image_list_path, buda_data, ocr_import_info, ocr_disk_path):
         self.ocr_import_info = ocr_import_info
         self.ocr_disk_path = ocr_disk_path
         self.bdrc_scan_id = bdrc_scan_id
@@ -14,10 +14,12 @@ class HOCRTestFileProvider():
         self.bdrc_image_list_path = bdrc_image_list_path
         self.image_info = {}
 
+    def _get_image_list(self, image_group_id):
+        return load_yaml(self.bdrc_image_list_path / str(image_group_id+".json"))
 
     def get_image_list(self, image_group_id):
         self.get_images_info(image_group_id)
-        buda_il = get_image_list(self.bdrc_scan_id, image_group_id)
+        buda_il = self._get_image_list(image_group_id)
         # format should be a list of image_id (/ file names)
         return map(lambda ii: ii["filename"], buda_il)
 
@@ -32,12 +34,11 @@ class HOCRTestFileProvider():
         image_info_path = Path(f"{self.ocr_disk_path}") / "info" / vol_folder / "gb-bdrc-map.json"
         self.images_info = load_yaml(image_info_path)
         
-    
     def get_source_info(self):
         image_group_ids = []
         self.source_info = self.buda_data
         curr = {}
-        vol_paths = list(Path(self.bdrc_image_list_path).iterdir())
+        vol_paths = list((Path(self.ocr_disk_path) / "output").iterdir())
         for vol_path in vol_paths:
             image_group_id = re.split(r"-", vol_path.name)[1]
             image_group_ids.append(image_group_id)
@@ -61,7 +62,7 @@ class HOCRTestFileProvider():
             return
         
 class HOCRIATestFileProvider():
-    def __init__(self, bdrc_scan_id, bdrc_image_list_path, buda_data, ocr_import_info, ocr_disk_path=None):
+    def __init__(self, bdrc_scan_id, bdrc_image_list_path, buda_data, ocr_import_info, ocr_disk_path):
         self.ocr_import_info = ocr_import_info
         self.ocr_disk_path = ocr_disk_path
         self.bdrc_scan_id = bdrc_scan_id
@@ -73,14 +74,16 @@ class HOCRIATestFileProvider():
 
     def get_image_list(self, image_group_id):
         self.get_images_info(image_group_id)
-        buda_il = get_image_list(self.bdrc_scan_id, image_group_id)
+        buda_il = self._get_image_list(image_group_id)
         # format should be a list of image_id (/ file names)
         return map(lambda ii: ii["filename"], buda_il)
     
+    def _get_image_list(self, image_group_id):
+        return load_yaml(self.bdrc_image_list_path / str(image_group_id+".json"))
     
     def get_images_info(self, image_group_id):
         curr_image = {}
-        image_list = get_image_list(self.bdrc_scan_id, image_group_id)
+        image_list = self._get_image_list(image_group_id)
         image_group_hocr = self.get_image_group_hocr(image_group_id)
         if image_group_hocr :
             hocr_html = BeautifulSoup(image_group_hocr, 'html.parser')
@@ -99,7 +102,7 @@ class HOCRIATestFileProvider():
     
     def get_image_group_hocr(self, image_group_id):
         vol_num = self.source_info['image_groups'][image_group_id]['volume_number']
-        image_group_hocr_path = Path(f"{self.bdrc_image_list_path}") / f"bdrc-{self.bdrc_scan_id}-{vol_num}_hocr.html"
+        image_group_hocr_path = Path(f"{self.ocr_disk_path}") / f"bdrc-{self.bdrc_scan_id}-{vol_num}_hocr.html"
         try:
             hocr_html = image_group_hocr_path.read_text(encoding='utf-8')
             return hocr_html
@@ -110,7 +113,7 @@ class HOCRIATestFileProvider():
         image_group_ids = []
         self.source_info = self.buda_data
         curr = {}
-        vol_paths = list(Path(self.bdrc_image_list_path).iterdir())
+        vol_paths = list(Path(self.ocr_disk_path).iterdir())
         for vol_path in vol_paths:
             vol_num = re.split(r"-", vol_path.stem)[2][:-5]
             for image_group_id, info in self.source_info['image_groups'].items():
