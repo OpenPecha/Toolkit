@@ -47,7 +47,7 @@ UNICODE_CHARCAT_NOT_NOISE = ["Ll", "Lu", "Lo", "Nd", "No", "Nl", "Lt"]
 SAME_LINE_RATIO_THRESHOLD = 0.17
 
 class BBox:
-    def __init__(self, x1: int, x2: int, y1: int, y2: int, text: str = None, confidence: float = None, language: str = NO_LANG, unicharcat = "Lo"):
+    def __init__(self, x1: int, x2: int, y1: int, y2: int, text: str = None, confidence: float = None, language: str = NO_LANG):
         self.text = text
         self.x1 = x1
         self.x2 = x2
@@ -55,7 +55,6 @@ class BBox:
         self.y2 = y2
         self.confidence = confidence
         self.language = language
-        self.unicharcat = unicharcat
         self.mid_y = (y1 + y2) / 2
         self.mid_x = (x1 + x2) / 2
     
@@ -324,11 +323,25 @@ class OCRFormatter(BaseFormatter):
         return the ISO 15924 tag of the main script used
         in a string
         """
-        if len(text) == "0":
-            return "Zyyy"
-        return unicodedata.script(text[0])
+        halflen = int(len(text) / 2)
+        scripts = {}
+        maxcharscript_nbchars = 0
+        maxcharscript = "Zyyy"
+        for i, c in enumerate(text):
+            cscript = unicodedata.script(c)
+            if cscript not in scripts:
+                scripts[cscript] = 0
+            script_nbchars = scripts[cscript] + 1
+            scripts[cscript] = script_nbchars
+            if script_nbchars > maxcharscript_nbchars:
+                maxcharscript_nbchars = script_nbchars
+                maxcharscript = cscript
+            if maxcharscript_nbchars > halflen:
+                return maxcharscript
+        return maxcharscript
 
-    def get_language_code(self, text):
+
+    def get_main_language_code(self, text):
         """returns the language tag for the text
 
         Args:
@@ -341,15 +354,11 @@ class OCRFormatter(BaseFormatter):
             return NO_LANG
         return UNKNOWN_LANG
 
-    def get_unicharcat(self, text):
-        """returns the main unicode character category for the text
-
-        Args:
-            string (str): text from wordbox.text
-        """
-        if len(text) == "0":
-            return "Cc" # ?
-        return unicodedata.category(text[0])
+    def is_noise(self, text):
+        for c in text:
+            if unicodedata.category(c) in UNICODE_CHARCAT_NOT_NOISE:
+                return False
+        return True
 
     def add_language(self, bbox, bbox_start_cc, state):
         bbox_lang = bbox.language
@@ -397,7 +406,7 @@ class OCRFormatter(BaseFormatter):
 
     def bbox_line_has_characters(self, bbox_line):
         for bbox in bbox_line:
-            if bbox.language != UNKNOWN_LANG and self.get_unicharcat(bbox.text) in UNICODE_CHARCAT_NOT_NOISE:
+            if bbox.language != UNKNOWN_LANG and not self.is_noise(bbox.text):
                 return True
         if logging.DEBUG >= logging.root.level:
             line = ''

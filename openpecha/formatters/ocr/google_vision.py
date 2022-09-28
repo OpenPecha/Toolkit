@@ -2,6 +2,7 @@ import gzip
 import json
 import logging
 import statistics
+from fontTools import unicodedata
 
 from openpecha.formatters.ocr.ocr import OCRFileProvider, OCRFormatter, BBox, UNICODE_CHARCAT_FOR_WIDTH
 from openpecha.buda.api import get_buda_scan_info, get_image_list, image_group_to_folder_name
@@ -94,7 +95,7 @@ class GoogleVisionFormatter(OCRFormatter):
         # the language returned by Google OCR is not particularly helpful
         # language = self.get_language_code_from_gv_poly(word)
         # instead we use our custom detection system
-        language = self.get_language_code(text)
+        language = self.get_main_language_code(text)
         if 'boundingBox' not in word or 'vertices' not in word['boundingBox']:
             return None
         vertices = word['boundingBox']['vertices']
@@ -122,7 +123,7 @@ class GoogleVisionFormatter(OCRFormatter):
                 for paragraph in block['paragraphs']:
                     for word in paragraph['words']:
                         for symbol in word['symbols']:
-                            symbolunicat = self.get_unicharcat(symbol['text'])
+                            symbolunicat = unicodedata.category(symbol['text'])
                             if symbolunicat in UNICODE_CHARCAT_FOR_WIDTH:
                                 vertices = symbol['boundingBox']['vertices']
                                 if len(vertices) < 2 or 'x' not in vertices[0] or 'x' not in vertices[1]:
