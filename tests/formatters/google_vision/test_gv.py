@@ -29,7 +29,6 @@ def test_base_text():
         formatter = GoogleVisionFormatter(output_path=tmpdirname)
         pecha_path = formatter.create_opf(data_provider, pecha_id, {}, ocr_import_info)
         base_text = (pecha_path / f"{pecha_path.name}.opf" / "base" / "I3852.txt").read_text(encoding='utf-8')
-        print(base_text)
         assert expected_base_text == base_text
 
 def test_build_layers():

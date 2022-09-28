@@ -21,6 +21,7 @@ from openpecha.core.ids import get_base_id
 from openpecha.core.metadata import InitialPechaMetadata, InitialCreationType, LicenseType, Copyright_copyrighted, Copyright_unknown, Copyright_public_domain
 from openpecha.formatters import BaseFormatter
 from openpecha.utils import dump_yaml, gzip_str
+from openpecha import __version__
 
 ANNOTATION_MINIMAL_LEN = 20
 ANNOTATION_MINIMAL_CONFIDENCE = 0.8
@@ -44,7 +45,7 @@ UNKNOWN_LANG = "und"
 # Unicode character categories taken into account when computing width:
 UNICODE_CHARCAT_FOR_WIDTH = ["Ll", "Lu", "Lo", "Nd", "No", "Nl", "Lt"]
 UNICODE_CHARCAT_NOT_NOISE = ["Ll", "Lu", "Lo", "Nd", "No", "Nl", "Lt"]
-SAME_LINE_RATIO_THRESHOLD = 0.17
+SAME_LINE_RATIO_THRESHOLD = 0.2
 
 class BBox:
     def __init__(self, x1: int, x2: int, y1: int, y2: int, text: str = None, confidence: float = None, language: str = NO_LANG):
@@ -380,7 +381,7 @@ class OCRFormatter(BaseFormatter):
             state["latest_language_annotation"] = annotation
             return
         # if there's no previous annotation and language is the default language, return
-        if bbox_lang == self.default_language or bbox_lang == NO_LANG or not bbox_lang:
+        if bbox_lang == self.default_language or bbox_lang == NO_LANG or bbox_lang == UNKNOWN_LANG or not bbox_lang:
             return
         # if there's no previous annotation and language is not the default, we create an annotation
         annotation = {"start": bbox_start_cc, "end": bbox_end_cc, "lang": bbox_lang}
@@ -624,7 +625,7 @@ class OCRFormatter(BaseFormatter):
         self.same_line_ratio_threshold = opf_options["same_line_ratio_threshold"] if "same_line_ratio_threshold" in opf_options else SAME_LINE_RATIO_THRESHOLD
 
         ocr_import_info["op_import_options"] = opf_options
-        ocr_import_info["op_import_version"] = "1.0.0"
+        ocr_import_info["op_import_version"] = __version__
         self._build_dirs(None, id_=pecha_id)
 
         # if the bdrc scan id is not specified, we assume it's the directory namepecha_id

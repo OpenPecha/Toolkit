@@ -27,6 +27,8 @@ def test_google_ocr_base_meta():
         assert output_metadata["source_metadata"] == expected_metadata["source_metadata"]
         del output_metadata["ocr_import_info"]["ocr_info"]["timestamp"]
         del expected_metadata["ocr_import_info"]["ocr_info"]["timestamp"]
+        del output_metadata["ocr_import_info"]["op_import_version"]
+        del expected_metadata["ocr_import_info"]["op_import_version"]
         assert output_metadata["ocr_import_info"] == expected_metadata["ocr_import_info"]
         assert output_metadata["statistics"] == expected_metadata["statistics"]
         assert output_metadata["default_language"] == expected_metadata["default_language"]

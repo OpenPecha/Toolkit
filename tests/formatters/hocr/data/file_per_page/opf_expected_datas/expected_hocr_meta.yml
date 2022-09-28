@@ -9,6 +9,7 @@ ocr_import_info:
   ocr_info:
     timestamp: '2022-08-05T09:34:20Z'
   op_import_options: {}
+  op_import_version: 1.0.0
 default_language: bo
 source: https://library.bdrc.io
 source_file: null
@@ -26,7 +27,7 @@ source_metadata:
   languages:
   - bo
 statistics:
-  ocr_word_mean_confidence_index: 0.91727078891258
+  ocr_word_mean_confidence_index: 0.9207357679914071
   ocr_word_median_confidence_index: 0.99
 quality: null
 bases:
@@ -40,7 +41,7 @@ bases:
     base_file: I4PD424.txt
     statistics:
       ocr_word_median_confidence_index: 0.99
-      ocr_word_mean_confidence_index: 0.9183173588924387
+      ocr_word_mean_confidence_index: 0.9212004287245444
   I4PD423:
     source_metadata:
       id: http://purl.bdrc.io/resource/I4PD423
@@ -51,7 +52,7 @@ bases:
     base_file: I4PD423.txt
     statistics:
       ocr_word_median_confidence_index: 0.99
-      ocr_word_mean_confidence_index: 0.916221985058698
+      ocr_word_mean_confidence_index: 0.9202691065662002
 copyright:
   status: Public domain
   notice: Public domain

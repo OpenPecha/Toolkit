@@ -24,6 +24,14 @@ def test_base_text():
         formatter = HOCRFormatter(mode=mode, output_path=tmpdirname)
         pecha_path = formatter.create_opf(data_provider, pecha_id, {}, ocr_import_info)
         base_text = (pecha_path / f"{pecha_path.name}.opf" / "base" / "I0886.txt").read_text(encoding='utf-8')
+        base_text_line = base_text.split("\n")
+        expected_base_text_line = expected_base_text.split("\n")
+        for i, btl in enumerate(base_text_line):
+            if btl != expected_base_text_line[i]:
+                print("'%s' != '%s'" % (btl, expected_base_text_line[i]))
+                for j, c in enumerate(btl):
+                    if c != expected_base_text_line[i][j]:
+                        print("'%s' != '%s'" % (c, expected_base_text_line[i][j]))
         assert expected_base_text == base_text
 
 def test_build_layers():

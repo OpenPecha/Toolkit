@@ -1,70 +1,70 @@
-id: a28a1bd3283945dca3e62b46aa6e4108
+id: ff1602251c664f21a9dca96c13796914
 annotation_type: Pagination
 revision: '00001'
 annotations:
-  c70c77271c624bf9a1eb009f64a857f6:
+  db1864cd702e43059959a557bc630df0:
     span:
       start: 0
-      end: 806
+      end: 771
     imgnum: 1
     reference: 08860001.tif
-  ccf43a246a474f5390c2185973764f48:
+  0d56c85d046a4943b1c74fcd485c46be:
     span:
-      start: 807
-      end: 1585
+      start: 772
+      end: 1568
     imgnum: 2
     reference: 08860002.tif
-  6b5dadd20544489ebbef5db731373e1c:
+  1273a7b6c30d4b0f86136b76e64b1137:
     span:
-      start: 1586
-      end: 1586
+      start: 1569
+      end: 1569
     imgnum: 3
     reference: 08860003.tif
-  16003c1ed5c543b8891cdc2877d23385:
+  f31118b9d08e484bbdd0e8d51220b520:
     span:
-      start: 1587
-      end: 1630
+      start: 1570
+      end: 1610
     imgnum: 4
     reference: 08860004.tif
-  56f7b5f1ba854bcfa61bbd572aa29098:
+  74528ff6873e4637bd3cb57ac6039ca6:
     span:
-      start: 1631
-      end: 2100
+      start: 1611
+      end: 2078
     imgnum: 5
     reference: 08860005.tif
-  138b7eade16a4da59eb411a7c4996d55:
+  8bc2428d0f36434996205c1a280aaad8:
     span:
-      start: 2101
-      end: 2826
+      start: 2079
+      end: 2792
     imgnum: 6
     reference: 08860006.tif
-  b91bdaf58e6d4804a736dc982e158e6c:
+  68442542e96440a8881b64687f0c3e87:
     span:
-      start: 2827
-      end: 3180
+      start: 2793
+      end: 3130
     imgnum: 7
     reference: 08860007.tif
-  d1d540e9d54c4bc298ab3d5827394ad0:
+  5e4f2d3c21db4e46bfb505282200ff3b:
     span:
-      start: 3181
-      end: 3471
+      start: 3131
+      end: 3405
     imgnum: 8
     reference: 08860008.tif
-  43933a8182654eca81fe4106137721b4:
+  8c3d99fa555c4e28ad5d873109d9e9f0:
     span:
-      start: 3472
-      end: 3679
+      start: 3406
+      end: 3602
     imgnum: 10
     reference: 08860010.tif
-  a6f59f204b1d45028e037053a205a181:
+  9fd37b89cb504f2696ee38b167b2f805:
     span:
-      start: 3680
-      end: 4830
+      start: 3603
+      end: 4761
     imgnum: 13
     reference: 08860013.tif
-  8d073f5052ff417fac9fd0038040c4d7:
+  d0aa0b15b93b429c9272ff71fdef03ec:
     span:
-      start: 4831
-      end: 5136
+      start: 4762
+      end: 5065
     imgnum: 16
     reference: 08860016.tif
