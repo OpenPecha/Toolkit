@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.8.32 (2022-09-30)
+### Fix
+* **rdf:** Fix github URL in RDF export ([`d05d876`](https://github.com/OpenPecha/Toolkit/commit/d05d8766ea67e70ec3ff626b025778f3bba95b28))
+
 ## v0.8.31 (2022-09-28)
 ### Fix
 * **rdf:** Wrong volume number in export ([`2f87e37`](https://github.com/OpenPecha/Toolkit/commit/2f87e37537a60fdbdeba431b910c63a2ab7d8976))
