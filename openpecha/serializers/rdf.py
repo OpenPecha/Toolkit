@@ -92,10 +92,10 @@ class BUDARDFSerializer:
             oii = meta.ocr_import_info
             if "source" in oii:
                 self.add_triple(bdr[self.lname], bdo["OPFOCRSource"], Literal(oii["source"]))
-            if "software" in oii:
-                self.add_triple(bdr[self.lname], bdo["OPFOCRSoftware"], Literal(oii["software"]))
-            if "batch" in oii:
-                self.add_triple(bdr[self.lname], bdo["OPFOCRBatch"], Literal(oii["batch"]))
+            if "software_id" in oii:
+                self.add_triple(bdr[self.lname], bdo["OPFOCRSoftware"], Literal(oii["software_id"]))
+            if "batch_id" in oii:
+                self.add_triple(bdr[self.lname], bdo["OPFOCRBatch"], Literal(oii["batch_id"]))
             if "ocr_info" in oii and "timestamp" in oii["ocr_info"]:
                 self.add_triple(bdr[self.lname], bdo["OPFOCRTimeStamp"], Literal(oii["ocr_info"]["timestamp"], datatype=XSD.dateTime))
         self.get_base_volumes()
