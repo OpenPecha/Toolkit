@@ -158,7 +158,7 @@ bdr:UTIE0OPI0123_9C26 a :Etext ;
         bdr:EPec398aa83ce2495da5dd83d50beb5705 ;
     :eTextInInstance bdr:IE0OPI0123 ;
     :eTextIsVolume 1 ;
-    rdfs:seeAlso "https://github.com/OpenPecha/I0123/"^^xsd:anyURI .
+    rdfs:seeAlso "https://github.com/Openpecha-Data/I0123/"^^xsd:anyURI .
 
 bdr:UTIE0OPI0123_9C26_00000 a :EtextChunk ;
     :chunkContents """༄༅།།བོད་ཀྱི་ནང་བསྟན་དཔེ་ཚོགས་ལྟེ་གནས།།

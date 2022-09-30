@@ -158,7 +158,7 @@ class BUDARDFSerializer:
             subject,
             rdfs.seeAlso,
             Literal(
-                f"https://github.com/OpenPecha/{self._pecha_id}/", datatype=XSD.anyURI
+                f"https://github.com/Openpecha-Data/{self._pecha_id}/", datatype=XSD.anyURI
             ),
         )
         self.set_etext_pages(baselname)
