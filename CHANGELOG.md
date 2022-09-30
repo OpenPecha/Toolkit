@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.8.33 (2022-09-30)
+### Fix
+* **rdf:** Fix software and batch keys ([`d6f558e`](https://github.com/OpenPecha/Toolkit/commit/d6f558e2090ee899390d5d9a12cdd975ce146530))
+
 ## v0.8.32 (2022-09-30)
 ### Fix
 * **rdf:** Fix github URL in RDF export ([`d05d876`](https://github.com/OpenPecha/Toolkit/commit/d05d8766ea67e70ec3ff626b025778f3bba95b28))
