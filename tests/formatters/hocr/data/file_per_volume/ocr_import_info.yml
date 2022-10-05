@@ -1,0 +1,7 @@
+source: bdrc
+software: google_books
+batch: batch_2022
+expected_default_language: bo
+bdrc_scan_id: W22084
+ocr_info:
+  timestamp: None

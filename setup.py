@@ -47,6 +47,7 @@ setup(
         "rdflib>=5.0.0, <6.0",
         "pydantic>=1.7.3, <2.0",
         "python-docx>=0.8.11, <1.0",
+        "fonttools[unicode] >= 4.37.3"
     ],
     extras_require={
         "transifex": [
@@ -54,7 +55,7 @@ setup(
             "python-slugify[unidecode]>=5.0, <6.0",
         ]
     },
-    python_requires=">=3.6",
+    python_requires=">=3.7",
     entry_points={
         "console_scripts": [
             "openpecha=openpecha.cli:cli"

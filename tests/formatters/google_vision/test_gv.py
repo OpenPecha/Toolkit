@@ -3,13 +3,14 @@ import tempfile
 from pathlib import Path
 
 import py
-import pytest
-from openpecha.formatters import google_vision
+import pytest   
 
-from openpecha.formatters.google_vision import GoogleVisionFormatter
+from openpecha.formatters.ocr import GoogleVisionFormatter
 from openpecha.utils import load_yaml, dump_yaml
-from test_data_provider import GoogleVisionTestFileProvider
+from test_gv_data_provider import GoogleVisionTestFileProvider
+import logging
 
+#logging.basicConfig(level=logging.DEBUG)
 
 def test_base_text():
     work_id = "W24767"
@@ -76,4 +77,5 @@ def test_with_gzip_json():
         assert isinstance(pecha_path, Path) and pecha_path.is_dir()
 
 if __name__ == "__main__":
+    test_base_text()
     test_build_layers()
