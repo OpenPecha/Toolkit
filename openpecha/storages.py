@@ -1,4 +1,5 @@
 import enum
+import git
 import os
 import shutil
 import time
@@ -138,14 +139,24 @@ class GithubStorage(Storage):
             private = False
         
         remote_repo_url = create_github_repo(path=path, org_name=self.org_name, token=self.token, private=private, description=description)
-        return remote_repo_url        
+        return remote_repo_url
+
+    def is_git_repo(self, path):
+        try:
+            _ = git.Repo(path).git_dir
+            return True
+        except git.exc.InvalidGitRepositoryError:
+            return False       
 
     def add_dir(self, path: Path, description: str):
         """dir local dir to github."""
-        remote_repo_url = self._init_remote_repo(
-            path=path, description=description
-        )
-        local_repo = self._init_local_repo(path=path, remote_url=remote_repo_url)
+        if not self.is_git_repo(path):
+            remote_repo_url = self._init_remote_repo(
+                path=path, description=description
+            )
+            local_repo = self._init_local_repo(path=path, remote_url=remote_repo_url)
+        else:
+            local_repo = Repo(path)
         commit_and_push(repo=local_repo, message="Initial commit")
         return local_repo
 

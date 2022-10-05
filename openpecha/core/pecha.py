@@ -391,11 +391,12 @@ class OpenPechaFS(OpenPecha):
         # Publishing assets in release
         if asset_path:
             repo_name = self.pecha_id
-            shutil.make_archive(asset_path, "zip", asset_path)
-            asset_paths.append(f"{asset_name}.zip")
+            shutil.make_archive(asset_path.parent / asset_name, "zip", asset_path)
+            asset_paths.append(f"{asset_path.parent / asset_name}.zip")
             create_release(
                 repo_name, prerelease=False, asset_paths=asset_paths, org=os.environ["OPENPECHA_DATA_GITHUB_ORG"], token=os.environ.get("GITHUB_TOKEN")
             )
+            (asset_path.parent / f"{asset_name}.zip").unlink()
 
     def remove(self):
         self.storage.remove_dir_with_path(name=self.pecha_path)
