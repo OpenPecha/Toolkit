@@ -92,10 +92,10 @@ class BUDARDFSerializer:
             oii = meta.ocr_import_info
             if "source" in oii:
                 self.add_triple(bdr[self.lname], bdo["OPFOCRSource"], Literal(oii["source"]))
-            if "software" in oii:
-                self.add_triple(bdr[self.lname], bdo["OPFOCRSoftware"], Literal(oii["software"]))
-            if "batch" in oii:
-                self.add_triple(bdr[self.lname], bdo["OPFOCRBatch"], Literal(oii["batch"]))
+            if "software_id" in oii:
+                self.add_triple(bdr[self.lname], bdo["OPFOCRSoftware"], Literal(oii["software_id"]))
+            if "batch_id" in oii:
+                self.add_triple(bdr[self.lname], bdo["OPFOCRBatch"], Literal(oii["batch_id"]))
             if "ocr_info" in oii and "timestamp" in oii["ocr_info"]:
                 self.add_triple(bdr[self.lname], bdo["OPFOCRTimeStamp"], Literal(oii["ocr_info"]["timestamp"], datatype=XSD.dateTime))
         self.get_base_volumes()
@@ -141,7 +141,6 @@ class BUDARDFSerializer:
 
     def set_etext(self, baselname, baseinfo, volume_number):
         volume_basename = f"{self.lname}_{baselname}"
-        volume_number = int(re.search(r"\d+", baselname).group())
         subject = bdr[f"UT{volume_basename}"]
         if "source_metadata" in baseinfo and "image_group_id" in baseinfo["source_metadata"]:
             iglname = baseinfo["source_metadata"]["image_group_id"]
@@ -159,7 +158,7 @@ class BUDARDFSerializer:
             subject,
             rdfs.seeAlso,
             Literal(
-                f"https://github.com/OpenPecha/{self._pecha_id}/", datatype=XSD.anyURI
+                f"https://github.com/Openpecha-Data/{self._pecha_id}/", datatype=XSD.anyURI
             ),
         )
         self.set_etext_pages(baselname)
