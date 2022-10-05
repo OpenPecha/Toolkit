@@ -4,16 +4,15 @@ Text Scan laput Form - Title Page
 TBRC Volume Nuniber 3852
 TBRC Work Number (W ) 24767
 Title
- ལམ་འབྲས་གཞུང་རྡོ་རྗེའི་ཚིག་རྐང་གི་རྣམ་འགྲེལ་བཅུ་གཅིག་
+ལམ་འབྲས་གཞུང་རྡོ་རྗེའི་ཚིག་རྐང་གི་རྣམ་འགྲེལ་བཅུ་གཅིག་
 lam 'bras gzhung rdo rje'i tshig rkang gi mam 'grel heu ycig
 Author
- ས་ཆེན་ཀུན་དགའ་སྙིང་པོ་
+ས་ཆེན་ཀུན་དགའ་སྙིང་པོ་
 kun oga' snying po
 Descriptor reproduced from a set of prints from the sde-dye dyon-chen
 blocks
 Original Publication sa-skya lam 'bras literature series:v, 28-30
-Place
- dehra dun, u.p.
+Place dehra dun, u.p.
 Publisher sakya centre
 Date 1985
 Total Volumes
@@ -28,8 +27,7 @@ Full Record (Library of Congress Online Catalog) Page 1 of 2
 The Library of Congress > > Go to Library of Congress Authorities
 LIBRARY NURSININI ITALI .
 Hala New Search Headings To Request Account Other Start
-Search History 
-List | List an Item Status Database Over
+Search History List | List an Item Status Database Over
 inilind Library of Congress Online Catalog
 ¥11 K 111 1 : Title = lam 'bras gzun
 PAKOTT KIVITY: Displaying 1 of l.
@@ -64,12 +62,10 @@ http://catalog.loc.gov/cgi-bin/Pwobrecon .cgi?v3= 1& ti= 1,1 & SEQ =200401271649
 SA-SKYA LAM 'BRAS LITERATURE SERIES : VOLUME 28
 ALL RIGHTS RESERVED
 
-ཏུ
- །ལགང་བྱུང་བ། །དེནི་བརྩེཆེན་ཐུགས་རྗེ་མངའ་རྣམས་ཡིན། །འཕྲལ་བདག་པར་མཛད་ལ་ཡི་ངལ་བའི། །ཡཐད་རྒྱ་དྲས་ཆོས་ཀྱིས་དཔེ།
+ཏུ །ལགང་བྱུང་བ། །དེནི་བརྩེཆེན་ཐུགས་རྗེ་མངའ་རྣམས་ཡིན། །འཕྲལ་བདག་པར་མཛད་ལ་ཡི་ངལ་བའི། །ཡཐད་རྒྱ་དྲས་ཆོས་ཀྱིས་དཔེ།
 སྤྱོད 
 ལེགསམཛོད། །བྱདཆུབ་སྤྱོད་འཇུག་རིད་ལུགས་ཟླ་མེད ། །ཐོས་འདི་དམ་པ་མཆོག་པ་དྲིན་ལས་བྱུང་། །རང་གིས་དྲན་པའི་ཕ་སོས་སུ་ཉུང་གསལ་བྱ། །ཁེ་ད་ལྡན་
-པའཉིས འདིར་ཐར་པ་ཐམས་ཅད་མཁྱེན་པའི་གཞུང་ལམ་ཕན་བདེན་པོ་འབྱུང་གནསpབ་སུསཔྱདཆུབ་ེམས་དཔའི་སྤྱོད་པ་ལ་འཇུག་པའི་ཚུལ་བཟང་
-པརིབ་བགམ་ཡིནནོ། །
+པའཉིས འདིར་ཐར་པ་ཐམས་ཅད་མཁྱེན་པའི་གཞུང་ལམ་ཕན་བདེན་པོ་འབྱུང་གནསpབ་སུསཔྱདཆུབ་ེམས་དཔའི་སྤྱོད་པ་ལ་འཇུག་པའི་ཚུལ་བཟང་པརིབ་བགམ་ཡིནནོ། །
 ཡིན་པ་དེ་ལ་གསུམ། མཚན་དང་། གཞུང་། བརྩམས་པ་མཐར་ཕྱིན་པའི་དོན་ནོ། །དདཔ་ལ་མཚོན་དངོས་དང་། ཞ་སྤྱོད་འགྱུར་ཕྱག་གོ། །དང་པོནི། རྒྱུ་རཱན།
 ཛཇུས
 

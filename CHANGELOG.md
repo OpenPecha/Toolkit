@@ -2,6 +2,20 @@
 
 <!--next-version-placeholder-->
 
+## v0.9.0 (2022-10-05)
+### Feature
+* **hocr:** Parser base code implemented ([`e7ccec4`](https://github.com/OpenPecha/Toolkit/commit/e7ccec401792ea84af7ff6df9948a618dbd7a29b))
+
+### Fix
+* **hocr-parser:** Updated google vision expected output ([`956933d`](https://github.com/OpenPecha/Toolkit/commit/956933da771af92790a70d3f466e9b8fc7f7c954))
+* **hocr-parser:** Add language tag function ([`e6c9e8e`](https://github.com/OpenPecha/Toolkit/commit/e6c9e8e8a83323d510df3bb89049dc277efeb004))
+* **hocr-parser:** Add data_provider and formatter function for IA format hocr ([`cc9b37c`](https://github.com/OpenPecha/Toolkit/commit/cc9b37cfdaae6e8f7ca54942a44109154c40c393))
+* **hocr-parser:** Added IA format hocr test and test case ([`932e6fc`](https://github.com/OpenPecha/Toolkit/commit/932e6fcc08502269f9c27049c2a8424f80c32adc))
+* **hocr-parser:** Updated the hocr ([`ec2fae3`](https://github.com/OpenPecha/Toolkit/commit/ec2fae3e6a04dcf8f2ce31a8e74083dbd831732b))
+* **hocr-parser:** Added ocr directory to formatters ([`72e2bba`](https://github.com/OpenPecha/Toolkit/commit/72e2bbab5a96b91660e31945455d21ca0907b23c))
+* **hocr-parser:** Added hocr test ([`654ef6c`](https://github.com/OpenPecha/Toolkit/commit/654ef6c96299749674efa2551f1d10427a8381f4))
+* **hocr_parser:** Fixed hocr_parser ([`0c87ae8`](https://github.com/OpenPecha/Toolkit/commit/0c87ae80d5c8100a2a983d750e1862c5996f9a8e))
+
 ## v0.8.33 (2022-09-30)
 ### Fix
 * **rdf:** Fix software and batch keys ([`d6f558e`](https://github.com/OpenPecha/Toolkit/commit/d6f558e2090ee899390d5d9a12cdd975ce146530))
