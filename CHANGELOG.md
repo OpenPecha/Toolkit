@@ -2,6 +2,18 @@
 
 <!--next-version-placeholder-->
 
+## v0.8.33 (2022-09-30)
+### Fix
+* **rdf:** Fix software and batch keys ([`d6f558e`](https://github.com/OpenPecha/Toolkit/commit/d6f558e2090ee899390d5d9a12cdd975ce146530))
+
+## v0.8.32 (2022-09-30)
+### Fix
+* **rdf:** Fix github URL in RDF export ([`d05d876`](https://github.com/OpenPecha/Toolkit/commit/d05d8766ea67e70ec3ff626b025778f3bba95b28))
+
+## v0.8.31 (2022-09-28)
+### Fix
+* **rdf:** Wrong volume number in export ([`2f87e37`](https://github.com/OpenPecha/Toolkit/commit/2f87e37537a60fdbdeba431b910c63a2ab7d8976))
+
 ## v0.8.30 (2022-09-05)
 ### Fix
 * **hot-fix:** Fix infinite loop ([`5a4a84d`](https://github.com/OpenPecha/Toolkit/commit/5a4a84dcb42a90d41c4e5a91446ee90f88542bce))
