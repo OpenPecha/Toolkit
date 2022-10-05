@@ -1,0 +1,525 @@
+source_metadata:
+  id: http://purl.bdrc.io/resource/W22084
+  status: http://purl.bdrc.io/admindata/StatusReleased
+  access: http://purl.bdrc.io/admindata/AccessOpen
+  reproduction_of: http://purl.bdrc.io/resource/MW22084
+  copyright_status: http://purl.bdrc.io/resource/CopyrightPublicDomain
+  title: བཀའ་འགྱུར ༼སྡེ་དགེ་པར་ཕུད༽
+  languages:
+  - bo
+image_groups:
+  I0956:
+    id: http://purl.bdrc.io/resource/I0956
+    total_pages: 612
+    volume_number: 71
+    volume_pages_bdrc_intro: 2
+  I0969:
+    id: http://purl.bdrc.io/resource/I0969
+    total_pages: 550
+    volume_number: 84
+    volume_pages_bdrc_intro: 2
+  I0948:
+    id: http://purl.bdrc.io/resource/I0948
+    total_pages: 596
+    volume_number: 63
+    volume_pages_bdrc_intro: 2
+  I0943:
+    id: http://purl.bdrc.io/resource/I0943
+    total_pages: 640
+    volume_number: 58
+    volume_pages_bdrc_intro: 2
+  I0939:
+    id: http://purl.bdrc.io/resource/I0939
+    total_pages: 594
+    volume_number: 54
+    volume_pages_bdrc_intro: 2
+  I0963:
+    id: http://purl.bdrc.io/resource/I0963
+    total_pages: 624
+    volume_number: 78
+    volume_pages_bdrc_intro: 2
+  I0889:
+    id: http://purl.bdrc.io/resource/I0889
+    total_pages: 606
+    volume_number: 4
+    volume_pages_bdrc_intro: 2
+  I0942:
+    id: http://purl.bdrc.io/resource/I0942
+    total_pages: 690
+    volume_number: 57
+    volume_pages_bdrc_intro: 2
+  I0979:
+    id: http://purl.bdrc.io/resource/I0979
+    total_pages: 534
+    volume_number: 94
+    volume_pages_bdrc_intro: 2
+  I0951:
+    id: http://purl.bdrc.io/resource/I0951
+    total_pages: 622
+    volume_number: 66
+    volume_pages_bdrc_intro: 2
+  I0936:
+    id: http://purl.bdrc.io/resource/I0936
+    total_pages: 598
+    volume_number: 51
+    volume_pages_bdrc_intro: 2
+  I0891:
+    id: http://purl.bdrc.io/resource/I0891
+    total_pages: 577
+    volume_number: 6
+    volume_pages_bdrc_intro: 2
+  I0923:
+    id: http://purl.bdrc.io/resource/I0923
+    total_pages: 728
+    volume_number: 38
+    volume_pages_bdrc_intro: 2
+  I0930:
+    id: http://purl.bdrc.io/resource/I0930
+    total_pages: 682
+    volume_number: 45
+    volume_pages_bdrc_intro: 2
+  I0896:
+    id: http://purl.bdrc.io/resource/I0896
+    total_pages: 668
+    volume_number: 11
+    volume_pages_bdrc_intro: 2
+  I0912:
+    id: http://purl.bdrc.io/resource/I0912
+    total_pages: 788
+    volume_number: 27
+    volume_pages_bdrc_intro: 2
+  I0987:
+    id: http://purl.bdrc.io/resource/I0987
+    total_pages: 944
+    volume_number: 102
+    volume_pages_bdrc_intro: 2
+  I0981:
+    id: http://purl.bdrc.io/resource/I0981
+    total_pages: 530
+    volume_number: 96
+    volume_pages_bdrc_intro: 2
+  I0919:
+    id: http://purl.bdrc.io/resource/I0919
+    total_pages: 569
+    volume_number: 34
+    volume_pages_bdrc_intro: 2
+  I0921:
+    id: http://purl.bdrc.io/resource/I0921
+    total_pages: 794
+    volume_number: 36
+    volume_pages_bdrc_intro: 2
+  I0934:
+    id: http://purl.bdrc.io/resource/I0934
+    total_pages: 586
+    volume_number: 49
+    volume_pages_bdrc_intro: 2
+  I0950:
+    id: http://purl.bdrc.io/resource/I0950
+    total_pages: 614
+    volume_number: 65
+    volume_pages_bdrc_intro: 2
+  I0960:
+    id: http://purl.bdrc.io/resource/I0960
+    total_pages: 598
+    volume_number: 75
+    volume_pages_bdrc_intro: 2
+  I0929:
+    id: http://purl.bdrc.io/resource/I0929
+    total_pages: 600
+    volume_number: 44
+    volume_pages_bdrc_intro: 2
+  I0931:
+    id: http://purl.bdrc.io/resource/I0931
+    total_pages: 558
+    volume_number: 46
+    volume_pages_bdrc_intro: 2
+  I0933:
+    id: http://purl.bdrc.io/resource/I0933
+    total_pages: 576
+    volume_number: 48
+    volume_pages_bdrc_intro: 2
+  I0980:
+    id: http://purl.bdrc.io/resource/I0980
+    total_pages: 592
+    volume_number: 95
+    volume_pages_bdrc_intro: 2
+  I0898:
+    id: http://purl.bdrc.io/resource/I0898
+    total_pages: 628
+    volume_number: 13
+    volume_pages_bdrc_intro: 2
+  I0959:
+    id: http://purl.bdrc.io/resource/I0959
+    total_pages: 602
+    volume_number: 74
+    volume_pages_bdrc_intro: 2
+  I0949:
+    id: http://purl.bdrc.io/resource/I0949
+    total_pages: 600
+    volume_number: 64
+    volume_pages_bdrc_intro: 2
+  I0888:
+    id: http://purl.bdrc.io/resource/I0888
+    total_pages: 588
+    volume_number: 3
+    volume_pages_bdrc_intro: 2
+  I0916:
+    id: http://purl.bdrc.io/resource/I0916
+    total_pages: 596
+    volume_number: 31
+    volume_pages_bdrc_intro: 2
+  I0932:
+    id: http://purl.bdrc.io/resource/I0932
+    total_pages: 612
+    volume_number: 47
+    volume_pages_bdrc_intro: 2
+  I0901:
+    id: http://purl.bdrc.io/resource/I0901
+    total_pages: 790
+    volume_number: 16
+    volume_pages_bdrc_intro: 2
+  I0911:
+    id: http://purl.bdrc.io/resource/I0911
+    total_pages: 766
+    volume_number: 26
+    volume_pages_bdrc_intro: 2
+  I0887:
+    id: http://purl.bdrc.io/resource/I0887
+    total_pages: 636
+    volume_number: 2
+    volume_pages_bdrc_intro: 2
+  I0961:
+    id: http://purl.bdrc.io/resource/I0961
+    total_pages: 564
+    volume_number: 76
+    volume_pages_bdrc_intro: 2
+  I0966:
+    id: http://purl.bdrc.io/resource/I0966
+    total_pages: 574
+    volume_number: 81
+    volume_pages_bdrc_intro: 2
+  I0983:
+    id: http://purl.bdrc.io/resource/I0983
+    total_pages: 624
+    volume_number: 98
+    volume_pages_bdrc_intro: 2
+  I0906:
+    id: http://purl.bdrc.io/resource/I0906
+    total_pages: 800
+    volume_number: 21
+    volume_pages_bdrc_intro: 2
+  I0970:
+    id: http://purl.bdrc.io/resource/I0970
+    total_pages: 546
+    volume_number: 85
+    volume_pages_bdrc_intro: 2
+  I0915:
+    id: http://purl.bdrc.io/resource/I0915
+    total_pages: 610
+    volume_number: 30
+    volume_pages_bdrc_intro: 2
+  I0967:
+    id: http://purl.bdrc.io/resource/I0967
+    total_pages: 664
+    volume_number: 82
+    volume_pages_bdrc_intro: 2
+  I0988:
+    id: http://purl.bdrc.io/resource/I0988
+    total_pages: 344
+    volume_number: 103
+    volume_pages_bdrc_intro: 2
+  I0957:
+    id: http://purl.bdrc.io/resource/I0957
+    total_pages: 622
+    volume_number: 72
+    volume_pages_bdrc_intro: 2
+  I0895:
+    id: http://purl.bdrc.io/resource/I0895
+    total_pages: 622
+    volume_number: 10
+    volume_pages_bdrc_intro: 2
+  I0914:
+    id: http://purl.bdrc.io/resource/I0914
+    total_pages: 602
+    volume_number: 29
+    volume_pages_bdrc_intro: 2
+  I0958:
+    id: http://purl.bdrc.io/resource/I0958
+    total_pages: 620
+    volume_number: 73
+    volume_pages_bdrc_intro: 2
+  I0975:
+    id: http://purl.bdrc.io/resource/I0975
+    total_pages: 574
+    volume_number: 90
+    volume_pages_bdrc_intro: 2
+  I0902:
+    id: http://purl.bdrc.io/resource/I0902
+    total_pages: 764
+    volume_number: 17
+    volume_pages_bdrc_intro: 2
+  I0920:
+    id: http://purl.bdrc.io/resource/I0920
+    total_pages: 788
+    volume_number: 35
+    volume_pages_bdrc_intro: 2
+  I0971:
+    id: http://purl.bdrc.io/resource/I0971
+    total_pages: 648
+    volume_number: 86
+    volume_pages_bdrc_intro: 2
+  I0974:
+    id: http://purl.bdrc.io/resource/I0974
+    total_pages: 548
+    volume_number: 89
+    volume_pages_bdrc_intro: 2
+  I0962:
+    id: http://purl.bdrc.io/resource/I0962
+    total_pages: 742
+    volume_number: 77
+    volume_pages_bdrc_intro: 2
+  I0968:
+    id: http://purl.bdrc.io/resource/I0968
+    total_pages: 608
+    volume_number: 83
+    volume_pages_bdrc_intro: 2
+  I0890:
+    id: http://purl.bdrc.io/resource/I0890
+    total_pages: 586
+    volume_number: 5
+    volume_pages_bdrc_intro: 2
+  I0909:
+    id: http://purl.bdrc.io/resource/I0909
+    total_pages: 824
+    volume_number: 24
+    volume_pages_bdrc_intro: 2
+  I0986:
+    id: http://purl.bdrc.io/resource/I0986
+    total_pages: 558
+    volume_number: 101
+    volume_pages_bdrc_intro: 2
+  I0893:
+    id: http://purl.bdrc.io/resource/I0893
+    total_pages: 540
+    volume_number: 8
+    volume_pages_bdrc_intro: 2
+  I0905:
+    id: http://purl.bdrc.io/resource/I0905
+    total_pages: 798
+    volume_number: 20
+    volume_pages_bdrc_intro: 2
+  I0886:
+    id: http://purl.bdrc.io/resource/I0886
+    total_pages: 624
+    volume_number: 1
+    volume_pages_bdrc_intro: 2
+  I0925:
+    id: http://purl.bdrc.io/resource/I0925
+    total_pages: 590
+    volume_number: 40
+    volume_pages_bdrc_intro: 2
+  I0953:
+    id: http://purl.bdrc.io/resource/I0953
+    total_pages: 638
+    volume_number: 68
+    volume_pages_bdrc_intro: 2
+  I0972:
+    id: http://purl.bdrc.io/resource/I0972
+    total_pages: 620
+    volume_number: 87
+    volume_pages_bdrc_intro: 2
+  I0946:
+    id: http://purl.bdrc.io/resource/I0946
+    total_pages: 618
+    volume_number: 61
+    volume_pages_bdrc_intro: 2
+  I0908:
+    id: http://purl.bdrc.io/resource/I0908
+    total_pages: 776
+    volume_number: 23
+    volume_pages_bdrc_intro: 2
+  I0965:
+    id: http://purl.bdrc.io/resource/I0965
+    total_pages: 688
+    volume_number: 80
+    volume_pages_bdrc_intro: 2
+  I0918:
+    id: http://purl.bdrc.io/resource/I0918
+    total_pages: 574
+    volume_number: 33
+    volume_pages_bdrc_intro: 2
+  I0913:
+    id: http://purl.bdrc.io/resource/I0913
+    total_pages: 764
+    volume_number: 28
+    volume_pages_bdrc_intro: 2
+  I0941:
+    id: http://purl.bdrc.io/resource/I0941
+    total_pages: 602
+    volume_number: 56
+    volume_pages_bdrc_intro: 2
+  I0897:
+    id: http://purl.bdrc.io/resource/I0897
+    total_pages: 606
+    volume_number: 12
+    volume_pages_bdrc_intro: 2
+  I0938:
+    id: http://purl.bdrc.io/resource/I0938
+    total_pages: 680
+    volume_number: 53
+    volume_pages_bdrc_intro: 2
+  I0984:
+    id: http://purl.bdrc.io/resource/I0984
+    total_pages: 576
+    volume_number: 99
+    volume_pages_bdrc_intro: 2
+  I0955:
+    id: http://purl.bdrc.io/resource/I0955
+    total_pages: 626
+    volume_number: 70
+    volume_pages_bdrc_intro: 2
+  I0922:
+    id: http://purl.bdrc.io/resource/I0922
+    total_pages: 794
+    volume_number: 37
+    volume_pages_bdrc_intro: 2
+  I0940:
+    id: http://purl.bdrc.io/resource/I0940
+    total_pages: 634
+    volume_number: 55
+    volume_pages_bdrc_intro: 2
+  I0976:
+    id: http://purl.bdrc.io/resource/I0976
+    total_pages: 576
+    volume_number: 91
+    volume_pages_bdrc_intro: 2
+  I0894:
+    id: http://purl.bdrc.io/resource/I0894
+    total_pages: 658
+    volume_number: 9
+    volume_pages_bdrc_intro: 2
+  I0903:
+    id: http://purl.bdrc.io/resource/I0903
+    total_pages: 792
+    volume_number: 18
+    volume_pages_bdrc_intro: 2
+  I0892:
+    id: http://purl.bdrc.io/resource/I0892
+    total_pages: 576
+    volume_number: 7
+    volume_pages_bdrc_intro: 2
+  I0926:
+    id: http://purl.bdrc.io/resource/I0926
+    total_pages: 598
+    volume_number: 41
+    volume_pages_bdrc_intro: 2
+  I0977:
+    id: http://purl.bdrc.io/resource/I0977
+    total_pages: 634
+    volume_number: 92
+    volume_pages_bdrc_intro: 2
+  I0964:
+    id: http://purl.bdrc.io/resource/I0964
+    total_pages: 586
+    volume_number: 79
+    volume_pages_bdrc_intro: 2
+  I0917:
+    id: http://purl.bdrc.io/resource/I0917
+    total_pages: 614
+    volume_number: 32
+    volume_pages_bdrc_intro: 2
+  I0944:
+    id: http://purl.bdrc.io/resource/I0944
+    total_pages: 630
+    volume_number: 59
+    volume_pages_bdrc_intro: 2
+  I0954:
+    id: http://purl.bdrc.io/resource/I0954
+    total_pages: 616
+    volume_number: 69
+    volume_pages_bdrc_intro: 2
+  I0973:
+    id: http://purl.bdrc.io/resource/I0973
+    total_pages: 670
+    volume_number: 88
+    volume_pages_bdrc_intro: 2
+  I0904:
+    id: http://purl.bdrc.io/resource/I0904
+    total_pages: 766
+    volume_number: 19
+    volume_pages_bdrc_intro: 2
+  I0982:
+    id: http://purl.bdrc.io/resource/I0982
+    total_pages: 718
+    volume_number: 97
+    volume_pages_bdrc_intro: 2
+  I0952:
+    id: http://purl.bdrc.io/resource/I0952
+    total_pages: 640
+    volume_number: 67
+    volume_pages_bdrc_intro: 2
+  I0900:
+    id: http://purl.bdrc.io/resource/I0900
+    total_pages: 806
+    volume_number: 15
+    volume_pages_bdrc_intro: 2
+  I0935:
+    id: http://purl.bdrc.io/resource/I0935
+    total_pages: 594
+    volume_number: 50
+    volume_pages_bdrc_intro: 2
+  I0899:
+    id: http://purl.bdrc.io/resource/I0899
+    total_pages: 790
+    volume_number: 14
+    volume_pages_bdrc_intro: 2
+  I0924:
+    id: http://purl.bdrc.io/resource/I0924
+    total_pages: 542
+    volume_number: 39
+    volume_pages_bdrc_intro: 2
+  I0978:
+    id: http://purl.bdrc.io/resource/I0978
+    total_pages: 622
+    volume_number: 93
+    volume_pages_bdrc_intro: 2
+  I0927:
+    id: http://purl.bdrc.io/resource/I0927
+    total_pages: 578
+    volume_number: 42
+    volume_pages_bdrc_intro: 2
+  I0928:
+    id: http://purl.bdrc.io/resource/I0928
+    total_pages: 620
+    volume_number: 43
+    volume_pages_bdrc_intro: 2
+  I0945:
+    id: http://purl.bdrc.io/resource/I0945
+    total_pages: 594
+    volume_number: 60
+    volume_pages_bdrc_intro: 2
+  I0937:
+    id: http://purl.bdrc.io/resource/I0937
+    total_pages: 688
+    volume_number: 52
+    volume_pages_bdrc_intro: 2
+  I0985:
+    id: http://purl.bdrc.io/resource/I0985
+    total_pages: 568
+    volume_number: 100
+    volume_pages_bdrc_intro: 2
+  I0907:
+    id: http://purl.bdrc.io/resource/I0907
+    total_pages: 770
+    volume_number: 22
+    volume_pages_bdrc_intro: 2
+  I0947:
+    id: http://purl.bdrc.io/resource/I0947
+    total_pages: 616
+    volume_number: 62
+    volume_pages_bdrc_intro: 2
+  I0910:
+    id: http://purl.bdrc.io/resource/I0910
+    total_pages: 792
+    volume_number: 25
+    volume_pages_bdrc_intro: 2
