@@ -34,7 +34,6 @@ class HOCRBDRCFileProvider():
 
         Args:
             image_group_id (str): image_group_id of the volume
-            
         """
         self.get_images_info(image_group_id)
         buda_il = get_image_list(self.bdrc_scan_id, image_group_id)
@@ -60,7 +59,6 @@ class HOCRBDRCFileProvider():
     
     def get_hocr_filename(self, image_id):
         """ return the filename of the image_id from the images_info dict
-        
         """
         for filename, img_ref in self.images_info.items():
             img_id = img_ref
@@ -101,7 +99,6 @@ class HOCRIAFileProvider():
 
         Args:
             image_group_id (str): image_group_id of the volume
-            
         """
         self.get_images_info(image_group_id)
         buda_il = get_image_list(self.bdrc_scan_id, image_group_id)
@@ -114,7 +111,6 @@ class HOCRIAFileProvider():
 
         Args:
             image_group_id (str): image_group_id of the volume
-            
         """
         curr_image = {}
         image_list = get_image_list(self.bdrc_scan_id, image_group_id)
@@ -141,7 +137,6 @@ class HOCRIAFileProvider():
 
         Returns:
             hocr_html: html file of the volume
-            
         """
         vol_num = self.buda_data['image_groups'][image_group_id]['volume_number']
         image_group_hocr_path = Path(f"{self.bdrc_image_list_path}") / f"bdrc-{self.bdrc_scan_id}-{vol_num}_hocr.html"
@@ -160,7 +155,6 @@ class HOCRIAFileProvider():
 
         Args:
             image_group_id (str): image_group_id of the volume
-            
         """
         try:
             page_hocr = self.images_info[image_filename]['page_info']
