@@ -5,6 +5,7 @@ import warnings
 from collections import defaultdict
 from pathlib import Path
 from typing import Dict, List, Union
+from xmlrpc.client import Boolean
 from git import Repo
 
 from openpecha import blupdate, config
@@ -12,7 +13,7 @@ from openpecha.core import ids
 from openpecha.core.annotations import BaseAnnotation, Span
 from openpecha.core.layer import Layer, LayerEnum, PechaMetadata, SpanINFO
 from openpecha.github_utils import create_release
-from openpecha.storages import GithubStorage, Storage
+from openpecha.storages import GithubStorage, Storage, commit_and_push
 from openpecha.utils import download_pecha, dump_yaml, load_yaml, load_yaml_str
 
 
@@ -65,10 +66,10 @@ class OpenPecha:
     @property
     def about(self):
         source_metadata = []
-        for val in self.meta.source_metadata.values():
-            if not isinstance(val, (str, int)):
-                continue
-            source_metadata.append(val)
+        titles = self.meta.source_metadata.get('title', {})
+        if titles:
+            for val in titles.values():
+                source_metadata.append(str(val))
         return ", ".join(source_metadata)
 
     def reset_base_and_layers(self):
@@ -102,6 +103,14 @@ class OpenPecha:
             return self._components
         self._components = self._read_components()
         return self._components
+    
+    @property
+    def is_private(self):
+        private = False
+        if self.meta.source_metadata:
+            if "CN" in self.meta.source_metadata.get("geo_restriction", []) or self.meta.source_metadata.get("restrictedInChina", False):
+                private = True
+        return private
 
     def _get_base_name(self) -> str:
         return ids.get_base_id()
@@ -386,7 +395,11 @@ class OpenPechaFS(OpenPecha):
         asset_paths = []
         if not self.storage:
             self.storage = GithubStorage()
-        self.storage.add_dir(path=self.pecha_path, description=self.about)
+        if self.storage.is_git_repo(self.pecha_path):
+            local_repo = Repo(self.pecha_path)
+            commit_and_push(repo=local_repo, message="Pecha update")
+        else:
+            self.storage.add_dir(path=self.pecha_path, description=self.about, is_private=self.is_private)
 
         # Publishing assets in release
         if asset_path:
