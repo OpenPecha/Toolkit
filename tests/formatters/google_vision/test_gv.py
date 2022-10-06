@@ -1,20 +1,22 @@
 import json
+from pickle import NONE
 import tempfile
 from pathlib import Path
 
 import py
 import pytest   
 
+from openpecha.core.layer import LayerEnum
+from openpecha.core.pecha import OpenPechaFS
 from openpecha.formatters.ocr import GoogleVisionFormatter
 from openpecha.utils import load_yaml, dump_yaml
 from test_gv_data_provider import GoogleVisionTestFileProvider
-import logging
 
 #logging.basicConfig(level=logging.DEBUG)
 
 def test_base_text():
     work_id = "W24767"
-    pecha_id = "I123456"
+    pecha_id = None
     
     ocr_path = Path(__file__).parent / "data" / work_id
     expected_base_text = (Path(__file__).parent / "data" / "opf_expected_datas" / "expected_base_text.txt").read_text(encoding='utf-8')
@@ -27,8 +29,8 @@ def test_base_text():
     
     with tempfile.TemporaryDirectory() as tmpdirname:
         formatter = GoogleVisionFormatter(output_path=tmpdirname)
-        pecha_path = formatter.create_opf(data_provider, pecha_id, {}, ocr_import_info)
-        base_text = (pecha_path / f"{pecha_path.name}.opf" / "base" / "I3852.txt").read_text(encoding='utf-8')
+        pecha = formatter.create_opf(data_provider, pecha_id, {}, ocr_import_info)
+        base_text = pecha.bases['I3852']
         assert expected_base_text == base_text
 
 def test_build_layers():
@@ -50,10 +52,10 @@ def test_build_layers():
     
     with tempfile.TemporaryDirectory() as tmpdirname:
         formatter = GoogleVisionFormatter(output_path=tmpdirname)
-        pecha_path = formatter.create_opf(data_provider, pecha_id, opf_options, ocr_import_info)
-        pagination_layer = load_yaml((pecha_path / f"{pecha_path.name}.opf" / "layers" / "I3852" / "Pagination.yml"))
-        language_layer = load_yaml((pecha_path / f"{pecha_path.name}.opf" / "layers" / "I3852" / "Language.yml"))
-        confidence_layer = load_yaml((pecha_path / f"{pecha_path.name}.opf" / "layers" / "I3852" / "OCRConfidence.yml"))
+        pecha = formatter.create_opf(data_provider, pecha_id, opf_options, ocr_import_info)
+        pagination_layer = json.loads(pecha.layers['I3852'][LayerEnum.pagination].json(exclude_none=True))
+        language_layer = json.loads(pecha.layers['I3852'][LayerEnum.language].json(exclude_none=True))
+        confidence_layer = json.loads(pecha.layers['I3852'][LayerEnum.ocr_confidence].json(exclude_none=True))
 
         ###Pagination layer testing
         for (_, expected_ann), (_, ann) in zip(expected_pagination_layer['annotations'].items(), pagination_layer['annotations'].items()):
@@ -73,8 +75,8 @@ def test_with_gzip_json():
     ocr_path = Path(__file__).parent / "data" / "W1PD95844"
     with tempfile.TemporaryDirectory() as tmpdirname:
         formatter = GoogleVisionFormatter(output_path=tmpdirname)
-        pecha_path = formatter.create_opf(ocr_path, 1, meta_flag=False)
-        assert isinstance(pecha_path, Path) and pecha_path.is_dir()
+        pecha = formatter.create_opf(ocr_path, 1, meta_flag=False)
+        assert isinstance(pecha, OpenPechaFS) and pecha.opf_path.is_dir()
 
 if __name__ == "__main__":
     test_base_text()

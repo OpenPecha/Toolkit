@@ -1,8 +1,10 @@
 import tempfile
+import json
 from pathlib import Path
 
+from openpecha.core.layer import LayerEnum
 from openpecha.formatters.ocr.hocr import HOCRFormatter
-from openpecha.utils import load_yaml, dump_yaml
+from openpecha.utils import load_yaml
 from test_hocr_data_provider import HOCRTestFileProvider
 
 
@@ -21,8 +23,8 @@ def test_base_text():
     
     with tempfile.TemporaryDirectory() as tmpdirname:
         formatter = HOCRFormatter(output_path=tmpdirname)
-        pecha_path = formatter.create_opf(data_provider, pecha_id, {}, ocr_import_info)
-        base_text = (pecha_path / f"{pecha_path.name}.opf" / "base" / "I4PD423.txt").read_text(encoding='utf-8')
+        pecha = formatter.create_opf(data_provider, pecha_id, {}, ocr_import_info)
+        base_text = pecha.bases["I4PD423"]
         assert expected_base_text == base_text
 
 def test_build_layers():
@@ -44,10 +46,10 @@ def test_build_layers():
     
     with tempfile.TemporaryDirectory() as tmpdirname:
         formatter = HOCRFormatter(output_path=tmpdirname)
-        pecha_path = formatter.create_opf(data_provider, pecha_id, opf_options, ocr_import_info)
-        pagination_layer = load_yaml((pecha_path / f"{pecha_path.name}.opf" / "layers" / "I4PD423" / "Pagination.yml"))
-        language_layer = load_yaml((pecha_path / f"{pecha_path.name}.opf" / "layers" / "I4PD423" / "Language.yml"))
-        confidence_layer = load_yaml((pecha_path / f"{pecha_path.name}.opf" / "layers" / "I4PD423" / "OCRConfidence.yml"))
+        pecha = formatter.create_opf(data_provider, pecha_id, opf_options, ocr_import_info)
+        pagination_layer = json.loads(pecha.layers['I4PD423'][LayerEnum.pagination].json(exclude_none=True))
+        language_layer = json.loads(pecha.layers['I4PD423'][LayerEnum.language].json(exclude_none=True))
+        confidence_layer = json.loads(pecha.layers['I4PD423'][LayerEnum.ocr_confidence].json(exclude_none=True))
 
         ###Pagination layer testing
         for (_, expected_ann), (_, ann) in zip(expected_pagination_layer['annotations'].items(), pagination_layer['annotations'].items()):

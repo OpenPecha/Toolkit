@@ -1,7 +1,9 @@
 import tempfile
+import json
 from pathlib import Path
 
 from test_hocr_data_provider import HOCRIATestFileProvider
+from openpecha.core.layer import LayerEnum
 from openpecha.formatters.ocr.hocr import HOCRFormatter
 
 from openpecha.utils import load_yaml, dump_yaml
@@ -22,8 +24,8 @@ def test_base_text():
     
     with tempfile.TemporaryDirectory() as tmpdirname:
         formatter = HOCRFormatter(mode=mode, output_path=tmpdirname)
-        pecha_path = formatter.create_opf(data_provider, pecha_id, {}, ocr_import_info)
-        base_text = (pecha_path / f"{pecha_path.name}.opf" / "base" / "I0886.txt").read_text(encoding='utf-8')
+        pecha = formatter.create_opf(data_provider, pecha_id, {}, ocr_import_info)
+        base_text = pecha.bases['I0886']
         base_text_line = base_text.split("\n")
         expected_base_text_line = expected_base_text.split("\n")
         for i, btl in enumerate(base_text_line):
@@ -53,9 +55,9 @@ def test_build_layers():
     
     with tempfile.TemporaryDirectory() as tmpdirname:
         formatter = HOCRFormatter(mode=mode, output_path=tmpdirname)
-        pecha_path = formatter.create_opf(data_provider, pecha_id, opf_options, ocr_import_info)
-        pagination_layer = load_yaml((pecha_path / f"{pecha_path.name}.opf" / "layers" / "I0886" / "Pagination.yml"))
-        confidence_layer = load_yaml((pecha_path / f"{pecha_path.name}.opf" / "layers" / "I0886" / "OCRConfidence.yml"))
+        pecha = formatter.create_opf(data_provider, pecha_id, opf_options, ocr_import_info)
+        pagination_layer = json.loads(pecha.layers['I0886'][LayerEnum.pagination].json(exclude_none=True))
+        confidence_layer = json.loads(pecha.layers['I0886'][LayerEnum.ocr_confidence].json(exclude_none=True))
 
         ###Pagination layer testing
         for (_, expected_ann), (_, ann) in zip(expected_pagination_layer['annotations'].items(), pagination_layer['annotations'].items()):
