@@ -1,17 +1,9 @@
-import gzip
-from importlib.metadata import metadata
-import json
-import math
 import re
-from enum import Enum
-from pathlib import Path
 import statistics
 import logging
 
 import datetime
 from datetime import timezone
-import requests
-from pathlib import Path
 from fontTools import unicodedata
 from abc import abstractmethod
 
@@ -21,7 +13,6 @@ from openpecha.core.layer import Layer, LayerEnum, OCRConfidenceLayer
 from openpecha.core.metadata import InitialPechaMetadata, InitialCreationType, LicenseType, Copyright_copyrighted, Copyright_unknown, Copyright_public_domain
 from openpecha.core.pecha import OpenPechaFS
 from openpecha.formatters import BaseFormatter
-from openpecha.utils import dump_yaml, gzip_str
 from openpecha import __version__
 
 ANNOTATION_MINIMAL_LEN = 20
@@ -641,25 +632,25 @@ class OCRFormatter(BaseFormatter):
             self.default_language = self.source_info["languages"][0]
 
         self.metadata = self.get_metadata(pecha_id, ocr_import_info)
-        pecha_obj = OpenPechaFS(metadata=self.metadata)
+        pecha = OpenPechaFS(metadata=self.metadata)
         total_word_confidence_list = []
 
         for image_group_id, image_group_info in self.source_info["image_groups"].items():
             base_id = image_group_id
             base_text, layers, word_confidence_list = self.build_base(image_group_id)
-            pecha_obj.bases[base_id] = base_text
-            pecha_obj.layers[base_id] = layers
+            pecha.bases[base_id] = base_text
+            pecha.layers[base_id] = layers
             self.set_base_meta(image_group_id, base_id, word_confidence_list)
             total_word_confidence_list += word_confidence_list
 
         # we add the rest to metadata:
-        pecha_obj.meta.bases = self.base_meta
+        pecha.meta.bases = self.base_meta
         if total_word_confidence_list:
-            pecha_obj.meta.statistics = {
+            pecha.meta.statistics = {
                 # there are probably more efficient ways to compute those
                 "ocr_word_mean_confidence_index": statistics.mean(total_word_confidence_list),
                 "ocr_word_median_confidence_index": statistics.median(total_word_confidence_list)
             }
-        pecha_obj.save(output_path=self.output_path)
+        pecha.save(output_path=self.output_path)
 
-        return pecha_obj
+        return pecha

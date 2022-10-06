@@ -1,15 +1,12 @@
-import json
-from pickle import NONE
 import tempfile
 from pathlib import Path
 
-import py
 import pytest   
 
-from openpecha.core.layer import LayerEnum
+from openpecha.core.layer import LayerEnum, Layer
 from openpecha.core.pecha import OpenPechaFS
 from openpecha.formatters.ocr import GoogleVisionFormatter
-from openpecha.utils import load_yaml, dump_yaml
+from openpecha.utils import load_yaml
 from test_gv_data_provider import GoogleVisionTestFileProvider
 
 #logging.basicConfig(level=logging.DEBUG)
@@ -33,14 +30,23 @@ def test_base_text():
         base_text = pecha.bases['I3852']
         assert expected_base_text == base_text
 
+def is_same_ann(expected_ann, ann):
+    if expected_ann.span.start == ann.span.start and expected_ann.span.end == ann.span.end:
+        return True
+    return False
+
 def test_build_layers():
     work_id = "W24767"
     pecha_id = "I123456"
+    base_name = "I3852"
     
     ocr_path = Path(__file__).parent / "data" / work_id
-    expected_pagination_layer = load_yaml((Path(__file__).parent / "data" / "opf_expected_datas" / "expected_Pagination.yml"))
-    expected_language_layer = load_yaml((Path(__file__).parent / "data" / "opf_expected_datas" / "expected_Language.yml"))
-    expected_confidence_layer = load_yaml((Path(__file__).parent / "data" / "opf_expected_datas" / "expected_OCRConfidence.yml"))
+    expected_pagination_layer_dict = load_yaml((Path(__file__).parent / "data" / "opf_expected_datas" / "expected_Pagination.yml"))
+    expected_pagination_layer = Layer(annotation_type=LayerEnum.pagination, annotations=expected_pagination_layer_dict['annotations'])
+    expected_language_layer_dict = load_yaml((Path(__file__).parent / "data" / "opf_expected_datas" / "expected_Language.yml"))
+    expected_language_layer = Layer(annotation_type=LayerEnum.language, annotations=expected_language_layer_dict['annotations'])
+    expected_confidence_layer_dict = load_yaml((Path(__file__).parent / "data" / "opf_expected_datas" / "expected_OCRConfidence.yml"))
+    expected_confidence_layer = Layer(annotation_type=LayerEnum.ocr_confidence, annotations=expected_confidence_layer_dict['annotations'])
     buda_data_path = Path(__file__).parent / "data" / "buda_data.yml"
     ocr_import_info_path = Path(__file__).parent / "data" / "ocr_import_info.yml"
     ocr_import_info = load_yaml(ocr_import_info_path)
@@ -53,21 +59,21 @@ def test_build_layers():
     with tempfile.TemporaryDirectory() as tmpdirname:
         formatter = GoogleVisionFormatter(output_path=tmpdirname)
         pecha = formatter.create_opf(data_provider, pecha_id, opf_options, ocr_import_info)
-        pagination_layer = json.loads(pecha.layers['I3852'][LayerEnum.pagination].json(exclude_none=True))
-        language_layer = json.loads(pecha.layers['I3852'][LayerEnum.language].json(exclude_none=True))
-        confidence_layer = json.loads(pecha.layers['I3852'][LayerEnum.ocr_confidence].json(exclude_none=True))
+        pagination_layer = pecha.layers[base_name][LayerEnum.pagination]
+        language_layer = pecha.layers[base_name][LayerEnum.language]
+        confidence_layer = pecha.layers[base_name][LayerEnum.ocr_confidence]
 
         ###Pagination layer testing
-        for (_, expected_ann), (_, ann) in zip(expected_pagination_layer['annotations'].items(), pagination_layer['annotations'].items()):
-            assert expected_ann == ann
+        for (_, expected_ann), (_, ann) in zip(expected_pagination_layer.get_annotations(), pagination_layer.get_annotations()):
+            assert is_same_ann(expected_ann, ann)
         
         ###Language layer testing
-        for (_, expected_ann), (_, ann) in zip(expected_language_layer['annotations'].items(), language_layer['annotations'].items()):
-            assert expected_ann == ann
+        for (_, expected_ann), (_, ann) in zip(expected_language_layer.get_annotations(), language_layer.get_annotations()):
+            assert is_same_ann(expected_ann, ann)
 
         ###Confidence layer testing
-        for (_, expected_ann), (_, ann) in zip(expected_confidence_layer['annotations'].items(), confidence_layer['annotations'].items()):
-            assert expected_ann == ann
+        for (_, expected_ann), (_, ann) in zip(expected_confidence_layer.get_annotations(), confidence_layer.get_annotations()):
+            assert is_same_ann(expected_ann, ann)
 
 
 @pytest.mark.skip(reason="bdrc api failing")

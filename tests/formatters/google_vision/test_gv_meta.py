@@ -1,8 +1,6 @@
 import tempfile
-import json
 from pathlib import Path
 
-from openpecha import config
 from openpecha.utils import load_yaml
 from openpecha.formatters.ocr.google_vision import GoogleVisionFormatter, GoogleVisionBDRCFileProvider
 from test_gv_data_provider import GoogleVisionTestFileProvider
@@ -23,7 +21,7 @@ def test_google_ocr_metadata():
     with tempfile.TemporaryDirectory() as tmpdirname:
         formatter = GoogleVisionFormatter(output_path=tmpdirname)
         pecha = formatter.create_opf(data_provider, pecha_id, {}, ocr_import_info)
-        output_metadata = json.loads(pecha.meta.json(exclude_none=True))
+        output_metadata = pecha.read_meta_file()
         expected_metadata = load_yaml(expected_meta_path)
         assert output_metadata['license'] == expected_metadata['license']
         assert output_metadata['copyright'] == expected_metadata['copyright']
