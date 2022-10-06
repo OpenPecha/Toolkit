@@ -2,6 +2,11 @@
 
 <!--next-version-placeholder-->
 
+## v0.9.1 (2022-10-05)
+### Fix
+* **hocr-parser:** Fix documentation ([`b7b6e95`](https://github.com/OpenPecha/Toolkit/commit/b7b6e95235181d3833acbdce39f5eee8c5dbc7fc))
+* **hocr-parser:** Add documentation and a bug fix ([`cc5ffd8`](https://github.com/OpenPecha/Toolkit/commit/cc5ffd8a269e585cb9bace4d64abcf896a81dc94))
+
 ## v0.9.0 (2022-10-05)
 ### Feature
 * **hocr:** Parser base code implemented ([`e7ccec4`](https://github.com/OpenPecha/Toolkit/commit/e7ccec401792ea84af7ff6df9948a618dbd7a29b))
