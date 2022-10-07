@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.9.3 (2022-10-07)
+### Fix
+* **utils:** Add download release ([`1b93132`](https://github.com/OpenPecha/Toolkit/commit/1b9313255341bf1d4f7e054353fa8da5cd575421))
+
 ## v0.9.2 (2022-10-07)
 ### Fix
 * **formatter.ocr:** Use `openpecha.core` module to create pecha and layers ([`35ad913`](https://github.com/OpenPecha/Toolkit/commit/35ad913378588b8b5eede8d3e7c715549dfeb3fa))
