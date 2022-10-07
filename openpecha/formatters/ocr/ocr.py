@@ -540,7 +540,7 @@ class OCRFormatter(BaseFormatter):
             return Copyright_unknown, None
         return Copyright_copyrighted, LicenseType.UNDER_COPYRIGHT
             
-    def get_metadata(self, pecha_id: str = None, ocr_import_info=None):
+    def get_metadata(self, pecha_id: str = None, ocr_import_info=None) -> InitialPechaMetadata:
         source_metadata = {
             "id": f"http://purl.bdrc.io/resource/{self.bdrc_scan_id}",
             "title": "",
