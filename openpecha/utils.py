@@ -2,6 +2,8 @@
 """
 import gzip
 import io
+import urllib
+import requests
 import shutil
 from collections import defaultdict
 from pathlib import Path
@@ -147,3 +149,31 @@ def download_pecha(pecha_id, out_path=None, needs_update=True, branch="main"):
     setup_auth_for_old_repo(repo, org=storage.org_name, token=storage.token)
 
     return pecha_path
+
+
+def download_pecha_assets(pecha_id: str, asset_type:str, download_dir:Path):
+    """Download pecha assets from latest release 
+
+    Args:
+        pecha_id (str): pecha id
+        asset_type (str): asset type can be src web page or ocr output
+        download_dir (Path): directory where you want to download the assets
+
+    Returns:
+        Path: zip file path of downloaded asset
+    """
+    
+
+    response = requests.get(f"https://api.github.com/repos/OpenPecha-data/{pecha_id}/releases/latest")
+    res = response.json()
+    for asset in res['assets']:
+        if asset['name'] == f"{asset_type}.zip":
+            asset_download_url = asset['browser_download_url']
+            break
+    f = urllib.request.urlopen(asset_download_url)
+    assets = f.read()
+    zip_asset_file_path = download_dir / f"{pecha_id}_{asset_type}.zip"
+
+    zip_asset_file_path.write_bytes(assets)
+
+    return zip_asset_file_path
