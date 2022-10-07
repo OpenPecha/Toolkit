@@ -21,8 +21,8 @@ def test_google_ocr_base_meta():
     
     with tempfile.TemporaryDirectory() as tmpdirname:
         formatter = HOCRFormatter(mode=mode, output_path=tmpdirname)
-        pecha_path = formatter.create_opf(data_provider, pecha_id, {}, ocr_import_info)
-        output_metadata = load_yaml(Path(f"{pecha_path}/{pecha_path.name}.opf/meta.yml"))
+        pecha = formatter.create_opf(data_provider, pecha_id, {}, ocr_import_info)
+        output_metadata = pecha.read_meta_file()
         expected_metadata = load_yaml(expected_meta_path)
         assert output_metadata["source_metadata"] == expected_metadata["source_metadata"]
         del output_metadata["ocr_import_info"]["ocr_info"]["timestamp"]

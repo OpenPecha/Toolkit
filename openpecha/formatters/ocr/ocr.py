@@ -1,26 +1,18 @@
-import gzip
-import json
-import math
 import re
-from enum import Enum
-from pathlib import Path
 import statistics
 import logging
 
 import datetime
 from datetime import timezone
-import requests
-from pathlib import Path
 from fontTools import unicodedata
 from abc import abstractmethod
 
 from openpecha.core.annotation import Page, Span
-from openpecha.core.annotations import BaseAnnotation, Language, OCRConfidence
+from openpecha.core.annotations import Language, OCRConfidence
 from openpecha.core.layer import Layer, LayerEnum, OCRConfidenceLayer
-from openpecha.core.ids import get_base_id
 from openpecha.core.metadata import InitialPechaMetadata, InitialCreationType, LicenseType, Copyright_copyrighted, Copyright_unknown, Copyright_public_domain
+from openpecha.core.pecha import OpenPechaFS
 from openpecha.formatters import BaseFormatter
-from openpecha.utils import dump_yaml, gzip_str
 from openpecha import __version__
 
 ANNOTATION_MINIMAL_LEN = 20
@@ -525,17 +517,17 @@ class OCRFormatter(BaseFormatter):
         layers = {}
         if state["pagination_annotations"]:
             layer = Layer(annotation_type=LayerEnum.pagination, annotations=state["pagination_annotations"])
-            layers[LayerEnum.pagination.value] = json.loads(layer.json(exclude_none=True))
+            layers[LayerEnum.pagination] = layer
         if state["language_annotations"]:
             annotations = self.merge_short_language_annotations(state["language_annotations"])
             layer = Layer(annotation_type=LayerEnum.language, annotations=annotations)
-            layers[LayerEnum.language.value] = json.loads(layer.json(exclude_none=True))
+            layers[LayerEnum.language] = layer
         if state["low_confidence_annotations"]:
             layer = OCRConfidenceLayer(
                 confidence_threshold=self.ocr_confidence_threshold, 
                 annotations=state["low_confidence_annotations"]
             )
-            layers[LayerEnum.ocr_confidence.value] = json.loads(layer.json(exclude_none=True))
+            layers[LayerEnum.ocr_confidence] = layer
         return state["base_layer"], layers, state["word_confidences"]
 
     def get_copyright_and_license_info(self, bdata):
@@ -548,7 +540,7 @@ class OCRFormatter(BaseFormatter):
             return Copyright_unknown, None
         return Copyright_copyrighted, LicenseType.UNDER_COPYRIGHT
             
-    def get_metadata(self, pecha_id, ocr_import_info):
+    def get_metadata(self, pecha_id: str = None, ocr_import_info=None) -> InitialPechaMetadata:
         source_metadata = {
             "id": f"http://purl.bdrc.io/resource/{self.bdrc_scan_id}",
             "title": "",
@@ -575,7 +567,7 @@ class OCRFormatter(BaseFormatter):
             default_language=self.default_language,
             ocr_import_info=ocr_import_info
         )
-        return json.loads(metadata.json())
+        return metadata
 
     def set_base_meta(self, image_group_id, base_file_name, word_confidence_list):
         self.cur_word_confidences = []
@@ -590,7 +582,7 @@ class OCRFormatter(BaseFormatter):
               "ocr_word_mean_confidence_index": statistics.mean(word_confidence_list)
             }
     
-    def create_opf(self, data_provider, pecha_id, opf_options = {}, ocr_import_info = {}):
+    def create_opf(self, data_provider, pecha_id=None, opf_options = {}, ocr_import_info = {}):
         """Create opf
 
         Args:
@@ -626,7 +618,8 @@ class OCRFormatter(BaseFormatter):
 
         ocr_import_info["op_import_options"] = opf_options
         ocr_import_info["op_import_version"] = __version__
-        self._build_dirs(None, id_=pecha_id)
+        
+        # self._build_dirs(None, id_=pecha_id)
 
         # if the bdrc scan id is not specified, we assume it's the directory namepecha_id
         self.bdrc_scan_id = ocr_import_info["bdrc_scan_id"]
@@ -639,34 +632,25 @@ class OCRFormatter(BaseFormatter):
             self.default_language = self.source_info["languages"][0]
 
         self.metadata = self.get_metadata(pecha_id, ocr_import_info)
+        pecha = OpenPechaFS(metadata=self.metadata)
         total_word_confidence_list = []
 
         for image_group_id, image_group_info in self.source_info["image_groups"].items():
             base_id = image_group_id
             base_text, layers, word_confidence_list = self.build_base(image_group_id)
-
-            # save base_text
-            (self.dirs["opf_path"] / "base" / f"{base_id}.txt").write_text(base_text)
-
-            # save layers
-            vol_layer_path = self.dirs["layers_path"] / base_id
-            vol_layer_path.mkdir(exist_ok=True)
-            for layer_id, layer in layers.items():
-                layer_fn = vol_layer_path / f"{layer_id}.yml"
-                dump_yaml(layer, layer_fn)
+            pecha.bases[base_id] = base_text
+            pecha.layers[base_id] = layers
             self.set_base_meta(image_group_id, base_id, word_confidence_list)
             total_word_confidence_list += word_confidence_list
 
         # we add the rest to metadata:
-        self.metadata["bases"] = self.base_meta
+        pecha.meta.bases = self.base_meta
         if total_word_confidence_list:
-            self.metadata['statistics'] = {
+            pecha.meta.statistics = {
                 # there are probably more efficient ways to compute those
                 "ocr_word_mean_confidence_index": statistics.mean(total_word_confidence_list),
                 "ocr_word_median_confidence_index": statistics.median(total_word_confidence_list)
             }
+        pecha.save(output_path=self.output_path)
 
-        meta_fn = self.dirs["opf_path"] / "meta.yml"
-        dump_yaml(self.metadata, meta_fn)
-
-        return self.dirs["opf_path"].parent
+        return pecha
