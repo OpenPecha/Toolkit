@@ -36,7 +36,7 @@ def test_base_text():
         assert expected_base_text == base_text
 
 def is_same_ann(expected_ann, ann):
-    if expected_ann.span.start == ann.span.start and expected_ann.span.end == ann.span.end:
+    if expected_ann.__dict__ == ann.__dict__:
         return True
     return False
 
