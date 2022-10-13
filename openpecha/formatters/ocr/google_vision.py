@@ -123,7 +123,7 @@ class GoogleVisionFormatter(OCRFormatter):
                 for paragraph in block['paragraphs']:
                     for word in paragraph['words']:
                         for symbol in word['symbols']:
-                            symbolunicat = unicodedata.category(symbol['text'])
+                            symbolunicat = unicodedata.category(symbol['text'][0])
                             if symbolunicat in UNICODE_CHARCAT_FOR_WIDTH:
                                 vertices = symbol['boundingBox']['vertices']
                                 if len(vertices) < 2 or 'x' not in vertices[0] or 'x' not in vertices[1]:
