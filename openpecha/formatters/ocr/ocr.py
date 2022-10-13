@@ -622,8 +622,8 @@ class OCRFormatter(BaseFormatter):
         # self._build_dirs(None, id_=pecha_id)
 
         # if the bdrc scan id is not specified, we assume it's the directory namepecha_id
-        self.bdrc_scan_id = ocr_import_info["bdrc_scan_id"]
-        self.source_info = data_provider.get_source_info()
+        self.bdrc_scan_id = self.data_provider.bdrc_scan_id
+        self.source_info = self.data_provider.get_source_info()
         self.default_language = "bo" if "expected_default_language" not in ocr_import_info else ocr_import_info["expected_default_language"]
         self.default_language = "bo"
         if "expected_default_language" in ocr_import_info:
