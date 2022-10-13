@@ -148,5 +148,5 @@ class GoogleVisionFormatter(OCRFormatter):
             page_content = ocr_object["textAnnotations"][0]["description"]
         except Exception:
             logging.error("OCR page is empty (no textAnnotations[0]/description)")
-            return
+            return None, 0
         return self.get_char_base_bboxes_and_avg_width(ocr_object)
