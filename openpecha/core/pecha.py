@@ -111,7 +111,7 @@ class OpenPecha:
     def is_private(self):
         private = False
         if self.meta.source_metadata:
-            if "CN" in self.meta.source_metadata.get("geo_restriction", []) or self.meta.source_metadata.get("restrictedInChina", False):
+            if self.meta.source_metadata.get("geo_restriction", []) or self.meta.source_metadata.get("restrictedInChina", False):
                 private = True
         return private
 
