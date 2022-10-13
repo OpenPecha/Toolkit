@@ -12,6 +12,7 @@ from openpecha.core.ids import get_initial_pecha_id
 from openpecha.github_utils import create_readme, github_publish
 from openpecha.storages import GithubStorage, Storage
 from openpecha.utils import create_release_with_assets, ocr_result_input
+from openpecha.formatters.ocr.google_vision import GoogleVisionBDRCFileProvider
 
 buildin_pipes = {
     "input": {"ocr_result_input": ocr_result_input},
@@ -73,9 +74,10 @@ class CatalogManager:
         self.batch.append(catalog_metadata)
         create_readme(metadata["source_metadata"], self.formatter.pecha_path)
 
-    def format_and_publish(self, path):
+    def format_and_publish(self, path, ocr_import_info):
         """Convert input pecha to opf-pecha with id assigined"""
-        self.formatter.create_opf(path, get_initial_pecha_id())
+        data_provider = GoogleVisionBDRCFileProvider(path.name, ocr_import_info, path, mode="local")
+        self.formatter.create_opf(data_provider, None, {}, ocr_import_info)
         self._get_catalog_metadata(self.formatter.meta_fn)
         github_publish(
             self.formatter.pecha_path,
@@ -86,8 +88,8 @@ class CatalogManager:
         )
         return self.formatter.pecha_path
 
-    def add_ocr_item(self, path):
-        self._process(path, "ocr_result_input", "create_release_with_assets")
+    def add_ocr_item(self, path, ocr_import_info):
+        self._process(path, ocr_import_info, "ocr_result_input", "create_release_with_assets")
 
     def add_hfml_item(self, path):
         self._process(path, "ocr_result_input")
@@ -95,11 +97,11 @@ class CatalogManager:
     def add_empty_item(self, text):
         self._process(text, "ocr_result_input")
 
-    def _process(self, path, input_method, release_method=None):
+    def _process(self, path, ocr_import_info, input_method, release_method=None):
         print("[INFO] Getting input")
         raw_pecha_path = self.pipes["input"][input_method](path)
         print("[INFO] Convert Pecha to OPF")
-        opf_pecha_path = self.format_and_publish(raw_pecha_path)
+        opf_pecha_path = self.format_and_publish(raw_pecha_path, ocr_import_info)
         if release_method:
             print("[INFO] Release OPF pecha")
             self.pipes["release"][release_method](opf_pecha_path)
