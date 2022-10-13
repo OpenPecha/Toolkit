@@ -1,11 +1,9 @@
 import json
-import os
 import shutil
 import warnings
 from collections import defaultdict
 from pathlib import Path
 from typing import Dict, List, Union
-from xmlrpc.client import Boolean
 from git import Repo
 
 from openpecha import blupdate, config
@@ -66,10 +64,15 @@ class OpenPecha:
     @property
     def about(self):
         source_metadata = []
-        titles = self.meta.source_metadata.get('title', {})
-        if titles:
-            for val in titles.values():
-                source_metadata.append(str(val))
+        descriptive_labels = ['title', 'author', 'id']
+        for label, info in self.meta.source_metadata.items():
+            if label in descriptive_labels:
+                if isinstance(info, list):
+                    cur_info = f"{label}: {' '.join(info)}"
+                    source_metadata.append(cur_info)
+                else:
+                    cur_info = f"{label}: {info}"
+                    source_metadata.append(cur_info)
         return ", ".join(source_metadata)
 
     def reset_base_and_layers(self):
@@ -407,7 +410,7 @@ class OpenPechaFS(OpenPecha):
             shutil.make_archive(asset_path.parent / asset_name, "zip", asset_path)
             asset_paths.append(f"{asset_path.parent / asset_name}.zip")
             create_release(
-                repo_name, prerelease=False, asset_paths=asset_paths, org=os.environ["OPENPECHA_DATA_GITHUB_ORG"], token=os.environ.get("GITHUB_TOKEN")
+                repo_name, prerelease=False, asset_paths=asset_paths, org=self.storage.org_name, token=self.storage.token
             )
             (asset_path.parent / f"{asset_name}.zip").unlink()
 
@@ -463,7 +466,7 @@ class OpenPechaBareGitRepo(OpenPecha):
             path = f.split("/")
             if len(path) > 1:
                 basename = path[-2]
-                layername = pathlib.Path(path[-1]).stem
+                layername = Path(path[-1]).stem
                 if basename not in res:
                     res[basename] = []
                 res[basename].append(layername)
