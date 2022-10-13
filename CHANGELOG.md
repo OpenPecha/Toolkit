@@ -2,6 +2,17 @@
 
 <!--next-version-placeholder-->
 
+## v0.9.3 (2022-10-07)
+### Fix
+* **utils:** Add download release ([`1b93132`](https://github.com/OpenPecha/Toolkit/commit/1b9313255341bf1d4f7e054353fa8da5cd575421))
+
+## v0.9.2 (2022-10-07)
+### Fix
+* **formatter.ocr:** Use `openpecha.core` module to create pecha and layers ([`35ad913`](https://github.com/OpenPecha/Toolkit/commit/35ad913378588b8b5eede8d3e7c715549dfeb3fa))
+* **ocr:** Add return type for get_metadata ([`b739372`](https://github.com/OpenPecha/Toolkit/commit/b739372391d87ab2d960371afc2611ec6bce56f1))
+* **test:** Update test ([`b651531`](https://github.com/OpenPecha/Toolkit/commit/b651531bd704dc585712bf6a04c796d12a81374c))
+* **ocr:** Create opf method return openpechafs object ([`57e611f`](https://github.com/OpenPecha/Toolkit/commit/57e611f5e01548a2dfce3eafee980f73a7b05ee6))
+
 ## v0.9.1 (2022-10-05)
 ### Fix
 * **hocr-parser:** Fix documentation ([`b7b6e95`](https://github.com/OpenPecha/Toolkit/commit/b7b6e95235181d3833acbdce39f5eee8c5dbc7fc))

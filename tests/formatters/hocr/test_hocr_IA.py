@@ -2,6 +2,7 @@ import tempfile
 from pathlib import Path
 
 from test_hocr_data_provider import HOCRIATestFileProvider
+from openpecha.core.layer import LayerEnum, Layer
 from openpecha.formatters.ocr.hocr import HOCRFormatter
 
 from openpecha.utils import load_yaml, dump_yaml
@@ -22,8 +23,8 @@ def test_base_text():
     
     with tempfile.TemporaryDirectory() as tmpdirname:
         formatter = HOCRFormatter(mode=mode, output_path=tmpdirname)
-        pecha_path = formatter.create_opf(data_provider, pecha_id, {}, ocr_import_info)
-        base_text = (pecha_path / f"{pecha_path.name}.opf" / "base" / "I0886.txt").read_text(encoding='utf-8')
+        pecha = formatter.create_opf(data_provider, pecha_id, {}, ocr_import_info)
+        base_text = pecha.bases['I0886']
         base_text_line = base_text.split("\n")
         expected_base_text_line = expected_base_text.split("\n")
         for i, btl in enumerate(base_text_line):
@@ -34,14 +35,22 @@ def test_base_text():
                         print("'%s' != '%s'" % (c, expected_base_text_line[i][j]))
         assert expected_base_text == base_text
 
+def is_same_ann(expected_ann, ann):
+    if expected_ann.__dict__ == ann.__dict__:
+        return True
+    return False
+
 def test_build_layers():
     work_id = "W22084"
     pecha_id = "I9876543"
     mode = "IA"
+    base_name = "I0886"
     
     ocr_path = Path(__file__).parent / "data" / "file_per_volume" / work_id
-    expected_pagination_layer = load_yaml((Path(__file__).parent / "data" / "file_per_volume" / "opf_expected_datas" / "expected_Pagination.yml"))
-    expected_confidence_layer = load_yaml((Path(__file__).parent / "data" / "file_per_volume" / "opf_expected_datas" / "expected_OCRConfidence.yml"))
+    expected_pagination_layer_dict = load_yaml((Path(__file__).parent / "data" / "file_per_volume" / "opf_expected_datas" / "expected_Pagination.yml"))
+    expected_pagination_layer = Layer(annotation_type=LayerEnum.pagination, annotations=expected_pagination_layer_dict['annotations'])
+    expected_confidence_layer_dict = load_yaml((Path(__file__).parent / "data" / "file_per_volume" / "opf_expected_datas" / "expected_OCRConfidence.yml"))
+    expected_confidence_layer = Layer(annotation_type=LayerEnum.ocr_confidence, annotations=expected_confidence_layer_dict['annotations'])
     buda_data_path = Path(__file__).parent / "data" / "file_per_volume" / "buda_data.yml"
     ocr_import_info_path = Path(__file__).parent / "data" / "file_per_volume" / "ocr_import_info.yml"
     ocr_import_info = load_yaml(ocr_import_info_path)
@@ -53,17 +62,17 @@ def test_build_layers():
     
     with tempfile.TemporaryDirectory() as tmpdirname:
         formatter = HOCRFormatter(mode=mode, output_path=tmpdirname)
-        pecha_path = formatter.create_opf(data_provider, pecha_id, opf_options, ocr_import_info)
-        pagination_layer = load_yaml((pecha_path / f"{pecha_path.name}.opf" / "layers" / "I0886" / "Pagination.yml"))
-        confidence_layer = load_yaml((pecha_path / f"{pecha_path.name}.opf" / "layers" / "I0886" / "OCRConfidence.yml"))
+        pecha = formatter.create_opf(data_provider, pecha_id, opf_options, ocr_import_info)
+        pagination_layer = pecha.layers[base_name][LayerEnum.pagination]
+        confidence_layer = pecha.layers[base_name][LayerEnum.ocr_confidence]
 
         ###Pagination layer testing
-        for (_, expected_ann), (_, ann) in zip(expected_pagination_layer['annotations'].items(), pagination_layer['annotations'].items()):
-            assert expected_ann == ann
+        for (_, expected_ann), (_, ann) in zip(expected_pagination_layer.get_annotations(), pagination_layer.get_annotations()):
+            assert is_same_ann(expected_ann, ann)
 
         ###Confidence layer testing
-        for (_, expected_ann), (_, ann) in zip(expected_confidence_layer['annotations'].items(), confidence_layer['annotations'].items()):
-            assert expected_ann == ann
+        for (_, expected_ann), (_, ann) in zip(expected_confidence_layer.get_annotations(), confidence_layer.get_annotations()):
+            assert is_same_ann(expected_ann, ann)
 
 if __name__ == "__main__":
     test_base_text()

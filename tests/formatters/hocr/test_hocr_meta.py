@@ -1,7 +1,6 @@
 import tempfile
 from pathlib import Path
 
-from openpecha import config
 from openpecha.utils import load_yaml
 from openpecha.formatters.ocr.hocr import HOCRFormatter
 from test_hocr_data_provider import HOCRTestFileProvider
@@ -21,8 +20,8 @@ def test_google_ocr_metadata():
     
     with tempfile.TemporaryDirectory() as tmpdirname:
         formatter = HOCRFormatter(output_path=tmpdirname)
-        pecha_path = formatter.create_opf(data_provider, pecha_id, {}, ocr_import_info)
-        output_metadata = load_yaml(Path(f"{pecha_path}/{pecha_path.name}.opf/meta.yml"))
+        pecha = formatter.create_opf(data_provider, pecha_id, {}, ocr_import_info)
+        output_metadata = pecha.read_meta_file()
         expected_metadata = load_yaml(expected_meta_path)
         assert output_metadata['license'] == expected_metadata['license']
         assert output_metadata['copyright'] == expected_metadata['copyright']
