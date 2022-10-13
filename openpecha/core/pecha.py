@@ -10,7 +10,8 @@ from openpecha import blupdate, config
 from openpecha.core import ids
 from openpecha.core.annotations import BaseAnnotation, Span
 from openpecha.core.layer import Layer, LayerEnum, PechaMetadata, SpanINFO
-from openpecha.storages import GithubStorage, Storage
+from openpecha.github_utils import create_release
+from openpecha.storages import GithubStorage, Storage, commit_and_push
 from openpecha.utils import download_pecha, dump_yaml, load_yaml, load_yaml_str
 
 
@@ -63,10 +64,15 @@ class OpenPecha:
     @property
     def about(self):
         source_metadata = []
-        for val in self.meta.source_metadata.values():
-            if not isinstance(val, (str, int)):
-                continue
-            source_metadata.append(val)
+        descriptive_labels = ['title', 'author', 'id']
+        for label, info in self.meta.source_metadata.items():
+            if label in descriptive_labels:
+                if isinstance(info, list):
+                    cur_info = f"{label}: {' '.join(info)}"
+                    source_metadata.append(cur_info)
+                else:
+                    cur_info = f"{label}: {info}"
+                    source_metadata.append(cur_info)
         return ", ".join(source_metadata)
 
     def reset_base_and_layers(self):
@@ -100,6 +106,14 @@ class OpenPecha:
             return self._components
         self._components = self._read_components()
         return self._components
+    
+    @property
+    def is_private(self):
+        private = False
+        if self.meta.source_metadata:
+            if "CN" in self.meta.source_metadata.get("geo_restriction", []) or self.meta.source_metadata.get("restrictedInChina", False):
+                private = True
+        return private
 
     def _get_base_name(self) -> str:
         return ids.get_base_id()
@@ -249,6 +263,8 @@ class OpenPechaFS(OpenPecha):
 
     @property
     def pecha_path(self) -> Path:
+        if self._opf_path:
+            return self._opf_path.parent
         return self.output_dir / self.pecha_id
 
     @property
@@ -378,10 +394,25 @@ class OpenPechaFS(OpenPecha):
                 continue
             self.reset_layer(base_name, layer_name)
 
-    def publish(self):
+    def publish(self, asset_path:Path=None, asset_name:str=None):
+        asset_paths = []
         if not self.storage:
             self.storage = GithubStorage()
-        self.storage.add_dir(path=self.pecha_path, description=self.about)
+        if self.storage.is_git_repo(self.pecha_path):
+            local_repo = Repo(self.pecha_path)
+            commit_and_push(repo=local_repo, message="Pecha update")
+        else:
+            self.storage.add_dir(path=self.pecha_path, description=self.about, is_private=self.is_private)
+
+        # Publishing assets in release
+        if asset_path:
+            repo_name = self.pecha_id
+            shutil.make_archive(asset_path.parent / asset_name, "zip", asset_path)
+            asset_paths.append(f"{asset_path.parent / asset_name}.zip")
+            create_release(
+                repo_name, prerelease=False, asset_paths=asset_paths, org=self.storage.org_name, token=self.storage.token
+            )
+            (asset_path.parent / f"{asset_name}.zip").unlink()
 
     def remove(self):
         self.storage.remove_dir_with_path(name=self.pecha_path)
@@ -435,7 +466,7 @@ class OpenPechaBareGitRepo(OpenPecha):
             path = f.split("/")
             if len(path) > 1:
                 basename = path[-2]
-                layername = pathlib.Path(path[-1]).stem
+                layername = Path(path[-1]).stem
                 if basename not in res:
                     res[basename] = []
                 res[basename].append(layername)

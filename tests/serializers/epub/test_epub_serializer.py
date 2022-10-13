@@ -9,7 +9,8 @@ def test_opf_2_tsadra_serializer():
     opf_path = Path(__file__).parent / "data" / "P000801" / "P000801.opf"
     with tempfile.TemporaryDirectory() as tmpdirname:
         serializer = EpubSerializer(opf_path)
-        out_fn = serializer.serialize(output_path=tmpdirname)
+        css_template = '.tibetan-sabche1 {color: #005e7f;}'
+        out_fn = serializer.serialize(output_path=tmpdirname, css_template=css_template)
         assert out_fn.name == "P000801.epub"
 
 
