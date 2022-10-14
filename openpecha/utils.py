@@ -2,13 +2,13 @@
 """
 import gzip
 import io
-import urllib
-import requests
 import shutil
+import urllib
 from collections import defaultdict
 from pathlib import Path
 from typing import Dict
 
+import requests
 import yaml
 from git import GIT_OK, Repo
 from git.cmd import GitCommandError
@@ -46,7 +46,7 @@ def _mkdir(path):
         return path
     path.mkdir(exist_ok=True, parents=True)
     return path
-    
+
 def ocr_result_input(path):
     return path
 
@@ -118,6 +118,10 @@ def _eval_branch(repo, branch):
 
 
 def download_pecha(pecha_id, out_path=None, needs_update=True, branch="main"):
+    # resolve defaults kwargs
+    needs_update = needs_update if needs_update is not None else True
+    branch = branch if branch is not None else "main"
+
     # clone the repo
     pecha_url = f"{config.GITHUB_ORG_URL}/{pecha_id}.git"
     if out_path:
@@ -152,7 +156,7 @@ def download_pecha(pecha_id, out_path=None, needs_update=True, branch="main"):
 
 
 def download_pecha_assets(pecha_id: str, asset_type:str, download_dir:Path):
-    """Download pecha assets from latest release 
+    """Download pecha assets from latest release
 
     Args:
         pecha_id (str): pecha id
@@ -162,7 +166,7 @@ def download_pecha_assets(pecha_id: str, asset_type:str, download_dir:Path):
     Returns:
         Path: zip file path of downloaded asset
     """
-    
+
 
     response = requests.get(f"https://api.github.com/repos/OpenPecha-data/{pecha_id}/releases/latest")
     res = response.json()

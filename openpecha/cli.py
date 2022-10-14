@@ -4,8 +4,6 @@ import traceback
 from pathlib import Path
 
 import click
-from git import Repo
-from git.cmd import GitCommandError
 from tqdm import tqdm
 
 import openpecha
@@ -17,10 +15,9 @@ from openpecha.catalog.filter import is_text_good_quality
 from openpecha.catalog.storage import GithubBucket
 from openpecha.core.pecha import OpenPechaFS
 from openpecha.corpus.quality import NonWordsCounter
-from openpecha.exceptions import PechaNotFound
-from openpecha.formatters import GoogleOCRFormatter, HFMLFormatter
+from openpecha.formatters import GoogleVisionFormatter, HFMLFormatter
 from openpecha.serializers import EpubSerializer, HFMLSerializer
-from openpecha.storages import GithubStorage, setup_auth_for_old_repo
+from openpecha.utils import download_pecha
 
 OP_PATH = config.BASE_PATH
 config = {
@@ -49,91 +46,34 @@ def cli():
     pass
 
 
-def create_config_dirs():
-    config["OP_DATA_PATH"].mkdir(parents=True, exist_ok=True)
-    config["CONFIG_PATH"].mkdir(parents=True, exist_ok=True)
-
-
-def _eval_branch(repo, branch):
-    """return default branch as fallback branch."""
-    if branch in repo.refs or f"origin/{branch}" in repo.refs:
-        return branch
-    elif "main" in repo.refs:
-        return "main"
-    else:
-        return "master"
-
-
-def download_pecha(pecha_id, out_path=None, needs_update=True, branch="main"):
-    # clone the repo
-    pecha_url = f"{config['OP_ORG']}/{pecha_id}.git"
-    if out_path:
-        out_path = Path(out_path)
-        out_path.mkdir(exist_ok=True, parents=True)
-        pecha_path = out_path / pecha_id
-    else:
-        pecha_path = config["OP_PECHAS_PATH"] / pecha_id
-
-    if pecha_path.is_dir():  # if repo is already exits at local then try to pull
-        repo = Repo(str(pecha_path))
-        branch = _eval_branch(repo, branch)
-        repo.git.checkout(branch)
-        if needs_update:
-            click.echo(INFO.format(f"Updating {pecha_id} ..."))
-            repo.git.pull("origin", branch)
-    else:
-        click.echo(INFO.format(f"Downloading {pecha_id} ..."))
-        try:
-            Repo.clone_from(pecha_url, str(pecha_path))
-        except GitCommandError:
-            raise PechaNotFound(f"Pecha with id {pecha_id} doesn't exist")
-        repo = Repo(str(pecha_path))
-        branch = _eval_branch(repo, branch)
-        repo.git.checkout(branch)
-
-    # setup auth
-    storage = GithubStorage()
-    setup_auth_for_old_repo(repo, org=storage.org_name, token=storage.token)
-
-    return pecha_path
-
-
-# Poti Download command
 @cli.command()
-@click.option("--number", "-n", help="Pecha number of pecha, for single pecha download")
-@click.option(
-    "--batch",
-    "-b",
-    help="path to text file containg list of names of \
-                                     pecha in separate line. Poti batch download",
-)
-@click.option(
-    "--filter",
-    "-f",
-    help="filter pecha by layer availability, specify \
-                                     layer names in comma separated, eg: title,yigchung,..",
-)
-@click.option("--out", "-o", help="directory to store all the pecha")
+@click.argument("pecha_id")
+@click.option("--out", "-o", help="Directory to save the pecha")
+@click.option("--branch", "-b", help="Which branch to download, default is `main`")
 def download(**kwargs):
     """
-    Command to download pecha.
-    If id and batch options are not provided then it will download all the pecha.
+    Command to download a pecha.
     """
-    pecha_id = get_pecha_id(kwargs["number"])
+    pecha_id = kwargs["pecha_id"]
+    output_path = kwargs["out"]
+    branch = kwargs["branch"]
 
-    # create config dirs
-    create_config_dirs()
+    msg = INFO.format(f"Downloading {pecha_id}️...")
+    click.echo(msg)
 
-    # get pecha
-    pechas = [pecha_id]
+    try:
+        pecha_path = download_pecha(pecha_id, out_path=output_path, branch=branch)
+    except Exception as e:
+        msg = ERROR.format(f"❌ Failed to download {pecha_id}...x")
+        click.echo(msg)
+        msg = ERROR.format(f"❌ {e}")
+        click.echo(msg)
+        return
 
-    # download the repo
-    for pecha in tqdm(pechas):
-        download_pecha(pecha, kwargs["out"])
-
-    # print location of data
-    msg = f"Downloaded {pecha_id} ... ok"
-    click.echo(INFO.format(msg))
+    msg = INFO.format(f"✅ Download completed")
+    click.echo(msg)
+    msg = INFO.format(f"📖 Pecha saved at {pecha_path.resolve()}")
+    click.echo(msg)
 
 
 # OpenPecha Formatter
@@ -152,7 +92,7 @@ def format(**kwargs):
     Command to format pecha into opf
     """
     if kwargs["name"] == "ocr":
-        formatter = GoogleOCRFormatter(kwargs["output_path"])
+        formatter = GoogleVisionFormatter(kwargs["output_path"])
     elif kwargs["name"] == "tsadra":
         formatter = HFMLFormatter(kwargs["output_path"])
     else:
