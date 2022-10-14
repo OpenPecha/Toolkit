@@ -2,6 +2,11 @@
 
 <!--next-version-placeholder-->
 
+## v0.9.5 (2022-10-14)
+### Fix
+* **cli:** Add batch download command ([`ef5a7d8`](https://github.com/OpenPecha/Toolkit/commit/ef5a7d80904f75c5450887aadb877e6bb59295cc))
+* **cli:** Download cmd now only download single pecha ([`5ee31c9`](https://github.com/OpenPecha/Toolkit/commit/5ee31c92a8f8c80caf79a9fc3f81d966656aca67))
+
 ## v0.9.4 (2022-10-14)
 ### Fix
 * **pecha:** Update is private with geo restriction availibilty ([`3e9b3c2`](https://github.com/OpenPecha/Toolkit/commit/3e9b3c2142d4a619c1f968095990f837238fe97d))
