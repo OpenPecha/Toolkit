@@ -58,23 +58,53 @@ def download(**kwargs):
     output_path = kwargs["out"]
     branch = kwargs["branch"]
 
-    msg = INFO.format(f"Downloading {pecha_id}️...")
-    click.echo(msg)
+    click.echo(f"✨ Downloading {pecha_id}️...")
 
     try:
         pecha_path = download_pecha(pecha_id, out_path=output_path, branch=branch)
     except Exception as e:
-        msg = ERROR.format(f"❌ Failed to download {pecha_id}...x")
-        click.echo(msg)
-        msg = ERROR.format(f"❌ {e}")
-        click.echo(msg)
+        click.echo(f"❌ Failed to download {pecha_id}...x")
+        click.echo(f"❌ {e}")
         return
 
-    msg = INFO.format(f"✅ Download completed")
-    click.echo(msg)
-    msg = INFO.format(f"📖 Pecha saved at {pecha_path.resolve()}")
-    click.echo(msg)
+    click.echo(f"✅ Download completed")
+    click.echo(f"📖 Pecha saved at {pecha_path.resolve()}")
 
+
+@cli.command()
+@click.argument("batch_file_path")
+@click.option("--out", "-o", help="Directory to save the pecha")
+@click.option("--branch", "-b", help="Which branch to download, default is `main`")
+def batch_download(**kwargs):
+    """
+    Download batch of pechas.
+    """
+    batch_file_path = Path(kwargs["batch_file_path"])
+    output_path = kwargs["out"]
+    branch = kwargs["branch"]
+
+    assert batch_file_path.is_file()
+
+    # resolve outpout path
+    output_path = output_path if output_path else (Path.cwd() / batch_file_path.stem)
+    output_path = Path(output_path).resolve()
+    output_path.mkdir(exist_ok=True, parents=True)
+
+    click.echo(f"✨ Downloading  the batch {batch_file_path.name}...")
+
+    for pecha_id in tqdm(batch_file_path.read_text().splitlines()):
+        if not pecha_id:
+            continue
+
+        try:
+            download_pecha(pecha_id, out_path=output_path, branch=branch)
+        except Exception as e:
+            click.echo(f"❌ Failed to download {pecha_id}...x")
+            click.echo("❌ Error: {e}")
+            continue
+
+    click.echo(f"✅ Download completed")
+    click.echo(f"📚 Batch saved at {output_path}")
 
 # OpenPecha Formatter
 formatter_types = ["ocr", "hfml(default)", "tsadra"]
