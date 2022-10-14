@@ -1,11 +1,13 @@
 import enum
+import git
 import os
 import shutil
-import time
 from pathlib import Path
 
 from git import Repo
 from github import Github
+
+from openpecha.github_utils import create_github_repo
 
 
 class Storages(enum.Enum):
@@ -118,17 +120,22 @@ class GithubStorage(Storage):
         repo.config_writer().set_value("user", "email", self.email).release()
         return repo
 
-    def _init_remote_repo(self, name: str, description: str):
+    def _init_remote_repo(self, path: Path, description: str, is_private: bool):
         """Creates remote repo in Github and returns it's url."""
+        remote_repo_url = create_github_repo(path=path, org_name=self.org_name, token=self.token, private=is_private, description=description)
+        return remote_repo_url
 
-        repo = self.org.create_repo(name)
-        time.sleep(2)
-        return repo._html_url.value
+    def is_git_repo(self, path):
+        try:
+            _ = git.Repo(path).git_dir
+            return True
+        except git.exc.InvalidGitRepositoryError:
+            return False       
 
-    def add_dir(self, path: Path, description: str):
+    def add_dir(self, path: Path, description: str, is_private: bool=False):
         """dir local dir to github."""
         remote_repo_url = self._init_remote_repo(
-            name=path.name, description=description
+            path=path, description=description, is_private=is_private
         )
         local_repo = self._init_local_repo(path=path, remote_url=remote_repo_url)
         commit_and_push(repo=local_repo, message="Initial commit")

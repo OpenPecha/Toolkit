@@ -2,6 +2,25 @@
 
 <!--next-version-placeholder-->
 
+## v0.9.4 (2022-10-14)
+### Fix
+* **pecha:** Update is private with geo restriction availibilty ([`3e9b3c2`](https://github.com/OpenPecha/Toolkit/commit/3e9b3c2142d4a619c1f968095990f837238fe97d))
+* **pecha:** Used storage object to get org name and token. update pecha about ([`66696f2`](https://github.com/OpenPecha/Toolkit/commit/66696f25171cf2b27b5f921e65bf304ea31b9d85))
+* **googel-vision:** Return none and o for get_bboxes_for_page if page is empty ([`a6e01e8`](https://github.com/OpenPecha/Toolkit/commit/a6e01e8a2f42569bb706250c744a48fb6e632a03))
+* **google-vision:** Check first char for unicode category ([`3deaaa2`](https://github.com/OpenPecha/Toolkit/commit/3deaaa2903b60c0fc696904bdda7d4571a7a235c))
+* **ocr:** Get bdrc_scan_id from data provider ([`85aa344`](https://github.com/OpenPecha/Toolkit/commit/85aa344c843cdf6b9a1682ca651b4974be4dc971))
+* **catalog-manager:** Updated create_opf to the new format and add data_provider ([`4f492ad`](https://github.com/OpenPecha/Toolkit/commit/4f492ad6245e0e530d6008a5bdc9f1f9831f1965))
+* **test:** Assert annotation object updated ([`3c44292`](https://github.com/OpenPecha/Toolkit/commit/3c44292ab264db78a128ad28e1173204f36debb9))
+* **ocr:** Add pecha id default as none ([`a7cc7ad`](https://github.com/OpenPecha/Toolkit/commit/a7cc7adc6f8f160c1a0165a0492f95ea6da0d909))
+* **pecha:** Update pecha about and add is private to pecha ([`54428a5`](https://github.com/OpenPecha/Toolkit/commit/54428a5c19a83779bdcd6824ac4eb1e1968571bb))
+* **pecha:** Publish existing pecha with changes ([`99af8b0`](https://github.com/OpenPecha/Toolkit/commit/99af8b0d7fbdcc15b58cdd7a9a916d29c0fbaa0d))
+* **pecha:** Publish asset in release with pecha ([`efad1ba`](https://github.com/OpenPecha/Toolkit/commit/efad1ba981a61dc0a3a6785e81503dc4b159fdbe))
+* **storages:** Add check geo_restriciton in meta for private repo ([`09b1162`](https://github.com/OpenPecha/Toolkit/commit/09b1162fea2d3b3d13e4267222b07db67526f72a))
+
+## v0.9.3 (2022-10-07)
+### Fix
+* **utils:** Add download release ([`1b93132`](https://github.com/OpenPecha/Toolkit/commit/1b9313255341bf1d4f7e054353fa8da5cd575421))
+
 ## v0.9.2 (2022-10-07)
 ### Fix
 * **formatter.ocr:** Use `openpecha.core` module to create pecha and layers ([`35ad913`](https://github.com/OpenPecha/Toolkit/commit/35ad913378588b8b5eede8d3e7c715549dfeb3fa))
