@@ -6,18 +6,9 @@ the catalog. Functonalities includes:
 
 """
 
-import yaml
-
-from openpecha.core.ids import get_initial_pecha_id
 from openpecha.github_utils import create_readme, github_publish
 from openpecha.storages import GithubStorage, Storage
-from openpecha.utils import create_release_with_assets, ocr_result_input
 from openpecha.formatters.ocr.google_vision import GoogleVisionBDRCFileProvider
-
-buildin_pipes = {
-    "input": {"ocr_result_input": ocr_result_input},
-    "release": {"create_release_with_assets": create_release_with_assets},
-}
 
 
 class CatalogManager:
@@ -25,7 +16,6 @@ class CatalogManager:
 
     def __init__(
         self,
-        pipes=None,
         formatter=None,
         layers=[],
         not_include_files=["releases"],
@@ -37,7 +27,6 @@ class CatalogManager:
         self.formatter = formatter
         self.layers = layers
         self.not_include_files = not_include_files
-        self.pipes = pipes if pipes else buildin_pipes
         self.storage = storage if storage else GithubStorage()
 
     def _add_id_url(self, row):
@@ -62,31 +51,24 @@ class CatalogManager:
         # reset the batch
         self.batch = []
 
-    def _get_catalog_metadata(self, meta_fn):
-        metadata = yaml.safe_load(meta_fn.open())
+    def _get_catalog_metadata(self, pecha):
+        source_metadata = pecha.meta.source_metadata
         catalog_metadata = [
-            metadata["id"].split(":")[-1],
-            metadata["source_metadata"].get("title", ""),
-            metadata["source_metadata"].get("subtitle", ""),
-            metadata["source_metadata"].get("author", ""),
-            metadata["source_metadata"].get("id", ""),
+            pecha.meta.id,
+            source_metadata.get("title", ""),
+            source_metadata.get("subtitle", ""),
+            source_metadata.get("author", ""),
+            source_metadata["id"].split("/")[-1]
         ]
         self.batch.append(catalog_metadata)
-        create_readme(metadata["source_metadata"], self.formatter.pecha_path)
+        create_readme(source_metadata, pecha.pecha_path)
 
     def format_and_publish(self, path, ocr_import_info):
         """Convert input pecha to opf-pecha with id assigined"""
         data_provider = GoogleVisionBDRCFileProvider(path.name, ocr_import_info, path, mode="local")
-        self.formatter.create_opf(data_provider, None, {}, ocr_import_info)
-        self._get_catalog_metadata(self.formatter.meta_fn)
-        github_publish(
-            self.formatter.pecha_path,
-            not_includes=self.not_include_files,
-            layers=self.layers,
-            org=self.storage.org_name,
-            token=self.storage.token,
-        )
-        return self.formatter.pecha_path
+        pecha = self.formatter.create_opf(data_provider, None, {}, ocr_import_info)
+        self._get_catalog_metadata(pecha)
+        pecha.publish(asset_path=path, asset_name='ocr_output')
 
     def add_ocr_item(self, path, ocr_import_info):
         self._process(path, ocr_import_info, "ocr_result_input", "create_release_with_assets")
@@ -99,9 +81,5 @@ class CatalogManager:
 
     def _process(self, path, ocr_import_info, input_method, release_method=None):
         print("[INFO] Getting input")
-        raw_pecha_path = self.pipes["input"][input_method](path)
         print("[INFO] Convert Pecha to OPF")
-        opf_pecha_path = self.format_and_publish(raw_pecha_path, ocr_import_info)
-        if release_method:
-            print("[INFO] Release OPF pecha")
-            self.pipes["release"][release_method](opf_pecha_path)
+        self.format_and_publish(path, ocr_import_info)
