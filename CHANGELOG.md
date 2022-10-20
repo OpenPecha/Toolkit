@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.9.6 (2022-10-20)
+### Fix
+* Disable git rebase when downloading pecha ([`d1c87c6`](https://github.com/OpenPecha/Toolkit/commit/d1c87c64cacfd45c5379cd01929944b52e9c06a2))
+
 ## v0.9.5 (2022-10-14)
 ### Fix
 * **cli:** Add batch download command ([`ef5a7d8`](https://github.com/OpenPecha/Toolkit/commit/ef5a7d80904f75c5450887aadb877e6bb59295cc))
