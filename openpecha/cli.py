@@ -10,14 +10,11 @@ import openpecha
 from openpecha import config
 from openpecha.alignment.tmx import create_opf as alignment
 from openpecha.blupdate import PechaBaseUpdate
-from openpecha.catalog import config as catalog_config
-from openpecha.catalog.filter import is_text_good_quality
-from openpecha.catalog.storage import GithubBucket
 from openpecha.core.pecha import OpenPechaFS
 from openpecha.corpus.quality import NonWordsCounter
 from openpecha.formatters import GoogleVisionFormatter, HFMLFormatter
 from openpecha.serializers import EpubSerializer, HFMLSerializer
-from openpecha.utils import download_pecha
+from openpecha.utils import download_pecha as download_pecha_util
 
 OP_PATH = config.BASE_PATH
 config = {
@@ -50,9 +47,9 @@ def cli():
 @click.argument("pecha_id")
 @click.option("--out", "-o", help="Directory to save the pecha")
 @click.option("--branch", "-b", help="Which branch to download, default is `main`")
-def download(**kwargs):
+def download_pecha(**kwargs):
     """
-    Command to download a pecha.
+    Download a single pecha.
     """
     pecha_id = kwargs["pecha_id"]
     output_path = kwargs["out"]
@@ -61,7 +58,7 @@ def download(**kwargs):
     click.echo(f"✨ Downloading {pecha_id}️...")
 
     try:
-        pecha_path = download_pecha(pecha_id, out_path=output_path, branch=branch)
+        pecha_path = download_pecha_util(pecha_id, out_path=output_path, branch=branch)
     except Exception as e:
         click.echo(f"❌ Failed to download {pecha_id}...x")
         click.echo(f"❌ {e}")
@@ -75,9 +72,9 @@ def download(**kwargs):
 @click.argument("batch_file_path")
 @click.option("--out", "-o", help="Directory to save the pecha")
 @click.option("--branch", "-b", help="Which branch to download, default is `main`")
-def batch_download(**kwargs):
+def download_pecha_batch(**kwargs):
     """
-    Download batch of pechas.
+    Download a batch of pechas.
     """
     batch_file_path = Path(kwargs["batch_file_path"])
     output_path = kwargs["out"]
@@ -97,7 +94,7 @@ def batch_download(**kwargs):
             continue
 
         try:
-            download_pecha(pecha_id, out_path=output_path, branch=branch)
+            download_pecha_util(pecha_id, out_path=output_path, branch=branch)
         except Exception as e:
             click.echo(f"❌ Failed to download {pecha_id}...x")
             click.echo("❌ Error: {e}")
@@ -105,6 +102,7 @@ def batch_download(**kwargs):
 
     click.echo(f"✅ Download completed")
     click.echo(f"📚 Batch saved at {output_path}")
+
 
 # OpenPecha Formatter
 formatter_types = ["ocr", "hfml(default)", "tsadra"]
@@ -117,9 +115,9 @@ formatter_types = ["ocr", "hfml(default)", "tsadra"]
 @click.option("--id", "-i", type=int, help="Id of the pecha")
 @click.option("--output_path", "-o", help="output path to store opf pechas")
 @click.argument("input_path")
-def format(**kwargs):
+def import_text(**kwargs):
     """
-    Command to format pecha into opf
+    Import text from a file to OpenPecha format.
     """
     if kwargs["name"] == "ocr":
         formatter = GoogleVisionFormatter(kwargs["output_path"])
@@ -130,6 +128,7 @@ def format(**kwargs):
 
     formatter.create_opf(kwargs["input_path"], kwargs["id"])
 
+
 export_types = ["hfml(default)", "epub"]
 
 
@@ -139,9 +138,9 @@ export_types = ["hfml(default)", "epub"]
 )
 @click.option("--opf_path", "-op")
 @click.option("--output_path", "-o")
-def export(**kwargs):
+def export_text(**kwargs):
     """
-    Command to export Pecha in epub
+    Export text from OpenPecha format to a specified file format.
     """
 
     opf_path = kwargs["opf_path"]
@@ -156,70 +155,6 @@ def export(**kwargs):
     serializer.serialize(output_path)
 
 
-def _get_bucket(bucket_type, bucket_name, n):
-    if bucket_type == "github":
-        catalog_config.GITHUB_BUCKET_CONFIG["catalog"]["end"] = n
-        return GithubBucket(bucket_name, config=catalog_config.GITHUB_BUCKET_CONFIG)
-
-
-def _get_filter_strategy_caller(filter_strategy):
-    if filter_strategy == "non_words_ratio":
-        try:
-            from bonltk.text_quality import non_words_ratio
-        except Exception:
-            msg = (
-                "bonltk not installed. Install it with `pip install bonltk` "
-                "or from https://github.com/10zinten/bonltk"
-            )
-            raise ImportError(msg)
-        return non_words_ratio
-
-
-def _save_text(text, output_path, parent_path, fn):
-    pecha_path = Path(output_path) / parent_path
-    pecha_path.mkdir(exist_ok=True)
-    vol_path = pecha_path / fn
-    vol_path.write_text(text)
-
-
-@cli.command()
-@click.option("--output_path", "-o", type=click.Path(exists=True), required=True)
-@click.option("--bucket_type", "-bt", type=click.Choice(["github"]), default="github")
-@click.option("--bucket_name", "-bn", type=str, default="OpenPecha-Data")
-@click.option(
-    "--filter_strategy",
-    "-fs",
-    type=click.Choice(["non_words_ratio"]),
-    default="non_words_ratio",
-)
-@click.option(
-    "--threshold",
-    "-th",
-    type=float,
-    default=0.8,
-    help="Determines the quality of the text (1 being the highest and 0 being the lowest)",
-)
-@click.option("-n", type=int, default=1, help="number of pechas to download")
-@click.option("--verbose", "-v", help="verbose", is_flag=True)
-@click.option("--debug", "-d", help="debug", is_flag=True)
-def corpus_download(
-    output_path, bucket_type, bucket_name, filter_strategy, threshold, n, verbose, debug
-):
-    if debug:
-        logging.basicConfig(level=logging.DEBUG)
-    elif verbose:
-        logging.basicConfig(level=logging.INFO)
-
-    bucket = _get_bucket(bucket_type, bucket_name, n)
-    filter_strategy_caller = _get_filter_strategy_caller(filter_strategy)
-    for pecha_id, base in bucket.get_all_pechas_base():
-        for vol_base, vol_fn in base:
-            if is_text_good_quality(
-                vol_base, strategy=filter_strategy_caller, threshold=threshold
-            ):
-                _save_text(vol_base, output_path, pecha_id, vol_fn)
-
-
 @cli.command()
 @click.argument("pecha_number")
 @click.argument("pecha_path")
@@ -228,7 +163,7 @@ def update_layers(**kwargs):
     Update all the layers when base has been updated.
     """
     pecha_id = get_pecha_id(kwargs["pecha_number"])
-    src_pecha_path = download_pecha(pecha_id)
+    src_pecha_path = download_pecha_util(pecha_id)
 
     click.echo(INFO.format(f"Updating base of {pecha_id} ..."))
     src_opf_path = src_pecha_path / f"{pecha_id}.opf"

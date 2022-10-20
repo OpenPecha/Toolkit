@@ -1,14 +1,22 @@
-import pytest
+from pathlib import Path
+from unittest import mock
 
-from openpecha.utils import download_pecha
+from click.testing import CliRunner
 
-
-@pytest.mark.skip
-def test_download_pecha():
-    pecha_path = download_pecha("P000800", branch="review")
-    print(pecha_path)
+import openpecha.cli
 
 
-if __name__ == "__main__":
-    test_download_pecha()
-    # test_download_cat()
+@mock.patch("openpecha.cli.download_pecha_util", autospec=True)
+def test_download_pecha(mock_download_pecha_util):
+    mock_download_pecha_util.return_value = Path("/tmp/P000001")
+    runner = CliRunner()
+    result = runner.invoke(openpecha.cli.cli, ["download-pecha", "P000001"])
+    mock_download_pecha_util.assert_called_once_with(
+        "P000001", out_path=None, branch=None
+    )
+    assert result.exit_code == 0
+    assert result.output == (
+        "✨ Downloading P000001️...\n"
+        "✅ Download completed\n"
+        "📖 Pecha saved at /private/tmp/P000001\n"
+    )
