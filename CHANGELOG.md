@@ -2,6 +2,11 @@
 
 <!--next-version-placeholder-->
 
+## v0.9.7 (2022-10-20)
+### Fix
+* **test_cli:** Remove full path assert in download_pecha ([`5bd01af`](https://github.com/OpenPecha/Toolkit/commit/5bd01af5625eb56054320c329d2e91d68de99604))
+* **cli:** Downgrade click version and add cli test ([`a82f153`](https://github.com/OpenPecha/Toolkit/commit/a82f153c8b3ff7d277f5ceed939ed294ec04e730))
+
 ## v0.9.6 (2022-10-20)
 ### Fix
 * Disable git rebase when downloading pecha ([`d1c87c6`](https://github.com/OpenPecha/Toolkit/commit/d1c87c64cacfd45c5379cd01929944b52e9c06a2))
