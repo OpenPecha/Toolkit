@@ -15,8 +15,3 @@ def test_download_pecha(mock_download_pecha_util):
         "P000001", out_path=None, branch=None
     )
     assert result.exit_code == 0
-    assert result.output == (
-        "✨ Downloading P000001️...\n"
-        "✅ Download completed\n"
-        "📖 Pecha saved at /private/tmp/P000001\n"
-    )
