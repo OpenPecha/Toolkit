@@ -2,7 +2,8 @@ OpenPecha is a free open repository of e-texts and annotations made publicly ava
 
 
 ## Key features
-- Contains a large dataset that is gradually increasing in quantity and quality through contributions from core members and apps that use our APIs.
-- Uses the opf (OpenPecha format), which uses standoff markdown to connect annotation layers to a base text layer
-- Includes a base layer, a table of contents layer, a footnotes layer, and a hyperlinks layer
-- Supports virtually unlimited additional layers for witnesses, commentaries, tagging, and more
+- Contains a dataset of more than 13,000 texts that is gradually increasing in quantity and quality through contributions from core members and apps that use our APIs
+- Uses the opf (OpenPecha format), which uses standoff markdown in annotation layers to link to characters in a base text layer
+- Includes a base layer, a table of contents layer, a footnotes layer, and a hyperlinks layer by default
+- Supports virtually unlimited additional layers for witnesses, commentaries, layers of same-type tags, and more
+- Supports changes to the base layer through OpenPecha's Character Coordinate Translation Vector (CCTV), which locks tags in annotation layers to characters in the base layer even as they move   
