@@ -14,8 +14,8 @@ theme:
 nav:
   - Home:
     - Introduction: index.md
-  - How to:
-    - Developer Guide:
+  - Guides:
+    - Developer Guides:
       - developer/00_index.md
       - developer/layer.md
       - developer/pecha.md
@@ -28,7 +28,7 @@ nav:
   - Specs:
     - OPF Format: opf-format.md
     - Annotations: annotations.md
-  - Code Reference:
+  - Code References:
     - reference/core.md
   - Development:
     - Contributing: contributing.md
