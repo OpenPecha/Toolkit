@@ -138,9 +138,13 @@ class GoogleVisionFormatter(OCRFormatter):
                         cur_word = ""
                         bbox = self.dict_to_bbox(word)
                         bboxes.append(bbox)
-        avg_width = statistics.mean(widths)
+        if widths:
+            avg_width = statistics.mean(widths)
+        else:
+            avg_width = 0
         logging.debug("average char width: %f", avg_width)
         return bboxes, avg_width
+
 
     def get_bboxes_for_page(self, image_group_id, image_filename):
         ocr_object = self.data_provider.get_image_data(image_group_id, image_filename)
