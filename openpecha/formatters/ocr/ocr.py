@@ -52,10 +52,12 @@ class BBox:
         self.mid_x = (x1 + x2) / 2
     
     def get_height(self):
-        return self.y2 - self.y1
+        return abs(self.y2 - self.y1)
 
     def get_width(self):
-        return self.x2 - self.x1
+        if self.x2 == self.x1:
+            self.x2 += 1
+        return abs(self.x2 - self.x1)
     
     def get_box_orientation(self):
         width = self.x2 - self.x1
