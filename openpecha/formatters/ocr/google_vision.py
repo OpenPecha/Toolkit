@@ -141,7 +141,7 @@ class GoogleVisionFormatter(OCRFormatter):
         if widths:
             avg_width = statistics.mean(widths)
         else:
-            avg_width = 0
+            avg_width = -1
         logging.debug("average char width: %f", avg_width)
         return bboxes, avg_width
 
