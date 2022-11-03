@@ -217,7 +217,7 @@ class HOCRFormatter(OCRFormatter):
                 # we need to convert it to our internal value system:
                 angle = 360 - int(boxinfo_parts[1])
             if boxinfo_parts[0] == "x_wconf":
-                confidence = float(boxinfo_parts[1])
+                confidence = float(boxinfo_parts[1]) / 100.0
         if coords is None:
             return None
         language = self.get_main_language_code(word_box.text)
