@@ -322,7 +322,7 @@ class OpenPechaFS(OpenPecha):
         return res
 
     def save_meta(self):
-        dump_yaml(json.loads(self.meta.json()), self.meta_fn)
+        dump_yaml(json.loads(self.meta.json(exclude_none=True)), self.meta_fn)
 
     def save_single_base(self, base_name: str, content: str = None):
         if not content:
@@ -336,7 +336,7 @@ class OpenPechaFS(OpenPecha):
 
     def save_layer(self, base_name: str, layer_name: LayerEnum, layer: Layer):
         layer_fn = self._mkdir(self.layers_path / base_name) / f"{layer_name.value}.yml"
-        dump_yaml(json.loads(layer.json()), layer_fn)
+        dump_yaml(json.loads(layer.json(exclude_none=True)), layer_fn)
         return layer_fn
 
     def save_layers(self):

@@ -134,12 +134,7 @@ class GoogleVisionFormatter(OCRFormatter):
         Returns:
             obj: BBox object of bounding bbox
         """
-        text = word.get('text', '')
         confidence = word.get('confidence')
-        # the language returned by Google OCR is not particularly helpful
-        # language = self.get_language_code_from_gv_poly(word)
-        # instead we use our custom detection system
-        language = self.get_main_language_code(text)
         if 'boundingBox' not in word or 'vertices' not in word['boundingBox']:
             return None
         vertices = word['boundingBox']['vertices']
@@ -149,9 +144,7 @@ class GoogleVisionFormatter(OCRFormatter):
         if self.remove_rotated_boxes and bboxinfo[4] > 0:
             return None
         return BBox(bboxinfo[0], bboxinfo[1], bboxinfo[2], bboxinfo[3], bboxinfo[4], 
-            text=text, 
-            confidence=confidence, 
-            language=language)
+            confidence=confidence)
 
     @staticmethod
     def get_width_of_vertices(vertices):
@@ -199,8 +192,13 @@ class GoogleVisionFormatter(OCRFormatter):
                             cur_word += symbol['text']
                             if self.has_space_attached(symbol):
                                 cur_word += " "
-                        bbox.text = cur_word
-                        bboxes.append(bbox)
+                        if cur_word:
+                            bbox.text = cur_word
+                            # the language returned by Google OCR is not particularly helpful
+                            # language = self.get_language_code_from_gv_poly(word)
+                            # instead we use our custom detection system
+                            bbox.language = self.get_main_language_code(cur_word)
+                            bboxes.append(bbox)
         avg_width = statistics.mean(widths) if widths else None
         logging.debug("average char width: %f", avg_width)
         return bboxes, avg_width
