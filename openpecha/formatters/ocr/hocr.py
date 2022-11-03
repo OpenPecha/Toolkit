@@ -205,6 +205,7 @@ class HOCRFormatter(OCRFormatter):
         for boxinfo in boxinfos:
             boxinfo_parts = boxinfo.split(" ")
             if boxinfo_parts[0] == "bbox":
+                # in HOCR's, bbox order is x0, y0, x1, y1
                 coords = [
                     int(boxinfo_parts[1]), 
                     int(boxinfo_parts[2]),
@@ -221,7 +222,8 @@ class HOCRFormatter(OCRFormatter):
             return None
         language = self.get_main_language_code(word_box.text)
         text = self.get_word_text_with_space(line_text, word_box)
-        box = BBox(coords[0], coords[1], coords[2], coords[3],
+        # but we initialize as x1, x2, y1, y2
+        box = BBox(coords[0], coords[2], coords[1], coords[3],
             angle = angle,
             text=text,
             confidence=confidence,
