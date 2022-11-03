@@ -170,12 +170,6 @@ class HOCRFormatter(OCRFormatter):
         super().__init__(output_path, metadata)
         self.mode = mode
         self.word_span = 0
-
-    def get_confidence(self, word_box):
-        confidence_info = word_box['title']
-        confidence = float(int(re.search(r"x_wconf (\d+)", confidence_info).group(1))/100)
-        return confidence
-
     
     def get_word_text_with_space(self, line_text, word_box):
         """check for space after word_text using line_text, add space to word_text if found 
@@ -202,19 +196,33 @@ class HOCRFormatter(OCRFormatter):
             box : bbox for text in word_box with vertices, confidence, language 
         """
         line_text = line_box.text
-        try:
-            vertices_info = word_box['title'].split(';')[0]
-        except:
+        if 'title' not in word_box:
             return None
-        vertices_coordinates = vertices_info.split(" ")
-        x1 = int(vertices_coordinates[1])
-        y1 = int(vertices_coordinates[2])
-        x2 = int(vertices_coordinates[3])
-        y2 = int(vertices_coordinates[4])
-        confidence = self.get_confidence(word_box)
+        boxinfos = word_box['title'].split(';')
+        coords = None
+        angle = None
+        confidence = None
+        for boxinfo in boxinfos:
+            boxinfo_parts = boxinfo.split(" ")
+            if boxinfo_parts[0] == "bbox":
+                coords = [
+                    int(boxinfo_parts[1]), 
+                    int(boxinfo_parts[2]),
+                    int(boxinfo_parts[3]),
+                    int(boxinfo_parts[4])
+                    ]
+            if boxinfo_parts[0] == "textangle":
+                # angle is indicated counter-clockwise in hocr so
+                # we need to convert it to our internal value system:
+                angle = 360 - int(boxinfo_parts[1])
+            if boxinfo_parts[0] == "x_wconf":
+                confidence = float(boxinfo_parts[1])
+        if coords is None:
+            return None
         language = self.get_main_language_code(word_box.text)
         text = self.get_word_text_with_space(line_text, word_box)
-        box = BBox(x1, x2, y1, y2,
+        box = BBox(coords[0], coords[1], coords[2], coords[3],
+            angle = angle,
             text=text,
             confidence=confidence,
             language=language
