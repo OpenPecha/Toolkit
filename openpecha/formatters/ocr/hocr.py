@@ -249,7 +249,9 @@ class HOCRFormatter(OCRFormatter):
             self.word_span = 0
             word_boxes = line_box.find_all("span", {"class": "ocrx_word"})
             for word_box in word_boxes:
-                bboxes.append(self.parse_box(line_box,word_box))
+                bbox = self.parse_box(line_box,word_box)
+                if bbox is not None:
+                    bboxes.append(bbox)
         return bboxes
     
     def get_boxes_for_IA(self, page_html):
@@ -269,7 +271,9 @@ class HOCRFormatter(OCRFormatter):
                 self.word_span = 0
                 word_boxes = line_box.find_all("span", {"class": "ocrx_word"})
                 for word_box in word_boxes:
-                    bboxes.append(self.parse_box(line_box, word_box))
+                    bbox = self.parse_box(line_box,word_box)
+                    if bbox is not None:
+                        bboxes.append(bbox)
         return bboxes
 
 

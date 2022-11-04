@@ -34,11 +34,14 @@ try:
 except (ImportError, AttributeError):
     yaml_dumper = yaml.SafeDumper
 
-yaml_dumper.add_multi_representer(LayerEnum, LayerEnum.to_yaml)
-yaml_dumper.add_multi_representer(AnnType, AnnType.to_yaml)
-yaml_dumper.add_multi_representer(metadata.InitialCreationType, metadata.InitialCreationType.to_yaml)
-yaml_dumper.add_multi_representer(metadata.CopyrightStatus, metadata.CopyrightStatus.to_yaml)
-yaml_dumper.add_multi_representer(metadata.LicenseType, metadata.LicenseType.to_yaml)
+def simple_enum_to_yaml(representer, node):
+    return representer.represent_data(node.value)
+
+yaml_dumper.add_multi_representer(LayerEnum, simple_enum_to_yaml)
+yaml_dumper.add_multi_representer(AnnType, simple_enum_to_yaml)
+yaml_dumper.add_multi_representer(metadata.InitialCreationType, simple_enum_to_yaml)
+yaml_dumper.add_multi_representer(metadata.CopyrightStatus, simple_enum_to_yaml)
+yaml_dumper.add_multi_representer(metadata.LicenseType, simple_enum_to_yaml)
 
 def gzip_str(string_):
     # taken from https://gist.github.com/Garrett-R/dc6f08fc1eab63f94d2cbb89cb61c33d

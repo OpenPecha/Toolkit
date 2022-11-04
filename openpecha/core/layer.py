@@ -37,10 +37,6 @@ class LayerEnum(Enum):
     segment = "Segment"
     ocr_confidence = "OCRConfidence"
 
-    @classmethod
-    def to_yaml(cls, representer, node):
-        return representer.represent_data(node.value)
-
 
 def _get_annotation_class(layer_name: LayerEnum):
     """Maps LayerEnum to Annotation class"""

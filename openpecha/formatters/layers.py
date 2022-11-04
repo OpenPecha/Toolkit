@@ -55,11 +55,6 @@ class AnnType(Enum):
     durchen = "Durchen"
     footnote = "Footnote"
 
-    @classmethod
-    def to_yaml(cls, representer, node):
-        return representer.represent_data(node.value)
-
-
 class _attr_names:
     # Layer
     ID = "id"  # Uique id for annotation of specific Pecha or Abstract work. type: str
