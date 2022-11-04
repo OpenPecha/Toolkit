@@ -451,7 +451,7 @@ class OCRFormatter(BaseFormatter):
         if mean_page_confidence < self.ocr_confidence_threshold or nb_below_threshold > self.max_low_conf_per_page:
             state["low_confidence_annotations"][self.get_unique_id()] = OCRConfidence(
                 span=Span(start=page_start_cc, end=state["base_layer_len"]), 
-                confidence=mean_page_confidence, nb_below_threshold=nb_below_threshold)
+                confidence=mean_page_confidence, nb_below_threshold=nb_below_threshold if nb_below_threshold else None)
         else:
             self.merge_page_low_confidence_annotations(state["page_low_confidence_annotations"], state["low_confidence_annotations"])
             state["page_low_confidence_annotations"] = []

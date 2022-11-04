@@ -22,7 +22,8 @@ class HFMLSerializer(Serialize):
         end_payload = ")"
         side = "ab"
         local_id = self.get_local_id(ann, uuid2localid)
-        if ann["type"] == AnnType.pagination:
+        ann_type = AnnType(ann["type"])
+        if ann_type == AnnType.pagination:
             pg_idx = ann.get("page_index", "")
             if not pg_idx:
                 pg_idx = ann.get("imgnum", "")
@@ -46,52 +47,52 @@ class HFMLSerializer(Serialize):
             else:
                 start_payload += "\n"
             only_start_ann = True
-        elif ann["type"] == AnnType.topic:
+        elif ann_type == AnnType.topic:
             start_payload = f"{{{ann['work_id']}}}"
             only_start_ann = True
-        elif ann["type"] == AnnType.sub_topic:
+        elif ann_type == AnnType.sub_topic:
             start_payload = f"{{{ann['work_id']}}}"
             only_start_ann = True
-        elif ann["type"] == AnnType.correction:
+        elif ann_type == AnnType.correction:
             start_payload = f"<{local_id}"
             end_payload = f',{ann["correction"]}>'
-        elif ann["type"] == AnnType.archaic:
+        elif ann_type == AnnType.archaic:
             start_payload = f"{{{local_id}"
             end_payload = f',{ann["modern"]}}}'
-        elif ann["type"] == AnnType.peydurma:
+        elif ann_type == AnnType.peydurma:
             start_payload = f"#{local_id}"
             only_start_ann = True
-        elif ann["type"] == AnnType.error_candidate:
+        elif ann_type == AnnType.error_candidate:
             start_payload = f"[{local_id}"
             end_payload = "]"
-        elif ann["type"] == AnnType.book_title:
+        elif ann_type == AnnType.book_title:
             start_payload = f"<{local_id}k1"
             end_payload = ">"
-        elif ann["type"] == AnnType.book_number:
+        elif ann_type == AnnType.book_number:
             start_payload = f"<{local_id}k4"
             end_payload = ">"
-        elif ann["type"] == AnnType.poti_title:
+        elif ann_type == AnnType.poti_title:
             start_payload = f"<{local_id}k2"
             end_payload = ">"
-        elif ann["type"] == AnnType.author:
+        elif ann_type == AnnType.author:
             start_payload = f"<{local_id}au"
             end_payload = ">"
-        elif ann["type"] == AnnType.chapter:
+        elif ann_type == AnnType.chapter:
             start_payload = f"<{local_id}k3"
             end_payload = ">"
-        elif ann["type"] == AnnType.tsawa:
+        elif ann_type == AnnType.tsawa:
             start_payload = f"<{local_id}m"
             end_payload = "m>"
-        elif ann["type"] == AnnType.citation:
+        elif ann_type == AnnType.citation:
             start_payload = f"<{local_id}g"
             end_payload = "g>"
-        elif ann["type"] == AnnType.sabche:
+        elif ann_type == AnnType.sabche:
             start_payload = f"<{local_id}q"
             end_payload = "q>"
-        elif ann["type"] == AnnType.yigchung:
+        elif ann_type == AnnType.yigchung:
             start_payload = f"<{local_id}y"
             end_payload = "y>"
-        elif ann["type"] == AnnType.durchen:
+        elif ann_type == AnnType.durchen:
             start_payload = f"<{local_id}d"
             end_payload = "d>"
 

@@ -196,14 +196,14 @@ class HOCRFormatter(OCRFormatter):
             box : bbox for text in word_box with vertices, confidence, language 
         """
         line_text = line_box.text
-        if 'title' not in word_box:
+        if not word_box.has_attr('title'):
             return None
         boxinfos = word_box['title'].split(';')
         coords = None
         angle = None
         confidence = None
         for boxinfo in boxinfos:
-            boxinfo_parts = boxinfo.split(" ")
+            boxinfo_parts = boxinfo.strip().split(" ")
             if boxinfo_parts[0] == "bbox":
                 # in HOCR's, bbox order is x0, y0, x1, y1
                 coords = [
@@ -212,15 +212,17 @@ class HOCRFormatter(OCRFormatter):
                     int(boxinfo_parts[3]),
                     int(boxinfo_parts[4])
                     ]
-            if boxinfo_parts[0] == "textangle":
+            elif boxinfo_parts[0] == "textangle":
                 # angle is indicated counter-clockwise in hocr so
                 # we need to convert it to our internal value system:
-                angle = 360 - int(boxinfo_parts[1])
-            if boxinfo_parts[0] == "x_wconf":
+                angle = int(boxinfo_parts[1])
+                if textangle != 0:
+                    angle = 360 - angle
+            elif boxinfo_parts[0] == "x_wconf":
                 confidence = float(boxinfo_parts[1]) / 100.0
         if coords is None:
             return None
-        if self.remove_rotated_boxes and angle > 0:
+        if self.remove_rotated_boxes and angle is not None and angle > 0:
             return None
         language = self.get_main_language_code(word_box.text)
         text = self.get_word_text_with_space(line_text, word_box)

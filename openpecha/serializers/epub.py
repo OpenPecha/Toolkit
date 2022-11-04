@@ -135,45 +135,46 @@ class EpubSerializer(Serialize):
         only_start_ann = False
         start_payload = "("
         end_payload = ")"
-        if ann["type"] == AnnType.correction:
+        ann_type = AnnType(ann["type"])
+        if ann_type == AnnType.correction:
             start_payload = "("
             end_payload = f',{ann["correction"]})'
-        elif ann["type"] == AnnType.peydurma:
+        elif ann_type == AnnType.peydurma:
             start_payload = "#"
             only_start_ann = True
-        elif ann["type"] == AnnType.error_candidate:
+        elif ann_type == AnnType.error_candidate:
             start_payload = "["
             end_payload = "]"
-        elif ann["type"] == AnnType.book_title:
+        elif ann_type == AnnType.book_title:
             start_payload = Tsadra_template.book_title_SP
             end_payload = Tsadra_template.span_EP
-        elif ann["type"] == AnnType.sub_title:
+        elif ann_type == AnnType.sub_title:
             start_payload = Tsadra_template.sub_title_SP
             end_payload = Tsadra_template.span_EP
-        elif ann["type"] == AnnType.book_number:
+        elif ann_type == AnnType.book_number:
             start_payload = Tsadra_template.book_number_SP
             end_payload = f"{Tsadra_template.span_EP}{Tsadra_template.para_EP}"
-        elif ann["type"] == AnnType.author:
+        elif ann_type == AnnType.author:
             start_payload = Tsadra_template.author_SP
             end_payload = f"{Tsadra_template.span_EP}{Tsadra_template.para_EP}"
-        elif ann["type"] == AnnType.chapter:
+        elif ann_type == AnnType.chapter:
             start_payload = Tsadra_template.chapter_SP
             end_payload = Tsadra_template.span_EP
-        elif ann["type"] == AnnType.tsawa:
+        elif ann_type == AnnType.tsawa:
             css_class_name = self.get_css_class_name(ann)
             start_payload = self.get_tsawa_sp(css_class_name)
             end_payload = Tsadra_template.span_EP
-        elif ann["type"] == AnnType.citation:
+        elif ann_type == AnnType.citation:
             css_class_name = self.get_css_class_name(ann)
             start_payload = self.get_citation_sp(css_class_name)
             end_payload = Tsadra_template.span_EP
-        elif ann["type"] == AnnType.sabche:
+        elif ann_type == AnnType.sabche:
             start_payload = Tsadra_template.sabche_SP
             end_payload = Tsadra_template.span_EP
-        elif ann["type"] == AnnType.yigchung:
+        elif ann_type == AnnType.yigchung:
             start_payload = Tsadra_template.yigchung_SP
             end_payload = Tsadra_template.span_EP
-        elif ann["type"] == AnnType.footnote:
+        elif ann_type == AnnType.footnote:
             start_payload = f'<a href="#fr{ann["id"]}">{Tsadra_template.footnote_marker_SP} id="fm{ann["id"]}">'
             end_payload = Tsadra_template.footnote_EP
 
