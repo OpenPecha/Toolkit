@@ -12,17 +12,25 @@ class InitialCreationType(Enum):
     ebook = "ebook"
     input = "input"
 
+    @classmethod
+    def to_yaml(cls, representer, node):
+        return representer.represent_data(node.value)
+
 
 class CopyrightStatus(Enum):
     UNKNOWN = "Unknown"
     COPYRIGHTED = "In copyright"
     PUBLIC_DOMAIN = "Public domain"
 
+    @classmethod
+    def to_yaml(cls, representer, node):
+        return representer.represent_data(node.value)
+
 
 class Copyright(BaseModel):
     status: CopyrightStatus = CopyrightStatus.UNKNOWN
     notice: Optional[str] = ""
-    info_url: Optional[AnyHttpUrl] = None
+    info_url: Optional[str] = None
 
     class Config:
         extra = Extra.forbid
@@ -58,6 +66,10 @@ class LicenseType(Enum):
     CC_BY_NC_ND = "CC BY-NC-ND"
     
     UNDER_COPYRIGHT = "under copyright"
+
+    @classmethod
+    def to_yaml(cls, representer, node):
+        return representer.represent_data(node.value)
 
 
 class PechaMetadata(BaseModel):

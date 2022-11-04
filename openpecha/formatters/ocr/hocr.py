@@ -220,6 +220,8 @@ class HOCRFormatter(OCRFormatter):
                 confidence = float(boxinfo_parts[1]) / 100.0
         if coords is None:
             return None
+        if self.remove_rotated_boxes and angle > 0:
+            return None
         language = self.get_main_language_code(word_box.text)
         text = self.get_word_text_with_space(line_text, word_box)
         # but we initialize as x1, x2, y1, y2
