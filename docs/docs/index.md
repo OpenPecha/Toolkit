@@ -1,4 +1,11 @@
-OpenPecha is a free open repository of e-texts and annotations made publicly available on GitHub and through a set of APIs. The project’s primary aim is to facilitate the collection, proofreading, and enrichment of e-texts by leveraging language technology and collaboration.
+OpenPecha is an 🗒️e-text and 🏷️annotations store made available on GitHub and through a set of APIs. 
+
+
+
+
+
+The project’s primary aim is to facilitate the collection, proofreading, and enrichment of e-texts by leveraging language technology and collaboration.
+
 
 
 ## Key features
