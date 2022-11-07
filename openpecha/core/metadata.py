@@ -22,7 +22,7 @@ class CopyrightStatus(Enum):
 class Copyright(BaseModel):
     status: CopyrightStatus = CopyrightStatus.UNKNOWN
     notice: Optional[str] = ""
-    info_url: Optional[AnyHttpUrl] = None
+    info_url: Optional[str] = None
 
     class Config:
         extra = Extra.forbid

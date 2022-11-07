@@ -40,12 +40,13 @@ UNICODE_CHARCAT_NOT_NOISE = ["Ll", "Lu", "Lo", "Nd", "No", "Nl", "Lt"]
 SAME_LINE_RATIO_THRESHOLD = 0.2
 
 class BBox:
-    def __init__(self, x1: int, x2: int, y1: int, y2: int, text: str = None, confidence: float = None, language: str = NO_LANG):
+    def __init__(self, x1: int, x2: int, y1: int, y2: int, angle: int = None, text: str = None, confidence: float = None, language: str = NO_LANG):
         self.text = text
         self.x1 = x1
         self.x2 = x2
         self.y1 = y1
         self.y2 = y2
+        self.angle = angle
         self.confidence = confidence
         self.language = language
         self.mid_y = (y1 + y2) / 2
@@ -57,6 +58,14 @@ class BBox:
     def get_width(self):
         return self.x2 - self.x1
     
+    def get_angle(self):
+        """
+        Returns the angle of the BBox. The value is either None (when no angle can be determined)
+        or the value of the clockwise rotation, in positive degrees (the value must be between 0 and 359).
+        A value of 0 represents straight characters.
+        """
+        return self.angle
+
     def get_box_orientation(self):
         width = self.x2 - self.x1
         length = self.y2 - self.y1
@@ -113,6 +122,7 @@ class OCRFormatter(BaseFormatter):
         self.create_language_layer = True
         self.ocr_confidence_threshold = ANNOTATION_MINIMAL_CONFIDENCE
         self.language_annotation_min_len = ANNOTATION_MINIMAL_LEN
+        self.remove_rotated_boxes = True
 
     def text_preprocess(self, text):
         return text
@@ -280,6 +290,7 @@ class OCRFormatter(BaseFormatter):
                 next_bbox.x1,
                 cur_bbox.y1, # the y coordinates are kind of arbitrary
                 cur_bbox.y2,
+                angle=0,
                 text=" ",
                 confidence=None,
                 language=None
@@ -440,7 +451,7 @@ class OCRFormatter(BaseFormatter):
         if mean_page_confidence < self.ocr_confidence_threshold or nb_below_threshold > self.max_low_conf_per_page:
             state["low_confidence_annotations"][self.get_unique_id()] = OCRConfidence(
                 span=Span(start=page_start_cc, end=state["base_layer_len"]), 
-                confidence=mean_page_confidence, nb_below_threshold=nb_below_threshold)
+                confidence=mean_page_confidence, nb_below_threshold=nb_below_threshold if nb_below_threshold else None)
         else:
             self.merge_page_low_confidence_annotations(state["page_low_confidence_annotations"], state["low_confidence_annotations"])
             state["page_low_confidence_annotations"] = []
@@ -609,6 +620,7 @@ class OCRFormatter(BaseFormatter):
         self.data_provider = data_provider
 
         self.remove_non_character_lines = opf_options["remove_non_character_lines"] if "remove_non_character_lines" in opf_options else True
+        self.remove_rotated_boxes = opf_options["remove_rotated_boxes"] if "remove_rotated_boxes" in opf_options else True
         self.create_language_layer = opf_options["create_language_layer"] if "create_language_layer" in opf_options else True
         self.ocr_confidence_threshold = opf_options["ocr_confidence_threshold"] if "ocr_confidence_threshold" in opf_options else ANNOTATION_MINIMAL_CONFIDENCE
         self.language_annotation_min_len = opf_options["language_annotation_min_len"] if "language_annotation_min_len" in opf_options else ANNOTATION_MINIMAL_LEN

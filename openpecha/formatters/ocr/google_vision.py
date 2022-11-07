@@ -81,6 +81,50 @@ class GoogleVisionFormatter(OCRFormatter):
         # English is a kind of default for our purpose
         return "en"
 
+    @staticmethod
+    def get_bboxinfo_from_vertices(vertices):
+        """
+        Vertices do not always have dots in the same order. The current hypothesis
+        is that their order represents the rotation of characters detected by
+        the OCR.
+
+        This is not documented on
+
+        https://cloud.google.com/vision/docs/reference/rest/v1/projects.locations.products.referenceImages#Vertex
+
+        though, so use the angle value with caution.
+        """
+        if len(vertices) == 0:
+            return None
+        idx_smallest = -1
+        smallest_x = -1
+        smallest_y = -1
+        largest_x = -1
+        largest_y = -1
+        for idx, v in enumerate(vertices):
+            if "x" not in v or "y" not in v:
+                continue
+            smallest_x = v["x"] if smallest_x == -1 else min(v["x"], smallest_x)
+            smallest_y = v["y"] if smallest_y == -1 else min(v["y"], smallest_y)
+            largest_x = max(v["x"], largest_x)
+            largest_y = max(v["y"], largest_y)
+            # here we have to account for cases where the 4 dots don't form a rectangle
+            # because coordinates are shifted by 1, see test_bbox_info for some example
+            if abs(v["x"] - smallest_x) < 3 and abs(v["y"] - smallest_y) < 3:
+                idx_smallest = idx
+        if smallest_x == -1 or smallest_y == -1 or largest_y == -1 or largest_x == -1:
+            return None
+        angle = None
+        if len(vertices) == 4 and idx_smallest != -1:
+            angle = 0
+            if idx_smallest == 1:
+                angle = 270
+            if idx_smallest == 2:
+                angle = 180
+            if idx_smallest == 3:
+                angle = 90
+        return [smallest_x, largest_x, smallest_y, largest_y, angle]
+
     def dict_to_bbox(self, word):
         """Convert bounding bbox to BBox object
 
@@ -90,21 +134,32 @@ class GoogleVisionFormatter(OCRFormatter):
         Returns:
             obj: BBox object of bounding bbox
         """
-        text = word.get('text', '')
         confidence = word.get('confidence')
-        # the language returned by Google OCR is not particularly helpful
-        # language = self.get_language_code_from_gv_poly(word)
-        # instead we use our custom detection system
-        language = self.get_main_language_code(text)
         if 'boundingBox' not in word or 'vertices' not in word['boundingBox']:
             return None
         vertices = word['boundingBox']['vertices']
-        if len(vertices) != 4 or 'x' not in vertices[0] or 'x' not in vertices[1] or 'y' not in vertices[0] or 'y' not in vertices[2]:
+        bboxinfo = GoogleVisionFormatter.get_bboxinfo_from_vertices(vertices)
+        if bboxinfo == None:
             return None
-        return BBox(vertices[0]['x'], vertices[1]['x'], vertices[0]['y'], vertices[2]['y'], 
-            text=text, 
-            confidence=confidence, 
-            language=language)
+        if self.remove_rotated_boxes and bboxinfo[4] > 0:
+            return None
+        return BBox(bboxinfo[0], bboxinfo[1], bboxinfo[2], bboxinfo[3], bboxinfo[4], 
+            confidence=confidence)
+
+    @staticmethod
+    def get_width_of_vertices(vertices):
+        if len(vertices) < 4:
+            return None
+        smallest_x = -1
+        largest_x = -1
+        for v in vertices:
+            if "x" not in v or "y" not in v:
+                continue
+            smallest_x = v["x"] if smallest_x == -1 else min(v["x"], smallest_x)
+            largest_x = max(v["x"], largest_x)
+        if smallest_x == -1:
+            return None
+        return largest_x - smallest_x
 
     def get_char_base_bboxes_and_avg_width(self, response):
         """Return bounding bboxs in page response
@@ -116,29 +171,35 @@ class GoogleVisionFormatter(OCRFormatter):
             list: list of BBox object which saves required info of a bounding bbox
         """
         bboxes = []
-        cur_word = ""
         widths = []
         for page in response['fullTextAnnotation']['pages']:
             for block in page['blocks']:
                 for paragraph in block['paragraphs']:
                     for word in paragraph['words']:
+                        bbox = self.dict_to_bbox(word)
+                        if bbox is None:
+                            # case where we ignore the bbox for some reason
+                            # for instance rotated text
+                            continue
+                        cur_word = ""
                         for symbol in word['symbols']:
                             symbolunicat = unicodedata.category(symbol['text'][0])
                             if symbolunicat in UNICODE_CHARCAT_FOR_WIDTH:
                                 vertices = symbol['boundingBox']['vertices']
-                                if len(vertices) < 2 or 'x' not in vertices[0] or 'x' not in vertices[1]:
-                                    logging.debug("symbol box with no coodinates, ignore for average width")
-                                    continue
-                                logging.debug("consider '%s' (cat %s) for avg width", symbol['text'], symbolunicat)
-                                widths.append(vertices[1]['x'] - vertices[0]['x'])
+                                width = GoogleVisionFormatter.get_width_of_vertices(vertices)
+                                if width > 0:
+                                    widths.append(width)
                             cur_word += symbol['text']
                             if self.has_space_attached(symbol):
                                 cur_word += " "
-                        word['text'] = cur_word
-                        cur_word = ""
-                        bbox = self.dict_to_bbox(word)
-                        bboxes.append(bbox)
-        avg_width = statistics.mean(widths)
+                        if cur_word:
+                            bbox.text = cur_word
+                            # the language returned by Google OCR is not particularly helpful
+                            # language = self.get_language_code_from_gv_poly(word)
+                            # instead we use our custom detection system
+                            bbox.language = self.get_main_language_code(cur_word)
+                            bboxes.append(bbox)
+        avg_width = statistics.mean(widths) if widths else None
         logging.debug("average char width: %f", avg_width)
         return bboxes, avg_width
 

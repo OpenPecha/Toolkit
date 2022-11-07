@@ -52,7 +52,8 @@ class PedurmaSerializer(Serialize):
         end_payload = ")"
         side = "ab"
         local_id = self.get_local_id(ann, uuid2localid)
-        if ann["type"] == AnnType.pagination:
+        ann_type = AnnType(ann["type"])
+        if ann_type == AnnType.pagination:
             pg_idx = ann.get("page_index", "")
             if not pg_idx:
                 pg_idx = ann.get("imgnum", "")
@@ -76,7 +77,7 @@ class PedurmaSerializer(Serialize):
             else:
                 start_payload += "\n"
             only_start_ann = True
-        elif ann["type"] == AnnType.pedurma_note:
+        elif ann_type == AnnType.pedurma_note:
             start_payload = ""
             end_payload = f'{ann["collation_note"]}'
 

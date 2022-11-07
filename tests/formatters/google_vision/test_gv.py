@@ -6,7 +6,7 @@ import pytest
 from openpecha.core.layer import LayerEnum, Layer
 from openpecha.core.pecha import OpenPechaFS
 from openpecha.formatters.ocr import GoogleVisionFormatter
-from openpecha.utils import load_yaml
+from openpecha.utils import load_yaml, dump_yaml
 from test_gv_data_provider import GoogleVisionTestFileProvider
 
 #logging.basicConfig(level=logging.DEBUG)

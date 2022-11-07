@@ -1,4 +1,3 @@
-import json
 import shutil
 import warnings
 from collections import defaultdict
@@ -322,7 +321,7 @@ class OpenPechaFS(OpenPecha):
         return res
 
     def save_meta(self):
-        dump_yaml(json.loads(self.meta.json()), self.meta_fn)
+        dump_yaml(self.meta.dict(exclude_none=True), self.meta_fn)
 
     def save_single_base(self, base_name: str, content: str = None):
         if not content:
@@ -336,7 +335,7 @@ class OpenPechaFS(OpenPecha):
 
     def save_layer(self, base_name: str, layer_name: LayerEnum, layer: Layer):
         layer_fn = self._mkdir(self.layers_path / base_name) / f"{layer_name.value}.yml"
-        dump_yaml(json.loads(layer.json()), layer_fn)
+        dump_yaml(layer.dict(exclude_none=True), layer_fn)
         return layer_fn
 
     def save_layers(self):
@@ -346,7 +345,7 @@ class OpenPechaFS(OpenPecha):
 
     def save_index(self):
         try:
-            dump_yaml(json.loads(self.index.json()), self.index_fn)
+            dump_yaml(self.index.dict(exclude_none=True), self.index_fn)
         except FileNotFoundError:
             pass
 

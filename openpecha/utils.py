@@ -14,6 +14,9 @@ from git import GIT_OK, Repo
 from git.cmd import GitCommandError
 
 from openpecha import config, storages
+from openpecha.core.layer import LayerEnum
+from openpecha.formatters.layers import AnnType
+from openpecha.core import metadata
 from openpecha.exceptions import PechaNotFound
 from openpecha.github_utils import create_release
 from openpecha.storages import GithubStorage, setup_auth_for_old_repo
@@ -30,6 +33,15 @@ try:
     yaml_dumper = yaml.CSafeDumper
 except (ImportError, AttributeError):
     yaml_dumper = yaml.SafeDumper
+
+def simple_enum_to_yaml(representer, node):
+    return representer.represent_data(node.value)
+
+yaml_dumper.add_multi_representer(LayerEnum, simple_enum_to_yaml)
+yaml_dumper.add_multi_representer(AnnType, simple_enum_to_yaml)
+yaml_dumper.add_multi_representer(metadata.InitialCreationType, simple_enum_to_yaml)
+yaml_dumper.add_multi_representer(metadata.CopyrightStatus, simple_enum_to_yaml)
+yaml_dumper.add_multi_representer(metadata.LicenseType, simple_enum_to_yaml)
 
 def gzip_str(string_):
     # taken from https://gist.github.com/Garrett-R/dc6f08fc1eab63f94d2cbb89cb61c33d
