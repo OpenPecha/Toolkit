@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.9.8 (2022-11-07)
+### Fix
+* **pecha:** Handle box rotation ([`182c674`](https://github.com/OpenPecha/Toolkit/commit/182c6749464f2db15e5b2a1ec648f09816db2e53))
+
 ## v0.9.7 (2022-10-20)
 ### Fix
 * **test_cli:** Remove full path assert in download_pecha ([`5bd01af`](https://github.com/OpenPecha/Toolkit/commit/5bd01af5625eb56054320c329d2e91d68de99604))
