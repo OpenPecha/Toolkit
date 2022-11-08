@@ -6,9 +6,9 @@ Since, OpenPecha as has three types of pecha, we have metadata classes to create
 
 Pecha Type | ID format | Metadata Class
 ---|---|---
-Initial Pecha | I######## | `openpecha.core.metadata.InitialPechaMetadata`
-Diplomatic Pecha | D######## | `openpecha.core.metadata.DiplomaticPechaMetadata`
-Open Pecha | O######## | `openpecha.core.metadata.OpenPechaMetadata`
+Initial | I######## | `openpecha.core.metadata.InitialPechaMetadata`
+Diplomatic | D######## | `openpecha.core.metadata.DiplomaticPechaMetadata`
+Open | O######## | `openpecha.core.metadata.OpenPechaMetadata`
 Alignment | A######## | ``
 Collection | C######## | ``
 
