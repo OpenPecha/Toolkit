@@ -9,6 +9,8 @@ Pecha Type | ID format | Metadata Class
 Initial Pecha | I######## | `openpecha.core.metadata.InitialPechaMetadata`
 Diplomatic Pecha | D######## | `openpecha.core.metadata.DiplomaticPechaMetadata`
 Open Pecha | O######## | `openpecha.core.metadata.OpenPechaMetadata`
+Alignment | A######## | ``
+Collection | C######## | ``
 
 here is an example to create metadata for *Initial Pecha* type
 
