@@ -14,12 +14,21 @@ theme:
 nav:
   - Home:
     - Introduction: index.md
+  - Dataset:
+    - Introduction: Dataset/introduction.md
+    - Download: Dataset/download.md
+    - Reference: Dataset/reference.md
+    - Background: Dataset/background.md
+    - Resources: Dataset/resources.md
+  - Specs:
+    - OPF Format: opf-format.md
+    - Annotations: annotations.md
   - Guides:
     - Developer Guides:
       - developer/00_index.md
       - developer/layer.md
       - developer/pecha.md
-      - developer/metadata.md
+      - developer/metadata.md  
   - Plugins:
     - Import:
       - importers/00_index.md
