@@ -28,11 +28,6 @@ nav:
   - Specs:
     - OPF Format: opf-format.md
     - Annotations: annotations.md
-  - Code References:
-    - reference/core.md
-  - Development:
-    - Contributing: contributing.md
-    - Code of Conduct: code_of_conduct.md
 
 markdown_extensions:
   - toc:
