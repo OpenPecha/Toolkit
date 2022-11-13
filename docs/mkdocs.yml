@@ -10,6 +10,7 @@ theme:
     - content.code.annotate
     - navigation.tabs
     - navigation.top
+    - navigation.expand
 
 nav:
   - Intro:
@@ -24,7 +25,6 @@ nav:
     - Quickstart: toolkit/quickstart.md
     - Installation: toolkit/installation.md
     - Reference:
-      - toolkit/00_index.md
       - toolkit/opf-format.md
       - toolkit/annotations.md
       - toolkit/hfml.md
