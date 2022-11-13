@@ -24,7 +24,6 @@ nav:
     - Quickstart: toolkit/quickstart.md
     - Install: toolkit/download.md
     - Reference:
-      - reference/00_index.md
       - reference/opf-format.md
       - reference/annotations.md
       - reference/hfml.md
