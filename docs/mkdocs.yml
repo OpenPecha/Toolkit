@@ -22,7 +22,7 @@ nav:
   - Toolkit:
     - Introduction: toolkit/introduction.md
     - Quickstart: toolkit/quickstart.md
-    - Install: toolkit/download.md
+    - Installation: toolkit/installation.md
     - Reference:
       - reference/opf-format.md
       - reference/annotations.md
@@ -32,9 +32,9 @@ nav:
       - reference/metadata.md 
     - Background: toolkit/background.md
   - Community:
-    - Community: community.md
+    - Community: docs/community.md
   - Benchmarks:
-    - Benchmarks: benchmarks.md
+    - Benchmarks: docs/benchmarks.md
     
 markdown_extensions:
   - toc:
