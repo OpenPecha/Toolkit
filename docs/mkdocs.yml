@@ -24,13 +24,13 @@ nav:
     - Quickstart: toolkit/quickstart.md
     - Installation: toolkit/installation.md
     - Reference:
-      - reference/00_index.md
-      - reference/opf-format.md
-      - reference/annotations.md
-      - reference/hfml.md
-      - reference/pecha.md
-      - reference/layer.md
-      - reference/metadata.md 
+      - toolkit/00_index.md
+      - toolkit/opf-format.md
+      - toolkit/annotations.md
+      - toolkit/hfml.md
+      - toolkit/pecha.md
+      - toolkit/layer.md
+      - toolkit/metadata.md 
     - Background: toolkit/background.md
   - Community:
     - Community: community.md
