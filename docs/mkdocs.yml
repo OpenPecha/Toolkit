@@ -24,17 +24,18 @@ nav:
     - Quickstart: toolkit/quickstart.md
     - Installation: toolkit/installation.md
     - Reference:
-      - OP format: reference/opf-format.md
-      - Annotations: reference/annotations.md
-      - Importers: reference/hfml.md
-      - Pechas: reference/pecha.md
-      - Layers: reference/layer.md
-      - Pecha metadata: reference/metadata.md 
+      - reference/00_index.md
+      - reference/opf-format.md
+      - reference/annotations.md
+      - reference/hfml.md
+      - reference/pecha.md
+      - reference/layer.md
+      - reference/metadata.md 
     - Background: toolkit/background.md
   - Community:
-    - Community: docs/community.md
+    - Community: community.md
   - Benchmarks:
-    - Benchmarks: docs/benchmarks.md
+    - Benchmarks: benchmarks.md
     
 markdown_extensions:
   - toc:
