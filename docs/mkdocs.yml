@@ -12,32 +12,34 @@ theme:
     - navigation.top
 
 nav:
-  - Home:
-    - Introduction: index.md
-  - Dataset:
+  - Intro:
+    - OpenPecha overview: index.md
+  - Data:
     - Introduction: Dataset/introduction.md
     - Download: Dataset/download.md
     - Reference: Dataset/reference.md
     - Background: Dataset/background.md
     - Resources: Dataset/resources.md
-  - Specs:
-    - OPF Format: opf-format.md
-    - Annotations: annotations.md
-  - Guides:
-    - Developer Guides:
-      - developer/00_index.md
+  - Toolkit:
+    - Introduction: Dataset/introduction.md
+    - Download: Dataset/download.md
+    - Reference: Dataset/reference.md
+      - reference/00_index.md
+      - OPF Format: opf-format.md
+      - Annotations: annotations.md
+      - importers/hfml.md
       - developer/layer.md
       - developer/pecha.md
       - developer/metadata.md  
-  - Plugins:
-    - Import:
-      - importers/00_index.md
-      - importers/hfml.md
-    - Export: exporters.md
-  - Specs:
+  - Benchmarks:
+    - Background: Dataset/background.md
+    - Resources: Dataset/resources.md 
+  - Community:
     - OPF Format: opf-format.md
     - Annotations: annotations.md
-
+  - Benchmarks:
+    - OPF Format: opf-format.md
+    
 markdown_extensions:
   - toc:
       permalink: true
