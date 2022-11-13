@@ -15,30 +15,27 @@ nav:
   - Intro:
     - OpenPecha overview: index.md
   - Data:
-    - Introduction: Dataset/introduction.md
-    - Download: Dataset/download.md
-    - Reference: Dataset/reference.md
-    - Background: Dataset/background.md
-    - Resources: Dataset/resources.md
+    - Introduction: data/introduction.md
+    - Download: data/download.md
+    - Reference: data/reference.md
+    - Background: data/background.md
   - Toolkit:
-    - Introduction: Dataset/introduction.md
-    - Download: Dataset/download.md
-    - Reference: Dataset/reference.md
+    - Introduction: toolkit/introduction.md
+    - Quickstart: toolkit/quickstart.md
+    - Install: toolkit/download.md
+    - Reference:
       - reference/00_index.md
-      - OPF Format: opf-format.md
-      - Annotations: annotations.md
-      - importers/hfml.md
-      - developer/layer.md
-      - developer/pecha.md
-      - developer/metadata.md  
-  - Benchmarks:
-    - Background: Dataset/background.md
-    - Resources: Dataset/resources.md 
+      - reference/opf-format.md
+      - reference/annotations.md
+      - reference/hfml.md
+      - reference/pecha.md
+      - reference/layer.md
+      - reference/metadata.md 
+     - Background: toolkit/background.md
   - Community:
-    - OPF Format: opf-format.md
-    - Annotations: annotations.md
+    - Community: community.md
   - Benchmarks:
-    - OPF Format: opf-format.md
+    - Benchmarks: benchmarks.md
     
 markdown_extensions:
   - toc:
