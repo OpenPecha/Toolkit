@@ -16,15 +16,14 @@ nav:
   - Intro:
     - OpenPecha overview: index.md
   - Data:
-    - Introduction: data/introduction.md
+    - Intro and download: data/introduction.md
     - Download: data/download.md
-    - Reference: data/reference.md
+    - Reference:
       - data/opf-format.md
     - Background: data/background.md
   - Toolkit:
-    - Introduction: toolkit/introduction.md
+    - Intro and installation: toolkit/introduction.md
     - Quickstart: toolkit/quickstart.md
-    - Installation: toolkit/installation.md
     - Reference:
       - toolkit/annotations.md
       - toolkit/hfml.md
