@@ -7,7 +7,7 @@ from openpecha.formatters.ocr.hocr import HOCRFormatter
 from test_hocr_data_provider import HOCRTestFileProvider
 
 def test_google_ocr_base_meta():
-    work_id = "W2PD17457"
+    work_id = "W1KG10193"
     pecha_id = "I123456"
     
     ocr_path = Path(__file__).parent / "data" / "file_per_page" / work_id

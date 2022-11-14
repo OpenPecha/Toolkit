@@ -1,58 +1,60 @@
-id: I1234567
-legacy_id: null
+id: I123456
 ocr_import_info:
   source: bdrc
   software: google_books
   batch: batch_2022
   expected_default_language: bo
-  bdrc_scan_id: W2PD17457
+  bdrc_scan_id: W1KG10193
   ocr_info:
-    timestamp: '2022-08-05T09:34:20Z'
+    timestamp: 11/04/22T20:33:39,
+    html: html.zip
+    txt: txt.zip
+    images: images.zip
   op_import_options: {}
-  op_import_version: 1.0.0
+  op_import_version: 0.9.8
 default_language: bo
 source: https://library.bdrc.io
-source_file: null
 initial_creation_type: ocr
-imported: '2022-09-16T11:01:05.994514+00:00'
-last_modified: '2022-09-16T11:01:05.994526+00:00'
-parser: null
+imported: 2022-11-14 10:26:24.372012+00:00
+last_modified: 2022-11-14 10:26:24.372033+00:00
 source_metadata:
-  id: http://purl.bdrc.io/resource/W2PD17457
+  id: http://purl.bdrc.io/resource/W1KG10193
   status: http://purl.bdrc.io/admindata/StatusReleased
   access: http://purl.bdrc.io/admindata/AccessOpen
-  reproduction_of: http://purl.bdrc.io/resource/MW2PD17457
+  geo_restriction:
+  - CN
+  reproduction_of: http://purl.bdrc.io/resource/MW1KG10193
   copyright_status: http://purl.bdrc.io/resource/CopyrightPublicDomain
-  title: སྔ་འགྱུར་བྱང་གཏེར་ཆོས་སྐོར་ཕྱོགས་བསྒྲིགས།
+  title: གསུང་འབུམ། འཇིགས་མེད་གླིང་པ།
   languages:
   - bo
+  author: ཀུན་མཁྱེན་འཇིགས་མེད་གླིང་པ།
 statistics:
-  ocr_word_mean_confidence_index: 0.9207357679914071
-  ocr_word_median_confidence_index: 0.99
-quality: null
+  ocr_word_mean_confidence_index: 0.9679414335664336
+  ocr_word_median_confidence_index: 1.0
 bases:
-  I4PD424:
+  I1KG10196:
     source_metadata:
-      id: http://purl.bdrc.io/resource/I4PD424
-      total_pages: 1074
+      id: http://purl.bdrc.io/resource/I1KG10196
+      total_pages: 1007
       volume_number: 2
       volume_pages_bdrc_intro: 2
     order: 2
-    base_file: I4PD424.txt
+    base_file: I1KG10196.txt
     statistics:
-      ocr_word_median_confidence_index: 0.99
-      ocr_word_mean_confidence_index: 0.9212004287245444
-  I4PD423:
+      ocr_word_median_confidence_index: 1.0
+      ocr_word_mean_confidence_index: 0.971639344262295
+  I1KG10195:
     source_metadata:
-      id: http://purl.bdrc.io/resource/I4PD423
-      total_pages: 880
+      id: http://purl.bdrc.io/resource/I1KG10195
+      total_pages: 935
       volume_number: 1
       volume_pages_bdrc_intro: 2
     order: 1
-    base_file: I4PD423.txt
+    base_file: I1KG10195.txt
     statistics:
-      ocr_word_median_confidence_index: 0.99
-      ocr_word_mean_confidence_index: 0.9202691065662002
+      ocr_word_median_confidence_index: 1.0
+      ocr_word_mean_confidence_index: 0.961371359223301
 copyright:
   status: Public domain
   notice: Public domain

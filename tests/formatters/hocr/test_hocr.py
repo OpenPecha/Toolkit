@@ -8,7 +8,7 @@ from test_hocr_data_provider import HOCRTestFileProvider
 
 
 def test_base_text():
-    work_id = "W2PD17457"
+    work_id = "W1KG10193"
     pecha_id = "I123456"
     
     ocr_path = Path(__file__).parent / "data" / "file_per_page" / work_id
@@ -23,7 +23,7 @@ def test_base_text():
     with tempfile.TemporaryDirectory() as tmpdirname:
         formatter = HOCRFormatter(output_path=tmpdirname)
         pecha = formatter.create_opf(data_provider, pecha_id, {}, ocr_import_info)
-        base_text = pecha.bases["I4PD423"]
+        base_text = pecha.bases["I1KG10195"]
         assert expected_base_text == base_text
     
 def is_same_ann(expected_ann, ann):
@@ -32,9 +32,9 @@ def is_same_ann(expected_ann, ann):
     return False
 
 def test_build_layers():
-    work_id = "W2PD17457"
+    work_id = "W1KG10193"
     pecha_id = "I123456"
-    base_name = "I4PD423"
+    base_name = "I1KG10195"
     
     ocr_path = Path(__file__).parent / "data" / "file_per_page" / work_id
     expected_pagination_layer_dict = load_yaml((Path(__file__).parent / "data" / "file_per_page" / "opf_expected_datas" / "expected_Pagination.yml"))

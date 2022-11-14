@@ -1,52 +1,58 @@
-id: c68c3848cb964ec8abff031b9bed839e
+id: d107185924d44fd194e76fd479760980
 annotation_type: Pagination
 revision: '00001'
 annotations:
-  75aa9ed05e22423ca6bc960bbcf911be:
+  5fa1afdfb690453f96bfe44d36f818df:
     span:
       start: 0
-      end: 570
+      end: 584
     imgnum: 1
-    reference: I4PD4230001.tif
-  83421ad50dc94dfbb95ef7b092456a5f:
+    reference: I1KG101950001.jpg
+  9d385f9116094cbdba176901e98e5241:
     span:
-      start: 571
-      end: 703
+      start: 585
+      end: 625
     imgnum: 3
-    reference: I4PD4230003.tif
-  61ef27ea22a54a0abe98e9d17d658784:
+    reference: I1KG101950003.jpg
+  35eb1bd6b51548baaa67d3f0c8229765:
     span:
-      start: 704
-      end: 770
+      start: 626
+      end: 749
     imgnum: 5
-    reference: I4PD4230005.tif
-  9e0dea7580944480b6d050ec7a9e371d:
+    reference: I1KG101950005.jpg
+  19534a813cfb41109943266c7d510dff:
     span:
-      start: 771
-      end: 1751
+      start: 750
+      end: 950
     imgnum: 6
-    reference: I4PD4230006.tif
-  feba7c539b8b4e41a389da3068888466:
+    reference: I1KG101950006.jpg
+  7d171f340e9b4e36bc2b483137f8ea81:
     span:
-      start: 1752
-      end: 1970
+      start: 951
+      end: 1059
     imgnum: 7
-    reference: I4PD4230007.tif
-  4355400153f64367a6a08c74b8ba9460:
+    reference: I1KG101950007.jpg
+  28abd2286a0b4ec09cb36ed72b5ad815:
     span:
-      start: 1971
-      end: 2209
-    imgnum: 8
-    reference: I4PD4230008.tif
-  9b5aed85baad4236b6aef88f1e28c835:
-    span:
-      start: 2210
-      end: 2443
+      start: 1060
+      end: 1140
     imgnum: 9
-    reference: I4PD4230009.tif
-  2638d8aa6c2d4a85ba277520ae40a677:
+    reference: I1KG101950009.jpg
+  0abbfacb82b74512bc8afd76947add5e:
     span:
-      start: 2444
-      end: 3506
+      start: 1141
+      end: 1741
     imgnum: 10
-    reference: I4PD4230010.tif
+    reference: I1KG101950010.jpg
+  ab0abb73b1d349c4b5e23959de4cd75c:
+    span:
+      start: 1742
+      end: 2370
+    imgnum: 11
+    reference: I1KG101950011.jpg
+  1ba37b28b2d746b68ae80a8ee1d4682d:
+    span:
+      start: 2371
+      end: 3178
+    imgnum: 12
+    reference: I1KG101950012.jpg

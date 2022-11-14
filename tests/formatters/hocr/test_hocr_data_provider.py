@@ -65,10 +65,12 @@ class HOCRTestFileProvider():
         hocr_filename = self.get_hocr_filename(image_filename)+".html"
         zf = self.get_image_group_data(image_group_id)
         try:
-            with zf.open(hocr_filename) as hocr_file:
-                return hocr_file.read()
+            for filename in zf.filelist:
+                if filename.filename.split("/")[-1] == hocr_filename:
+                    with zf.open(filename.filename) as hocr_file:
+                        return hocr_file.read()
         except:
-            return
+            return 
         
 class HOCRIATestFileProvider():
     def __init__(self, bdrc_scan_id, bdrc_image_list_path, buda_data, ocr_import_info, ocr_disk_path):
