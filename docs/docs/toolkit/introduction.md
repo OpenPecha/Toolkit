@@ -1,6 +1,7 @@
 ## Intro
 
-## :floppy_disk: Installation
+## Installation
+
 Stable version:
 
 #### `pip install openpecha`
