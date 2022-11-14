@@ -1,5 +1,3 @@
-# Intro and installation
-
 ## Intro
 
 ## :floppy_disk: Installation
@@ -11,19 +9,7 @@ Daily development version:
 
 #### `pip install git+https://github.com/OpenPecha/Openpecha-Toolkit`
 
-
-Developer Installation
-
-git clone https://github.com/OpenPecha-dev/openpecha-toolkit.git
-cd openpecha-toolkit
-pip install -r requirements-dev.txt
-pip install -e .
-pre-commit install
-Testing
-
-PYTHONPATH=.:$PYTHONPATH pytest tests
-
-## Developer Installation.
+## Developer Installation
 ```bash
 git clone https://github.com/OpenPecha-dev/openpecha-toolkit.git
 cd openpecha-toolkit
