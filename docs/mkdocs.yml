@@ -19,13 +19,13 @@ nav:
     - Introduction: data/introduction.md
     - Download: data/download.md
     - Reference: data/reference.md
+      - data/opf-format.md
     - Background: data/background.md
   - Toolkit:
     - Introduction: toolkit/introduction.md
     - Quickstart: toolkit/quickstart.md
     - Installation: toolkit/installation.md
     - Reference:
-      - toolkit/opf-format.md
       - toolkit/annotations.md
       - toolkit/hfml.md
       - toolkit/pecha.md
