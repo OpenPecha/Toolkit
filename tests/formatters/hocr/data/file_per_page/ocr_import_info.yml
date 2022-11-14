@@ -2,6 +2,9 @@ source: bdrc
 software: google_books
 batch: batch_2022
 expected_default_language: bo
-bdrc_scan_id: W2PD17457
+bdrc_scan_id: W1KG10193
 ocr_info:
-  timestamp: '2022-08-05T09:34:20Z'
+  timestamp: 11/04/22T20:33:39,
+  html: html.zip
+  txt: txt.zip
+  images: images.zip
