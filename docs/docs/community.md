@@ -1,4 +1,4 @@
-# OpenPecha members
+## OpenPecha members
 
 ![BDRC logo](https://user-images.githubusercontent.com/51434640/194739598-8a630a40-b83e-46cd-9f52-3f746db9864f.png)
 
@@ -16,7 +16,9 @@ The **Buddhist Digital Resource Center** is a nonprofit organization dedicated t
 
 **Lotus King Trust** supports the propagation and practice of Buddhadharma and the meaningful development of remote Himalayan communities.
 
-# Partners
+---
+
+## Partners
 
 ![kumarajiva logo](https://user-images.githubusercontent.com/51434640/194739365-bfa7a89d-e930-48d7-8f98-56a7db773764.png)
 
