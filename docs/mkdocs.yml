@@ -25,7 +25,8 @@ nav:
   - Toolkit:
     - Intro and installation: toolkit/introduction.md
     - Quickstart: toolkit/quickstart.md
-    - Reference:
+    - Reference: toolkot/reference.md
+    - Recipies:
       - toolkit/pecha.md
       - toolkit/layer.md
       - toolkit/metadata.md 
