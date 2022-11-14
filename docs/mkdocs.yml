@@ -14,7 +14,7 @@ theme:
 
 nav:
   - Intro:
-    - OpenPecha overview: index.md
+    - Overview: index.md
   - Data:
     - Intro and download: data/introduction.md
     - Reference:
