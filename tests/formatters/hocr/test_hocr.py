@@ -4,7 +4,7 @@ from pathlib import Path
 from openpecha.core.layer import LayerEnum, Layer
 from openpecha.formatters.ocr.hocr import HOCRFormatter
 from openpecha.utils import load_yaml
-from test_hocr_data_provider import HOCRTestFileProvider
+from test_hocr_data_provider import BDRCGBTestFileProvider
 
 
 def test_base_text():
@@ -18,7 +18,7 @@ def test_base_text():
     ocr_import_info = load_yaml(ocr_import_info_path)
     buda_data = load_yaml(buda_data_path)
     bdrc_image_list_path = Path(__file__).parent / "data" / "file_per_page"
-    data_provider = HOCRTestFileProvider(work_id, bdrc_image_list_path, buda_data, ocr_import_info, ocr_path)
+    data_provider = BDRCGBTestFileProvider(work_id, bdrc_image_list_path, buda_data, ocr_import_info, ocr_path)
     
     with tempfile.TemporaryDirectory() as tmpdirname:
         formatter = HOCRFormatter(output_path=tmpdirname)
@@ -48,7 +48,7 @@ def test_build_layers():
     ocr_import_info = load_yaml(ocr_import_info_path)
     buda_data = load_yaml(buda_data_path)
     image_list_path = Path(__file__).parent / "data" / "file_per_page"
-    data_provider = HOCRTestFileProvider(work_id, image_list_path, buda_data, ocr_import_info, ocr_path)
+    data_provider = BDRCGBTestFileProvider(work_id, image_list_path, buda_data, ocr_import_info, ocr_path)
 
     opf_options = {"ocr_confidence_threshold": 0.9, "max_low_conf_per_page": 50}
     

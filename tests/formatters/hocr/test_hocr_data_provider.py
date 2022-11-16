@@ -6,7 +6,7 @@ import logging
 import re
 from zipfile import ZipFile
 
-class HOCRTestFileProvider():
+class BDRCGBTestFileProvider():
     def __init__(self, bdrc_scan_id, bdrc_image_list_path, buda_data, ocr_import_info, ocr_disk_path):
         self.ocr_import_info = ocr_import_info
         self.ocr_disk_path = ocr_disk_path
