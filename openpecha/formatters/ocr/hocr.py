@@ -41,7 +41,10 @@ class BDRCGBFileProvider():
         self.get_images_info(image_group_id)
         buda_il = get_image_list(self.bdrc_scan_id, image_group_id)
         # format should be a list of image_id (/ file names)
-        return map(lambda ii: ii["filename"], buda_il)
+        if buda_il:
+            return map(lambda ii: ii["filename"], buda_il)
+        else:
+            return []
     
     def get_images_info(self, image_group_id):
         """load page_filename with image_filename mapping to images.info
