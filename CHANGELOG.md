@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.9.9 (2022-11-22)
+### Fix
+* **pecha:** Fix BUDA API ([`ace0d31`](https://github.com/OpenPecha/Toolkit/commit/ace0d31e171ba01e40d45ea68258b2b39ea0d824))
+
 ## v0.9.8 (2022-11-07)
 ### Fix
 * **pecha:** Handle box rotation ([`182c674`](https://github.com/OpenPecha/Toolkit/commit/182c6749464f2db15e5b2a1ec648f09816db2e53))
