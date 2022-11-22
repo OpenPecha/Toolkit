@@ -150,6 +150,8 @@ def _res_from_model(g, wlname):
                                 res["source_metadata"]["author"] = l.value
         res["source_metadata"]["languages"] = list(res["source_metadata"]["languages"])
         for _, _, ig in g.triples((wres, BDO.instanceHasVolume, None)):
+            if g.value(ig, BDO.volumeNumber) is None or g.value(ig, BDO.volumePagesTotal) is None:
+                continue
             iglname = str(ig)[str(ig).rfind('/')+1:]
             res["image_groups"][iglname] = {}
             iginfo = res["image_groups"][iglname]
