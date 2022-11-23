@@ -5,6 +5,7 @@ edit_uri: "blob/master/docs/docs"
 
 theme:
   name: material
+  logo: assets/logo.png
   features:
     - search.highlight
     - content.code.annotate
