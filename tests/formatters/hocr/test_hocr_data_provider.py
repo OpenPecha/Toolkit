@@ -4,8 +4,9 @@ from pathlib import Path
 from bs4 import BeautifulSoup
 import logging
 import re
+from zipfile import ZipFile
 
-class HOCRTestFileProvider():
+class BDRCGBTestFileProvider():
     def __init__(self, bdrc_scan_id, bdrc_image_list_path, buda_data, ocr_import_info, ocr_disk_path):
         self.ocr_import_info = ocr_import_info
         self.ocr_disk_path = ocr_disk_path
@@ -13,6 +14,8 @@ class HOCRTestFileProvider():
         self.buda_data = buda_data
         self.bdrc_image_list_path = bdrc_image_list_path
         self.image_info = {}
+        self.cur_zip = None
+        self.cur_image_group_id = None
 
     def _get_image_list(self, image_group_id):
         return load_yaml(self.bdrc_image_list_path / str(image_group_id+".json"))
@@ -49,17 +52,25 @@ class HOCRTestFileProvider():
         }
         self.source_info['image_groups'] =  curr['image_groups']
         return self.source_info
-        
     
-    def get_image_data(self, image_group_id, image_filename):
+    def get_image_group_data(self, image_group_id):
+        if image_group_id == self.cur_image_group_id and self.cur_zip is not None:
+            return self.cur_zip
         vol_folder = image_group_to_folder_name(self.bdrc_scan_id, image_group_id)
-        hocr_filename = self.get_hocr_filename(image_filename)
-        image_hocr_path = Path(f"{self.ocr_disk_path}") / "output" / vol_folder / f"{hocr_filename}.html"
+        zip_path = Path(f"{self.ocr_disk_path}") / "output" / vol_folder / "html.zip"
+        self.cur_zip = ZipFile(zip_path)
+        return self.cur_zip
+
+    def get_image_data(self, image_group_id, image_filename):
+        hocr_filename = self.get_hocr_filename(image_filename)+".html"
+        zf = self.get_image_group_data(image_group_id)
         try:
-            hocr_html = image_hocr_path.read_text(encoding='utf-8')
-            return hocr_html
+            for filename in zf.filelist:
+                if filename.filename.split("/")[-1] == hocr_filename:
+                    with zf.open(filename.filename) as hocr_file:
+                        return hocr_file.read()
         except:
-            return
+            return 
         
 class HOCRIATestFileProvider():
     def __init__(self, bdrc_scan_id, bdrc_image_list_path, buda_data, ocr_import_info, ocr_disk_path):

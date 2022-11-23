@@ -4,10 +4,10 @@ from pathlib import Path
 
 from openpecha.utils import load_yaml, dump_yaml
 from openpecha.formatters.ocr.hocr import HOCRFormatter
-from test_hocr_data_provider import HOCRTestFileProvider
+from test_hocr_data_provider import BDRCGBTestFileProvider
 
 def test_google_ocr_base_meta():
-    work_id = "W2PD17457"
+    work_id = "W1KG10193"
     pecha_id = "I123456"
     
     ocr_path = Path(__file__).parent / "data" / "file_per_page" / work_id
@@ -17,7 +17,7 @@ def test_google_ocr_base_meta():
     ocr_import_info = load_yaml(ocr_import_info_path)
     buda_data = load_yaml(buda_data_path)
     bdrc_image_list_path = Path(__file__).parent / "data" / "file_per_page"
-    data_provider = HOCRTestFileProvider(work_id, bdrc_image_list_path, buda_data, ocr_import_info, ocr_path)
+    data_provider = BDRCGBTestFileProvider(work_id, bdrc_image_list_path, buda_data, ocr_import_info, ocr_path)
     
     with tempfile.TemporaryDirectory() as tmpdirname:
         formatter = HOCRFormatter(output_path=tmpdirname)
