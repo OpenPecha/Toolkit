@@ -2,6 +2,11 @@
 
 <!--next-version-placeholder-->
 
+## v0.9.10 (2022-11-23)
+### Fix
+* **hocr-formatter:** Removed the update for empty volume bugs ([`9193669`](https://github.com/OpenPecha/Toolkit/commit/91936697e7c5a908cc1a1d376d2bcdc9f256ca04))
+* **hocr-formatter:** Unzip html.zip and read html ([`9791dce`](https://github.com/OpenPecha/Toolkit/commit/9791dce0cabcb2e7953854e318393d4e5062c36f))
+
 ## v0.9.9 (2022-11-22)
 ### Fix
 * **pecha:** Fix BUDA API ([`ace0d31`](https://github.com/OpenPecha/Toolkit/commit/ace0d31e171ba01e40d45ea68258b2b39ea0d824))
