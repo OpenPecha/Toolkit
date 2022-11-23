@@ -5,6 +5,8 @@ edit_uri: "blob/master/docs/docs"
 
 theme:
   name: material
+    palette:
+      primary: light blue
   logo: logo.png
   features:
     - search.highlight
