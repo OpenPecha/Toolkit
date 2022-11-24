@@ -17,14 +17,17 @@ theme:
 
 nav:
   - Home:
-    - Overview: index.md
+    - Welcome: index.md
   - Data:
-    - Intro and download: data/introduction.md
+    - Featured datasets: data/featured-datasets.md
     - Reference:
       - data/opf-format.md
-      - data/annotations.md
+      - data/library-api.md
       - data/hfml.md
     - Background: data/background.md
+  - API:
+    - Getting started: api/getting-started.md
+    - Reference: api/reference.md
   - Toolkit:
     - Intro and installation: toolkit/introduction.md
     - Quickstart: toolkit/quickstart.md
@@ -35,7 +38,7 @@ nav:
       - toolkit/metadata.md 
     - Background: toolkit/background.md
   - Community:
-    - Community: community.md
+    - Partners: partners.md
   - Benchmarks:
     - Benchmarks: benchmarks.md
     
