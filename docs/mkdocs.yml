@@ -13,7 +13,7 @@ theme:
         icon: material/toggle-switch
         name: Switch to dark mode
     - scheme: slate
-      primary: grey
+      primary: black
       accent: blue grey
       toggle:
         icon: material/toggle-switch-off-outline
@@ -73,3 +73,16 @@ markdown_extensions:
 plugins:
   - search
   - mkdocstrings
+  
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/OpenPecha
+    - icon: fontawesome/brands/discord
+      link: https://discord.com/invite/7GFpPFSTeA
+    - icon: fontawesome/brands/hugging-face
+      link: https://huggingface.co/openpecha
+    - icon: fontawesome/brands/medium
+      link: https://medium.com/@OpenPecha
+    - icon: fontawesome/brands/twitter
+      link: https://twitter.com/openpecha
