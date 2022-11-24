@@ -6,7 +6,6 @@ edit_uri: "blob/master/docs/docs"
 theme:
   name: material
   palette:
-    primary: white
     - media: "(prefers-color-scheme)"
       toggle:
         icon: material/toggle-switch
@@ -21,6 +20,7 @@ theme:
       toggle:
         icon: material/weather-sunny
         name: Switch to system preference
+    primary: white
   logo: logo.png
   features:
     - search.highlight
