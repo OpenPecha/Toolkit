@@ -6,7 +6,6 @@ edit_uri: "blob/master/docs/docs"
 theme:
   name: material
   palette:
-    primary: white
     - media: "(prefers-color-scheme)"
       toggle:
         icon: material/brightness-auto
