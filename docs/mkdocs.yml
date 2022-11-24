@@ -13,8 +13,8 @@ theme:
         icon: material/toggle-switch
         name: Switch to dark mode
     - scheme: slate
-      primary: indigo
-      accent: indigo
+      primary: grey
+      accent: blue grey
       toggle:
         icon: material/toggle-switch-off-outline
         name: Switch to light mode
