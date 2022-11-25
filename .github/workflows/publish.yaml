@@ -64,6 +64,7 @@ jobs:
       - name: setup workspace
         run: |
           pip install -r requirements-docs.txt
+          pip install git+https://${{ secrets.OPENPECHABOT_GH_TOKEN }}@github.com/OpenPechaBot/mkdocs-material-insiders.git
           echo docs.openpecha.org > "${GITHUB_WORKSPACE}/docs/docs/CNAME"
           remote_repo="https://x-access-token:${GITHUB_TOKEN}@${GITHUB_DOMAIN:-"github.com"}/${GITHUB_REPOSITORY}.git"
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
