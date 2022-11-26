@@ -1,4 +1,9 @@
+---
+icon: material/emoticon-happy 
+---
+
 # Welcome
+...
 
 OpenPecha is an 🗒️e-text and 🏷️annotations store made available on GitHub and through a set of APIs. 
 
