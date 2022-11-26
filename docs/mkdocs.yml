@@ -49,6 +49,8 @@ nav:
     - Connect: community/connect.md
   - Benchmarks:
     - Benchmarks: benchmarks.md
+  - Blog:
+    - blog/index.md
     
 markdown_extensions:
   - toc:
@@ -70,6 +72,7 @@ markdown_extensions:
 plugins:
   - search
   - mkdocstrings
+  - blog
   
 extra:
   social:
