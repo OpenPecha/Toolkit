@@ -1,6 +1,6 @@
 # Welcome
 
-OpenPecha is an 🗒️e-text and 🏷️annotations store made available on GitHub and through a set of APIs. 
+OpenPecha is an :material-book-edit-outline: e-text and :material-tag-outline: annotations store made available on GitHub and through a set of APIs. 
 
 The project’s primary aim is to facilitate the collection, proofreading, and enrichment of e-texts by leveraging language technology and collaboration.
 
