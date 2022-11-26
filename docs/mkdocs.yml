@@ -51,6 +51,8 @@ nav:
     - Benchmarks: benchmarks.md
   - Blog:
     - blog/index.md
+    - 2022:
+      - blog/posts/coming-soon.md
     
 markdown_extensions:
   - toc:
