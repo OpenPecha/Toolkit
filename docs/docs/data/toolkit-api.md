@@ -1,4 +1,8 @@
-# Library toolkit API
+---
+icon: material/api
+---
+
+# Toolkit API
 
 All the annotations in OPF are just span of start and end character the base layer and some attributes of the particular annotation. The most simplest form of annotation is just having the a span. Here is the list of annotation currently supported by OpenPecha.
 
