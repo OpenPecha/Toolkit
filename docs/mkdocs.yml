@@ -38,14 +38,11 @@ nav:
     - Getting started: api/getting-started.md
     - Reference: api/reference.md
   - Toolkit:
-    - Intro and installation: toolkit/introduction.md
-    - Quickstart: toolkit/quickstart.md
-    - Reference: toolkot/reference.md
-    - Recipies:
-      - toolkit/pecha.md
-      - toolkit/layer.md
-      - toolkit/metadata.md 
-    - Background: toolkit/background.md
+    - Overview: toolkit/toolkit-overview.md  
+    - Installation: toolkit/install.md
+    - Aquisition pipeline: toolkit/acquisition-pipeline.md
+    - Etext operations: toolkit/extext-operations.md
+    - Publishing pipeline: toolkit/publishing-pipeline.md
   - Community:
     - Partners: community/partners.md
     - Stay informed: community/stay-informed.md
