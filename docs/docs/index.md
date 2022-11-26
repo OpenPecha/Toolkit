@@ -6,7 +6,7 @@ The project’s primary aim is to facilitate the collection, proofreading, and e
 
 <div class="grid cards" markdown>
 
--   :material-download:{ .lg .middle } __Download an OP dataset__
+-   :material-download:{ .lg .middle } __Download a featured dataset__
 
     ---
 
@@ -14,20 +14,20 @@ The project’s primary aim is to facilitate the collection, proofreading, and e
 
     [:octicons-arrow-right-24: Featured datasets](https://docs.openpecha.org/data/featured-datasets/)
     
--   :material-clock-fast:{ .lg .middle } __Set up in 5 minutes__
+-   :material-hammer-wrench:{ .lg .middle } Get the OP toolkit__
 
     ---
 
     Install the [`OpenPecha toolkit`](#) with [`pip`](https://pypi.org/project/pip/) and get up
-    and running in minutes
+    and running in minutes.
 
     [:octicons-arrow-right-24: OP toolkit](https://docs.openpecha.org/toolkit/install/)
 
--   :material-api:{ .lg .middle } __OpenPecha API__
+-   :material-api:{ .lg .middle } __Use the OpenPecha API__
 
     ---
 
-    Use the OpenPecha to automate text proccessing. 
+    Harness the power of OpenPecha with the OP API. 
 
     [:octicons-arrow-right-24: OpenPecha API](https://docs.openpecha.org/api/getting-started/)
 
@@ -35,7 +35,7 @@ The project’s primary aim is to facilitate the collection, proofreading, and e
 
     ---
 
-    Read our blog to learn about new OP developments and info on Tibetan language digital tools.
+    Read our blog to learn the latest from OpenPecha and the Tibetan AI space.
 
     [:octicons-arrow-right-24: OpenPecha blog](https://docs.openpecha.org/blog/)
 
