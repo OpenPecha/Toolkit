@@ -1,5 +1,5 @@
 ---
-icon: material/pipe
+icon: material/publish
 ---
 
 # Publishing pipeline
