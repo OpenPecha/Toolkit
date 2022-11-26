@@ -1,5 +1,5 @@
 ---
-icon: material/book-open-outline
+icon: material/book-edit-outline
 ---
 
 # E-text operations
