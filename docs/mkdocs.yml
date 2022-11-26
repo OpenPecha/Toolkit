@@ -31,11 +31,9 @@ nav:
     - Welcome: index.md
   - Data:
     - Featured datasets: data/featured-datasets.md
-    - Reference:
-      - data/opf-format.md
-      - data/library-api.md
-      - data/hfml.md
-    - Background: data/background.md
+    - Reference: data/reference.md
+    - GitHub: data/github.md
+    - Core concepts: data/core-concepts.md
   - API:
     - Getting started: api/getting-started.md
     - Reference: api/reference.md
