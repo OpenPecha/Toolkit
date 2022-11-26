@@ -1,5 +1,5 @@
 ---
-icon: material/emoticon-happy 
+icon: material/magnify 
 ---
 
 # Data reference
