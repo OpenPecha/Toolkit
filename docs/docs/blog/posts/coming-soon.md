@@ -1,5 +1,4 @@
 ---
-draft: false 
 date: 2022-11-26
 categories:
   - openpecha
