@@ -1,6 +1,8 @@
-## Intro
+---
+icon: material/briefcase-download-outline 
+---
 
-## Installation
+# Installation
 
 Stable version:
 
