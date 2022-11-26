@@ -49,7 +49,9 @@ nav:
       - toolkit/metadata.md 
     - Background: toolkit/background.md
   - Community:
-    - Partners: partners.md
+    - Partners: community/partners.md
+    - Stay informed: community/stay-informed.md
+    - Connect: community/connect.md
   - Benchmarks:
     - Benchmarks: benchmarks.md
     
