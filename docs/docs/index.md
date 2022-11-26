@@ -6,38 +6,38 @@ The project’s primary aim is to facilitate the collection, proofreading, and e
 
 <div class="grid cards" markdown>
 
+-   :material-download:{ .lg .middle } __Download an OP dataset__
+
+    ---
+
+    Get the latest OP datasets to train Tibetan language AI models.
+
+    [:octicons-arrow-right-24: Featured datasets](https://docs.openpecha.org/data/featured-datasets/)
+    
 -   :material-clock-fast:{ .lg .middle } __Set up in 5 minutes__
 
     ---
 
-    Install [`mkdocs-material`](#) with [`pip`](#) and get up
+    Install the [`OpenPecha toolkit`](#) with [`pip`](https://pypi.org/project/pip/) and get up
     and running in minutes
 
-    [:octicons-arrow-right-24: Getting started](#)
+    [:octicons-arrow-right-24: OP toolkit](https://docs.openpecha.org/toolkit/install/)
 
--   :fontawesome-brands-markdown:{ .lg .middle } __It's just Markdown__
-
-    ---
-
-    Focus on your content and generate a responsive and searchable static site
-
-    [:octicons-arrow-right-24: Reference](#)
-
--   :material-format-font:{ .lg .middle } __Made to measure__
+-   :material-api:{ .lg .middle } __OpenPecha API__
 
     ---
 
-    Change the colors, fonts, language, icons, logo and more with a few lines
+    Use the OpenPecha to automate text proccessing. 
 
-    [:octicons-arrow-right-24: Customization](#)
+    [:octicons-arrow-right-24: OpenPecha API](https://docs.openpecha.org/api/getting-started/)
 
--   :material-scale-balance:{ .lg .middle } __Open Source, MIT__
+-   :material-post-outline:{ .lg .middle } __Get the latest news__
 
     ---
 
-    Material for MkDocs is licensed under MIT and available on [GitHub]
+    Read our blog to learn about new OP developments and info on Tibetan language digital tools.
 
-    [:octicons-arrow-right-24: License](#)
+    [:octicons-arrow-right-24: OpenPecha blog](https://docs.openpecha.org/blog/)
 
 </div>
 
