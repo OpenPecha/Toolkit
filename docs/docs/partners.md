@@ -1,4 +1,8 @@
-## OpenPecha partners
+---
+icon: material/handshake 
+---
+
+# Partners
 
 ![BDRC logo](https://user-images.githubusercontent.com/51434640/194739598-8a630a40-b83e-46cd-9f52-3f746db9864f.png)
 
