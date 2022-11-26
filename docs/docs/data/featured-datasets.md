@@ -1,5 +1,5 @@
 ---
-icon: material/database-arrow-down 
+icon: material/database-arrow-down-outline 
 ---
 
 # Featured datasets
