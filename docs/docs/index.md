@@ -14,7 +14,7 @@ The project’s primary aim is to facilitate the collection, proofreading, and e
 
     [:octicons-arrow-right-24: Featured datasets](https://docs.openpecha.org/data/featured-datasets/)
     
--   :material-hammer-wrench:{ .lg .middle } Get the OP toolkit__
+-   :material-hammer-wrench:{ .lg .middle } __Get the OP toolkit__
 
     ---
 
