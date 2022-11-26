@@ -41,7 +41,7 @@ nav:
     - Overview: toolkit/toolkit-overview.md  
     - Installation: toolkit/install.md
     - Aquisition pipeline: toolkit/acquisition-pipeline.md
-    - Etext operations: toolkit/extext-operations.md
+    - E-text operations: toolkit/etext-operations.md
     - Publishing pipeline: toolkit/publishing-pipeline.md
   - Community:
     - Partners: community/partners.md
