@@ -2,6 +2,13 @@
 
 <!--next-version-placeholder-->
 
+## v0.9.11 (2022-11-28)
+### Fix
+* Circular import ([`4577a7d`](https://github.com/OpenPecha/Toolkit/commit/4577a7df2bf4b7085ee1cc9406cd59363f49d7b0))
+
+### Documentation
+* Switch to mkdir-material insider ([`e1c0a45`](https://github.com/OpenPecha/Toolkit/commit/e1c0a45f294287f65e51e52489e4f21c08cd1486))
+
 ## v0.9.10 (2022-11-23)
 ### Fix
 * **hocr-formatter:** Removed the update for empty volume bugs ([`9193669`](https://github.com/OpenPecha/Toolkit/commit/91936697e7c5a908cc1a1d376d2bcdc9f256ca04))
