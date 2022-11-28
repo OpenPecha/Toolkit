@@ -7,12 +7,17 @@ Avialable functions:
 import os
 from pathlib import Path
 from uuid import uuid4
+import datetime
+from datetime import timezone
+from enum import Enum
 
 from openpecha import config, github_utils
 from openpecha.core.annotation import AnnBase, Span
 from openpecha.core.layer import Layer, LayerEnum
 from openpecha.core.pecha import OpenPechaFS
-from openpecha.utils import dump_yaml, load_yaml
+from openpecha.utils import load_yaml
+from openpecha.core.ids import get_base_id, get_initial_pecha_id
+from openpecha.core.metadata import InitialPechaMetadata, InitialCreationType
 
 from ..parsers.tmx import parse_tmx
 from ..segmenters.sentence import get_sentence_segments
@@ -51,30 +56,29 @@ def get_base_text(text):
     return final_base
 
 
-def create_opf_repo(segmented_text, opf_path, title, lang, origin_type):
-    pecha_id = opf_path.stem
-    opf = OpenPechaFS(path=opf_path)
-    layers = {"0001": {LayerEnum.segment: get_segment_layer(segmented_text)}}
-    base_text = get_base_text(segmented_text)
-    bases = {"0001": base_text}
-    metadata = {
-        "id": pecha_id,
-        "initial_creation_type": "TMX",
-        "origin_type": origin_type,
-        "source_metadata": {
+def get_metadata(pecha_id: str = None, title: str = None, language: str = None) -> InitialPechaMetadata:
+        source_metadata = {
             "id": "",
             "title": title,
-            "language": lang,
             "author": "",
-            "volume": {},
-        },
-    }
-    opf.layers = layers
-    opf.bases = bases
-    opf.save_base()
-    opf.save_layers()
-    meta_fn = Path(f"{opf_path}/meta.yml")
-    dump_yaml(metadata, meta_fn)
+        }
+        copyright = {}
+        license = None
+        parser_link = None
+
+        metadata = InitialPechaMetadata(
+            id=pecha_id,
+            source='',
+            initial_creation_type=InitialCreationType.tmx,
+            imported=datetime.datetime.now(timezone.utc),
+            last_modified=datetime.datetime.now(timezone.utc),
+            parser=parser_link,
+            copyright=copyright,
+            license=license,
+            source_metadata=source_metadata,
+            default_language=language
+        )
+        return metadata
 
 
 def create_readme(pecha_path):
@@ -90,16 +94,39 @@ def create_readme(pecha_path):
     return readme
 
 
-def create_opf(text, title=None, lang=None, origin_type="translation", new=False):
-    if text:
+def create_opf(segmented_text, title=None, lang=None, output_path=None, new=False):
+    if segmented_text:
         if new:
-            text = get_sentence_segments(text)
-        pecha_id = uuid4().hex
-        opf_path = config.PECHAS_PATH / pecha_id / f"{pecha_id}.opf"
-        create_opf_repo(text, opf_path, title, lang, origin_type)
-        readme = create_readme(opf_path.parent)
-        (opf_path.parent / "readme.md").write_text(readme, encoding="utf-8")
-    return opf_path.parent
+            text = get_sentence_segments(segmented_text)
+        else:
+            text = segmented_text
+    pecha_id = get_initial_pecha_id()
+    opf_path = Path(f"{output_path}/{pecha_id}/{pecha_id}.opf")
+    opf_path.mkdir(exist_ok=True, parents=True)
+    pecha = OpenPechaFS(opf_path)
+    base_id = get_base_id()
+    layers = {f"{base_id}": {LayerEnum.segment: get_segment_layer(text)}}
+    base_text = get_base_text(text)
+    bases = {f"{base_id}": base_text}
+    metadata = get_metadata(pecha_id, title, lang)
+    pecha.layers = layers
+    pecha.bases = bases
+    pecha.meta = metadata 
+    pecha.meta.bases = {
+        base_id:
+            {   
+                "source_metadata": None,
+                "order": 1,
+                "base_file": f"{base_id}".txt,
+                "statistics": None
+                }
+            }
+    pecha.save_base()
+    pecha.save_layers()
+    pecha.save_meta()
+    readme = create_readme(pecha.pecha_path.parent)
+    (pecha.pecha_path.parent / "readme.md").write_text(readme, encoding="utf-8")
+    return pecha
 
 
 def publish_pecha(pecha_path):
@@ -133,18 +160,18 @@ def create_opf_from_tmx(tmx_path):
     return source_pecha_path, target_pecha_path, source_metadata
 
 
-def create_alignment_from_source_text(text_path, title, publish=True):
+def create_alignment_from_source_text(text_path, title, lang, output_path, publish=True):
     text = Path(text_path).read_text(encoding="utf-8")
-    opf_path = create_opf(text, title=None, lang=None, new=True)
+    pecha = create_opf(text, title, lang, output_path, new=True)
     obj = TMXAlignment()
     alignment_path = obj.create_alignment_repo(
-        source_pecha_path=opf_path,
+        source_pecha_path=pecha.pecha_path,
         target_pecha_path=None,
         title=title,
         source_metadata=None,
     )
     if publish:
-        publish_pecha(opf_path)
+        pecha.publish()
         publish_pecha(alignment_path)
     return alignment_path
 

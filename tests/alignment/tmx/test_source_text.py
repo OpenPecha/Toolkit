@@ -12,3 +12,8 @@ def test_create_alignment_from_source_text():
     alignment_path = create_alignment_from_source_text(text_path, title, publish=False)
     print(alignment_path)
     assert alignment_path
+
+
+
+if __name__ == "__main__":
+    test_create_alignment_from_source_text()
