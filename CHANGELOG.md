@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.9.12 (2022-11-28)
+### Fix
+* Remove AnnType dependency which is redundant ([`fce9d7d`](https://github.com/OpenPecha/Toolkit/commit/fce9d7ddb9f13ca12072a72fc5a1d3ce1759d8b4))
+
 ## v0.9.11 (2022-11-28)
 ### Fix
 * Circular import ([`4577a7d`](https://github.com/OpenPecha/Toolkit/commit/4577a7df2bf4b7085ee1cc9406cd59363f49d7b0))
