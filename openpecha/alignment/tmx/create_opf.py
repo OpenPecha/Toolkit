@@ -15,7 +15,7 @@ from openpecha import config, github_utils
 from openpecha.core.annotation import AnnBase, Span
 from openpecha.core.layer import Layer, LayerEnum
 from openpecha.core.pecha import OpenPechaFS
-from openpecha.utils import load_yaml
+from openpecha.utils import load_yaml, dump_yaml
 from openpecha.core.ids import get_base_id, get_initial_pecha_id
 from openpecha.core.metadata import InitialPechaMetadata, InitialCreationType
 
@@ -101,9 +101,10 @@ def create_opf(segmented_text, title=None, lang=None, output_path=None, new=Fals
         else:
             text = segmented_text
     pecha_id = get_initial_pecha_id()
+    # opf_path = config.PECHAS_PATH / pecha_id / f"{pecha_id}.opf"
     opf_path = Path(f"{output_path}/{pecha_id}/{pecha_id}.opf")
     opf_path.mkdir(exist_ok=True, parents=True)
-    pecha = OpenPechaFS(opf_path)
+    pecha = OpenPechaFS(path=opf_path)
     base_id = get_base_id()
     layers = {f"{base_id}": {LayerEnum.segment: get_segment_layer(text)}}
     base_text = get_base_text(text)
@@ -111,19 +112,22 @@ def create_opf(segmented_text, title=None, lang=None, output_path=None, new=Fals
     metadata = get_metadata(pecha_id, title, lang)
     pecha.layers = layers
     pecha.bases = bases
-    pecha.meta = metadata 
-    pecha.meta.bases = {
+    pecha.metadata = metadata 
+    pecha.metadata.bases = {
         base_id:
             {   
                 "source_metadata": None,
                 "order": 1,
-                "base_file": f"{base_id}".txt,
+                "base_file": f"{base_id}.txt",
                 "statistics": None
                 }
             }
     pecha.save_base()
     pecha.save_layers()
-    pecha.save_meta()
+    # pecha.save_meta()
+    
+    metadata = pecha.metadata
+    dump_yaml(metadata, pecha.meta_fn)
     readme = create_readme(pecha.pecha_path.parent)
     (pecha.pecha_path.parent / "readme.md").write_text(readme, encoding="utf-8")
     return pecha
@@ -153,7 +157,7 @@ def create_opf_from_tmx(tmx_path):
 
     src_lang = source_metadata.get("srclang", "")
     tar_lang = source_metadata.get("adminlang", "")
-
+    
     source_pecha_path = create_opf(src_text, title, src_lang, origin_type)
     target_pecha_path = create_opf(tar_text, title, tar_lang, origin_type)
 

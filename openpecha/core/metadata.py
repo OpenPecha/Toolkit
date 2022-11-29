@@ -11,6 +11,7 @@ class InitialCreationType(Enum):
     ocr = "ocr"
     ebook = "ebook"
     input = "input"
+    tmx = "tmx"
 
 
 class CopyrightStatus(Enum):

@@ -38,19 +38,36 @@ class TMXAlignment:
         return segment
 
     def get_segment_pairs(self, source_pecha_path, target_pecha_path):
-
+        source_meta_yml = load_yaml(
+            Path(
+                source_pecha_path
+                / f"{source_pecha_path.stem}.opf"
+                / "meta.yml"
+            )
+        )
+        target_meta_yml = load_yaml(
+            Path(
+                target_pecha_path
+                / f"{target_pecha_path.stem}.opf"
+                / "meta.yml"
+            )
+        )
+        
+        source_base_id = source_meta_yml["bases"][0]
+        target_base_id = target_meta_yml["bases"][0]
+        
         source_segment_yml = load_yaml(
             Path(
                 source_pecha_path
                 / f"{source_pecha_path.stem}.opf"
-                / "layers/0001/Segment.yml"
+                / f"layers/{source_base_id}/Segment.yml"
             )
         )
         target_segment_yml = load_yaml(
             Path(
                 target_pecha_path
                 / f"{target_pecha_path.stem}.opf"
-                / "layers/0001/Segment.yml"
+                / f"layers/{target_base_id}/Segment.yml"
             )
         )
 
@@ -156,6 +173,7 @@ class TMXAlignment:
                         "type": origin_type,
                         "relation": "source",
                         "lang": src_lang,
+                        "base": base
                     },
                     f"{target_pecha_path.stem}": {
                         "type": origin_type,
