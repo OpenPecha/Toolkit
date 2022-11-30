@@ -2,7 +2,6 @@
 This module contains format variable for all the annotations
 """
 
-from collections import namedtuple
 from enum import Enum
 
 __all__ = [
@@ -31,7 +30,7 @@ __all__ = [
 ]
 
 
-class AnnType(Enum):
+class LayerEnum(Enum):
     book_title = "BookTitle"
     sub_title = "SubTitle"
     book_number = "BookNumber"
@@ -54,6 +53,7 @@ class AnnType(Enum):
     archaic = "Archaic"
     durchen = "Durchen"
     footnote = "Footnote"
+
 
 class _attr_names:
     # Layer

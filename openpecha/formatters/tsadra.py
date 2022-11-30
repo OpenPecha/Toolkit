@@ -1,19 +1,16 @@
 import os
-from copy import deepcopy
 from functools import partial
 from pathlib import Path
-from re import sub
 
 from bs4 import BeautifulSoup
 
-from .formatter import BaseFormatter
-from .layers import *
-from .layers import AnnType
+from openpecha.formatters.formatter import BaseFormatter
+from openpecha.formatters.layers import *
+from openpecha.formatters.layers import LayerEnum
 
 
 class TsadraTemplate:
-    """Content tsadra template components.
-    """
+    """Content tsadra template components."""
 
     author = [
         "credits-page_front-page---text-author",
@@ -450,20 +447,20 @@ class TsadraFormatter(BaseFormatter):
         """
         self.get_footnote_ann()
         result = {
-            AnnType.book_title: [self.book_title],
-            AnnType.sub_title: [self.sub_title],
-            AnnType.book_number: [self.book_number],
-            AnnType.poti_title: [self.poti_title],
-            AnnType.author: [self.author],
-            AnnType.chapter: [self.chapter],
-            AnnType.topic: [self.topic],
-            AnnType.sub_topic: [self.sub_topic],
-            AnnType.pagination: [self.pagination],
-            AnnType.tsawa: [self.root_text],
-            AnnType.citation: [self.citation],
-            AnnType.sabche: [self.sabche],
-            AnnType.yigchung: [self.yigchung],
-            AnnType.footnote: [self.footnote],
+            LayerEnum.book_title: [self.book_title],
+            LayerEnum.sub_title: [self.sub_title],
+            LayerEnum.book_number: [self.book_number],
+            LayerEnum.poti_title: [self.poti_title],
+            LayerEnum.author: [self.author],
+            LayerEnum.chapter: [self.chapter],
+            LayerEnum.topic: [self.topic],
+            LayerEnum.sub_topic: [self.sub_topic],
+            LayerEnum.pagination: [self.pagination],
+            LayerEnum.tsawa: [self.root_text],
+            LayerEnum.citation: [self.citation],
+            LayerEnum.sabche: [self.sabche],
+            LayerEnum.yigchung: [self.yigchung],
+            LayerEnum.footnote: [self.footnote],
         }
         return result
 

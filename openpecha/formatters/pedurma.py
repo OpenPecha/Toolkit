@@ -1,10 +1,10 @@
 import re
 from pathlib import Path
 
-from ..utils import Vol2FnManager
-from .formatter import BaseFormatter
-from .layers import *
-from .layers import AnnType, _attr_names
+from openpecha.core.layer import LayerEnum
+from openpecha.formatters.formatter import BaseFormatter
+from openpecha.formatters.layers import *
+from openpecha.utils import Vol2FnManager
 
 
 class PedurmaFormatter(BaseFormatter):
@@ -154,10 +154,10 @@ class PedurmaFormatter(BaseFormatter):
 
     def get_result(self):
         result = {
-            AnnType.topic: [],
-            AnnType.sub_topic: [],
-            AnnType.pagination: self.page,
-            AnnType.pedurma_note: self.durchen,
+            LayerEnum.topic: [],
+            LayerEnum.sub_topic: [],
+            LayerEnum.pagination: self.page,
+            LayerEnum.pedurma_note: self.durchen,
         }
         return result
 

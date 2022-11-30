@@ -1,8 +1,8 @@
 from pathlib import Path
 
-from ..formatters.layers import AnnType
-from ..utils import Vol2FnManager
-from .serialize import Serialize
+from openpecha.formatters.layers import LayerEnum
+from openpecha.utils import Vol2FnManager
+from openpecha.serializers.serialize import Serialize
 
 
 class HFMLSerializer(Serialize):
@@ -22,8 +22,8 @@ class HFMLSerializer(Serialize):
         end_payload = ")"
         side = "ab"
         local_id = self.get_local_id(ann, uuid2localid)
-        ann_type = AnnType(ann["type"])
-        if ann_type == AnnType.pagination:
+        ann_type = LayerEnum(ann["type"])
+        if ann_type == LayerEnum.pagination:
             pg_idx = ann.get("page_index", "")
             if not pg_idx:
                 pg_idx = ann.get("imgnum", "")
@@ -47,52 +47,52 @@ class HFMLSerializer(Serialize):
             else:
                 start_payload += "\n"
             only_start_ann = True
-        elif ann_type == AnnType.topic:
+        elif ann_type == LayerEnum.topic:
             start_payload = f"{{{ann['work_id']}}}"
             only_start_ann = True
-        elif ann_type == AnnType.sub_topic:
+        elif ann_type == LayerEnum.sub_topic:
             start_payload = f"{{{ann['work_id']}}}"
             only_start_ann = True
-        elif ann_type == AnnType.correction:
+        elif ann_type == LayerEnum.correction:
             start_payload = f"<{local_id}"
             end_payload = f',{ann["correction"]}>'
-        elif ann_type == AnnType.archaic:
+        elif ann_type == LayerEnum.archaic:
             start_payload = f"{{{local_id}"
             end_payload = f',{ann["modern"]}}}'
-        elif ann_type == AnnType.peydurma:
+        elif ann_type == LayerEnum.peydurma:
             start_payload = f"#{local_id}"
             only_start_ann = True
-        elif ann_type == AnnType.error_candidate:
+        elif ann_type == LayerEnum.error_candidate:
             start_payload = f"[{local_id}"
             end_payload = "]"
-        elif ann_type == AnnType.book_title:
+        elif ann_type == LayerEnum.book_title:
             start_payload = f"<{local_id}k1"
             end_payload = ">"
-        elif ann_type == AnnType.book_number:
+        elif ann_type == LayerEnum.book_number:
             start_payload = f"<{local_id}k4"
             end_payload = ">"
-        elif ann_type == AnnType.poti_title:
+        elif ann_type == LayerEnum.poti_title:
             start_payload = f"<{local_id}k2"
             end_payload = ">"
-        elif ann_type == AnnType.author:
+        elif ann_type == LayerEnum.author:
             start_payload = f"<{local_id}au"
             end_payload = ">"
-        elif ann_type == AnnType.chapter:
+        elif ann_type == LayerEnum.chapter:
             start_payload = f"<{local_id}k3"
             end_payload = ">"
-        elif ann_type == AnnType.tsawa:
+        elif ann_type == LayerEnum.tsawa:
             start_payload = f"<{local_id}m"
             end_payload = "m>"
-        elif ann_type == AnnType.citation:
+        elif ann_type == LayerEnum.citation:
             start_payload = f"<{local_id}g"
             end_payload = "g>"
-        elif ann_type == AnnType.sabche:
+        elif ann_type == LayerEnum.sabche:
             start_payload = f"<{local_id}q"
             end_payload = "q>"
-        elif ann_type == AnnType.yigchung:
+        elif ann_type == LayerEnum.yigchung:
             start_payload = f"<{local_id}y"
             end_payload = "y>"
-        elif ann_type == AnnType.durchen:
+        elif ann_type == LayerEnum.durchen:
             start_payload = f"<{local_id}d"
             end_payload = "d>"
 
