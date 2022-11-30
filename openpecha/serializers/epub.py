@@ -8,10 +8,9 @@ from pathlib import Path
 import requests
 from bs4 import BeautifulSoup
 
-from openpecha.formatters.layers import LayerEnum
-from openpecha.utils import load_yaml
-
+from openpecha.core.layer import LayerEnum
 from openpecha.serializers.serialize import Serialize
+from openpecha.utils import load_yaml
 
 
 class TsadraTemplateCSSClasses(Enum):

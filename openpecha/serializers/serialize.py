@@ -1,8 +1,8 @@
 import re
-from collections import defaultdict, namedtuple
+from collections import defaultdict
 from pathlib import Path
 
-from openpecha.formatters.layers import LayerEnum, SubText
+from openpecha.core.layer import LayerEnum
 from openpecha.utils import load_yaml
 
 INFO = "[INFO] {}"

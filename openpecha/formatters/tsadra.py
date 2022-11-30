@@ -4,9 +4,9 @@ from pathlib import Path
 
 from bs4 import BeautifulSoup
 
+from openpecha.core.layer import LayerEnum
 from openpecha.formatters.formatter import BaseFormatter
 from openpecha.formatters.layers import *
-from openpecha.formatters.layers import LayerEnum
 
 
 class TsadraTemplate:

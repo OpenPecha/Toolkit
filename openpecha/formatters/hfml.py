@@ -9,10 +9,11 @@ from pathlib import Path
 
 import yaml
 
-from openpecha.utils import Vol2FnManager, dump_yaml, load_yaml
+from openpecha.core.layer import LayerEnum
 from openpecha.formatters.formatter import BaseFormatter
 from openpecha.formatters.layers import *
-from openpecha.formatters.layers import LayerEnum, _attr_names
+from openpecha.formatters.layers import _attr_names
+from openpecha.utils import Vol2FnManager, dump_yaml, load_yaml
 
 
 class HFMLFormatter(BaseFormatter):

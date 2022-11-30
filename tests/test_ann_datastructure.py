@@ -1,7 +1,8 @@
 from uuid import uuid4
 
+from openpecha.core.layer import LayerEnum
 from openpecha.formatters.layers import *
-from openpecha.formatters.layers import LayerEnum, Span, _attr_names
+from openpecha.formatters.layers import Span, _attr_names
 
 
 def test_span():

@@ -1,7 +1,7 @@
 from pathlib import Path
 
+from openpecha.core.layer import LayerEnum
 from openpecha.formatters import TsadraFormatter
-from openpecha.formatters.layers import LayerEnum
 
 
 class TestTsadraFormatter:

@@ -1,8 +1,8 @@
 from pathlib import Path
 
-from openpecha.formatters.layers import LayerEnum
-from openpecha.utils import Vol2FnManager
+from openpecha.core.layer import LayerEnum
 from openpecha.serializers.serialize import Serialize
+from openpecha.utils import Vol2FnManager
 
 
 class HFMLSerializer(Serialize):

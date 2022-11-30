@@ -2,7 +2,6 @@
 This module contains format variable for all the annotations
 """
 
-from enum import Enum
 
 __all__ = [
     "Layer",
@@ -28,31 +27,6 @@ __all__ = [
     "Span",
     "Footnote",
 ]
-
-
-class LayerEnum(Enum):
-    book_title = "BookTitle"
-    sub_title = "SubTitle"
-    book_number = "BookNumber"
-    poti_title = "PotiTitle"
-    author = "Author"
-    chapter = "Chapter"
-
-    topic = "Text"
-    sub_topic = "SubText"
-
-    pagination = "Pagination"
-    citation = "Citation"
-    correction = "Correction"
-    error_candidate = "ErrorCandidate"
-    peydurma = "Peydurma"
-    pedurma_note = "PedurmaNote"
-    sabche = "Sabche"
-    tsawa = "Tsawa"
-    yigchung = "Yigchung"
-    archaic = "Archaic"
-    durchen = "Durchen"
-    footnote = "Footnote"
 
 
 class _attr_names:

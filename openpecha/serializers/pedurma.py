@@ -3,8 +3,7 @@ from pathlib import Path
 
 import yaml
 
-from openpecha.formatters.layers import LayerEnum
-
+from openpecha.core.layer import LayerEnum
 from openpecha.serializers.serialize import Serialize
 
 
