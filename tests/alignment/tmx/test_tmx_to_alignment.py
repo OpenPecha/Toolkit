@@ -5,6 +5,7 @@ from openpecha import config
 from openpecha.alignment.tmx import TMXAlignment
 from openpecha.alignment.tmx.create_opf import create_opf_from_tmx
 from openpecha.utils import load_yaml
+from openpecha.core.layer import LayerEnum
 
 
 def get_segment_pairs_annotation_ids(segment_pairs, source_pecha_id, target_peccha_id):
@@ -23,7 +24,9 @@ def get_segment_pairs_annotation_ids(segment_pairs, source_pecha_id, target_pecc
 
 def get_annotations(source_pecha, target_pecha):
     
-    for _id, source_segment_yml in source_pecha.layers.items():
+    for _pecha in list(source_pecha.layers.values()):
+        source_annotations= _pecha[LayerEnum.segment].annotations
+    for _id, source_segment_yml in dict(source_pecha.layers.values().annotations).items():
         source_base_id = _id
         for _, _value in source_segment_yml.items():
             source_annotations = _value.annotations

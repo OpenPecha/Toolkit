@@ -155,8 +155,8 @@ def create_alignment_from_source_text(text_path, lang, source_metadata=None, pub
     pecha = create_opf(text, lang, source_metadata)
     obj = TMXAlignment()
     alignment_path = obj.create_alignment_repo(
-        source_pecha_path=pecha.pecha_path,
-        target_pecha_path=None,
+        source_pecha=pecha,
+        target_pecha=None,
         title=source_metadata['title'],
         source_metadata=None,
     )
@@ -166,26 +166,26 @@ def create_alignment_from_source_text(text_path, lang, source_metadata=None, pub
     return alignment_path
 
 
-def create_alignment(source_pecha_path, target_pecha_path, title, source_metadata):
+def create_alignment(source_pecha, target_pecha, title, source_metadata):
     obj = TMXAlignment()
     alignment_path = obj.create_alignment_repo(
-        source_pecha_path, target_pecha_path, title, source_metadata
+        source_pecha, target_pecha, title, source_metadata
     )
     return alignment_path
 
 
 def create_alignment_from_tmx(tmx_path, publish=True):
     title = tmx_path.stem
-    source_pecha_path, target_pecha_path, source_metadata = create_opf_from_tmx(
+    source_pecha, target_pecha, source_metadata = create_opf_from_tmx(
         tmx_path
     )
     alignment_path = create_alignment(
-        source_pecha_path, target_pecha_path, title, source_metadata
+        source_pecha, target_pecha, title, source_metadata
     )
 
     if publish:
-        publish_pecha(source_pecha_path)
-        publish_pecha(target_pecha_path)
+        source_pecha.publish()
+        target_pecha.publish()
         publish_pecha(alignment_path)
 
     return alignment_path

@@ -133,6 +133,7 @@ class TMXAlignment:
     def write_alignment_repo(self, alignment_path, alignment_yml, meta_yml=None):
         alignment_opa_path = alignment_path / f"{alignment_path.stem}.opa"
         self._mkdir(alignment_opa_path)
+        # base_id = 
         alignment_yml_path = alignment_opa_path / "Alignment.yml"
         meta_path = alignment_opa_path / "meta.yml"
         dump_yaml(alignment_yml, alignment_yml_path)
