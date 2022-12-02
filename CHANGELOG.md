@@ -2,6 +2,14 @@
 
 <!--next-version-placeholder-->
 
+## v0.9.14 (2022-11-30)
+### Fix
+* Replace AnnType with LayerEnum ([`6a995fc`](https://github.com/OpenPecha/Toolkit/commit/6a995fc2db40c6f9a7714c3c19523bab84955bc6))
+
+## v0.9.13 (2022-11-30)
+### Fix
+* Replace AnnType with LayerEnum ([`e0feb81`](https://github.com/OpenPecha/Toolkit/commit/e0feb817c3c3f90b02aa3253adabb875c6a8f5e9))
+
 ## v0.9.12 (2022-11-28)
 ### Fix
 * Remove AnnType dependency which is redundant ([`fce9d7d`](https://github.com/OpenPecha/Toolkit/commit/fce9d7ddb9f13ca12072a72fc5a1d3ce1759d8b4))

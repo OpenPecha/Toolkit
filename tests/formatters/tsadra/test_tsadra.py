@@ -1,7 +1,7 @@
 from pathlib import Path
 
+from openpecha.core.layer import LayerEnum
 from openpecha.formatters import TsadraFormatter
-from openpecha.formatters.layers import AnnType
 
 
 class TestTsadraFormatter:
@@ -20,41 +20,41 @@ class TestTsadraFormatter:
         result = formatter.get_result()
 
         expected_result = {
-            AnnType.book_title: [[(None, {"span": {"start": 0, "end": 84}})]],
-            AnnType.sub_title: [[]],
-            AnnType.book_number: [[]],
-            AnnType.poti_title: [[]],
-            AnnType.author: [
+            LayerEnum.book_title: [[(None, {"span": {"start": 0, "end": 84}})]],
+            LayerEnum.sub_title: [[]],
+            LayerEnum.book_number: [[]],
+            LayerEnum.poti_title: [[]],
+            LayerEnum.author: [
                 [
                     (None, {"span": {"start": 86, "end": 109}}),
                     (None, {"span": {"start": 111, "end": 134}}),
                     (None, {"span": {"start": 136, "end": 181}}),
                 ]
             ],
-            AnnType.chapter: [[(None, {"span": {"start": 183, "end": 200}})]],
-            AnnType.topic: [[]],
-            AnnType.sub_topic: [[]],
-            AnnType.pagination: [[]],
-            AnnType.tsawa: [
+            LayerEnum.chapter: [[(None, {"span": {"start": 183, "end": 200}})]],
+            LayerEnum.topic: [[]],
+            LayerEnum.sub_topic: [[]],
+            LayerEnum.pagination: [[]],
+            LayerEnum.tsawa: [
                 [
                     (None, {"span": {"start": 4150, "end": 4300}, "isverse": True}),
                     (None, {"span": {"start": 5122, "end": 5298}, "isverse": True}),
                 ]
             ],
-            AnnType.citation: [
+            LayerEnum.citation: [
                 [
                     (None, {"span": {"start": 3993, "end": 4132}, "isverse": False}),
                     (None, {"span": {"start": 4302, "end": 4418}, "isverse": True}),
                 ]
             ],
-            AnnType.sabche: [
+            LayerEnum.sabche: [
                 [
                     (None, {"span": {"start": 5091, "end": 5120}}),
                     (None, {"span": {"start": 7313, "end": 7375}}),
                 ]
             ],
-            AnnType.yigchung: [[(None, {"span": {"start": 7273, "end": 7311}})]],
-            AnnType.footnote: [[]],
+            LayerEnum.yigchung: [[(None, {"span": {"start": 7273, "end": 7311}})]],
+            LayerEnum.footnote: [[]],
         }
 
         for layer in result:
