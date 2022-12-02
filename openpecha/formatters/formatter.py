@@ -3,11 +3,12 @@ from copy import deepcopy
 from pathlib import Path
 from uuid import uuid4
 
-from .. import config
-from .layers import *
-from .layers import AnnType, _attr_names
-
+from openpecha import config
+from openpecha.core.layer import LayerEnum
+from openpecha.formatters.layers import *
+from openpecha.formatters.layers import _attr_names
 from openpecha.utils import dump_yaml, load_yaml
+
 
 class Global2LocalId:
     """Map global id of annotation in a layer to local id of a layer."""
@@ -249,7 +250,7 @@ class BaseFormatter:
 
     def _get_vol_layers(self, layers):
         for layer_name in layers:
-            if layer_name in [AnnType.topic, AnnType.sub_topic]:
+            if layer_name in [LayerEnum.topic, LayerEnum.sub_topic]:
                 continue
             layers[layer_name] = _name(layer_name, layers[layer_name])
         return zip(*layers.values())
@@ -260,7 +261,7 @@ class BaseFormatter:
 
         # filter cross vols layers from layers
         cross_vols_layers = {}
-        for cross_ann_name in [AnnType.topic, AnnType.sub_topic]:
+        for cross_ann_name in [LayerEnum.topic, LayerEnum.sub_topic]:
             cross_vols_layers[cross_ann_name] = layers[cross_ann_name]
             del layers[cross_ann_name]
 
@@ -282,12 +283,13 @@ class BaseFormatter:
 
             yield result, vol_id
 
-        if AnnType.topic not in old_layers:
+        if LayerEnum.topic not in old_layers:
             # Create Index layer
             Index_layer = Layer(self.get_unique_id(), "index")
             # loop over each topic
             for topics, sub_topics in zip(
-                cross_vols_layers[AnnType.topic], cross_vols_layers[AnnType.sub_topic]
+                cross_vols_layers[LayerEnum.topic],
+                cross_vols_layers[LayerEnum.sub_topic],
             ):
                 if topics:
                     Topic = deepcopy(Text)

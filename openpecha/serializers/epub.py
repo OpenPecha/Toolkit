@@ -8,25 +8,25 @@ from pathlib import Path
 import requests
 from bs4 import BeautifulSoup
 
-from openpecha.formatters.layers import AnnType
+from openpecha.core.layer import LayerEnum
+from openpecha.serializers.serialize import Serialize
 from openpecha.utils import load_yaml
-
-from .serialize import Serialize
 
 
 class TsadraTemplateCSSClasses(Enum):
-    cover_title = 'credits-page_front-title'
-    book_title = 'tibetan-book-title'
-    sub_title = 'tibetan-book-sub-title'
-    book_number = 'tibetan-book-number'
-    chapter = 'tibetan-chapters'
-    tsawa_inline = 'tibetan-root-text'
-    tsawa_verse = 'tibetan-root-text-in-verse'
-    citation_inline = 'tibetan-citations'
-    citation_verse = 'tibetan-citations-in-verse'
-    citation_prose = 'tibetan-citations-prose'
-    sabche = 'tibetan-sabche1'
-    yigchung = 'tibetan-commentary-small'
+    cover_title = "credits-page_front-title"
+    book_title = "tibetan-book-title"
+    sub_title = "tibetan-book-sub-title"
+    book_number = "tibetan-book-number"
+    chapter = "tibetan-chapters"
+    tsawa_inline = "tibetan-root-text"
+    tsawa_verse = "tibetan-root-text-in-verse"
+    citation_inline = "tibetan-citations"
+    citation_verse = "tibetan-citations-in-verse"
+    citation_prose = "tibetan-citations-prose"
+    sabche = "tibetan-sabche1"
+    yigchung = "tibetan-commentary-small"
+
 
 class Tsadra_template:
     """Variables are important components of tsadra epub template."""
@@ -46,9 +46,15 @@ class Tsadra_template:
     chapter_SP = f'<span class="{TsadraTemplateCSSClasses.chapter.value}">'
     tsawa_inline_SP = f'<span class="{TsadraTemplateCSSClasses.tsawa_inline.value}">'
     tsawa_verse_SP = f'<span class="{TsadraTemplateCSSClasses.tsawa_verse.value}">'
-    citation_inline_SP = f'<span class="{TsadraTemplateCSSClasses.citation_inline.value}">'
-    citation_verse_SP = f'<span class="{TsadraTemplateCSSClasses.citation_verse.value}">'
-    citation_prose_sp = f'<span class="{TsadraTemplateCSSClasses.citation_prose.value}">'
+    citation_inline_SP = (
+        f'<span class="{TsadraTemplateCSSClasses.citation_inline.value}">'
+    )
+    citation_verse_SP = (
+        f'<span class="{TsadraTemplateCSSClasses.citation_verse.value}">'
+    )
+    citation_prose_sp = (
+        f'<span class="{TsadraTemplateCSSClasses.citation_prose.value}">'
+    )
     sabche_SP = f'<span class="{TsadraTemplateCSSClasses.sabche.value}">'
     yigchung_SP = f'<span class="{TsadraTemplateCSSClasses.yigchung.value}">'
     footnote_marker_SP = '<span class="tibetan-footnote-marker"'
@@ -104,7 +110,6 @@ class EpubSerializer(Serialize):
                 start_payload = Tsadra_template.citation_prose_sp
         return start_payload
 
-
     def get_tsawa_sp(self, css_class_name):
         """Return start payload for tsawa according to class name
 
@@ -135,46 +140,46 @@ class EpubSerializer(Serialize):
         only_start_ann = False
         start_payload = "("
         end_payload = ")"
-        ann_type = AnnType(ann["type"])
-        if ann_type == AnnType.correction:
+        ann_type = LayerEnum(ann["type"])
+        if ann_type == LayerEnum.correction:
             start_payload = "("
             end_payload = f',{ann["correction"]})'
-        elif ann_type == AnnType.peydurma:
+        elif ann_type == LayerEnum.peydurma:
             start_payload = "#"
             only_start_ann = True
-        elif ann_type == AnnType.error_candidate:
+        elif ann_type == LayerEnum.error_candidate:
             start_payload = "["
             end_payload = "]"
-        elif ann_type == AnnType.book_title:
+        elif ann_type == LayerEnum.book_title:
             start_payload = Tsadra_template.book_title_SP
             end_payload = Tsadra_template.span_EP
-        elif ann_type == AnnType.sub_title:
+        elif ann_type == LayerEnum.sub_title:
             start_payload = Tsadra_template.sub_title_SP
             end_payload = Tsadra_template.span_EP
-        elif ann_type == AnnType.book_number:
+        elif ann_type == LayerEnum.book_number:
             start_payload = Tsadra_template.book_number_SP
             end_payload = f"{Tsadra_template.span_EP}{Tsadra_template.para_EP}"
-        elif ann_type == AnnType.author:
+        elif ann_type == LayerEnum.author:
             start_payload = Tsadra_template.author_SP
             end_payload = f"{Tsadra_template.span_EP}{Tsadra_template.para_EP}"
-        elif ann_type == AnnType.chapter:
+        elif ann_type == LayerEnum.chapter:
             start_payload = Tsadra_template.chapter_SP
             end_payload = Tsadra_template.span_EP
-        elif ann_type == AnnType.tsawa:
+        elif ann_type == LayerEnum.tsawa:
             css_class_name = self.get_css_class_name(ann)
             start_payload = self.get_tsawa_sp(css_class_name)
             end_payload = Tsadra_template.span_EP
-        elif ann_type == AnnType.citation:
+        elif ann_type == LayerEnum.citation:
             css_class_name = self.get_css_class_name(ann)
             start_payload = self.get_citation_sp(css_class_name)
             end_payload = Tsadra_template.span_EP
-        elif ann_type == AnnType.sabche:
+        elif ann_type == LayerEnum.sabche:
             start_payload = Tsadra_template.sabche_SP
             end_payload = Tsadra_template.span_EP
-        elif ann_type == AnnType.yigchung:
+        elif ann_type == LayerEnum.yigchung:
             start_payload = Tsadra_template.yigchung_SP
             end_payload = Tsadra_template.span_EP
-        elif ann_type == AnnType.footnote:
+        elif ann_type == LayerEnum.footnote:
             start_payload = f'<a href="#fr{ann["id"]}">{Tsadra_template.footnote_marker_SP} id="fm{ann["id"]}">'
             end_payload = Tsadra_template.footnote_EP
 
@@ -467,9 +472,9 @@ class EpubSerializer(Serialize):
         Returns:
             bs4-tag: new metadata
         """
-        ibook_meta = soup.new_tag('meta')
-        ibook_meta.attrs['property'] = "ibooks:specified-fonts"
-        ibook_meta.append('true')
+        ibook_meta = soup.new_tag("meta")
+        ibook_meta.attrs["property"] = "ibooks:specified-fonts"
+        ibook_meta.append("true")
         meta_data.append(ibook_meta)
         return meta_data
 
@@ -483,10 +488,10 @@ class EpubSerializer(Serialize):
         Returns:
             bs4-tag: new manifest
         """
-        new_item = soup.new_tag('item')
-        new_item.attrs['href'] = "font/MonlamUniOuChan2.ttf"
-        new_item.attrs['id'] = "MonlamUniOuChan2.ttf"
-        new_item.attrs['media-type'] = "application/x-font-ttf"
+        new_item = soup.new_tag("item")
+        new_item.attrs["href"] = "font/MonlamUniOuChan2.ttf"
+        new_item.attrs["id"] = "MonlamUniOuChan2.ttf"
+        new_item.attrs["media-type"] = "application/x-font-ttf"
         manifest.append(new_item)
         return manifest
 
@@ -500,9 +505,11 @@ class EpubSerializer(Serialize):
             str: new opf content
         """
         soup = BeautifulSoup(opf, "html.parser")
-        soup.package.attrs['prefix'] = "ibooks: http://vocabulary.itunes.apple.com/rdf/ibooks/vocabulary-extensions-1.0/"
-        old_meta = soup.find('metadata')
-        old_manifest = soup.find('manifest')
+        soup.package.attrs[
+            "prefix"
+        ] = "ibooks: http://vocabulary.itunes.apple.com/rdf/ibooks/vocabulary-extensions-1.0/"
+        old_meta = soup.find("metadata")
+        old_manifest = soup.find("manifest")
         new_meta = self.get_new_metadata(soup, old_meta)
         new_manifest = self.get_new_manifest(soup, old_manifest)
         soup.metadata.replaceWith(new_meta)
@@ -516,28 +523,28 @@ class EpubSerializer(Serialize):
             epub_path (path_obj): path of epub produced by calibre
         """
         pecha_id = epub_path.stem
-        #rename to zip
-        zip_path = epub_path.parent / f'{pecha_id}.zip'
+        # rename to zip
+        zip_path = epub_path.parent / f"{pecha_id}.zip"
         os.rename(str(epub_path), str(zip_path))
         # epub_path.rename(epub_path.with_suffix('.zip'))
-        epub_folder = str(epub_path.parent / f'{pecha_id}')
-        with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+        epub_folder = str(epub_path.parent / f"{pecha_id}")
+        with zipfile.ZipFile(zip_path, "r") as zip_ref:
             zip_ref.extractall(epub_folder)
-        print('INFO: Unzip epub..')
+        print("INFO: Unzip epub..")
         zip_path.unlink()
-        opf_path = Path(epub_folder) / 'content.opf'
-        opf_content = opf_path.read_text(encoding='utf-8')
+        opf_path = Path(epub_folder) / "content.opf"
+        opf_content = opf_path.read_text(encoding="utf-8")
         new_opf_content = self.get_new_opf(opf_content)
-        opf_path.write_text(new_opf_content, encoding='utf-8')
-        print('INFO: OPF content updated..')
-        new_zip_path = shutil.make_archive(epub_folder, 'zip', epub_folder)
-        os.system(f'rm -r {epub_folder}')
-        print('INFO: file zipped..')
+        opf_path.write_text(new_opf_content, encoding="utf-8")
+        print("INFO: OPF content updated..")
+        new_zip_path = shutil.make_archive(epub_folder, "zip", epub_folder)
+        os.system(f"rm -r {epub_folder}")
+        print("INFO: file zipped..")
         new_zip_path = Path(new_zip_path)
-        new_epub_path = f'{epub_folder}.epub'
+        new_epub_path = f"{epub_folder}.epub"
         os.rename(str(new_zip_path), new_epub_path)
         # new_zip_path.rename(new_zip_path.with_suffix('.epub'))
-        print('INFO: Epub ready...')
+        print("INFO: Epub ready...")
 
     def get_serialized_html(self, result, base_id, pecha_title):
         """Serialize html are return using annotated text
@@ -566,7 +573,9 @@ class EpubSerializer(Serialize):
         serialized_html += f"{result}{footnote_ref_tag}</body>\n</html>"
         return serialized_html
 
-    def serialize(self,  output_path="./output/epub_output", toc_levels={}, css_template=None) -> Path:
+    def serialize(
+        self, output_path="./output/epub_output", toc_levels={}, css_template=None
+    ) -> Path:
         """
         This module serialize .opf file to other format such as .epub etc. In case of epub,
         we are using calibre ebook-convert command to do the conversion by passing our custom css template

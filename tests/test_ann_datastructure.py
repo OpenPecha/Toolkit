@@ -1,7 +1,8 @@
 from uuid import uuid4
 
+from openpecha.core.layer import LayerEnum
 from openpecha.formatters.layers import *
-from openpecha.formatters.layers import AnnType, Span, _attr_names
+from openpecha.formatters.layers import Span, _attr_names
 
 
 def test_span():
@@ -37,7 +38,7 @@ def test_ann():
 def test_layer():
     # create Page layer
     layer_id = uuid4().hex
-    ann_type = AnnType.pagination
+    ann_type = LayerEnum.pagination
     rev = f"{1:05}"
     Pagination_layer = Layer(layer_id, ann_type, rev=rev)
     start, end, imgnum, pg_ref = get_fake_pg()

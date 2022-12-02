@@ -5,15 +5,15 @@ This module implements all classes necessary to format HFML annotation to OpenPe
 HFML (Human Friendly Markup Language) contains tagset used for structuring and annotating the text.
 """
 import re
-from json import encoder
 from pathlib import Path
 
 import yaml
 
-from ..utils import Vol2FnManager, dump_yaml, load_yaml
-from .formatter import BaseFormatter
-from .layers import *
-from .layers import AnnType, _attr_names
+from openpecha.core.layer import LayerEnum
+from openpecha.formatters.formatter import BaseFormatter
+from openpecha.formatters.layers import *
+from openpecha.formatters.layers import _attr_names
+from openpecha.utils import Vol2FnManager, dump_yaml, load_yaml
 
 
 class HFMLFormatter(BaseFormatter):
@@ -103,7 +103,7 @@ class HFMLFormatter(BaseFormatter):
             yield self.text_preprocess(fn.read_text()), fn.name, fns_len
 
     def total_pattern(self, pat_list, annotated_line):
-        """ It calculates the length of all the annotation detected in a line.
+        """It calculates the length of all the annotation detected in a line.
 
         Args:
             pat_list (dict): It contains all the annotation's regex pattern as value and name of annotation as key.
@@ -193,7 +193,7 @@ class HFMLFormatter(BaseFormatter):
         return total_length
 
     def merge(self, start_list, end_list):
-        """ It merges two list.
+        """It merges two list.
         The starting  and ending of annotation(citaion,yigchung,sabche and tsawa) are stored in two list.
         Merging these two list will generate a list in which both starting and ending of an annotation together in a tuple.
         It is applicable only if the annotaions are not cross volume.
@@ -217,7 +217,7 @@ class HFMLFormatter(BaseFormatter):
         return result
 
     def search_before(self, ann, pat_list, line):
-        """ It calculates the length of annotation detected in a given line before a given annotation.
+        """It calculates the length of annotation detected in a given line before a given annotation.
         Args:
             ann (match object): It is a match object of the annotation of which we want to calculate
                                 the length of any annotation detected before it.
@@ -319,7 +319,7 @@ class HFMLFormatter(BaseFormatter):
         return length_before
 
     def base_extract(self, pat_list, annotated_line):
-        """ It extract the base text from annotated text.
+        """It extract the base text from annotated text.
         Args:
             pat_list (dict): It contains all the annotation's regex pattern as value and name of annotation as key.
             annotated_line (str): It contains the annotated line from which we want to extract the base text.
@@ -947,29 +947,29 @@ class HFMLFormatter(BaseFormatter):
                 self.sub_topic = self.sub_topic[1:]
         self.sub_topic = self.__final_sub_topic(self.sub_topic)
         result = {
-            AnnType.book_title: self.book_title,
-            AnnType.book_number: self.book_number,
-            AnnType.author: self.author,
-            AnnType.poti_title: self.poti_title,
-            AnnType.chapter: self.chapter_title,
-            AnnType.citation: self.citation_pattern,
-            AnnType.pagination: self.page,  # page variable format (start_index,end_index,pg_Info,pg_ann)
-            AnnType.topic: self.topic_id,
-            AnnType.sub_topic: self.sub_topic,
-            AnnType.sabche: self.sabche_pattern,
-            AnnType.tsawa: self.tsawa_pattern,
-            AnnType.yigchung: self.yigchung_pattern,
-            AnnType.correction: self.error_id,
-            AnnType.error_candidate: self.abs_er_id,
-            AnnType.peydurma: self.notes_id,
-            AnnType.archaic: self.archaic_word_id,
-            AnnType.durchen: self.durchen_pattern,
+            LayerEnum.book_title: self.book_title,
+            LayerEnum.book_number: self.book_number,
+            LayerEnum.author: self.author,
+            LayerEnum.poti_title: self.poti_title,
+            LayerEnum.chapter: self.chapter_title,
+            LayerEnum.citation: self.citation_pattern,
+            LayerEnum.pagination: self.page,  # page variable format (start_index,end_index,pg_Info,pg_ann)
+            LayerEnum.topic: self.topic_id,
+            LayerEnum.sub_topic: self.sub_topic,
+            LayerEnum.sabche: self.sabche_pattern,
+            LayerEnum.tsawa: self.tsawa_pattern,
+            LayerEnum.yigchung: self.yigchung_pattern,
+            LayerEnum.correction: self.error_id,
+            LayerEnum.error_candidate: self.abs_er_id,
+            LayerEnum.peydurma: self.notes_id,
+            LayerEnum.archaic: self.archaic_word_id,
+            LayerEnum.durchen: self.durchen_pattern,
         }
 
         return result
 
     def __final_sub_topic(self, sub_topics):
-        """ It include all the sub topic belonging in one topic in a list.
+        """It include all the sub topic belonging in one topic in a list.
 
         Args:
             sub_topic (list): It contains all the sub topic annotation's starting and ending index along with sub-topic info.

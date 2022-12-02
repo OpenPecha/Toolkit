@@ -4,9 +4,9 @@ from typing import List, Optional
 
 from pydantic import BaseModel, validator
 
-from .annotations import *
-from .ids import get_uuid
-from .metadata import PechaMetadata
+from openpecha.core.annotations import *
+from openpecha.core.ids import get_uuid
+from openpecha.core.metadata import PechaMetadata
 
 
 class LayerEnum(Enum):
@@ -28,6 +28,7 @@ class LayerEnum(Enum):
     correction = "Correction"
     error_candidate = "ErrorCandidate"
     peydurma = "Peydurma"
+    pedurma_note = "PedurmaNote"
     sabche = "Sabche"
     tsawa = "Tsawa"
     yigchung = "Yigchung"
@@ -87,6 +88,7 @@ def _get_annotation_class(layer_name: LayerEnum):
     else:
         return BaseAnnotation
 
+
 class Layer(BaseModel):
     id: str = None
     annotation_type: LayerEnum
@@ -125,7 +127,7 @@ class Layer(BaseModel):
         ann = ann_class.parse_obj(ann_dict)
         return ann
 
-    def set_annotation(self, ann: BaseAnnotation, ann_id = None):
+    def set_annotation(self, ann: BaseAnnotation, ann_id=None):
         """Add or Update annotation `ann` to the layer, returns the annotation id"""
         ann_id = ann_id if ann_id is not None else get_uuid()
         self.annotations[ann_id] = json.loads(ann.json())
