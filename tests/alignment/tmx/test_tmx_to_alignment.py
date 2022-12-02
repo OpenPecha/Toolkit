@@ -1,3 +1,4 @@
+import os
 import tempfile
 from pathlib import Path
 
@@ -24,14 +25,11 @@ def get_segment_pairs_annotation_ids(segment_pairs, source_pecha_id, target_pecc
 
 def get_annotations(source_pecha, target_pecha):
     
-    for _pecha in list(source_pecha.layers.values()):
-        source_annotations= _pecha[LayerEnum.segment].annotations
-    for _id, source_segment_yml in dict(source_pecha.layers.values().annotations).items():
-        source_base_id = _id
-        for _, _value in source_segment_yml.items():
-            source_annotations = _value.annotations
-    for id_, target_segment_yml in target_pecha.layers.items():
-        target_base_id = id_
+    for _, source_segment_yml in source_pecha.layers.items():
+        for _, value_ in source_segment_yml.items():
+            source_annotations = value_.annotations
+            
+    for _, target_segment_yml in target_pecha.layers.items():
         for _, value_ in target_segment_yml.items():
             target_annotations = value_.annotations
             
@@ -54,10 +52,10 @@ def get_text(
     for num in range(0, 2):
         src_annot_id = annotation_ids[num]["src"]
         tar_annot_id = annotation_ids[num]["tar"]
-        src_start = source_annotations[src_annot_id]["span"]["start"]
-        src_end = source_annotations[src_annot_id]["span"]["end"]
-        tar_start = target_annotations[tar_annot_id]["span"]["start"]
-        tar_end = target_annotations[tar_annot_id]["span"]["end"]
+        src_start = source_annotations[src_annot_id].span.start
+        src_end = source_annotations[src_annot_id].span.end
+        tar_start = target_annotations[tar_annot_id].span.start
+        tar_end = target_annotations[tar_annot_id].span.end
         source_text = source_base[src_start : src_end + 1]
         target_text = target_base[tar_start : tar_end + 1]
         curr_text[num] = {"src": source_text, "tar": target_text}
@@ -65,6 +63,13 @@ def get_text(
         curr_text = {}
     return final_text
 
+def get_alignment_yml(alignment_path):
+    opa_path = Path(f"{alignment_path}/{alignment_path.name}.opa/")
+    for yml_name in list(os.listdir(opa_path)):
+        if yml_name != "meta.yml":
+            yml_path = Path(f"{opa_path}/{yml_name}")
+            alignment_yml = load_yaml(yml_path)
+    return alignment_yml
 
 def test_tmx_to_alignment():
     config.PECHAS_PATH = Path(tempfile.gettempdir()) / "pechas"
@@ -85,9 +90,7 @@ def test_tmx_to_alignment():
         source_pecha, target_pecha
     )
 
-    alignment_yml = load_yaml(
-        Path(alignment_path / f"{alignment_path.stem}.opa" / "Alignment.yml")
-    )
+    alignment_yml = get_alignment_yml(alignment_path)
     segment_pairs = alignment_yml["segment_pairs"]
     annotation_ids = get_segment_pairs_annotation_ids(
         segment_pairs, source_pecha.pecha_id, target_pecha.pecha_id
@@ -112,9 +115,6 @@ def test_tmx_to_alignment():
         assert expected_segment_src == src_seg
         assert expected_segment_tar == tar_seg
 
-    alignment_yml = load_yaml(
-        alignment_path / f"{alignment_path.stem}.opa" / "Alignment.yml"
-    )
     segment_source = alignment_yml["segment_sources"]
     for uid, segment_info in segment_source.items():
         if segment_info["relation"] == "source":
@@ -122,8 +122,8 @@ def test_tmx_to_alignment():
         elif segment_info["relation"] == "target":
             target_pecha_id = uid
 
-    # assert source_pecha_path.stem == source_pecha_id
-    # assert target_pecha_path.stem == target_pecha_id
+    assert source_pecha.pecha_id == source_pecha_id
+    assert target_pecha.pecha_id == target_pecha_id
 
 
 

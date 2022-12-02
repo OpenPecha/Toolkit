@@ -12,9 +12,7 @@ def test_create_alignment_from_source_text():
         'title': "this is title"
     }
     alignment_path = create_alignment_from_source_text(text_path, 'bo', source_metadata, publish=False)
-    print(alignment_path)
     assert alignment_path
-
 
 
 if __name__ == "__main__":

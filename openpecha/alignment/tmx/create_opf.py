@@ -92,9 +92,7 @@ def create_opf(segmented_text, lang=None, source_metadata=None):
     if segmented_text:
         text = get_sentence_segments(segmented_text)
     pecha_id = get_initial_pecha_id()
-    # opf_path = config.PECHAS_PATH / pecha_id / f"{pecha_id}.opf"
-    output_path = Path(f"./pechas")
-    opf_path = Path(f"{output_path}/{pecha_id}/{pecha_id}.opf")
+    opf_path = config.PECHAS_PATH / pecha_id / f"{pecha_id}.opf"
     opf_path.mkdir(exist_ok=True, parents=True)
     pecha = OpenPechaFS(path=opf_path)
     base_id = get_base_id()
