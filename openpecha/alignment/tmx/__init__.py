@@ -71,15 +71,15 @@ class TMXAlignment:
                 curr_pair = {}
         return segment_pairs, source_base_id, target_base_id
 
-    def update_alignment_repo(self, alignment_path, target_pecha, annotation_map):
+    def update_alignment_repo(self, alignment_path, target_pecha_path, annotation_map):
         curr_pair = {}
         new_segment_pairs = {}
         target_segment = {}
         segment_source = {}
-        target_pecha_id = target_pecha.pecha_id
+        target_pecha_id = target_pecha_path.stem
         alignment_id = alignment_path.stem
         target_meta_yml = load_yaml(
-            target_pecha.pecha_path / f"{target_pecha_id}.opf" / "meta.yml"
+            target_pecha_path / f"{target_pecha_id}.opf" / "meta.yml"
         )
         alignment_yml = load_yaml(
             alignment_path / f"{alignment_id}.opa" / "Alignment.yml"
@@ -106,7 +106,7 @@ class TMXAlignment:
                 curr_pair = {}
         alignment_yml["segment_sources"] = segment_source
         alignment_yml["segment_pairs"] = new_segment_pairs
-        self.write_alignment_repo(alignment_path, alignment_yml)
+        self.write_alignment(alignment_path, alignment_yml)
 
     def create_readme_for_opa(self, alignment_id, meta_yml):
         source_metadata = meta_yml["source_metadata"]
