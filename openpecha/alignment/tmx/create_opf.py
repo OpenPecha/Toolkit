@@ -88,9 +88,9 @@ def create_readme(pecha_path):
     return readme
 
 
-def create_opf(segmented_text, lang=None, source_metadata=None):
-    if segmented_text:
-        text = get_sentence_segments(segmented_text)
+def create_opf(text, lang=None, source_metadata=None, new=False):
+    if new:
+        text = get_sentence_segments(text)
     pecha_id = get_initial_pecha_id()
     opf_path = config.PECHAS_PATH / pecha_id / f"{pecha_id}.opf"
     opf_path.mkdir(exist_ok=True, parents=True)
@@ -150,7 +150,7 @@ def create_opf_from_tmx(tmx_path):
 
 def create_alignment_from_source_text(text_path, lang, source_metadata=None, publish=True):
     text = Path(text_path).read_text(encoding="utf-8")
-    pecha = create_opf(text, lang, source_metadata)
+    pecha = create_opf(text, lang, source_metadata, new=True)
     obj = TMXAlignment()
     alignment_path = obj.create_alignment_repo(
         source_pecha=pecha,
