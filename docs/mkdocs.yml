@@ -27,8 +27,7 @@ theme:
     - navigation.expand
 
 nav:
-  - Home:
-    - Welcome: index.md
+  - Home: index.md
   - Data:
     - Featured datasets: data/featured-datasets.md
     - Reference: data/reference.md
