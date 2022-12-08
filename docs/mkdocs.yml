@@ -34,7 +34,7 @@ nav:
     - GitHub: data/github.md
     - Core concepts: data/core-concepts.md
   - Tools:
-    - Overview of tools: data/featured-datasets.md
+    - Tools overview: tools/overview.md
   - Python library:
     - Overview: toolkit/toolkit-overview.md  
     - Installation: toolkit/install.md
