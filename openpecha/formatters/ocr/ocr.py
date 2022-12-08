@@ -200,6 +200,31 @@ class OCRFormatter(BaseFormatter):
         """
         bboxes_sorted_on_y = sorted(bbox_centriods , key=lambda k: [k[1]])
         return bboxes_sorted_on_y
+    
+    def sort_line_and_remove_duplicates(self, line):
+        """it sorted the curr line using x centriod and
+        use that sorted list to remove the duplicates if the difference beteween 
+        prev_x and curr_x centriod is greater than 0 and less or equal to 6
+
+        Args:
+            line (list): list of centriod co-ordinates
+
+        Returns:
+            list: sorted new line with removed overlaps or duplicates
+        """
+        new_line = []
+        sorted_lines = sorted(line, key=lambda k: [k[0]])
+        prev_bbox = sorted_lines[0]
+        for bbox in sorted_lines:
+            prev_x = prev_bbox[0]
+            curr_x = bbox[0]
+            if 0 < abs(prev_x - curr_x) <= 6:
+                pass
+            else:
+                new_line.append(bbox)
+            prev_bbox = bbox
+        return new_line
+                    
 
     def get_bbox_sorted_on_x(self, bboxes_sorted_on_y, avg_box_height):
         """Groups box belonging in same line using average height and sort the grouped boxes base on x coordinates
@@ -226,7 +251,8 @@ class OCRFormatter(BaseFormatter):
         if cur_line:
             lines.append(cur_line)
         for line in lines:
-            sorted_line = sorted(line, key=lambda k: [k[0]])
+            sorted_line = self.sort_line_and_remove_duplicates(line)
+            # sorted_line = sorted(line, key=lambda k: [k[0]])
             for bbox in sorted_line:
                 sorted_bboxes.append(bbox)
         return sorted_bboxes
