@@ -49,7 +49,8 @@ nav:
     - Stay informed: community/stay-informed.md
     - Connect: community/connect.md
   - Benchmarks: benchmarks.md
-  - Blog: blog/index.md
+  - Blog: 
+    - OpenPecha blog: blog/index.md
     
 markdown_extensions:
   - toc:
