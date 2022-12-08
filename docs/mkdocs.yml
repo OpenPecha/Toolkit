@@ -48,10 +48,8 @@ nav:
     - Partners: community/partners.md
     - Stay informed: community/stay-informed.md
     - Connect: community/connect.md
-  - Benchmarks:
-    - Benchmarks: benchmarks.md
-  - Blog:
-    - blog/index.md
+  - Benchmarks: benchmarks.md
+  - Blog: blog/index.md
     
 markdown_extensions:
   - toc:
