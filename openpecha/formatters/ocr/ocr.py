@@ -201,32 +201,49 @@ class OCRFormatter(BaseFormatter):
         bboxes_sorted_on_y = sorted(bbox_centriods , key=lambda k: [k[1]])
         return bboxes_sorted_on_y
     
-    def sort_line_and_remove_duplicates(self, line):
+    def sort_line_and_remove_duplicates(self, line, bboxes):
         """it sorted the curr line using x centriod and
-        use that sorted list to remove the duplicates if the difference beteween 
-        prev_x and curr_x centriod is greater than 0 and less or equal to 6
+        use that sorted list of centriod, use the centrod co-ordinates
+        to get the bboxes object to get the area of the box and 
+        remove the if the area overlap or intersection over union percentage.
 
         Args:
             line (list): list of centriod co-ordinates
+            bboxes (dict): dict of bbox object with centriod co-ordinates as key
 
         Returns:
             list: sorted new line with removed overlaps or duplicates
         """
         new_line = []
         sorted_lines = sorted(line, key=lambda k: [k[0]])
-        prev_bbox = sorted_lines[0]
-        for bbox in sorted_lines:
-            prev_x = prev_bbox[0]
-            curr_x = bbox[0]
-            if 0 < abs(prev_x - curr_x) <= 6:
+        for num, bbox in enumerate(sorted_lines):
+            if num == 0:
+                prev_bbox = bboxes[f"{sorted_lines[0][0]},{sorted_lines[0][1]}"]
+            else:
+                prev_bbox = bboxes[f"{prev_bbox[0]},{prev_bbox[1]}"]
+            curr_bbox = bboxes[f"{bbox[0]},{bbox[1]}"]
+            
+            x_left = max(prev_bbox.x1, curr_bbox.x1)
+            y_top = max(prev_bbox.y1, curr_bbox.y1)
+            x_right = min(prev_bbox.x2, curr_bbox.x2)
+            y_bottom = min(prev_bbox.y2, curr_bbox.y2)
+            
+            intersection_area = (x_right - x_left + 1) * (y_bottom - y_top + 1)
+            
+            bb1_area = (prev_bbox.x2 - prev_bbox.x1 + 1) * (prev_bbox.y2 - prev_bbox.y1 + 1)
+            bb2_area = (curr_bbox.x2 - curr_bbox.x1 + 1) * (curr_bbox.y2 - curr_bbox.y1 + 1)
+
+            percentage_of_iou = (intersection_area / float(bb1_area + bb2_area - intersection_area)) * 100
+            prev_bbox = bbox
+            
+            if 100 > percentage_of_iou >= 60:
                 pass
             else:
                 new_line.append(bbox)
-            prev_bbox = bbox
         return new_line
                     
 
-    def get_bbox_sorted_on_x(self, bboxes_sorted_on_y, avg_box_height):
+    def get_bbox_sorted_on_x(self, bboxes_sorted_on_y, avg_box_height, bboxes):
         """Groups box belonging in same line using average height and sort the grouped boxes base on x coordinates
 
         Args:
@@ -251,7 +268,7 @@ class OCRFormatter(BaseFormatter):
         if cur_line:
             lines.append(cur_line)
         for line in lines:
-            sorted_line = self.sort_line_and_remove_duplicates(line)
+            sorted_line = self.sort_line_and_remove_duplicates(line, bboxes)
             # sorted_line = sorted(line, key=lambda k: [k[0]])
             for bbox in sorted_line:
                 sorted_bboxes.append(bbox)
@@ -275,7 +292,7 @@ class OCRFormatter(BaseFormatter):
             bbox_centriods.append(centroid)
         sorted_bboxes = []
         sort_on_y_bboxs = self.get_bbox_sorted_on_y(bbox_centriods)
-        sorted_bbox_centriods = self.get_bbox_sorted_on_x(sort_on_y_bboxs, avg_box_height)
+        sorted_bbox_centriods = self.get_bbox_sorted_on_x(sort_on_y_bboxs, avg_box_height, bboxes)
         for bbox_centriod in sorted_bbox_centriods:
             sorted_bboxes.append(bboxes[f"{bbox_centriod[0]},{bbox_centriod[1]}"])
         return sorted_bboxes
