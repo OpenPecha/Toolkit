@@ -10,7 +10,8 @@ ocr_import_info:
     timestamp: '1977-04-22T06:00:00+00:00'
     prop1: value 1
     prop2: value 2
-  op_import_options: {}
+  op_import_options:
+    remove_duplicate_symbols: false
   op_import_version: 1.0.0
 default_language: bo
 source: https://library.bdrc.io

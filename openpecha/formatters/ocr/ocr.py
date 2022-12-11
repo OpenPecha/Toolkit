@@ -679,6 +679,7 @@ class OCRFormatter(BaseFormatter):
         self.max_low_conf_per_page = opf_options["max_low_conf_per_page"] if "max_low_conf_per_page" in opf_options else ANNOTATION_MAX_LOW_CONF_PER_PAGE
         self.script_to_lang_map = opf_options["script_to_lang_map"] if "script_to_lang_map" in opf_options else DEFAULT_SCRIPT_TO_LANG_MAPPING
         self.same_line_ratio_threshold = opf_options["same_line_ratio_threshold"] if "same_line_ratio_threshold" in opf_options else SAME_LINE_RATIO_THRESHOLD
+        self.remove_duplicate_symbols = opf_options["remove_duplicate_symbols"] if "remove_duplicate_symbols" in opf_options else True
 
         ocr_import_info["op_import_options"] = opf_options
         ocr_import_info["op_import_version"] = __version__

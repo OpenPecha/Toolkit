@@ -10,7 +10,8 @@ ocr_import_info:
     html: html.zip
     txt: txt.zip
     images: images.zip
-  op_import_options: {}
+  op_import_options:
+    remove_duplicate_symbols: false
   op_import_version: 0.9.8
 default_language: bo
 source: https://library.bdrc.io
