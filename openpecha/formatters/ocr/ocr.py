@@ -80,6 +80,9 @@ class BBox:
     def get_centriod(self):
         return [self.mid_x, self.mid_y]
 
+    def to_debug_str(self):
+        return "'%s' [%d,%d,%d,%d]" % (self.text, self.x1, self.x2, self.y1, self.y2)
+
 
 class OCRFileProvider():
     def __init__(self, ocr_import_info: str):
@@ -214,32 +217,33 @@ class OCRFormatter(BaseFormatter):
         Returns:
             list: sorted new line with removed overlaps or duplicates
         """
+        sorted_line = sorted(line, key=lambda k: [k[0]])
         new_line = []
-        sorted_lines = sorted(line, key=lambda k: [k[0]])
-        for num, bbox in enumerate(sorted_lines):
-            if num == 0:
-                prev_bbox = bboxes[f"{sorted_lines[0][0]},{sorted_lines[0][1]}"]
-            else:
-                prev_bbox = bboxes[f"{prev_bbox[0]},{prev_bbox[1]}"]
+        prev_x2 = -1
+        orig_str = ""
+        for i, bbox in enumerate(sorted_line):
             curr_bbox = bboxes[f"{bbox[0]},{bbox[1]}"]
-            
-            x_left = max(prev_bbox.x1, curr_bbox.x1)
-            y_top = max(prev_bbox.y1, curr_bbox.y1)
-            x_right = min(prev_bbox.x2, curr_bbox.x2)
-            y_bottom = min(prev_bbox.y2, curr_bbox.y2)
-            
-            intersection_area = (x_right - x_left + 1) * (y_bottom - y_top + 1)
-            
-            bb1_area = (prev_bbox.x2 - prev_bbox.x1 + 1) * (prev_bbox.y2 - prev_bbox.y1 + 1)
-            bb2_area = (curr_bbox.x2 - curr_bbox.x1 + 1) * (curr_bbox.y2 - curr_bbox.y1 + 1)
-
-            percentage_of_iou = (intersection_area / float(bb1_area + bb2_area - intersection_area)) * 100
-            prev_bbox = bbox
-            
-            if 100 > percentage_of_iou >= 60:
-                pass
+            if curr_bbox.x1 <= prev_x2:
+                # check if there is overlap with a previous box on this line:
+                duplicate = False
+                for j in reversed(range(0, i)):
+                    bbox_j = bboxes[f"{sorted_line[j][0]},{sorted_line[j][1]}"]
+                    if curr_bbox.x1 > bbox_j.x2:
+                        continue
+                    if curr_bbox.x2 < bbox_j.x1:
+                        break
+                    overlap = min(bbox_j.x2, curr_bbox.x2) - max(bbox_j.x1, curr_bbox.x1)
+                    if overlap > 0.6 * (curr_bbox.x2 - curr_bbox.x1):
+                        duplicate = True
+                        logging.debug("remove duplicate symbol ", bbox_j.text)
+                        break
+                if duplicate:
+                    continue
+                else:
+                    new_line.append(bbox)
             else:
                 new_line.append(bbox)
+            prev_x2 = curr_bbox.x2
         return new_line
                     
 
