@@ -126,6 +126,9 @@ class OCRFormatter(BaseFormatter):
         self.ocr_confidence_threshold = ANNOTATION_MINIMAL_CONFIDENCE
         self.language_annotation_min_len = ANNOTATION_MINIMAL_LEN
         self.remove_rotated_boxes = True
+        self.remove_duplicate_symbols = True
+        self.script_to_lang_map = DEFAULT_SCRIPT_TO_LANG_MAPPING
+        self.max_low_conf_per_page = ANNOTATION_MAX_LOW_CONF_PER_PAGE
 
     def text_preprocess(self, text):
         return text
@@ -208,7 +211,7 @@ class OCRFormatter(BaseFormatter):
         """it sorted the curr line using x centriod and
         use that sorted list of centriod, use the centrod co-ordinates
         to get the bboxes object to get the area of the box and 
-        remove the if the area overlap or intersection over union percentage.
+        remove it if the area overlap or intersection over union percentage.
 
         Args:
             line (list): list of centriod co-ordinates
@@ -218,6 +221,8 @@ class OCRFormatter(BaseFormatter):
             list: sorted new line with removed overlaps or duplicates
         """
         sorted_line = sorted(line, key=lambda k: [k[0]])
+        if not self.remove_duplicate_symbols:
+            return sorted_line
         new_line = []
         prev_x2 = -1
         orig_str = ""
