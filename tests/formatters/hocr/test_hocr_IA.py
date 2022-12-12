@@ -23,7 +23,7 @@ def test_base_text():
     
     with tempfile.TemporaryDirectory() as tmpdirname:
         formatter = HOCRFormatter(mode=mode, output_path=tmpdirname)
-        pecha = formatter.create_opf(data_provider, pecha_id, {"remove_duplicate_symbols": False}, ocr_import_info)
+        pecha = formatter.create_opf(data_provider, pecha_id, {}, ocr_import_info)
         base_text = pecha.bases['I0886']
         base_text_line = base_text.split("\n")
         expected_base_text_line = expected_base_text.split("\n")
@@ -58,7 +58,7 @@ def test_build_layers():
     image_list_path = Path(__file__).parent / "data" / "file_per_volume" 
     data_provider = HOCRIATestFileProvider(work_id, image_list_path, buda_data, ocr_import_info, ocr_path)
 
-    opf_options = {"ocr_confidence_threshold": 0.9, "max_low_conf_per_page": 50, "remove_duplicate_symbols": False}
+    opf_options = {"ocr_confidence_threshold": 0.9, "max_low_conf_per_page": 50}
     
     with tempfile.TemporaryDirectory() as tmpdirname:
         formatter = HOCRFormatter(mode=mode, output_path=tmpdirname)
@@ -75,5 +75,5 @@ def test_build_layers():
             assert is_same_ann(expected_ann, ann)
 
 if __name__ == "__main__":
-    test_base_text()
+    # test_base_text()
     test_build_layers()
