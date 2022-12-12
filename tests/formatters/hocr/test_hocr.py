@@ -22,7 +22,7 @@ def test_base_text():
     
     with tempfile.TemporaryDirectory() as tmpdirname:
         formatter = HOCRFormatter(output_path=tmpdirname)
-        pecha = formatter.create_opf(data_provider, pecha_id, {}, ocr_import_info)
+        pecha = formatter.create_opf(data_provider, pecha_id, {"remove_duplicate_symbols": False}, ocr_import_info)
         base_text = pecha.bases["I1KG10195"]
         assert expected_base_text == base_text
     
@@ -50,7 +50,7 @@ def test_build_layers():
     image_list_path = Path(__file__).parent / "data" / "file_per_page"
     data_provider = BDRCGBTestFileProvider(work_id, image_list_path, buda_data, ocr_import_info, ocr_path)
 
-    opf_options = {"ocr_confidence_threshold": 0.9, "max_low_conf_per_page": 50}
+    opf_options = {"ocr_confidence_threshold": 0.9, "max_low_conf_per_page": 50, "remove_duplicate_symbols": False}
     
     with tempfile.TemporaryDirectory() as tmpdirname:
         formatter = HOCRFormatter(output_path=tmpdirname)

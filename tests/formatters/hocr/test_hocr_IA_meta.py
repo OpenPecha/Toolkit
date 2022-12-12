@@ -21,7 +21,7 @@ def test_google_ocr_metadata():
     
     with tempfile.TemporaryDirectory() as tmpdirname:
         formatter = HOCRFormatter(mode=mode, output_path=tmpdirname)
-        pecha = formatter.create_opf(data_provider, pecha_id, {}, ocr_import_info)
+        pecha = formatter.create_opf(data_provider, pecha_id, {"remove_duplicate_symbols": False}, ocr_import_info)
         output_metadata = pecha.read_meta_file()
         expected_metadata = load_yaml(expected_meta_path)
         assert output_metadata['license'] == expected_metadata['license']

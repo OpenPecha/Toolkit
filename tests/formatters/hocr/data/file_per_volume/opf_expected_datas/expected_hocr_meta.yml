@@ -8,7 +8,8 @@ ocr_import_info:
   bdrc_scan_id: W22084
   ocr_info:
     timestamp: None
-  op_import_options: {}
+  op_import_options:
+    remove_duplicate_symbols: false
   op_import_version: 1.0.0
 default_language: bo
 source: https://library.bdrc.io
