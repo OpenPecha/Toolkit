@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.9.16 (2022-12-12)
+### Fix
+* **test-formatter:** Updated formatter test to use remove duplicates option ([`be796bd`](https://github.com/OpenPecha/Toolkit/commit/be796bddf2948616b46de17c199f3e72c571039b))
+
 ## v0.9.15 (2022-12-12)
 ### Fix
 * **tests:** Tests pass, do not use option in other tests ([`411ef5b`](https://github.com/OpenPecha/Toolkit/commit/411ef5ba7a46a1315a56be0d818270a38836139f))
