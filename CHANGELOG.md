@@ -2,6 +2,17 @@
 
 <!--next-version-placeholder-->
 
+## v0.9.16 (2022-12-12)
+### Fix
+* **test-formatter:** Updated formatter test to use remove duplicates option ([`be796bd`](https://github.com/OpenPecha/Toolkit/commit/be796bddf2948616b46de17c199f3e72c571039b))
+
+## v0.9.15 (2022-12-12)
+### Fix
+* **tests:** Tests pass, do not use option in other tests ([`411ef5b`](https://github.com/OpenPecha/Toolkit/commit/411ef5ba7a46a1315a56be0d818270a38836139f))
+* **ocr:** Option to remove duplicate symbols, #220 ([`a4c7fe0`](https://github.com/OpenPecha/Toolkit/commit/a4c7fe0e4f64f596bb2fabfa1d061a8f0905b67c))
+* **formatter-ocr:** Checks if bbox overlaps more than 60% ([`c081ef3`](https://github.com/OpenPecha/Toolkit/commit/c081ef37d2c3f6b99e1edabf11ee4cb63ebab0d2))
+* **formatter-ocr:** Added remove duplicates and overalap ([`cf11570`](https://github.com/OpenPecha/Toolkit/commit/cf11570653e9dcec0a4b0db39ed62cbf94c6d206))
+
 ## v0.9.14 (2022-11-30)
 ### Fix
 * Replace AnnType with LayerEnum ([`6a995fc`](https://github.com/OpenPecha/Toolkit/commit/6a995fc2db40c6f9a7714c3c19523bab84955bc6))
