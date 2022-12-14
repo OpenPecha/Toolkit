@@ -5,6 +5,7 @@ Avialable functions:
 """
 
 import os
+import shutil
 from pathlib import Path
 from uuid import uuid4
 import datetime
@@ -121,7 +122,8 @@ def create_opf(text, lang=None, source_metadata=None, new=False):
     return pecha
 
 
-def publish_pecha(pecha_path):
+def publish_alignment(pecha_path, asset_path):
+    asset_paths = []
     github_utils.github_publish(
         pecha_path,
         message="initial commit",
@@ -129,8 +131,20 @@ def publish_pecha(pecha_path):
         layers=[],
         org=os.environ.get("OPENPECHA_DATA_GITHUB_ORG"),
         token=os.environ.get("GITHUB_TOKEN"),
-    )
-
+        description=f"title: {asset_path.stem}"
+        )
+    if asset_path:
+        repo_name = pecha_path.stem
+        asset_name = asset_path.stem
+        shutil.make_archive(asset_path.parent / asset_name, "zip", asset_path)
+        asset_paths.append(f"{asset_path.parent / asset_name}.zip")
+        github_utils.create_release(
+            repo_name,
+            prerelease=False,
+            asset_paths=asset_paths, 
+            org=os.environ.get("OPENPECHA_DATA_GITHUB_ORG"),
+            token=os.environ.get("GITHUB_TOKEN")
+        )
 
 def create_opf_from_tmx(tmx_path):
     title = tmx_path.stem
@@ -159,8 +173,8 @@ def create_alignment_from_source_text(text_path, lang, source_metadata=None, pub
         source_metadata=None,
     )
     if publish:
-        pecha.publish()
-        publish_pecha(alignment_path)
+        pecha.publish(asset_path=text_path.parent, asset_name=text_path.stem)
+        publish_alignment(alignment_path, text_path)
     return alignment_path
 
 
@@ -182,8 +196,8 @@ def create_alignment_from_tmx(tmx_path, publish=True):
     )
 
     if publish:
-        source_pecha.publish()
-        target_pecha.publish()
-        publish_pecha(alignment_path)
-
+        source_pecha.publish(asset_path=tmx_path.parent, asset_name=tmx_path.stem)
+        target_pecha.publish(asset_path=tmx_path.parent, asset_name=tmx_path.stem)
+        publish_alignment(alignment_path, asset_path=tmx_path.parent)
+        
     return alignment_path
