@@ -108,11 +108,12 @@ class OpenPecha:
     
     @property
     def is_private(self):
-        private = False
         if self.meta.source_metadata:
             if self.meta.source_metadata.get("geo_restriction", []) or self.meta.source_metadata.get("restrictedInChina", False):
-                private = True
-        return private
+                return True
+            if self.meta.source_metadata.get("access", "") != "http://purl.bdrc.io/admindata/AccessOpen":
+                return True
+        return False
 
     def _get_base_name(self) -> str:
         return ids.get_base_id()
