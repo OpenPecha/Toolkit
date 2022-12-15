@@ -33,8 +33,9 @@ class OpenPecha:
         metadata: PechaMetadata = None,
         assets: Dict[str, List[Union[str, Path]]] = None,
         components: Dict[str, List[Layer]] = None,
+        pecha_id: str = None
     ):
-        self._pecha_id = None
+        self._pecha_id = pecha_id
         self.bases = bases if bases else {}
         self.layers = layers if layers else defaultdict(dict)
         self._meta = self.__handle_old_metadata_attr(meta, metadata)
@@ -230,7 +231,7 @@ class OpenPechaFS(OpenPecha):
         self._opf_path = self.get_opf_path(pecha_id, path)
         self.output_dir = None
         self.storage = storage
-        super().__init__(**kwargs)
+        super().__init__(pecha_id = pecha_id, **kwargs)
 
     @staticmethod
     def get_opf_path(pecha_id, path: str) -> Path:
