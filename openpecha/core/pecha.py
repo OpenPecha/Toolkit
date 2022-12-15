@@ -90,14 +90,20 @@ class OpenPecha:
     def meta(self) -> PechaMetadata:
         if self._meta:
             return self._meta
-        self._meta = PechaMetadata.parse_obj(self.read_meta_file())
+        mf = self.read_meta_file()
+        if mf is not None:
+            self._meta = PechaMetadata.parse_obj(mf)
+            return self._meta
+        self._meta = PechaMetadata.parse_obj({})
         return self._meta
 
     @property
     def index(self) -> Layer:
         if self._index:
             return self._index
-        self._index = Layer.parse_obj(self.read_index_file())
+        idxf = self.read_index_file()
+        if idxf is not None:
+            self._index = Layer.parse_obj(idxf)
         return self._index
 
     @property
@@ -214,20 +220,15 @@ class OpenPecha:
 class OpenPechaFS(OpenPecha):
     """Class to represent opf pecha on file-system.
 
-    Note:
-        Either use pecha_id or `path` attribute to create
-        instance, `pecha_id` for downloading/updating pecha and
-        `path` for local pecha.
-
     Attributes:
         pecha_id(str): id of openpecha pecha.
-        path (str): path to local pecha root or pecha .opf path.
+        path (str): path to .opf directory.
     """
 
     def __init__(
-        self, pecha_id: str = None, path: str, **kwargs
+        self, path: str, pecha_id: str = None, **kwargs
     ):
-        self._opf_path = path
+        self._opf_path = Path(path)
         super().__init__(pecha_id = pecha_id, **kwargs)
 
     @staticmethod
@@ -272,14 +273,12 @@ class OpenPechaFS(OpenPecha):
             return load_yaml(layer_fn)
 
     def read_meta_file(self) -> Dict:
-        if self._opf_path is None:
-            return None
-        return load_yaml(self.meta_fn)
+        if self.meta_fn.is_file():
+            return load_yaml(self.meta_fn)
 
     def read_index_file(self) -> Dict:
-        if not self.index_fn.is_file():
-            return None
-        return load_yaml(self.index_fn)
+        if self.index_fn.is_file():
+            return load_yaml(self.index_fn)
 
     def _read_components(self):
         res = {}
@@ -321,6 +320,8 @@ class OpenPechaFS(OpenPecha):
                 self.save_layer(base_name, layer_name, layer)
 
     def save_index(self):
+        if self.index is None:
+            return
         try:
             dump_yaml(self.index.dict(exclude_none=True), self.index_fn)
         except FileNotFoundError:
@@ -335,13 +336,17 @@ class OpenPechaFS(OpenPecha):
                 dest_fn = assets_type_dir / asset_fn.name
                 shutil.copyfile(str(asset_fn), str(dest_fn))
 
-    def save(self):
+    def save(self, path: str = None):
+        saved_opf_path = self._opf_path
+        if path is not None:
+            self._opf_path = Path(path)
         OpenPechaFS._mkdir(self._opf_path)
         self.save_base()
         self.save_layers()
         self.save_index()
         self.save_meta()
         self.save_assets()
+        self._opf_path = saved_opf_path
 
     def update_base(self, base_name: str, content: str):
         self.set_base(content, base_name)
@@ -386,7 +391,7 @@ class OpenPechaGitRepo(OpenPechaFS):
 
 
     def __init__(
-        self, pecha_id: str = None, path: str = None, storage: Storage, **kwargs
+        self, pecha_id: str = None, path: str = None, storage: Storage = None, **kwargs
     ):
         self._opf_path = OpenPechaGitRepo.get_opf_path(pecha_id, path)
         super().__init__(pecha_id = pecha_id, path = self._opf_path, **kwargs)

@@ -697,7 +697,7 @@ class OCRFormatter(BaseFormatter):
             self.default_language = self.source_info["languages"][0]
 
         self.metadata = self.get_metadata(pecha_id, ocr_import_info)
-        pecha = OpenPechaFS(metadata=self.metadata)
+        pecha = OpenPechaFS(metadata=self.metadata, path=self.output_path)
         total_word_confidence_list = []
 
         for image_group_id, image_group_info in self.source_info["image_groups"].items():
@@ -716,6 +716,6 @@ class OCRFormatter(BaseFormatter):
                 "ocr_word_mean_confidence_index": statistics.mean(total_word_confidence_list),
                 "ocr_word_median_confidence_index": statistics.median(total_word_confidence_list)
             }
-        pecha.save(output_path=self.output_path)
+        pecha.save()
 
         return pecha
