@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.9.17 (2022-12-17)
+### Fix
+* **core:** Create OpenPechaGitRepo ([`ebf9c19`](https://github.com/OpenPecha/Toolkit/commit/ebf9c19781a8c083a4be727fb4e1e6a8b7cd2130))
+
 ## v0.9.16 (2022-12-12)
 ### Fix
 * **test-formatter:** Updated formatter test to use remove duplicates option ([`be796bd`](https://github.com/OpenPecha/Toolkit/commit/be796bddf2948616b46de17c199f3e72c571039b))
