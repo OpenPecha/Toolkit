@@ -33,8 +33,9 @@ class OpenPecha:
         metadata: PechaMetadata = None,
         assets: Dict[str, List[Union[str, Path]]] = None,
         components: Dict[str, List[Layer]] = None,
+        pecha_id: str = None
     ):
-        self._pecha_id = None
+        self._pecha_id = pecha_id
         self.bases = bases if bases else {}
         self.layers = layers if layers else defaultdict(dict)
         self._meta = self.__handle_old_metadata_attr(meta, metadata)
@@ -89,14 +90,20 @@ class OpenPecha:
     def meta(self) -> PechaMetadata:
         if self._meta:
             return self._meta
-        self._meta = PechaMetadata.parse_obj(self.read_meta_file())
+        mf = self.read_meta_file()
+        if mf is not None:
+            self._meta = PechaMetadata.parse_obj(mf)
+            return self._meta
+        self._meta = PechaMetadata.parse_obj({})
         return self._meta
 
     @property
     def index(self) -> Layer:
         if self._index:
             return self._index
-        self._index = Layer.parse_obj(self.read_index_file())
+        idxf = self.read_index_file()
+        if idxf is not None:
+            self._index = Layer.parse_obj(idxf)
         return self._index
 
     @property
@@ -108,11 +115,12 @@ class OpenPecha:
     
     @property
     def is_private(self):
-        private = False
         if self.meta.source_metadata:
             if self.meta.source_metadata.get("geo_restriction", []) or self.meta.source_metadata.get("restrictedInChina", False):
-                private = True
-        return private
+                return True
+            if self.meta.source_metadata.get("access", "") != "http://purl.bdrc.io/admindata/AccessOpen":
+                return True
+        return False
 
     def _get_base_name(self) -> str:
         return ids.get_base_id()
@@ -212,41 +220,16 @@ class OpenPecha:
 class OpenPechaFS(OpenPecha):
     """Class to represent opf pecha on file-system.
 
-    Note:
-        Either use pecha_id or `path` attribute to create
-        instance, `pecha_id` for downloading/updating pecha and
-        `path` for local pecha.
-
     Attributes:
         pecha_id(str): id of openpecha pecha.
-        path (str): path to local pecha root or pecha .opf path.
-        storage (Storage): storage obj for saving at remote.
+        path (str): path to .opf directory.
     """
 
     def __init__(
-        self, pecha_id: str = None, path: str = None, storage: Storage = None, **kwargs
+        self, path: str, pecha_id: str = None, **kwargs
     ):
-        self._opf_path = self.get_opf_path(pecha_id, path)
-        self.output_dir = None
-        self.storage = storage
-        super().__init__(**kwargs)
-
-    @staticmethod
-    def get_opf_path(pecha_id, path: str) -> Path:
-        """convert pecha path to pecha's opf path"""
-        if not pecha_id and not path:
-            return
-
-        if not path:
-            return download_pecha(pecha_id)
-
-        path = Path(path)
-        if path.name.endswith(".opf"):
-            return path
-        path = path / f"{path.name}.opf"
-        if not path.is_dir():
-            raise FileNotFoundError(f"Pecha not found at: {path}")
-        return path
+        self._opf_path = Path(path)
+        super().__init__(pecha_id = pecha_id, **kwargs)
 
     @staticmethod
     def _mkdir(path: Path):
@@ -255,16 +238,7 @@ class OpenPechaFS(OpenPecha):
 
     @property
     def opf_path(self) -> Path:
-        if self._opf_path:
-            return self._opf_path
-        self._opf_path = self.pecha_path / f"{self.pecha_id}.opf"
         return self._opf_path
-
-    @property
-    def pecha_path(self) -> Path:
-        if self._opf_path:
-            return self._opf_path.parent
-        return self.output_dir / self.pecha_id
 
     @property
     def base_path(self) -> Path:
@@ -287,7 +261,9 @@ class OpenPechaFS(OpenPecha):
         return self.opf_path / "assets"
 
     def read_base_file(self, base_name: str) -> str:
-        return (self.base_path / f"{base_name}.txt").read_text(encoding="utf-8")
+        base_fn = self.base_path / f"{base_name}.txt"
+        if base_fn.is_file():
+            return base_fn.read_text(encoding="utf-8")
 
     def read_layers_file(
         self, base_name: str, layer_name: LayerEnum
@@ -297,12 +273,12 @@ class OpenPechaFS(OpenPecha):
             return load_yaml(layer_fn)
 
     def read_meta_file(self) -> Dict:
-        return load_yaml(self.meta_fn)
+        if self.meta_fn.is_file():
+            return load_yaml(self.meta_fn)
 
     def read_index_file(self) -> Dict:
-        if not self.index_fn.is_file():
-            raise FileNotFoundError
-        return load_yaml(self.index_fn)
+        if self.index_fn.is_file():
+            return load_yaml(self.index_fn)
 
     def _read_components(self):
         res = {}
@@ -326,7 +302,7 @@ class OpenPechaFS(OpenPecha):
     def save_single_base(self, base_name: str, content: str = None):
         if not content:
             content = self.bases[base_name]
-        base_fn = self._mkdir(self.base_path) / f"{base_name}.txt"
+        base_fn = OpenPechaFS._mkdir(self.base_path) / f"{base_name}.txt"
         base_fn.write_text(content)
 
     def save_base(self):
@@ -334,7 +310,7 @@ class OpenPechaFS(OpenPecha):
             self.save_single_base(base_name, content)
 
     def save_layer(self, base_name: str, layer_name: LayerEnum, layer: Layer):
-        layer_fn = self._mkdir(self.layers_path / base_name) / f"{layer_name.value}.yml"
+        layer_fn = OpenPechaFS._mkdir(self.layers_path / base_name) / f"{layer_name.value}.yml"
         dump_yaml(layer.dict(exclude_none=True), layer_fn)
         return layer_fn
 
@@ -344,6 +320,8 @@ class OpenPechaFS(OpenPecha):
                 self.save_layer(base_name, layer_name, layer)
 
     def save_index(self):
+        if self.index is None:
+            return
         try:
             dump_yaml(self.index.dict(exclude_none=True), self.index_fn)
         except FileNotFoundError:
@@ -358,16 +336,17 @@ class OpenPechaFS(OpenPecha):
                 dest_fn = assets_type_dir / asset_fn.name
                 shutil.copyfile(str(asset_fn), str(dest_fn))
 
-    def save(self, output_path: Union[str, Path] = config.PECHAS_PATH):
-        self.output_dir = Path(output_path)
-        self._opf_path = None
-
+    def save(self, path: str = None):
+        saved_opf_path = self._opf_path
+        if path is not None:
+            self._opf_path = Path(path)
+        OpenPechaFS._mkdir(self._opf_path)
         self.save_base()
         self.save_layers()
         self.save_index()
         self.save_meta()
         self.save_assets()
-        return self.opf_path
+        self._opf_path = saved_opf_path
 
     def update_base(self, base_name: str, content: str):
         self.set_base(content, base_name)
@@ -393,6 +372,60 @@ class OpenPechaFS(OpenPecha):
                 continue
             self.reset_layer(base_name, layer_name)
 
+
+class OpenPechaGitRepo(OpenPechaFS):
+    """
+    Class to represent opf pecha on file-system, connected to
+    the OpenPecha-Data github organization
+
+    Note:
+        Either use pecha_id or `path` attribute to create
+        instance, `pecha_id` for downloading/updating pecha and
+        `path` for local pecha.
+
+    Attributes:
+        pecha_id(str): id of openpecha pecha.
+        path (str): path to local pecha root or pecha .opf path.
+        storage (Storage): storage for distant interaction.
+    """
+
+
+    def __init__(
+        self, pecha_id: str = None, path: str = None, storage: Storage = None, **kwargs
+    ):
+        self._opf_path = OpenPechaGitRepo.get_opf_path(pecha_id, path)
+        super().__init__(pecha_id = pecha_id, path = self._opf_path, **kwargs)
+
+    @staticmethod
+    def get_opf_path(pecha_id, path: str) -> Path:
+        """convert pecha path to pecha's opf path"""
+        if not pecha_id and not path:
+            return
+
+        if not path:
+            return download_pecha(pecha_id)
+
+        path = Path(path)
+        if path.name.endswith(".opf"):
+            return path
+        path = path / f"{path.name}.opf"
+        if not path.is_dir():
+            raise FileNotFoundError(f"Pecha not found at: {path}")
+        return path
+
+    @property
+    def pecha_path(self) -> Path:
+        if self._opf_path:
+            return self._opf_path.parent
+        return self.output_dir / self.pecha_id
+
+    @property
+    def opf_path(self) -> Path:
+        if self._opf_path:
+            return self._opf_path
+        self._opf_path = self.pecha_path / f"{self.pecha_id}.opf"
+        return self._opf_path
+
     def publish(self, asset_path:Path=None, asset_name:str=None):
         asset_paths = []
         if not self.storage:
@@ -413,19 +446,30 @@ class OpenPechaFS(OpenPecha):
             )
             (asset_path.parent / f"{asset_name}.zip").unlink()
 
+    def save(self, output_path: Union[str, Path] = config.PECHAS_PATH):
+        self.output_dir = Path(output_path)
+        self._opf_path = None
+
+        self.save_base()
+        self.save_layers()
+        self.save_index()
+        self.save_meta()
+        self.save_assets()
+        return self.opf_path
+
     def remove(self):
         self.storage.remove_dir_with_path(name=self.pecha_path)
 
 
 class OpenPechaBareGitRepo(OpenPecha):
-    """Class to represent opf pecha in a bare git repo on the file-system.
+    """
+    Class to represent opf pecha in a bare git repo on the file-system.
     """
 
     def __init__(
         self, pecha_id: str = None, path: str = None, revision: str = "HEAD", repo=None, **kwargs
     ):
-        super().__init__(**kwargs)
-        self._pecha_id = pecha_id
+        super().__init__(pecha_id = pecha_id, **kwargs)
         self.rev = revision
         if repo is not None:
             self.repo = repo
