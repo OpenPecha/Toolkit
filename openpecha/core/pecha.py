@@ -394,6 +394,7 @@ class OpenPechaGitRepo(OpenPechaFS):
         self, pecha_id: str = None, path: str = None, storage: Storage = None, **kwargs
     ):
         self._opf_path = OpenPechaGitRepo.get_opf_path(pecha_id, path)
+        self.storage = storage
         super().__init__(pecha_id = pecha_id, path = self._opf_path, **kwargs)
 
     @staticmethod
