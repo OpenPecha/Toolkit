@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.9.18 (2022-12-21)
+### Fix
+* **pecha:** Add storage attr to OpenPechaGitRepo ([`186b307`](https://github.com/OpenPecha/Toolkit/commit/186b3074604a175166f35bb9c61226b748bd5d3e))
+
 ## v0.9.17 (2022-12-17)
 ### Fix
 * **core:** Create OpenPechaGitRepo ([`ebf9c19`](https://github.com/OpenPecha/Toolkit/commit/ebf9c19781a8c083a4be727fb4e1e6a8b7cd2130))
