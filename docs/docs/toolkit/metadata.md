@@ -6,6 +6,7 @@ Since, OpenPecha as has three types of pecha, we have metadata classes to create
 
 Pecha Type | ID format | Metadata Class
 ---|---|---
+Work | W######## | `openpecha.core.metadata.WorkMetadata`
 Initial | I######## | `openpecha.core.metadata.InitialPechaMetadata`
 Diplomatic | D######## | `openpecha.core.metadata.DiplomaticPechaMetadata`
 Open | O######## | `openpecha.core.metadata.OpenPechaMetadata`
