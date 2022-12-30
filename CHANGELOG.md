@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.9.19 (2022-12-30)
+### Fix
+* **hotfix:** Option to not use blupdate ([`418aa36`](https://github.com/OpenPecha/Toolkit/commit/418aa3694408080a78aae63af1eadba1378e8b2b))
+
 ## v0.9.18 (2022-12-21)
 ### Fix
 * **pecha:** Add storage attr to OpenPechaGitRepo ([`186b307`](https://github.com/OpenPecha/Toolkit/commit/186b3074604a175166f35bb9c61226b748bd5d3e))
