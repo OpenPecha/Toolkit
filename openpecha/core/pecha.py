@@ -140,15 +140,18 @@ class OpenPecha:
     def get_base_metadata(self, base_name: str) -> str:
         self.meta.bases.get(base_name)
 
-    def set_base(self, content: str, base_name: str = None, metadata: Dict = {}) -> str:
+    def set_base(self, content: str, base_name: str = None, metadata: Dict = {}, update_layer_coordinates = True) -> str:
         """Create new base with `content` if `base_name` is not
         given otherwise overwrites it and return base_name.
         """
-        if base_name and base_name in self.bases:
-            blupdate.update_single_base(self, base_name, content)
+        if not base_name:
+            base_name = self._get_base_name()
+        if base_name in self.bases:
+            if update_layer_coordinates:
+                blupdate.update_single_base(self, base_name, content)
             self.bases[base_name] = content
         else:
-            base_name = self._get_base_name()
+            
             self.bases[base_name] = content
             self._set_base_metadata(base_name, metadata)
         return base_name
@@ -297,13 +300,17 @@ class OpenPechaFS(OpenPecha):
         return res
 
     def save_meta(self):
+        OpenPechaFS._mkdir(self.base_path)  
         dump_yaml(self.meta.dict(exclude_none=True), self.meta_fn)
 
     def save_single_base(self, base_name: str, content: str = None):
         if not content:
             content = self.bases[base_name]
         base_fn = OpenPechaFS._mkdir(self.base_path) / f"{base_name}.txt"
-        base_fn.write_text(content)
+        if content:
+            base_fn.write_text(content)
+        else:
+            base_fn.unlink()
 
     def save_base(self):
         for base_name, content in self.bases.items():
