@@ -174,12 +174,12 @@ class Serialize(object):
         return text for given span
         """
         if self.text_id:
-            vol_base = (self.opf_path / f"base/{base_id}.txt").read_text()
+            vol_base = (self.opf_path / f"base/{base_id}.txt").read_text(encoding='utf-8')
             start = self.text_spans[base_id]["start"]
             end = self.text_spans[base_id]["end"]
             return vol_base[start : end + 1]
         else:
-            vol_base = (self.opf_path / f"base/{base_id}.txt").read_text()
+            vol_base = (self.opf_path / f"base/{base_id}.txt").read_text(encoding='utf-8')
             return vol_base
 
     def get_text_base_layer(self):

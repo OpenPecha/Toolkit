@@ -601,7 +601,7 @@ class EpubSerializer(Serialize):
         results = self.get_result()
         for base_id, result in results.items():
             serialized_html = self.get_serialized_html(result, base_id, pecha_title)
-            Path(out_html_fn).write_text(serialized_html)
+            Path(out_html_fn).write_text(serialized_html, encoding='utf-8')
             # Downloading css template file from ebook template repo and saving it
             if not css_template:
                 css_template = requests.get(

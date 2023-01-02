@@ -8,21 +8,21 @@ from openpecha.formatters.formatter import LocalIdManager
 class TestHFMLFormatter:
     def test_get_base_text(self):
 
-        m_text = (Path(__file__).parent / "data" / "kangyur_01.txt").read_text()
+        m_text = (Path(__file__).parent / "data" / "kangyur_01.txt").read_text(encoding='utf-8')
         formatter = HFMLFormatter()
 
         text = formatter.text_preprocess(m_text)
         formatter.build_layers(text, len([text]))
         result = formatter.get_base_text()
 
-        expected = (Path(__file__).parent / "data" / "kangyur_base.txt").read_text()
+        expected = (Path(__file__).parent / "data" / "kangyur_base.txt").read_text(encoding='utf-8')
 
         assert result == expected
 
     def test_build_layers(self):
-        m_text1 = (Path(__file__).parent / "data" / "kangyur_01.txt").read_text()
-        m_text2 = (Path(__file__).parent / "data" / "kangyur_02.txt").read_text()
-        m_text3 = (Path(__file__).parent / "data" / "kangyur_03.txt").read_text()
+        m_text1 = (Path(__file__).parent / "data" / "kangyur_01.txt").read_text(encoding='utf-8')
+        m_text2 = (Path(__file__).parent / "data" / "kangyur_02.txt").read_text(encoding='utf-8')
+        m_text3 = (Path(__file__).parent / "data" / "kangyur_03.txt").read_text(encoding='utf-8')
         formatter = HFMLFormatter()
 
         text1 = formatter.text_preprocess(m_text1)

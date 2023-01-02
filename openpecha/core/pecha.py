@@ -308,7 +308,7 @@ class OpenPechaFS(OpenPecha):
             content = self.bases[base_name]
         base_fn = OpenPechaFS._mkdir(self.base_path) / f"{base_name}.txt"
         if content:
-            base_fn.write_text(content)
+            base_fn.write_text(content, encoding='utf-8')
         else:
             base_fn.unlink()
 
