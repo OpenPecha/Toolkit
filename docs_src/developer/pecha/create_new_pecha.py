@@ -5,7 +5,7 @@ from openpecha.core.pecha import OpenPechaFS
 
 # create new pecha
 metadata = InitialPechaMetadata(initial_creation_type=InitialCreationType.input)
-pecha = OpenPechaFS(metadata=metadata)
+pecha = OpenPechaFS(path="<path_to_pecha>", metadata=metadata)
 
 # create a simple layer
 ann = Citation(span=Span(start=10, end=20))

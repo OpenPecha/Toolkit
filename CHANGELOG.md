@@ -2,6 +2,18 @@
 
 <!--next-version-placeholder-->
 
+## v0.9.19 (2022-12-30)
+### Fix
+* **hotfix:** Option to not use blupdate ([`418aa36`](https://github.com/OpenPecha/Toolkit/commit/418aa3694408080a78aae63af1eadba1378e8b2b))
+
+## v0.9.18 (2022-12-21)
+### Fix
+* **pecha:** Add storage attr to OpenPechaGitRepo ([`186b307`](https://github.com/OpenPecha/Toolkit/commit/186b3074604a175166f35bb9c61226b748bd5d3e))
+
+## v0.9.17 (2022-12-17)
+### Fix
+* **core:** Create OpenPechaGitRepo ([`ebf9c19`](https://github.com/OpenPecha/Toolkit/commit/ebf9c19781a8c083a4be727fb4e1e6a8b7cd2130))
+
 ## v0.9.16 (2022-12-12)
 ### Fix
 * **test-formatter:** Updated formatter test to use remove duplicates option ([`be796bd`](https://github.com/OpenPecha/Toolkit/commit/be796bddf2948616b46de17c199f3e72c571039b))

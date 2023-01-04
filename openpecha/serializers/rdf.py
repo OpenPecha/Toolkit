@@ -29,7 +29,7 @@ class BUDARDFSerializer:
 
     def __init__(self, openpecha):
         self.openpecha = openpecha
-        self._pecha_id = openpecha.meta.id
+        self._pecha_id = openpecha.pecha_id
         self.lname = f"IE0OP{self._pecha_id}"
         self.graph_r = bdg[self.lname]
         self.lod_ds = rdflib.Dataset()

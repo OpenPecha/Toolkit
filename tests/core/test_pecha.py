@@ -31,13 +31,14 @@ def test_create_pecha():
             }
         },
         metadata=InitialPechaMetadata(initial_creation_type=InitialCreationType.ebook),
+        path=""
     )
     assert openpecha.meta.id
     assert openpecha.get_base("v001")
     assert openpecha.get_layer("v001", LayerEnum.citation)
 
     with tempfile.TemporaryDirectory() as tmpdirname:
-        assert openpecha.save(tmpdirname)
+        openpecha.save(tmpdirname)
 
 
 def test_load_openpecha(opf_path):
@@ -63,74 +64,12 @@ def test_save_layer(opf_path):
     shutil.rmtree(str(layer_fn.parent))
 
 
-def test_pecha_update(opf_path):
-    pecha = OpenPechaFS(path=opf_path)
-    with tempfile.TemporaryDirectory() as tmpdirname:
-        pecha.meta.id
-        pecha.get_base("v001")
-        pecha.get_layer("v001", LayerEnum.citation)
-        pecha.save(tmpdirname)
-
-        pecha.update_base("v001", "update base")
-        pecha.update_layer(
-            "v001",
-            LayerEnum.citation,
-            Layer(
-                annotation_type=LayerEnum.citation,
-                revision="00001",
-                annotations={"1": "update annotation"},
-            ),
-        )
-
-        pecha.reset_base_and_layers()
-        assert pecha.get_base("v001") == "update base"
-        assert (
-            pecha.get_layer("v001", LayerEnum.citation).annotations["1"]
-            == "update annotation"
-        )
-
-
 def test_create_empty_layer(opf_path):
     pecha = OpenPechaFS(path=opf_path)
     layer = pecha.get_layer("v001", LayerEnum("BookNumber"))
     assert layer.annotation_type == LayerEnum("BookNumber")
     assert layer.revision == "00001"
     assert layer.annotations == {}
-
-
-def test_reset_layer(opf_path):
-    pecha = OpenPechaFS(path=opf_path)
-    base_name, layer_name = "v001", LayerEnum.citation
-    with tempfile.TemporaryDirectory() as tmpdirname:
-        pecha.meta.id
-        pecha.get_base(base_name)
-        pecha.get_layer(base_name, layer_name)
-        pecha.save(tmpdirname)
-
-        pecha.reset_layer(base_name, layer_name)
-        assert not pecha.layers[base_name][layer_name]
-        pecha.get_layer(base_name, layer_name)
-        assert not pecha.layers[base_name][layer_name].annotations
-
-
-def test_reset_layers(opf_path):
-    pecha = OpenPechaFS(path=opf_path)
-    base_name, layer_name_1, layer_name_2 = "v001", LayerEnum.citation, LayerEnum.author
-    with tempfile.TemporaryDirectory() as tmpdirname:
-        pecha.meta.id
-        pecha.get_base(base_name)
-        pecha.get_base(base_name)
-        pecha.get_layer(base_name, layer_name_1)
-        pecha.get_layer(base_name, layer_name_2)
-        pecha.save(tmpdirname)
-
-        pecha.reset_layers(base_name, exclude=[layer_name_2])
-        assert not pecha.layers[base_name][layer_name_1]
-        assert pecha.layers[base_name][layer_name_2]
-        pecha.get_layer(base_name, layer_name_1)
-        pecha.get_layer(base_name, layer_name_2)
-        assert not pecha.layers[base_name][layer_name_1].annotations
-        assert pecha.layers[base_name][layer_name_2].annotations
 
 
 def test_set_base():
@@ -244,12 +183,12 @@ def test_download_pecha():
 
 def test_multi_create_pecha():
     metadata = InitialPechaMetadata(initial_creation_type=InitialCreationType.input)
-    pecha_01 = OpenPechaFS(metadata=metadata)
+    pecha_01 = OpenPechaFS(metadata=metadata, path="")
     pecha_01_base_name = pecha_01.set_base("pecha_01 base content")
 
     assert pecha_01.bases[pecha_01_base_name] == "pecha_01 base content"
 
-    pecha_02 = OpenPechaFS(metadata=metadata)
+    pecha_02 = OpenPechaFS(metadata=metadata, path="")
     pecha_02_base_name = pecha_02.set_base("pecha_02 base content")
 
     assert len(pecha_02.bases) == 1

@@ -4,13 +4,14 @@
 
 Since, OpenPecha as has three types of pecha, we have metadata classes to create metadata for each type of pecha. Here is the list of pecha types with it's associated metadata class.
 
-Pecha Type | ID format | Metadata Class
----|---|---
-Initial | I######## | `openpecha.core.metadata.InitialPechaMetadata`
-Diplomatic | D######## | `openpecha.core.metadata.DiplomaticPechaMetadata`
-Open | O######## | `openpecha.core.metadata.OpenPechaMetadata`
-Alignment | A######## | ``
-Collection | C######## | ``
+Pecha Type | ID format | Metadata Class | Note
+---|---|---|---
+Work | W######## | `openpecha.core.metadata.WorkMetadata` | 
+Initial | I######## | `openpecha.core.metadata.InitialPechaMetadata` | 
+Diplomatic | D######## | `openpecha.core.metadata.DiplomaticPechaMetadata` | 
+Open | O######## | `openpecha.core.metadata.OpenPechaMetadata` | 
+Alignment | A######## | `` | 
+Collection | C######## | `` | 
 
 here is an example to create metadata for *Initial Pecha* type
 

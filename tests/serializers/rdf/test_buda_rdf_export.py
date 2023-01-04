@@ -13,7 +13,7 @@ def test_buda_rdf_serializer():
     opf_path = Path(__file__).parent / "I0123" / "I0123.opf"
     expected_path = Path(__file__).parent / "I0123" / "I0123-expected.ttl"
 
-    op = OpenPechaFS("I0123", opf_path)
+    op = OpenPechaFS(opf_path, "I0123")
     serializer = BUDARDFSerializer(op)
     serializer.apply_layers()
     results = serializer.get_result()
