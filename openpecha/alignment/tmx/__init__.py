@@ -236,8 +236,8 @@ class TMXAlignment:
         """Creates the alignment repo using source_pecha and target_pecha and returns its path
 
         Args:
-            source_pecha (obj): OpenPechaFS object of source opf
-            target_pecha (obj, optional): OpenPechaFS object of source opf
+            source_pecha (obj): OpenpechaGitRepo object of source opf
+            target_pecha (obj, optional): OpenpechaGitRepo object of source opf
             title (str, optional): title of the TMX. Defaults to None.
             source_metadata (_type_, optional): source_metadata of the source TMX. Defaults to None.
             origin_type (str, optional): type of alignment. Defaults to "translation".

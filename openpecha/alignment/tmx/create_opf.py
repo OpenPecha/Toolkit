@@ -15,7 +15,7 @@ from enum import Enum
 from openpecha import config, github_utils
 from openpecha.core.annotation import AnnBase, Span
 from openpecha.core.layer import Layer, LayerEnum
-from openpecha.core.pecha import OpenPechaFS
+from openpecha.core.pecha import OpenPechaGitRepo
 from openpecha.utils import load_yaml, dump_yaml
 from openpecha.core.ids import get_base_id, get_initial_pecha_id
 from openpecha.core.metadata import InitialPechaMetadata, InitialCreationType
@@ -95,7 +95,7 @@ def create_opf(text, lang=None, source_metadata=None, new=False):
     pecha_id = get_initial_pecha_id()
     opf_path = config.PECHAS_PATH / pecha_id / f"{pecha_id}.opf"
     opf_path.mkdir(exist_ok=True, parents=True)
-    pecha = OpenPechaFS(path=opf_path)
+    pecha = OpenPechaGitRepo(path=opf_path)
     base_id = get_base_id()
     layers = {f"{base_id}": {LayerEnum.segment: get_segment_layer(text)}}
     base_text = get_base_text(text)
@@ -156,10 +156,10 @@ def create_opf_from_tmx(tmx_path):
 
     source_metadata.update({'title':title})
     
-    source_pecha_path = create_opf(src_text, src_lang, source_metadata)
-    target_pecha_path = create_opf(tar_text, tar_lang, source_metadata)
+    source_pecha = create_opf(src_text, src_lang, source_metadata)
+    target_pecha = create_opf(tar_text, tar_lang, source_metadata)
 
-    return source_pecha_path, target_pecha_path, source_metadata
+    return source_pecha, target_pecha, source_metadata
 
 
 def create_alignment_from_source_text(text_path, lang, source_metadata=None, publish=True):
