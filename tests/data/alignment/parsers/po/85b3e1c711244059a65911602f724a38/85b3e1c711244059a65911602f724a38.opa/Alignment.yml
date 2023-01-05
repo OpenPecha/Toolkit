@@ -3,6 +3,7 @@ segment_sources:
     type: translation
     relation: source
     lang: bo
+    base: E17H
 segment_pairs:
   b5a293ab0d5a4ae39923de414013ef35:
     9c48f0abcaa44746aefd03fc55e00718: d78c7334023a4a899749284e173ccb56

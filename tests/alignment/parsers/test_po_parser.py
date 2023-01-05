@@ -41,8 +41,9 @@ def test_update_alignment_from_po():
     copytree(str(test_alignment_path), str(alignment_path))
     target_pecha_path = update_alignment_from_po(po_path, alignment_path, publish=False)
     target_pecha_id = target_pecha_path.stem
+    for id in Path(f"{target_pecha_path}/{target_pecha_id}.opf/layers").iterdir(): base_id = id.name
     target_segment = load_yaml(
-        target_pecha_path / f"{target_pecha_id}.opf" / "layers/0001/Segment.yml"
+        Path(f"{target_pecha_path}/{target_pecha_id}.opf/layers/{base_id}/Segment.yml")
     )
     target_span = get_span(target_segment)
 
@@ -52,3 +53,6 @@ def test_update_alignment_from_po():
     expected_target_span = get_span(expected_target_segment)
 
     assert target_span == expected_target_span
+
+if __name__ == "__main__":
+    test_update_alignment_from_po()
