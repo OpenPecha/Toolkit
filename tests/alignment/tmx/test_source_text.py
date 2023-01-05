@@ -6,7 +6,7 @@ from openpecha.alignment.tmx.create_opf import create_alignment_from_source_text
 
 
 def test_create_alignment_from_source_text():
-    config.PECHAS_PATH = Path(tempfile.gettempdir()) / "pechas"
+    
     text_path = Path("./tests/data/alignment/tmx/new_text.txt")
     source_metadata = {
         'title': "this is title"

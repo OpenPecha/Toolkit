@@ -72,8 +72,6 @@ def get_alignment_yml(alignment_path):
     return alignment_yml
 
 def test_tmx_to_alignment():
-    config.PECHAS_PATH = Path(tempfile.gettempdir()) / "pechas"
-
     tmx_path = Path("./tests/data/alignment/tmx/input.tmx")
     source_pecha, target_pecha, source_metadata = create_opf_from_tmx(
         tmx_path

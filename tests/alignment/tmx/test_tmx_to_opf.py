@@ -25,7 +25,7 @@ def get_span(annotations, type=None):
 
 
 def test_create_tmx_to_opf():
-    config.PECHAS_PATH = Path(tempfile.gettempdir()) / "pechas"
+
     tmx_path = Path("./tests/data/alignment/tmx/input.tmx")
     source_pecha, target_pecha, _ = create_opf_from_tmx(tmx_path)
 

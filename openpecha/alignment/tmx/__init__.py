@@ -88,10 +88,12 @@ class TMXAlignment:
         for uid, info in segment_source.items():
             if info["relation"] == "source":
                 source_pecha_id = uid
+        for id, _ in target_meta_yml['bases'].items(): base_id = id
         target_segment[target_pecha_id] = {
             "type": target_meta_yml.get("origin_type", None),
             "relation": "target",
-            "lang": target_meta_yml.get("default_lanuguage", {}),
+            "lang": target_meta_yml.get("default_lanuguage", None),
+            "base": base_id
         }
         segment_source.update(target_segment)
         segment_pairs = alignment_yml["segment_pairs"]
@@ -138,7 +140,7 @@ class TMXAlignment:
             curr = {}
         return final
 
-    def write_alignment(self, alignment_path, alignment_yml, meta_yml=None):
+    def write_alignment(self, alignment_path, alignment_yml, meta_yml={}):
         alignment_opa_path = alignment_path / f"{alignment_path.stem}.opa"
         self._mkdir(alignment_opa_path)
         base_id = get_base_id()
