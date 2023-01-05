@@ -2,6 +2,19 @@
 
 <!--next-version-placeholder-->
 
+## v0.9.20 (2023-01-05)
+### Fix
+* **alignment:** All test passed for alignment ([`eb56db6`](https://github.com/OpenPecha/Toolkit/commit/eb56db66cb459fdd5791d08c5d0dae7763114be6))
+* **alignment:** Updated from OpenpechaFs to OpenpechaGitRepo ([`2a6bcb7`](https://github.com/OpenPecha/Toolkit/commit/2a6bcb7fec6480f3aa56542ebf9d7fdd3aebc6aa))
+* **alignment:** Pecha publish updated to upload the assets ([`3e5e032`](https://github.com/OpenPecha/Toolkit/commit/3e5e0323b0236e1d57bb5c0b7c0b218eff0e0584))
+* **alignment:** Fix sentence segmenter ([`a3b0977`](https://github.com/OpenPecha/Toolkit/commit/a3b09773395e466c7c2e546bce5223d6b9752db6))
+* **alignment:** Changed back the update_alignment in tmx ([`e6a0bee`](https://github.com/OpenPecha/Toolkit/commit/e6a0bee387986338d0f7b4500f6f20c4d51bfa13))
+* **alignment:** All test passed ([`e42d9c5`](https://github.com/OpenPecha/Toolkit/commit/e42d9c5bb8be87ee0117eb03a9be3eb61967a911))
+* **alignment:** Updated other tests ([`c32dbf1`](https://github.com/OpenPecha/Toolkit/commit/c32dbf12d76417b1a55b61485eadcd929c8e74fe))
+* **alignment:** Updated test and tmx ([`32c0c88`](https://github.com/OpenPecha/Toolkit/commit/32c0c889a7388890c25009efef68286294b285d3))
+* **alignment:** Tmx alignment reformat ([`2c26bd7`](https://github.com/OpenPecha/Toolkit/commit/2c26bd735b072e1d3db1610fba310b011ab954e4))
+* **alignment:** Updated create_opf of alignment ([`092b9ca`](https://github.com/OpenPecha/Toolkit/commit/092b9caec4a640e7847cf881846c63ba2ac777f4))
+
 ## v0.9.19 (2022-12-30)
 ### Fix
 * **hotfix:** Option to not use blupdate ([`418aa36`](https://github.com/OpenPecha/Toolkit/commit/418aa3694408080a78aae63af1eadba1378e8b2b))
