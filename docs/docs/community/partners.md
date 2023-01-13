@@ -16,13 +16,17 @@ The **Buddhist Digital Resource Center** is a nonprofit organization dedicated t
 
 **Indrajala** powers Buddhist technology through the gift of data.
 
+![kumarajiva logo](https://user-images.githubusercontent.com/51434640/194739365-bfa7a89d-e930-48d7-8f98-56a7db773764.png)
+
+**The Kumarajiva Project** aims to translate into Chinese all the texts in the Tibetan Buddhist canon that are not currently available in the Chinese canon.
+
 ![Lotus King Trust logo](https://user-images.githubusercontent.com/51434640/194739430-e751a55c-d584-4cca-9c66-45eb5f79d3ee.png)
 
 **Lotus King Trust** supports the propagation and practice of Buddhadharma and the meaningful development of remote Himalayan communities.
 
-![kumarajiva logo](https://user-images.githubusercontent.com/51434640/194739365-bfa7a89d-e930-48d7-8f98-56a7db773764.png)
+![Monlam logo](https://user-images.githubusercontent.com/51434640/212262242-cd067c3d-6e79-475b-9271-6468dc260b61.png)
 
-**The Kumarajiva Project** aims to translate into Chinese all the texts in the Tibetan Buddhist canon that are not currently available in the Chinese canon.
+**Monlam IT** creates digital tools to help preserve and strengthen the Tibetan language and culture.
 
 ![pecha jobs logo](https://user-images.githubusercontent.com/51434640/194739884-2fc3d7f2-0b2b-4a3f-9091-7eefb62c3cc3.png)
 
