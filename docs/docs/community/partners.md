@@ -26,7 +26,7 @@ The **Buddhist Digital Resource Center** is a nonprofit organization dedicated t
 
 ![Monlam logo](https://user-images.githubusercontent.com/51434640/212262242-cd067c3d-6e79-475b-9271-6468dc260b61.png)
 
-**Monlam IT** creates digital tools to help preserve and strengthen the Tibetan language and culture.
+**Monlam IT** creates digital tools to help protect and strengthen the Tibetan language and culture.
 
 ![pecha jobs logo](https://user-images.githubusercontent.com/51434640/194739884-2fc3d7f2-0b2b-4a3f-9091-7eefb62c3cc3.png)
 
