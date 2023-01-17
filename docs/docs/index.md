@@ -12,7 +12,7 @@ The project’s primary aim is to facilitate the collection, proofreading, and e
 
     Get the latest OP datasets to train Tibetan language AI models.
 
-    [:octicons-arrow-right-24: Featured datasets](https://docs.openpecha.org/data/featured-datasets/)
+    [:octicons-arrow-right-24: Featured datasets](https://openpecha.org/data/featured-datasets/)
     
 -   :material-hammer-wrench:{ .lg .middle } __Get the OP toolkit__
 
@@ -21,7 +21,7 @@ The project’s primary aim is to facilitate the collection, proofreading, and e
     Install the [`OpenPecha toolkit`](#) with [`pip`](https://pypi.org/project/pip/) and get up
     and running in minutes.
 
-    [:octicons-arrow-right-24: OP toolkit](https://docs.openpecha.org/toolkit/install/)
+    [:octicons-arrow-right-24: OP toolkit](https://openpecha.org/toolkit/install/)
 
 -   :material-api:{ .lg .middle } __Use the OpenPecha API__
 
@@ -29,7 +29,7 @@ The project’s primary aim is to facilitate the collection, proofreading, and e
 
     Harness the power of OpenPecha with the OP API. 
 
-    [:octicons-arrow-right-24: OpenPecha API](https://docs.openpecha.org/api/getting-started/)
+    [:octicons-arrow-right-24: OpenPecha API](https://openpecha.org/api/getting-started/)
 
 -   :material-post-outline:{ .lg .middle } __Get the latest news__
 
@@ -37,7 +37,7 @@ The project’s primary aim is to facilitate the collection, proofreading, and e
 
     Read our blog to learn the latest from OpenPecha and the Tibetan AI space.
 
-    [:octicons-arrow-right-24: OpenPecha blog](https://docs.openpecha.org/blog/)
+    [:octicons-arrow-right-24: OpenPecha blog](https://openpecha.org/blog/)
 
 </div>
 
