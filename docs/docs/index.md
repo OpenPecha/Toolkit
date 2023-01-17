@@ -10,26 +10,26 @@ The project’s primary aim is to facilitate the collection, proofreading, and e
 
     ---
 
-    Get the latest OP datasets to train Tibetan language AI models.
+    Get the latest Pecha datasets to train Tibetan-language AI models.
 
     [:octicons-arrow-right-24: Featured datasets](https://openpecha.org/data/featured-datasets/)
     
--   :material-hammer-wrench:{ .lg .middle } __Get the OP toolkit__
+-   :material-hammer-wrench:{ .lg .middle } __Get Pecha Toolkit__
 
     ---
 
-    Install the [`OpenPecha toolkit`](#) with [`pip`](https://pypi.org/project/pip/) and get up
+    Install [`Pecha Toolkit`](#) with [`pip`](https://pypi.org/project/pip/) and get up
     and running in minutes.
 
-    [:octicons-arrow-right-24: OP toolkit](https://openpecha.org/toolkit/install/)
+    [:octicons-arrow-right-24: Pecha toolkit](https://openpecha.org/toolkit/install/)
 
--   :material-api:{ .lg .middle } __Use the OpenPecha API__
+-   :material-api:{ .lg .middle } __Use Pecha API__
 
     ---
 
-    Harness the power of OpenPecha with the OP API. 
+    Harness the power of OpenPecha with Pecha API. 
 
-    [:octicons-arrow-right-24: OpenPecha API](https://openpecha.org/api/getting-started/)
+    [:octicons-arrow-right-24: Pecha API](https://openpecha.org/api/getting-started/)
 
 -   :material-post-outline:{ .lg .middle } __Get the latest news__
 
