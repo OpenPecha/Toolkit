@@ -18,7 +18,7 @@ icon: material/database-arrow-down-outline
 
     ---
 
-    This Kangyur was created with OpenPecha's Vulgate Generator, which compares multiple versions of a work and compiles a new version using the common common character at each position of the work.
+    This Kangyur was created with OpenPecha's Vulgate Generator, which compares instances of a work and compiles a new version using the most common character at each position in the work.
    
     [:octicons-arrow-right-24: :material-github: Get it on GitHub](#)
 
