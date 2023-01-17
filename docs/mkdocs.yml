@@ -28,29 +28,29 @@ theme:
 
 nav:
   - Home: index.md
-  - Data:
+  - Pecha Data:
     - Featured datasets: data/featured-datasets.md
     - Reference: data/reference.md
     - GitHub: data/github.md
     - Core concepts: data/core-concepts.md
-  - Tools:
-    - Tools overview: tools/overview.md
+  - Pecha Tools:
+    - Pecha Tools overview: tools/overview.md
+  - Pecha API:
+    - Getting started: api/getting-started.md
+    - Reference: api/reference.md
   - Python library:
     - Overview: toolkit/toolkit-overview.md  
     - Installation: toolkit/install.md
     - Aquisition pipeline: toolkit/acquisition-pipeline.md
     - E-text operations: toolkit/etext-operations.md
     - Publishing pipeline: toolkit/publishing-pipeline.md
-  - API:
-    - Getting started: api/getting-started.md
-    - Reference: api/reference.md
+  - Benchmarks: benchmarks.md
+  - Blog: 
+    - OpenPecha blog: blog/index.md
   - Community:
     - Partners: community/partners.md
     - Stay informed: community/stay-informed.md
     - Connect: community/connect.md
-  - Benchmarks: benchmarks.md
-  - Blog: 
-    - OpenPecha blog: blog/index.md
     
 markdown_extensions:
   - toc:
