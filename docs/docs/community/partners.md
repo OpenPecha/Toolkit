@@ -12,9 +12,9 @@ icon: material/handshake
 
 The **Buddhist Digital Resource Center** is a nonprofit organization dedicated to seeking out, preserving, documenting, and disseminating Buddhist literature.
 
-![Monlam logo](https://user-images.githubusercontent.com/51434640/212262242-cd067c3d-6e79-475b-9271-6468dc260b61.png)
+![Monlam logo](https://user-images.githubusercontent.com/51434640/212839127-aba104bb-71f9-47ed-af69-f8d30f393bdb.png)
 
-**Monlam IT** creates digital tools to help protect and strengthen the Tibetan language and culture.
+**Monlam AI** develops artificial intelligence in service of Tibetan language and culture.
 
 ![Esukhia logo](https://user-images.githubusercontent.com/51434640/194739560-d1e29abc-b9ae-428b-a635-93dc1008f6ff.png)
 
@@ -28,6 +28,6 @@ The **Buddhist Digital Resource Center** is a nonprofit organization dedicated t
 
 **Lotus King Trust** supports the propagation and practice of Buddhadharma and the meaningful development of remote Himalayan communities.
 
-![Monlam logo](https://user-images.githubusercontent.com/51434640/212262242-cd067c3d-6e79-475b-9271-6468dc260b61.png)
+![pecha jobs logo](https://user-images.githubusercontent.com/51434640/212839622-50f0a050-9772-4070-9f82-6c80dba37468.png)
 
 **pecha.jobs** provides data sourcing and processing services for individuals and organizations working to preserve and promote the Tibetan language, culture, and religion.
