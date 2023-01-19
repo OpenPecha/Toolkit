@@ -535,10 +535,13 @@ bdr:W1KG16793 :instanceHasReproduction bdr:IE0OPI0123 .
 
 bdr:IE0OPI0123 a :EtextInstance ;
     :OPFOCRBatch "batch_2022" ;
-    :OPFOCRSoftware "google_books" ;
+    :OPFOCRSoftware "norbuketaka" ;
     :OPFOCRSource "bdrc" ;
+    :inCollection bdr:PR1ER1 ;
     :OPFOCRTimeStamp "1977-04-22T06:00:00"^^xsd:dateTime ;
     :OPFOCRWordMeanConfidenceIndex "0.91"^^xsd:float ;
     :OPFOCRWordMedianConfidenceIndex "0.9"^^xsd:float ;
     :instanceHasVolume bdr:VLIE0OPI0123_9C26 ;
     :instanceReproductionOf bdr:W1KG16793 .
+
+bdr:PR1ER1 :collectionMember bdr:IE0OPI0123 .

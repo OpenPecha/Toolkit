@@ -94,6 +94,9 @@ class BUDARDFSerializer:
                 self.add_triple(bdr[self.lname], bdo["OPFOCRSource"], Literal(oii["source"]))
             if "software_id" in oii:
                 self.add_triple(bdr[self.lname], bdo["OPFOCRSoftware"], Literal(oii["software_id"]))
+                if oii["software_id"] == "norbuketaka":
+                    self.add_triple(bdr[self.lname], bdo.inCollection, bdr.PR1ER1)
+                    self.add_triple(bdr.PR1ER1, bdo.collectionMember, bdr[self.lname])
             if "batch_id" in oii:
                 self.add_triple(bdr[self.lname], bdo["OPFOCRBatch"], Literal(oii["batch_id"]))
             if "ocr_info" in oii and "timestamp" in oii["ocr_info"]:
