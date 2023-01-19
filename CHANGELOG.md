@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.9.21 (2023-01-19)
+### Fix
+* **rdf:** Better RDF export for NorbuKetaka texts ([`b4e3013`](https://github.com/OpenPecha/Toolkit/commit/b4e3013e8b8b7e8ba64b72952bbf65b976e280a2))
+
 ## v0.9.20 (2023-01-05)
 ### Fix
 * **alignment:** All test passed for alignment ([`eb56db6`](https://github.com/OpenPecha/Toolkit/commit/eb56db66cb459fdd5791d08c5d0dae7763114be6))
