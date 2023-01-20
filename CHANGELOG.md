@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.9.22 (2023-01-20)
+### Fix
+* **baregit:** Fix access to non existing layer ([`7ab4d0b`](https://github.com/OpenPecha/Toolkit/commit/7ab4d0b6167e6456d294330ac58cf46e311c75d2))
+
 ## v0.9.21 (2023-01-19)
 ### Fix
 * **rdf:** Better RDF export for NorbuKetaka texts ([`b4e3013`](https://github.com/OpenPecha/Toolkit/commit/b4e3013e8b8b7e8ba64b72952bbf65b976e280a2))
