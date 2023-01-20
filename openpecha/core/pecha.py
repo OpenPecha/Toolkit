@@ -488,7 +488,11 @@ class OpenPechaBareGitRepo(OpenPecha):
         return self.repo.git.show(f"{self.rev}:{self._pecha_id}.opf/" + oppath)
 
     def read_file_content_yml(self, oppath):
-        ymlstr = self.repo.git.show(f"{self.rev}:{self._pecha_id}.opf/" + oppath)
+        ymlstr = None
+        try:
+            ymlstr = self.repo.git.show(f"{self.rev}:{self._pecha_id}.opf/" + oppath)
+        except:
+            return None
         return load_yaml_str(ymlstr)
 
     def _list_paths(self):
