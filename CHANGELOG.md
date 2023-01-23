@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.9.23 (2023-01-23)
+### Fix
+* **google_vision:** Fix rare case in Google Vision json output ([#236](https://github.com/OpenPecha/Toolkit/issues/236)) ([`90b5dd6`](https://github.com/OpenPecha/Toolkit/commit/90b5dd6cbf37aef0f621a569eea8fd66d96b29c9))
+
 ## v0.9.22 (2023-01-20)
 ### Fix
 * **baregit:** Fix access to non existing layer ([`7ab4d0b`](https://github.com/OpenPecha/Toolkit/commit/7ab4d0b6167e6456d294330ac58cf46e311c75d2))
