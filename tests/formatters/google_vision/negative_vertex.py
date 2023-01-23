@@ -7,7 +7,9 @@ from openpecha.utils import load_yaml
 
 ocr_path = Path(__file__).parent / "data" / "36940497.json"
 
-def test_to_recreate_bug():
+def negative_x_vertex():
+
+    # The json file has a vertex with an x coordinate of -1
 
     state = {
         "base_layer_len": 0,
@@ -36,4 +38,4 @@ def test_to_recreate_bug():
 
 
 if __name__ == "__main__":
-    test_to_recreate_bug()
+    negative_x_vertex()
