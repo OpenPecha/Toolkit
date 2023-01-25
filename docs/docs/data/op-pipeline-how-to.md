@@ -53,33 +53,32 @@ Then select **agree and continue**.
 
 ### 4.  Activate your Google Cloud account
 
-4.1 Select **Activate** to start activating your account
+#### 4.1 Select **Activate** to start activating your account
 
 <img width="1150" alt="Google cloud activate button" src="https://user-images.githubusercontent.com/51434640/214494664-57c198a2-d2a9-476e-a80f-12d68baa4c8a.png">
 
-4.2 Fill in your account details
+####  4.2 Fill in your account details
 
 1. Select your country (if necessary)
 2. Select a description of your organization or needs
-3. Give your work email address (optional)
-4. Agree to the terms of service
+4. Check the box under **Terms of Service** to agree to it.
 5. Select **Continue**
 
 <img width="1357" alt="Google Cloud account details" src="https://user-images.githubusercontent.com/51434640/214496379-0bc9ab1f-f70f-44ec-9220-1d2c3190691b.png">
 
-4.3 Create a new payments profile.
+#### 4.3 Create a new payments profile
 
-Select **Create a new payments profile** or **Submit**.
+1. Select **Create a new payments profile** or **Submit**.
 
 <img width="1172" alt="Google Cloud new payments profile" src="https://user-images.githubusercontent.com/51434640/214496720-5a8eb5b8-edc2-43e6-8357-0f74d3ee22c9.png">
 
-Select **Add payment method** to open a window where you can add a credit card or debit card.
+2. Select **Add payment method** to open a window where you can add a credit card or debit card.
 
 <img width="1172" alt="Google Cloud payment method" src="https://user-images.githubusercontent.com/51434640/214498047-b0bb84d1-1f7a-41ec-a949-0d6f2c55c74b.png">
 
 > **Note**: Depending on your country, you might have the option of adding a bank account instead of a credit card.
 
-4.3 Choose a payment type and add your address. Then select **Create**.
+3. Choose a payment type and add your address. Then select **Create**.
 
 For profile type: 
 - Select individual if you are using this account for yourself and using your personal payment info. 
@@ -87,28 +86,44 @@ For profile type:
 
 <img width="1172" alt="Google cloud 4-3" src="https://user-images.githubusercontent.com/51434640/214498052-36bbafb1-9b4e-43e7-a9ac-29fcf06db22e.png">
 
-4.4 Add your account information and select **Save card**.
+4. Add your account information and select **Save card**.
 
 <img width="1172" alt="Google cloud 4-5" src="https://user-images.githubusercontent.com/51434640/214499279-52a0730a-2fdd-4d58-a703-075155f39ac4.png">
 
-4.5 Select **Start my free trial** 
+#### 4.4 Select **Start my free trial** 
 
 <img width="1172" alt="Google cloud Start my free trial" src="https://user-images.githubusercontent.com/51434640/214500727-694de3d1-5677-4672-af72-68aaf6a8274e.png">
 
 Your account is now complete. Google Cloud should look like this:
 
-
-
+<img width="1244" alt="Google Cloud dashboard" src="https://user-images.githubusercontent.com/51434640/214504304-bc9c7bce-40e7-4f98-8212-9ecfd3d90874.png">
 
 ## How to get a Google Cloud Vision email address and key
 
-Now that you have a Google Cloud account, it's time to get a address and key
+Now that you have a Google Cloud account, it's time to get an address and key.
+
+### 1. Open My first project project.
+
+On the Google Cloud dashboard, find **My first project** and select **Go to project details**. Or got the dropdown project menu at the top of the dashboard, find **My first project** and open it.
+
+<img width="1244" alt="My first project" src="https://user-images.githubusercontent.com/51434640/214504058-49e8b831-90bb-4716-b41a-39243b4ece3d.png">
+
+### 2. Add Google Cloud Vision to your project
+
+1. With **My first project** open, enter **Cloud Vision** in the search bar at the top of the Google Cloud console and choose **Cloud Vision API**. 
+
+<img width="1420" alt="Searching for cloud vision (1)" src="https://user-images.githubusercontent.com/51434640/214507732-34d02b93-c41e-48e5-90e7-46c4be0627f7.png">
+
+2. Select **Enable** to add the Cloud Vision API to your project.
+
+<img width="1254" alt="Enabling Cloud Vision API" src="https://user-images.githubusercontent.com/51434640/214509006-1aa7ebc7-0f7d-427b-9dfc-0faec0c2f8ab.png">
+
+###
 
 
 
 
-
-How to use the OP Pipeline
+## How to use the OP Pipeline
 
 
 
