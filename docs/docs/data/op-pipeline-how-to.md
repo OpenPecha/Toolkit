@@ -27,45 +27,39 @@ To get these, you need:
 
 ## How to create a Google Cloud account
 
-### 1.  Sign in on Google
+### 1.  Sign into Google
 
 Make sure you're signed into [Google](https://accounts.google.com/).
 
-### 2. Go to Google Cloud
+### 2. Go to Google Cloud and get started
 
 Visit https://cloud.google.com/ and select **Console**. 
 
-<img width="1357" alt="Google cloud home page" src="https://user-images.githubusercontent.com/51434640/214491257-aa0284e7-a800-4cb6-b6b9-ad14a4cab744.png">
+<img width="1357" alt="Google Cloud home page" src="https://user-images.githubusercontent.com/51434640/214491257-aa0284e7-a800-4cb6-b6b9-ad14a4cab744.png">
 
-> **Note**: If you don't see **Console**, select **Get Started**, or **Get started for free**. The sign-up process is almost the same.
+> **Note**: The Google Cloud homepage might not look exactly like this when you visit it. If you don't see **Console**, select **Get Started**, or **Get started for free**. The sign-up process is almost the same.
 
-### 3. Add your account information
+### 3. Agree to the terms of service for your country.
 
-On this screen, Google asks you to:
+Select your country and check the box under **Terms of Service** to agree to it.
 
-- Select your country
-- Agree to the terms of service
+Then select **agree and continue**.
 
-[Image 2]
+<img width="1357" alt="Google cloud signup" src="https://user-images.githubusercontent.com/51434640/214493131-bc2f7e0e-a45d-4f86-84b6-24fe22efca37.png">
 
-> **Note**: If you selected **Get started** or **Get started for free**, you might see a screen like this instead:
+> **Note**: If you selected **Get started** or **Get started for free** on the Google Cloud homepage, you might see a screen like this instead:
 
-[Image 2b]
+<img width="1357" alt="Google cloud terms of service" src="https://user-images.githubusercontent.com/51434640/214493276-f3e0b02e-14a7-4a0a-b9b5-6e7beada5d51.png">
 
-It might also ask you to
-
-- Select a description of your organization or needs
-- Give your work email address (optional)
-
-### 4.  Activate your Google Cloud platform account
+### 4.  Activate your Google Cloud account
 
 #### 4.1 Select **Activate**
 
-[Image 3]
+<img width="1150" alt="Google cloud #3" src="https://user-images.githubusercontent.com/51434640/214494664-57c198a2-d2a9-476e-a80f-12d68baa4c8a.png">
 
 #### 4.2 Fill in your account details. 
 
-- Select your country
+- Select your country (if necessary)
 - Select a description of your organization or needs
 - Give your work email address (optional)
 - Agree to the terms of service
