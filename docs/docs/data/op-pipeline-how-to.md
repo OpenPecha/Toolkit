@@ -53,38 +53,52 @@ Then select **agree and continue**.
 
 ### 4.  Activate your Google Cloud account
 
-#### 4.1 Select **Activate**
+4.1 Select **Activate** to start activating your account
 
-<img width="1150" alt="Google cloud #3" src="https://user-images.githubusercontent.com/51434640/214494664-57c198a2-d2a9-476e-a80f-12d68baa4c8a.png">
+<img width="1150" alt="Google cloud activate button" src="https://user-images.githubusercontent.com/51434640/214494664-57c198a2-d2a9-476e-a80f-12d68baa4c8a.png">
 
-#### 4.2 Fill in your account details. 
+4.2 Fill in your account details
 
-- Select your country (if necessary)
-- Select a description of your organization or needs
-- Give your work email address (optional)
-- Agree to the terms of service
+1. Select your country (if necessary)
+2. Select a description of your organization or needs
+3. Give your work email address (optional)
+4. Agree to the terms of service
+5. Select **Continue**
 
-#### 4.2 Select **Create a new payments profile**.
+<img width="1357" alt="Google Cloud account details" src="https://user-images.githubusercontent.com/51434640/214496379-0bc9ab1f-f70f-44ec-9220-1d2c3190691b.png">
 
-#### 4.3 Choose a payment type and add your address.
+4.3 Create a new payments profile.
 
-For profile type: 
-- select individual if you are using this account for yourself and using your personal payment info. 
-- Select organization if you are using this account at an organization and are using its payment info.
+Select **Create a new payments profile** or **Submit**.
 
-#### 4.4 Add your credit car information
+<img width="1172" alt="Google Cloud new payments profile" src="https://user-images.githubusercontent.com/51434640/214496720-5a8eb5b8-edc2-43e6-8357-0f74d3ee22c9.png">
 
-Select add payment method to add a credit or debit card, or add a bank account.
+Select **Add payment method** to open a window where you can add a credit card or debit card.
 
-[Image 4.3]
-[Image 4.4]
-[Image 4.5]
+<img width="1172" alt="Google Cloud payment method" src="https://user-images.githubusercontent.com/51434640/214498047-b0bb84d1-1f7a-41ec-a949-0d6f2c55c74b.png">
 
 > **Note**: Depending on your country, you might have the option of adding a bank account instead of a credit card.
 
-#### 4.5 Select **Start my free trial** 
+4.3 Choose a payment type and add your address. Then select **Create**.
 
-Now your Google Cloud Platform account is ready. It should look like this: 
+For profile type: 
+- Select individual if you are using this account for yourself and using your personal payment info. 
+- Select organization if you are using this account at an organization and are using its payment info.
+
+<img width="1172" alt="Google cloud 4-3" src="https://user-images.githubusercontent.com/51434640/214498052-36bbafb1-9b4e-43e7-a9ac-29fcf06db22e.png">
+
+4.4 Add your account information and select **Save card**.
+
+<img width="1172" alt="Google cloud 4-5" src="https://user-images.githubusercontent.com/51434640/214499279-52a0730a-2fdd-4d58-a703-075155f39ac4.png">
+
+4.5 Select **Start my free trial** 
+
+<img width="1172" alt="Google cloud Start my free trial" src="https://user-images.githubusercontent.com/51434640/214500727-694de3d1-5677-4672-af72-68aaf6a8274e.png">
+
+Your account is now complete. Google Cloud should look like this:
+
+
+
 
 ## How to get a Google Cloud Vision email address and key
 
