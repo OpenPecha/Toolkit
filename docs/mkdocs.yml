@@ -35,7 +35,7 @@ nav:
     - Core concepts: data/core-concepts.md
   - Pecha Tools:
     - Pecha Tools overview: tools/overview.md
-    - OCR Pipeline: tools/ocr-pipeline.md
+    - OCR Pipeline: tools/ocr-pipeline-reference.md
   - Pecha API:
     - Getting started: api/getting-started.md
     - Reference: api/reference.md
