@@ -5,7 +5,7 @@
 
 The OP Pipeline provides an interface for users to select scans from the BDRC library and OCR them. 
 
-Given a BDRC scan number, the OP Pipeline:
+Given a BDRC Scan ID, the OP Pipeline:
 
 1. Retrieves the scans that make up the text from the [BDRC library](https://library.bdrc.io).
 2. OCRs them with [Google Cloud Vision](https://cloud.google.com/vision).
@@ -21,9 +21,9 @@ Given a BDRC scan number, the OP Pipeline:
 
 In this field, you can name the batch that you are scanning.
 
-### Inputs
+### Input
 
-The OP Pipeline currently only supports OCRing images in the BDRC library. Texts are retrieved using their BDRC scan ID.
+The OP Pipeline currently only supports OCRing images in the BDRC library. Texts are retrieved using their BDRC Scan ID.
 
 Example of a BDRC scan ID:
 
@@ -31,9 +31,9 @@ Example of a BDRC scan ID:
 
 The scan ID follows `bdr:`. In this case, the ID is `W1KG12304`.
 
-Multiple scans can be OCRd in one batch. Add one BDRC scan ID per line.
+Multiple scans can be OCRd in one batch. Add one BDRC Scan ID per line.
 
-> **Warning**: BDRC Work IDs and Version IDs aren't supported. If used, the job will result in failure.
+> **Warning**: BDRC Work IDs and Version IDs aren't supported. If used, the OCR will result in failure.
 
 ### OCR Engine
 
@@ -53,7 +53,7 @@ These model types are accessible by the OP Pipeline.
 
 ### Language Hint
 
-The OP Pipeline can use the language hints listed below.
+The OP Pipeline can use these language hints to improve results:
 
 - Auto
 - Tibetan
@@ -67,38 +67,38 @@ The OP Pipeline can use the language hints listed below.
 
 ### Google Cloud Service Account Key 
 
-The key for the OP Pipeline is the `.json` file from Google Cloud when you 
+This is contained in the `.json` file that Google Cloud provides as a key for its Cloud Vision service.
 
-Open it in a text editor and copy the body of the file into this field.
+Open the file in a text editor and copy the `json` code into this field.
 
 > **Note**: If you don't have a key or need help getting one, read this [guide](#).
 
 ### Sponsor name
 
-The could be your name, your organization's name, or the person who bought the Google Cloud credit used to OCR the text(s) in this job. The name gets added to the OPF metadata. 
+The could be your name, your organization's name, or the person who bought the Google Cloud credit used to OCR the text(s) in this job. The name that is entered gets added to the OPF metadata. 
 
-### Allow BDRC and OpenPecha to use the results for improving this service.*
+### Allow BDRC and OpenPecha to use the results to improve this service
 
-By ticking this box, the results get put in a public [OpenPecha Data repository](https://github.com/OpenPecha-Data) on GitHub and you agree to allow BDRC and OP to use the resulting data.
+By ticking this box, the results get put in a public [OpenPecha Data repository](https://github.com/OpenPecha-Data) on GitHub and you agree to allow BDRC and OpenPecha to use the resulting data.
 
-If you don't agree to share the data, the file will be put in a private repo on OpenPecha Data's GitHub. In this case, after your job is successfully completed, email us at openpecha[at]gmail.com for access.
+If you don't agree, the file will be put in a private repo on OpenPecha Data's GitHub. In this case, after your job is successfully completed, email us at openpecha[at]gmail.com for access.
 
 ## Processing the OCRs
 
-After you fill out the form, select **Start**. The job may take up to several minutes.
+After filling out the form, select **Start**. The job may take several minutes or more, depending on the number of images that are scanned.
 
 ## All Batches
 
-On the right side of the Op Pipeline interface is a list of all of the batches that have been processed. Select **Details** next to your batch to see its progress and results.
+On the right side of the OP Pipeline interface is a list of recent batches that have been processed. Select **Details** next to your batch to see its progress and results.
 
 ## Batch Details
 
 Here you can:
 
-- Select the link under **Results** to go to the repo that contains the OCRd file.
-- Toggle the chevron next to **Inputs** to see the list of files that were OCRd
-- Toggle the chevron next to **Pipeline Config** to see the language hints, model type, and engine that were used.
-- Select **Details** under Actions to see more metadata about the batch.
+- Select the link under **Results** to go to the repo(s) that contain(s) the OCRd file(s).
+- Toggle the chevron next to **Inputs** to see the list of files that were OCRd.
+- Toggle the chevron next to **Pipeline Config** to see the language hint, model type, and OCR engine that were used.
+- Select **Details** under **Actions** to see more metadata about the batch.
 
 <img width="1031" alt="Batch details" src="https://user-images.githubusercontent.com/51434640/214577513-36560227-0c92-482d-b2d8-70758a38e7b2.png">
 
