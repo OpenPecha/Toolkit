@@ -1,9 +1,9 @@
 
-# How to get a Google Cloud Vision key to use with the OP Pipeline
+# How to get a Google Cloud Vision key to use with the OCR Pipeline
 
-The [OP Pipeline](https://tools.openpecha.org/pipelines/) uses [Google Cloud Vision](https://cloud.google.com/), part of the [Google Cloud platform](https://cloud.google.com/) to OCR images.
+The [OCR Pipeline](https://tools.openpecha.org/pipelines/) uses [Google Cloud Vision](https://cloud.google.com/), part of the [Google Cloud platform](https://cloud.google.com/) to OCR images.
 
-To use the OP Pipeline, you need a **Google Cloud Vision key**.
+To use the OCR Pipeline, you need a **Google Cloud Vision key**.
 
 To get one, you need:
 
@@ -134,6 +134,6 @@ On the Google Cloud dashboard, find **My first project** and select **Go to proj
 
 <img width="1196" alt="Creating a new key (1)" src="https://user-images.githubusercontent.com/51434640/214519067-2487870d-56fc-4258-a474-362d52ab4ed6.png">
 
-Google will send you a `.json` file. This is your key for the OP Pipeline.
+Google will send you a `.json` file. This is your key for the ORC Pipeline.
 
-Congratulations! Now you are ready to use the [OP Pipeline](https://tools.openpecha.org/pipelines/). Learn how to use it [here](#).
+Congratulations! Now you are ready to use the [OCR Pipeline](https://tools.openpecha.org/pipelines/). Learn how to use it [here](#).
