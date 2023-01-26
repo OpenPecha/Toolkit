@@ -1,8 +1,6 @@
 
 # OCR Pipeline
 
-## What is the OCR Pipeline and how does it work?
-
 The [OCR Pipeline](https://tools.openpecha.org/pipelines/) provides an interface for users to select scans from the BDRC library and OCR them. 
 
 Given a BDRC Scan ID, the OP Pipeline:
