@@ -87,7 +87,7 @@ By ticking this box, the results get put in a public [OpenPecha Data repository]
 
 If you don't agree, the file will be put in a private repo on OpenPecha Data's GitHub. In this case, after your job is successfully completed, email us at openpecha[at]gmail.com for access.
 
-## Processing the OCRs
+## Processing OCRs
 
 After starting the OCR process, the job may take several minutes or more, depending on the number of images that are scanned.
 
