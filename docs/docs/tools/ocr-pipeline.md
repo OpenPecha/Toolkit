@@ -1,9 +1,9 @@
 
-# OP Pipeline
+# OCR Pipeline
 
-## What is the OP Pipeline and how does it work?
+## What is the OCR Pipeline and how does it work?
 
-The OP Pipeline provides an interface for users to select scans from the BDRC library and OCR them. 
+The [OCR Pipeline](https://tools.openpecha.org/pipelines/) provides an interface for users to select scans from the BDRC library and OCR them. 
 
 Given a BDRC Scan ID, the OP Pipeline:
 
@@ -13,9 +13,21 @@ Given a BDRC Scan ID, the OP Pipeline:
 4. Creates a new repo on [OpenPecha Data's GitHub](https://github.com/OpenPecha-Data).
 5. Puts the OPF files for the text into the new repo.
 
-## How to use the OP Pipeline
+## How to use the OCR Pipeline
 
-> **Note**: Using the OP Pipeline requires a Google Cloud Vision key. Learn how to get one [here].
+> **Note**: Using the OCR Pipeline requires a Google Cloud Vision service account key. Learn how to get one [here](#).
+
+### Email
+
+Adding your email allows you to sort files by email. This is helpful if several members of an orgainization are sharing a Cloud Vision key.
+
+### Google Cloud Service JSON key file 
+
+This is contained in the `.json` file that Google Cloud provides as a key for its Cloud Vision service.
+
+Open the file in a text editor and copy the JSON code into this field.
+
+> **Note**: If you don't have a key or you need help getting one, read this [guide](#).
 
 ### Name
 
@@ -23,7 +35,7 @@ In this field, you can name the batch that you are scanning.
 
 ### Input
 
-The OP Pipeline currently only supports OCRing images in the BDRC library. Texts are retrieved using their BDRC Scan ID.
+The OCR Pipeline currently only supports OCRing images in the BDRC library. Texts are retrieved using their BDRC Scan ID.
 
 Example of a BDRC scan ID:
 
@@ -37,11 +49,11 @@ Multiple scans can be OCRd in one batch. Add one BDRC Scan ID per line.
 
 ### OCR Engine
 
-The OP Pipeline currently only supports Google Cloud Vision.
+The OCR Pipeline currently only supports Google Cloud Vision.
 
 ### Model Type
 
-These model types are accessible by the OP Pipeline.
+These model types are accessible by the OCR Pipeline.
 
 - builtin/stable
 - builtin/latest
@@ -65,15 +77,7 @@ The OP Pipeline can use these language hints to improve results:
 
 `Auto` seems to produce the best results, but this needs more testing. Feel free to experiment.
 
-### Google Cloud Service Account Key 
-
-This is contained in the `.json` file that Google Cloud provides as a key for its Cloud Vision service.
-
-Open the file in a text editor and copy the `json` code into this field.
-
-> **Note**: If you don't have a key or need help getting one, read this [guide](#).
-
-### Sponsor name
+### Sponsor Name
 
 The could be your name, your organization's name, or the person who bought the Google Cloud credit used to OCR the text(s) in this job. The name that is entered gets added to the OPF metadata. 
 
@@ -85,11 +89,11 @@ If you don't agree, the file will be put in a private repo on OpenPecha Data's G
 
 ## Processing the OCRs
 
-After filling out the form, select **Start**. The job may take several minutes or more, depending on the number of images that are scanned.
+After starting the OCR process, the job may take several minutes or more, depending on the number of images that are scanned.
 
 ## All Batches
 
-On the right side of the OP Pipeline interface is a list of recent batches that have been processed. Select **Details** next to your batch to see its progress and results.
+The right side of the OCR Pipeline interface contains a list of recent batches of files that have been processed. Select **Details** next to your batch to see its progress and results.
 
 ## Batch Details
 
@@ -102,10 +106,8 @@ Here you can:
 
 <img width="1031" alt="Batch details" src="https://user-images.githubusercontent.com/51434640/214577513-36560227-0c92-482d-b2d8-70758a38e7b2.png">
 
-### Need help?
+### Need Help?
 
-* Email us at openpecha[at]gmail.com.
 * File an [issue](https://github.com/OpenPecha/Data-Pipeline-Manager/issues/new?assignees=&labels=&template=bug_report.md&title=).
 * Join our [Discord](https://discord.com/invite/7GFpPFSTeA) and ask there.
-
-
+* Email us at openpecha[at]gmail.com.
