@@ -150,14 +150,15 @@ class GoogleVisionFormatter(OCRFormatter):
     def get_width_of_vertices(vertices):
         if len(vertices) < 4:
             return None
-        smallest_x = -1
+        # oddly enough, sometimes Google returns a vertex with x=-1...
+        smallest_x = None
         largest_x = -1
         for v in vertices:
             if "x" not in v or "y" not in v:
                 continue
-            smallest_x = v["x"] if smallest_x == -1 else min(v["x"], smallest_x)
+            smallest_x = v["x"] if smallest_x == None else min(v["x"], smallest_x)
             largest_x = max(v["x"], largest_x)
-        if smallest_x == -1:
+        if smallest_x == None:
             return None
         return largest_x - smallest_x
 
@@ -187,7 +188,7 @@ class GoogleVisionFormatter(OCRFormatter):
                             if symbolunicat in UNICODE_CHARCAT_FOR_WIDTH:
                                 vertices = symbol['boundingBox']['vertices']
                                 width = GoogleVisionFormatter.get_width_of_vertices(vertices)
-                                if width > 0:
+                                if width is not None and width > 0:
                                     widths.append(width)
                             cur_word += symbol['text']
                             if self.has_space_attached(symbol):

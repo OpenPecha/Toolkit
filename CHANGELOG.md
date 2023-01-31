@@ -2,6 +2,73 @@
 
 <!--next-version-placeholder-->
 
+## v0.9.23 (2023-01-23)
+### Fix
+* **google_vision:** Fix rare case in Google Vision json output ([#236](https://github.com/OpenPecha/Toolkit/issues/236)) ([`90b5dd6`](https://github.com/OpenPecha/Toolkit/commit/90b5dd6cbf37aef0f621a569eea8fd66d96b29c9))
+
+## v0.9.22 (2023-01-20)
+### Fix
+* **baregit:** Fix access to non existing layer ([`7ab4d0b`](https://github.com/OpenPecha/Toolkit/commit/7ab4d0b6167e6456d294330ac58cf46e311c75d2))
+
+## v0.9.21 (2023-01-19)
+### Fix
+* **rdf:** Better RDF export for NorbuKetaka texts ([`b4e3013`](https://github.com/OpenPecha/Toolkit/commit/b4e3013e8b8b7e8ba64b72952bbf65b976e280a2))
+
+## v0.9.20 (2023-01-05)
+### Fix
+* **alignment:** All test passed for alignment ([`eb56db6`](https://github.com/OpenPecha/Toolkit/commit/eb56db66cb459fdd5791d08c5d0dae7763114be6))
+* **alignment:** Updated from OpenpechaFs to OpenpechaGitRepo ([`2a6bcb7`](https://github.com/OpenPecha/Toolkit/commit/2a6bcb7fec6480f3aa56542ebf9d7fdd3aebc6aa))
+* **alignment:** Pecha publish updated to upload the assets ([`3e5e032`](https://github.com/OpenPecha/Toolkit/commit/3e5e0323b0236e1d57bb5c0b7c0b218eff0e0584))
+* **alignment:** Fix sentence segmenter ([`a3b0977`](https://github.com/OpenPecha/Toolkit/commit/a3b09773395e466c7c2e546bce5223d6b9752db6))
+* **alignment:** Changed back the update_alignment in tmx ([`e6a0bee`](https://github.com/OpenPecha/Toolkit/commit/e6a0bee387986338d0f7b4500f6f20c4d51bfa13))
+* **alignment:** All test passed ([`e42d9c5`](https://github.com/OpenPecha/Toolkit/commit/e42d9c5bb8be87ee0117eb03a9be3eb61967a911))
+* **alignment:** Updated other tests ([`c32dbf1`](https://github.com/OpenPecha/Toolkit/commit/c32dbf12d76417b1a55b61485eadcd929c8e74fe))
+* **alignment:** Updated test and tmx ([`32c0c88`](https://github.com/OpenPecha/Toolkit/commit/32c0c889a7388890c25009efef68286294b285d3))
+* **alignment:** Tmx alignment reformat ([`2c26bd7`](https://github.com/OpenPecha/Toolkit/commit/2c26bd735b072e1d3db1610fba310b011ab954e4))
+* **alignment:** Updated create_opf of alignment ([`092b9ca`](https://github.com/OpenPecha/Toolkit/commit/092b9caec4a640e7847cf881846c63ba2ac777f4))
+
+## v0.9.19 (2022-12-30)
+### Fix
+* **hotfix:** Option to not use blupdate ([`418aa36`](https://github.com/OpenPecha/Toolkit/commit/418aa3694408080a78aae63af1eadba1378e8b2b))
+
+## v0.9.18 (2022-12-21)
+### Fix
+* **pecha:** Add storage attr to OpenPechaGitRepo ([`186b307`](https://github.com/OpenPecha/Toolkit/commit/186b3074604a175166f35bb9c61226b748bd5d3e))
+
+## v0.9.17 (2022-12-17)
+### Fix
+* **core:** Create OpenPechaGitRepo ([`ebf9c19`](https://github.com/OpenPecha/Toolkit/commit/ebf9c19781a8c083a4be727fb4e1e6a8b7cd2130))
+
+## v0.9.16 (2022-12-12)
+### Fix
+* **test-formatter:** Updated formatter test to use remove duplicates option ([`be796bd`](https://github.com/OpenPecha/Toolkit/commit/be796bddf2948616b46de17c199f3e72c571039b))
+
+## v0.9.15 (2022-12-12)
+### Fix
+* **tests:** Tests pass, do not use option in other tests ([`411ef5b`](https://github.com/OpenPecha/Toolkit/commit/411ef5ba7a46a1315a56be0d818270a38836139f))
+* **ocr:** Option to remove duplicate symbols, #220 ([`a4c7fe0`](https://github.com/OpenPecha/Toolkit/commit/a4c7fe0e4f64f596bb2fabfa1d061a8f0905b67c))
+* **formatter-ocr:** Checks if bbox overlaps more than 60% ([`c081ef3`](https://github.com/OpenPecha/Toolkit/commit/c081ef37d2c3f6b99e1edabf11ee4cb63ebab0d2))
+* **formatter-ocr:** Added remove duplicates and overalap ([`cf11570`](https://github.com/OpenPecha/Toolkit/commit/cf11570653e9dcec0a4b0db39ed62cbf94c6d206))
+
+## v0.9.14 (2022-11-30)
+### Fix
+* Replace AnnType with LayerEnum ([`6a995fc`](https://github.com/OpenPecha/Toolkit/commit/6a995fc2db40c6f9a7714c3c19523bab84955bc6))
+
+## v0.9.13 (2022-11-30)
+### Fix
+* Replace AnnType with LayerEnum ([`e0feb81`](https://github.com/OpenPecha/Toolkit/commit/e0feb817c3c3f90b02aa3253adabb875c6a8f5e9))
+
+## v0.9.12 (2022-11-28)
+### Fix
+* Remove AnnType dependency which is redundant ([`fce9d7d`](https://github.com/OpenPecha/Toolkit/commit/fce9d7ddb9f13ca12072a72fc5a1d3ce1759d8b4))
+
+## v0.9.11 (2022-11-28)
+### Fix
+* Circular import ([`4577a7d`](https://github.com/OpenPecha/Toolkit/commit/4577a7df2bf4b7085ee1cc9406cd59363f49d7b0))
+
+### Documentation
+* Switch to mkdir-material insider ([`e1c0a45`](https://github.com/OpenPecha/Toolkit/commit/e1c0a45f294287f65e51e52489e4f21c08cd1486))
+
 ## v0.9.10 (2022-11-23)
 ### Fix
 * **hocr-formatter:** Removed the update for empty volume bugs ([`9193669`](https://github.com/OpenPecha/Toolkit/commit/91936697e7c5a908cc1a1d376d2bcdc9f256ca04))

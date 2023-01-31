@@ -80,6 +80,9 @@ class BBox:
     def get_centriod(self):
         return [self.mid_x, self.mid_y]
 
+    def to_debug_str(self):
+        return "'%s' [%d,%d,%d,%d]" % (self.text, self.x1, self.x2, self.y1, self.y2)
+
 
 class OCRFileProvider():
     def __init__(self, ocr_import_info: str):
@@ -123,6 +126,9 @@ class OCRFormatter(BaseFormatter):
         self.ocr_confidence_threshold = ANNOTATION_MINIMAL_CONFIDENCE
         self.language_annotation_min_len = ANNOTATION_MINIMAL_LEN
         self.remove_rotated_boxes = True
+        self.remove_duplicate_symbols = True
+        self.script_to_lang_map = DEFAULT_SCRIPT_TO_LANG_MAPPING
+        self.max_low_conf_per_page = ANNOTATION_MAX_LOW_CONF_PER_PAGE
 
     def text_preprocess(self, text):
         return text
@@ -200,8 +206,53 @@ class OCRFormatter(BaseFormatter):
         """
         bboxes_sorted_on_y = sorted(bbox_centriods , key=lambda k: [k[1]])
         return bboxes_sorted_on_y
+    
+    def sort_line_and_remove_duplicates(self, line, bboxes):
+        """it sorted the curr line using x centriod and
+        use that sorted list of centriod, use the centrod co-ordinates
+        to get the bboxes object to get the area of the box and 
+        remove it if the area overlap or intersection over union percentage.
 
-    def get_bbox_sorted_on_x(self, bboxes_sorted_on_y, avg_box_height):
+        Args:
+            line (list): list of centriod co-ordinates
+            bboxes (dict): dict of bbox object with centriod co-ordinates as key
+
+        Returns:
+            list: sorted new line with removed overlaps or duplicates
+        """
+        sorted_line = sorted(line, key=lambda k: [k[0]])
+        if not self.remove_duplicate_symbols:
+            return sorted_line
+        new_line = []
+        prev_x2 = -1
+        orig_str = ""
+        for i, bbox in enumerate(sorted_line):
+            curr_bbox = bboxes[f"{bbox[0]},{bbox[1]}"]
+            if curr_bbox.x1 <= prev_x2:
+                # check if there is overlap with a previous box on this line:
+                duplicate = False
+                for j in reversed(range(0, i)):
+                    bbox_j = bboxes[f"{sorted_line[j][0]},{sorted_line[j][1]}"]
+                    if curr_bbox.x1 > bbox_j.x2:
+                        continue
+                    if curr_bbox.x2 < bbox_j.x1:
+                        break
+                    overlap = min(bbox_j.x2, curr_bbox.x2) - max(bbox_j.x1, curr_bbox.x1)
+                    if overlap > 0.6 * (curr_bbox.x2 - curr_bbox.x1):
+                        duplicate = True
+                        logging.debug("remove duplicate symbol ", bbox_j.text)
+                        break
+                if duplicate:
+                    continue
+                else:
+                    new_line.append(bbox)
+            else:
+                new_line.append(bbox)
+            prev_x2 = curr_bbox.x2
+        return new_line
+                    
+
+    def get_bbox_sorted_on_x(self, bboxes_sorted_on_y, avg_box_height, bboxes):
         """Groups box belonging in same line using average height and sort the grouped boxes base on x coordinates
 
         Args:
@@ -226,7 +277,8 @@ class OCRFormatter(BaseFormatter):
         if cur_line:
             lines.append(cur_line)
         for line in lines:
-            sorted_line = sorted(line, key=lambda k: [k[0]])
+            sorted_line = self.sort_line_and_remove_duplicates(line, bboxes)
+            # sorted_line = sorted(line, key=lambda k: [k[0]])
             for bbox in sorted_line:
                 sorted_bboxes.append(bbox)
         return sorted_bboxes
@@ -249,7 +301,7 @@ class OCRFormatter(BaseFormatter):
             bbox_centriods.append(centroid)
         sorted_bboxes = []
         sort_on_y_bboxs = self.get_bbox_sorted_on_y(bbox_centriods)
-        sorted_bbox_centriods = self.get_bbox_sorted_on_x(sort_on_y_bboxs, avg_box_height)
+        sorted_bbox_centriods = self.get_bbox_sorted_on_x(sort_on_y_bboxs, avg_box_height, bboxes)
         for bbox_centriod in sorted_bbox_centriods:
             sorted_bboxes.append(bboxes[f"{bbox_centriod[0]},{bbox_centriod[1]}"])
         return sorted_bboxes
@@ -627,6 +679,7 @@ class OCRFormatter(BaseFormatter):
         self.max_low_conf_per_page = opf_options["max_low_conf_per_page"] if "max_low_conf_per_page" in opf_options else ANNOTATION_MAX_LOW_CONF_PER_PAGE
         self.script_to_lang_map = opf_options["script_to_lang_map"] if "script_to_lang_map" in opf_options else DEFAULT_SCRIPT_TO_LANG_MAPPING
         self.same_line_ratio_threshold = opf_options["same_line_ratio_threshold"] if "same_line_ratio_threshold" in opf_options else SAME_LINE_RATIO_THRESHOLD
+        self.remove_duplicate_symbols = opf_options["remove_duplicate_symbols"] if "remove_duplicate_symbols" in opf_options else True
 
         ocr_import_info["op_import_options"] = opf_options
         ocr_import_info["op_import_version"] = __version__
@@ -644,7 +697,7 @@ class OCRFormatter(BaseFormatter):
             self.default_language = self.source_info["languages"][0]
 
         self.metadata = self.get_metadata(pecha_id, ocr_import_info)
-        pecha = OpenPechaFS(metadata=self.metadata)
+        pecha = OpenPechaFS(metadata=self.metadata, path=self.output_path)
         total_word_confidence_list = []
 
         for image_group_id, image_group_info in self.source_info["image_groups"].items():
@@ -663,6 +716,6 @@ class OCRFormatter(BaseFormatter):
                 "ocr_word_mean_confidence_index": statistics.mean(total_word_confidence_list),
                 "ocr_word_median_confidence_index": statistics.median(total_word_confidence_list)
             }
-        pecha.save(output_path=self.output_path)
+        pecha.save()
 
         return pecha

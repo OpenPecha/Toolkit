@@ -8,7 +8,8 @@ from git import Repo
 
 from openpecha import config
 from openpecha.core.layer import Layer, LayerEnum
-from openpecha.core.pecha import OpenPechaFS
+from openpecha.core.pecha import OpenPechaGitRepo
+from openpecha.core.ids import get_base_id, get_initial_pecha_id
 from openpecha.github_utils import commit
 from openpecha.utils import dump_yaml
 
@@ -16,8 +17,8 @@ from ...alignment.tmx import TMXAlignment
 from ...alignment.tmx.create_opf import (
     create_readme,
     get_segment_annotation,
-    publish_pecha,
-)
+    get_metadata
+    )
 
 
 def setup_auth(repo, org, token):
@@ -50,44 +51,48 @@ def get_segment_layer_base_and_mapping(po_dict):
     return segment_layer, base_text, annotation_map
 
 
-def create_opf_for_translated(po_dict, pecha_id, opf_path, title=None, lang=None):
-    opf = OpenPechaFS(path=opf_path)
+def create_opf_for_translated(po_dict, title=None, lang=None):
+    source_metadata = {}
     segment_layer, base_text, annotation_map = get_segment_layer_base_and_mapping(
         po_dict
     )
-    layers = {"0001": {LayerEnum.segment: segment_layer}}
-    bases = {"0001": base_text}
-    metadata = {
-        "id": pecha_id,
-        "initial_creation_type": "TMX",
-        "origin_type": "translation",
-        "source_metadata": {
-            "id": "",
-            "title": title,
-            "langauge": lang,
-            "author": "",
-            "volume": {},
-        },
-    }
-    opf.layers = layers
-    opf.base = bases
-    opf.save_base()
-    opf.save_layers()
-    meta_fn = Path(f"{opf_path}/meta.yml")
-    dump_yaml(metadata, meta_fn)
-    return annotation_map
+    pecha_id = get_initial_pecha_id()
+    opf_path = config.PECHAS_PATH / pecha_id / f"{pecha_id}.opf"
+    opf_path.mkdir(exist_ok=True, parents=True)
+    pecha = OpenPechaGitRepo(path=opf_path)
+    base_id = get_base_id()
+    layers = {f"{base_id}": {LayerEnum.segment: segment_layer}}
+    base_text = base_text
+    bases = {f"{base_id}": base_text}
+    source_metadata.update({'title':title})
+    metadata = get_metadata(pecha_id, lang, source_metadata)
+    pecha.layers = layers
+    pecha.bases = bases
+    pecha._meta = metadata
+    
+    pecha._meta.bases = {
+        base_id:
+            {   
+                "source_metadata": None,
+                "order": 1,
+                "base_file": f"{base_id}.txt",
+                "statistics": None
+                }
+            }
+    pecha.save_base()
+    pecha.save_layers()
+    pecha.save_meta()
+    readme = create_readme(pecha.pecha_path)
+    (pecha.pecha_path / "readme.md").write_text(readme, encoding="utf-8")
+    return pecha, annotation_map
 
 
 def create_opf_and_annotation_map(po_zip, title=None, lang=None):
     if po_zip:
-        pecha_id = uuid4().hex
-        opf_path = Path(config.PECHAS_PATH / pecha_id / f"{pecha_id}.opf/")
-        annotation_map = create_opf_for_translated(
-            po_zip, pecha_id, opf_path, title, lang
+        pecha, annotation_map = create_opf_for_translated(
+            po_zip, title, lang
         )
-        readme = create_readme(opf_path.parent)
-        Path(opf_path.parent / "readme.md").write_text(readme, encoding="utf-8")
-    return opf_path.parent, annotation_map
+    return pecha, annotation_map
 
 
 def get_id_and_string(po_file):
@@ -108,24 +113,20 @@ def get_id_and_string(po_file):
     return po_dict, lang
 
 
-def read_po(path):
-    return polib.pofile(path)
-
-
 def transifex_output_to_opf(po_path):
-    po_file = read_po(po_path)
+    po_file = polib.pofile(po_path)
     po_zip, lang = get_id_and_string(po_file)
     title = "this is the title"
-    target_pecha_path, annotation_map = create_opf_and_annotation_map(
+    target_pecha, annotation_map = create_opf_and_annotation_map(
         po_zip, title, lang
     )
-    return target_pecha_path, annotation_map
+    return target_pecha, annotation_map
 
 
 def update_alignment_from_po(po_path, alignment_path, publish=True):
-    target_pecha_path, annotation_map = transifex_output_to_opf(po_path)
+    target_pecha, annotation_map = transifex_output_to_opf(po_path)
     obj = TMXAlignment()
-    obj.update_alignment_repo(alignment_path, target_pecha_path, annotation_map)
+    obj.update_alignment_repo(alignment_path, target_pecha.pecha_path, annotation_map)
 
     if publish:
         repo = Repo(alignment_path)
@@ -134,5 +135,5 @@ def update_alignment_from_po(po_path, alignment_path, publish=True):
         setup_auth(repo, org, token)
         message = "updated alginment.yml"
         commit(repo, message, not_includes=[], branch="master")
-        publish_pecha(target_pecha_path)
-    return target_pecha_path
+        target_pecha.publish()
+    return target_pecha.pecha_path

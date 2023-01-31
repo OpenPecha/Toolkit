@@ -29,7 +29,7 @@ class BUDARDFSerializer:
 
     def __init__(self, openpecha):
         self.openpecha = openpecha
-        self._pecha_id = openpecha.meta.id
+        self._pecha_id = openpecha.pecha_id
         self.lname = f"IE0OP{self._pecha_id}"
         self.graph_r = bdg[self.lname]
         self.lod_ds = rdflib.Dataset()
@@ -94,6 +94,9 @@ class BUDARDFSerializer:
                 self.add_triple(bdr[self.lname], bdo["OPFOCRSource"], Literal(oii["source"]))
             if "software_id" in oii:
                 self.add_triple(bdr[self.lname], bdo["OPFOCRSoftware"], Literal(oii["software_id"]))
+                if oii["software_id"] == "norbuketaka":
+                    self.add_triple(bdr[self.lname], bdo.inCollection, bdr.PR1ER1)
+                    self.add_triple(bdr.PR1ER1, bdo.collectionMember, bdr[self.lname])
             if "batch_id" in oii:
                 self.add_triple(bdr[self.lname], bdo["OPFOCRBatch"], Literal(oii["batch_id"]))
             if "ocr_info" in oii and "timestamp" in oii["ocr_info"]:

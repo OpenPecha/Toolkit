@@ -10,13 +10,12 @@ from typing import Dict
 
 import requests
 import yaml
-from git import GIT_OK, Repo
+from git import Repo
 from git.cmd import GitCommandError
 
-from openpecha import config, storages
-from openpecha.core.layer import LayerEnum
-from openpecha.formatters.layers import AnnType
+from openpecha import config
 from openpecha.core import metadata
+from openpecha.core.layer import LayerEnum
 from openpecha.exceptions import PechaNotFound
 from openpecha.github_utils import create_release
 from openpecha.storages import GithubStorage, setup_auth_for_old_repo
@@ -34,14 +33,16 @@ try:
 except (ImportError, AttributeError):
     yaml_dumper = yaml.SafeDumper
 
+
 def simple_enum_to_yaml(representer, node):
     return representer.represent_data(node.value)
 
+
 yaml_dumper.add_multi_representer(LayerEnum, simple_enum_to_yaml)
-yaml_dumper.add_multi_representer(AnnType, simple_enum_to_yaml)
 yaml_dumper.add_multi_representer(metadata.InitialCreationType, simple_enum_to_yaml)
 yaml_dumper.add_multi_representer(metadata.CopyrightStatus, simple_enum_to_yaml)
 yaml_dumper.add_multi_representer(metadata.LicenseType, simple_enum_to_yaml)
+
 
 def gzip_str(string_):
     # taken from https://gist.github.com/Garrett-R/dc6f08fc1eab63f94d2cbb89cb61c33d
@@ -53,11 +54,13 @@ def gzip_str(string_):
     bytes_obj = out.getvalue()
     return bytes_obj
 
+
 def _mkdir(path):
     if path.is_dir():
         return path
     path.mkdir(exist_ok=True, parents=True)
     return path
+
 
 def ocr_result_input(path):
     return path
@@ -119,6 +122,7 @@ def load_yaml(fn: Path) -> None:
 def load_yaml_str(s: str) -> None:
     return yaml.load(s, Loader=yaml_loader)
 
+
 def _eval_branch(repo, branch):
     """return default branch as fallback branch."""
     if branch in repo.refs or f"origin/{branch}" in repo.refs:
@@ -166,7 +170,7 @@ def download_pecha(pecha_id, out_path=None, needs_update=True, branch="main"):
     return pecha_path
 
 
-def download_pecha_assets(pecha_id: str, asset_type:str, download_dir:Path):
+def download_pecha_assets(pecha_id: str, asset_type: str, download_dir: Path):
     """Download pecha assets from latest release
 
     Args:
@@ -178,12 +182,13 @@ def download_pecha_assets(pecha_id: str, asset_type:str, download_dir:Path):
         Path: zip file path of downloaded asset
     """
 
-
-    response = requests.get(f"https://api.github.com/repos/OpenPecha-data/{pecha_id}/releases/latest")
+    response = requests.get(
+        f"https://api.github.com/repos/OpenPecha-data/{pecha_id}/releases/latest"
+    )
     res = response.json()
-    for asset in res['assets']:
-        if asset['name'] == f"{asset_type}.zip":
-            asset_download_url = asset['browser_download_url']
+    for asset in res["assets"]:
+        if asset["name"] == f"{asset_type}.zip":
+            asset_download_url = asset["browser_download_url"]
             break
     f = urllib.request.urlopen(asset_download_url)
     assets = f.read()

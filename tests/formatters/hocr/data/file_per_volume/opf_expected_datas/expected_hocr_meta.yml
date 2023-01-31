@@ -8,7 +8,8 @@ ocr_import_info:
   bdrc_scan_id: W22084
   ocr_info:
     timestamp: None
-  op_import_options: {}
+  op_import_options:
+    remove_duplicate_symbols: True
   op_import_version: 1.0.0
 default_language: bo
 source: https://library.bdrc.io
@@ -27,8 +28,8 @@ source_metadata:
   languages:
   - bo
 statistics:
-  ocr_word_mean_confidence_index: 0.3518703427719821
-  ocr_word_median_confidence_index: 0.3
+  ocr_word_mean_confidence_index: 0.3492919649960223
+  ocr_word_median_confidence_index: 0.29
 quality: null
 bases:
   I0886:
@@ -41,7 +42,7 @@ bases:
     base_file: I0886.txt
     statistics:
       ocr_word_median_confidence_index: 0.31
-      ocr_word_mean_confidence_index: 0.3691760904684976
+      ocr_word_mean_confidence_index: 0.36663701067615656
   I0887:
     source_metadata:
       id: http://purl.bdrc.io/resource/I0887
@@ -51,8 +52,8 @@ bases:
     order: 2
     base_file: I0887.txt
     statistics:
-      ocr_word_median_confidence_index: 0.28
-      ocr_word_mean_confidence_index: 0.3370539419087137
+      ocr_word_median_confidence_index: 0.27
+      ocr_word_mean_confidence_index: 0.3352661870503597
 copyright:
   status: Public domain
   notice: Public domain

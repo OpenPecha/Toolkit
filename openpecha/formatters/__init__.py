@@ -1,4 +1,4 @@
-from .empty import EmptyEbook
+# from .empty import EmptyEbook
 from .formatter import BaseFormatter
 from .hfml import HFMLFormatter
 from .ocr import GoogleVisionFormatter

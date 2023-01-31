@@ -75,5 +75,5 @@ def test_build_layers():
             assert is_same_ann(expected_ann, ann)
 
 if __name__ == "__main__":
-    test_base_text()
+    # test_base_text()
     test_build_layers()

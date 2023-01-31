@@ -10,7 +10,8 @@ ocr_import_info:
     html: html.zip
     txt: txt.zip
     images: images.zip
-  op_import_options: {}
+  op_import_options:
+    remove_duplicate_symbols: True
   op_import_version: 0.9.8
 default_language: bo
 source: https://library.bdrc.io
@@ -30,7 +31,7 @@ source_metadata:
   - bo
   author: ཀུན་མཁྱེན་འཇིགས་མེད་གླིང་པ།
 statistics:
-  ocr_word_mean_confidence_index: 0.9679414335664336
+  ocr_word_mean_confidence_index: 0.968030701754386
   ocr_word_median_confidence_index: 1.0
 bases:
   I1KG10196:
@@ -43,7 +44,7 @@ bases:
     base_file: I1KG10196.txt
     statistics:
       ocr_word_median_confidence_index: 1.0
-      ocr_word_mean_confidence_index: 0.971639344262295
+      ocr_word_mean_confidence_index: 0.9718181818181818
   I1KG10195:
     source_metadata:
       id: http://purl.bdrc.io/resource/I1KG10195
@@ -54,7 +55,7 @@ bases:
     base_file: I1KG10195.txt
     statistics:
       ocr_word_median_confidence_index: 1.0
-      ocr_word_mean_confidence_index: 0.961371359223301
+      ocr_word_mean_confidence_index: 0.9612484700122399
 copyright:
   status: Public domain
   notice: Public domain

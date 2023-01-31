@@ -27,7 +27,7 @@ statistics:
   ocr_word_mean_confidence_index: 0.91
 ocr_import_info:
   source: bdrc
-  software_id: google_books
+  software_id: norbuketaka
   batch_id: batch_2022
   ocr_info:
     timestamp: 1977-04-22T06:00:00Z

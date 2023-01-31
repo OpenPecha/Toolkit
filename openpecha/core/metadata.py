@@ -11,6 +11,7 @@ class InitialCreationType(Enum):
     ocr = "ocr"
     ebook = "ebook"
     input = "input"
+    tmx = "tmx"
 
 
 class CopyrightStatus(Enum):
@@ -67,7 +68,7 @@ class PechaMetadata(BaseModel):
     default_language: str = None
     source: str = None
     source_file: str = None
-    initial_creation_type: InitialCreationType
+    initial_creation_type: InitialCreationType = None
     imported: datetime = None
     last_modified: datetime = None
     parser: AnyHttpUrl = None

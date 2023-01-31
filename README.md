@@ -49,7 +49,7 @@ Daily development version:
 
 ## Docs
 
-- Documentation: [docs](https://docs.openpecha.org)
+- Documentation: [docs](https://openpecha.org)
 - If you have any problems with `openpecha-toolkit`, please open [issues](https://github.com/OpenPecha-dev/openpecha-toolkit/issues/new/choose)
 
 ## Developer Installation.
@@ -66,3 +66,4 @@ pre-commit install
 PYTHONPATH=.:$PYTHONPATH pytest tests
 ```
 <!-- This section must link to the docs which are in the root of the repository in /docs -->
+
