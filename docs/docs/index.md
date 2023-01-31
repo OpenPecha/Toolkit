@@ -43,8 +43,8 @@ The project’s primary aim is to facilitate the collection, proofreading, and e
 
 
 ## Key features
-- Contains a dataset of more than 13,000 texts that is gradually increasing in quantity and quality through contributions from core members and apps that use our APIs
-- Uses the opf (OpenPecha format), which uses standoff markdown in annotation layers to link to characters in a base text layer
-- Includes a base layer, a table of contents layer, a footnotes layer, and a hyperlinks layer by default
-- Supports virtually unlimited additional layers for witnesses, commentaries, layers of same-type tags, and more
-- Supports changes to the base layer through OpenPecha's Character Coordinate Translation Vector (CCTV), which locks tags in annotation layers to characters in the base layer even as they move   
+:material-arrow-right-circle-outline Contains a dataset of more than 13,000 texts that is gradually increasing in quantity and quality through contributions from core members and apps that use our APIs
+:material-arrow-right-circle-outline Uses the opf (OpenPecha format), which uses standoff markdown in annotation layers to link to characters in a base text layer
+:material-arrow-right-circle-outline Includes a base layer, a table of contents layer, a footnotes layer, and a hyperlinks layer by default
+:material-arrow-right-circle-outline Supports virtually unlimited additional layers for witnesses, commentaries, layers of same-type tags, and more
+:material-arrow-right-circle-outline Supports changes to the base layer through OpenPecha's Character Coordinate Translation Vector (CCTV), which locks tags in annotation layers to characters in the base layer even as they move   
