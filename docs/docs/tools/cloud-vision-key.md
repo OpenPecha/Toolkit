@@ -12,12 +12,15 @@ To get one, you need:
 
 > **Note:** If you don't have a credit card, contact openpecha@gmail.com. Our partners at [pecha.jobs](https://pecha.jobs) might be able to OCR images for you.
 
-## Table of contents
-<p align="center">
-  <a href="#how-to-create-a-google-cloud-account">Creating a Google Cloud account</a> •
-  <a href="#how-to-get-a-google-cloud-vision-key">Getting a Cloud Vision key</a> •
-  <a href="#need-help">Help</a> 
-</p>
+## On this page:
+
+<div class="grid cards" markdown>
+
+- [:material-arrow-right-circle-outline: __Creating a Google Cloud account__](#how-to-create-a-google-cloud-account)
+- [:material-arrow-right-circle-outline: __Getting a Cloud Vision key__](#how-to-get-a-google-cloud-vision-key)
+- [:material-arrow-right-circle-outline: __Help__](#need-help)
+
+</div>
 
 ## How to create a Google Cloud account
 
@@ -136,4 +139,4 @@ On the Google Cloud dashboard, find **My first project** and select **Go to proj
 
 Google will send you a `.json` file. This is your key for the ORC Pipeline.
 
-Congratulations! Now you are ready to use the [OCR Pipeline](https://tools.openpecha.org/pipelines/). Learn how to use it [here](#).
+Congratulations! Now you are ready to use the [OCR Pipeline](https://tools.openpecha.org/pipelines/).
