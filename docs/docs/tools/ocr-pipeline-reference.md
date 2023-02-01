@@ -11,7 +11,7 @@ Given a BDRC Scan ID, the OCR Pipeline:
 4. Creates a new repo on [OpenPecha Data's GitHub](https://github.com/OpenPecha-Data).
 5. Puts the OPF files for the text into the new repo.
 
-## On this page:
+## On this page
 
 <div class="grid cards" markdown>
 
@@ -102,11 +102,11 @@ If you don't agree, the file will be put in a private repo on OpenPecha Data's G
 
 The right side of the OCR Pipeline interface contains a list of recent batches of files that have been processed. Select **Details** next to your batch to see its progress and results.
 
-### Batch Details
+### Batch Detail
 
 Here you can:
 
-- Select the link under **Results** to go to the repo(s) that contain(s) the OCRd file(s).
+- Select the link under **Result** to go to the repo(s) that contain(s) the OCRd file(s).
 - Toggle the chevron next to **Inputs** to see the list of files that were OCRd.
 - Toggle the chevron next to **Pipeline Config** to see the language hint, model type, and OCR engine that were used.
 - Select **Details** under **Actions** to see more metadata about the batch.
@@ -131,5 +131,5 @@ Processing an OCR job may take several minutes or more, depending on the number 
 ## Need help?
 
 * File an [issue](https://github.com/OpenPecha/Data-Pipeline-Manager/issues/new?assignees=&labels=&template=bug_report.md&title=).
-* Join our [Discord](https://discord.com/invite/7GFpPFSTeA) and ask there.
+* Join our [Discord](https://discord.com/invite/7GFpPFSTeA) and ask.
 * Email us at openpecha[at]gmail.com.
