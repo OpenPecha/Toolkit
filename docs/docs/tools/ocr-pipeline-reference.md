@@ -1,9 +1,9 @@
 
-# OCR Pipeline
+# OCR Pipeline reference
 
 The [OCR Pipeline](https://tools.openpecha.org/pipelines/) provides an interface for OCRing scanned texts in the BDRC library. 
 
-Given a BDRC Scan ID, the OP Pipeline:
+Given a BDRC Scan ID, the OCR Pipeline:
 
 1. Retrieves the scans that make up the text from the [BDRC library](https://library.bdrc.io).
 2. OCRs them with [Google Cloud Vision](https://cloud.google.com/vision).
