@@ -11,7 +11,7 @@ Given a BDRC Scan ID, the OP Pipeline:
 4. Creates a new repo on [OpenPecha Data's GitHub](https://github.com/OpenPecha-Data).
 5. Puts the OPF files for the text into the new repo.
 
-## On this page
+## On this page:
 
 <div class="grid cards" markdown>
 
@@ -113,7 +113,7 @@ Here you can:
 
 <img width="1031" alt="Batch details" src="https://user-images.githubusercontent.com/51434640/214577513-36560227-0c92-482d-b2d8-70758a38e7b2.png">
 
-### Error Messages
+### Error messages
 
 - `FileNotFoundError:`: The supplied ID(s) weren't found. This could be because the supplied ID(s) were BDRC Work IDs or Version IDs.
   - **Solution**: Find the Scan ID for the text(s) you'd like to OCR and try again.
@@ -124,11 +124,11 @@ Here you can:
 - `GoogleVisionCredentialsError`: The supplied key is correctly formatted, but may have expired.
   - **Solution**: Regenerate a key on Google Cloud Vision and try again.
 
-## Processing Time
+## Processing time
 
 Processing an OCR job may take several minutes or more, depending on the number of images that are scanned.
 
-### Need Help?
+## Need help?
 
 * File an [issue](https://github.com/OpenPecha/Data-Pipeline-Manager/issues/new?assignees=&labels=&template=bug_report.md&title=).
 * Join our [Discord](https://discord.com/invite/7GFpPFSTeA) and ask there.
