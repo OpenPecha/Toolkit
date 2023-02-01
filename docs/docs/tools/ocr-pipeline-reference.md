@@ -1,7 +1,7 @@
 
 # OCR Pipeline
 
-The [OCR Pipeline](https://tools.openpecha.org/pipelines/) provides an interface for users to select scans from the BDRC library and OCR them. 
+The [OCR Pipeline](https://tools.openpecha.org/pipelines/) provides an interface for OCRing scanned texts in the BDRC library. 
 
 Given a BDRC Scan ID, the OP Pipeline:
 
@@ -11,13 +11,24 @@ Given a BDRC Scan ID, the OP Pipeline:
 4. Creates a new repo on [OpenPecha Data's GitHub](https://github.com/OpenPecha-Data).
 5. Puts the OPF files for the text into the new repo.
 
-## How to use the OCR Pipeline
+## On this page
 
-> **Note**: Using the OCR Pipeline requires a Google Cloud Vision service account key. Learn how to get one [here](#).
+<div class="grid cards" markdown>
+
+- [:material-arrow-right-circle-outline: __Input reference__](#input-reference)
+- [:material-arrow-right-circle-outline: __Output reference__](#output-reference)
+- [:material-arrow-right-circle-outline: __Processing time__](#processing-time)
+- [:material-arrow-right-circle-outline: __Help__](#need-help)
+
+</div>
+
+## Input reference
+
+> **Note** Using the OCR Pipeline requires a Google Cloud Vision service account key. Learn how to get one [here](https://openpecha.org/tools/cloud-vision-key/).
 
 ### Email
 
-Adding your email allows you to sort files by email. This is helpful if several members of an orgainization are sharing a Cloud Vision key.
+Adding your email prompts your browser to save your email and key in your browser settings so you don't have to reenter them every time you use this tool.
 
 ### Google Cloud Service JSON key file 
 
@@ -25,7 +36,7 @@ This is contained in the `.json` file that Google Cloud provides as a key for it
 
 Open the file in a text editor and copy the JSON code into this field.
 
-> **Note**: If you don't have a key or you need help getting one, read this [guide](#).
+> **Note** If you don't have a key or you need help getting one, read this [guide](https://openpecha.org/tools/cloud-vision-key/).
 
 ### Name
 
@@ -43,7 +54,7 @@ The scan ID follows `bdr:`. In this case, the ID is `W1KG12304`.
 
 Multiple scans can be OCRd in one batch. Add one BDRC Scan ID per line.
 
-> **Warning**: BDRC Work IDs and Version IDs aren't supported. If used, the OCR will result in failure.
+> **Warning** BDRC Work IDs and Version IDs aren't supported. If used, the OCR will result in failure.
 
 ### OCR Engine
 
@@ -59,7 +70,7 @@ These model types are accessible by the OCR Pipeline.
 
 `builtin/weekly` seems to produce the best results, but this needs more testing. Feel free to experiment.
 
-> **Warning**: `builtin/stable` doesn't currently work for Tibetan.
+> **Warning** `builtin/stable` doesn't currently work for Tibetan.
 
 ### Language Hint
 
@@ -85,15 +96,13 @@ By ticking this box, the results get put in a public [OpenPecha Data repository]
 
 If you don't agree, the file will be put in a private repo on OpenPecha Data's GitHub. In this case, after your job is successfully completed, email us at openpecha[at]gmail.com for access.
 
-## Processing OCRs
+## Output reference
 
-After starting the OCR process, the job may take several minutes or more, depending on the number of images that are scanned.
-
-## All Batches
+### All Batches
 
 The right side of the OCR Pipeline interface contains a list of recent batches of files that have been processed. Select **Details** next to your batch to see its progress and results.
 
-## Batch Details
+### Batch Details
 
 Here you can:
 
@@ -103,6 +112,21 @@ Here you can:
 - Select **Details** under **Actions** to see more metadata about the batch.
 
 <img width="1031" alt="Batch details" src="https://user-images.githubusercontent.com/51434640/214577513-36560227-0c92-482d-b2d8-70758a38e7b2.png">
+
+### Error Messages
+
+- `FileNotFoundError:`: The supplied ID(s) weren't found. This could be because the supplied ID(s) were BDRC Work IDs or Version IDs.
+  - **Solution**: Find the Scan ID for the text(s) you'd like to OCR and try again.
+ 
+- `AttributeError: 'str' object has no attribute 'keys'`: The provided key wasn't in the correct format. This could be because you entered the name of key file instead of the contents of the file.
+  - **Solution**: See the directions above for entering your Google Cloud Service JSON key file.  
+ 
+- `GoogleVisionCredentialsError`: The supplied key is correctly formatted, but may have expired.
+  - **Solution**: Regenerate a key on Google Cloud Vision and try again.
+
+## Processing Time
+
+Processing an OCR job may take several minutes or more, depending on the number of images that are scanned.
 
 ### Need Help?
 
