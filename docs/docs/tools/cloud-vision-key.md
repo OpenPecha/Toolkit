@@ -10,7 +10,7 @@ To get one, you need:
 - A Google account. Get one [here](https://accounts.google.com/).
 - A credit card or debit card
 
-> **Note:** If you don't have a credit card, contact openpecha@gmail.com. Our partners at [pecha.jobs](https://pecha.jobs) might be able to OCR images for you.
+> **Note** If you don't have a credit card, contact openpecha@gmail.com. Our partners at [pecha.jobs](https://pecha.jobs) might be able to OCR images for you.
 
 ## On this page:
 
@@ -34,7 +34,7 @@ Visit https://cloud.google.com/ and select **Console**. 
 
 <img width="1357" alt="Google Cloud home page" src="https://user-images.githubusercontent.com/51434640/214491257-aa0284e7-a800-4cb6-b6b9-ad14a4cab744.png">
 
-> **Note**: The Google Cloud home page might not look exactly like this when you visit it. If you don't see **Console**, select **Get Started** or **Get started for free**. The sign-up process is very similar.
+> **Note** The Google Cloud home page might not look exactly like this when you visit it. If you don't see **Console**, select **Get Started** or **Get started for free**. The sign-up process is very similar.
 
 ### 3. Agree to the terms of service for your country.
 
@@ -44,7 +44,7 @@ Then select **agree and continue**.
 
 <img width="1357" alt="Google cloud signup" src="https://user-images.githubusercontent.com/51434640/214493131-bc2f7e0e-a45d-4f86-84b6-24fe22efca37.png">
 
-> **Note**: If you selected **Get started** or **Get started for free** on the Google Cloud home page, you might see a screen like this instead:
+> **Note** If you selected **Get started** or **Get started for free** on the Google Cloud home page, you might see a screen like this instead:
 
 <img width="1357" alt="Google cloud terms of service" src="https://user-images.githubusercontent.com/51434640/214493276-f3e0b02e-14a7-4a0a-b9b5-6e7beada5d51.png">
 
@@ -73,7 +73,7 @@ Then select **agree and continue**.
 
 <img width="1172" alt="Google Cloud payment method" src="https://user-images.githubusercontent.com/51434640/214498047-b0bb84d1-1f7a-41ec-a949-0d6f2c55c74b.png">
 
-> **Note**: Depending on your country, you might also have an option to add a bank account.
+> **Note** Depending on your country, you might also have an option to add a bank account.
 
 3. Choose a payment type and add your address. Then select **Create**.
 
