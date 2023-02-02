@@ -1,8 +1,8 @@
 # Welcome
 
-OpenPecha is an :material-book-edit-outline: e-text and :material-tag-outline: annotations store made available on GitHub and through a set of APIs. 
+OpenPecha is an :material-note-text-outline: etext and :material-tag-outline: annotations store made available on GitHub and through a set of APIs. 
 
-The project’s primary aim is to facilitate the collection, proofreading, and enrichment of e-texts by leveraging language technology and collaboration.
+The project’s primary aim is to facilitate the collection, proofreading, and enrichment of etexts by leveraging language technology and collaboration.
 
 <div class="grid cards" markdown>
 
@@ -44,12 +44,12 @@ The project’s primary aim is to facilitate the collection, proofreading, and e
 
 ## Key features
 
-:material-arrow-right-circle-outline: Contains a dataset of more than 13,000 texts that is gradually increasing in quantity and quality through contributions from core members and apps that use our APIs
+:material-arrow-right-circle-outline: A dataset of more than 14,000 texts that is continuously increasing in quantity and quality through contributions from core members and apps that use our APIs.
 
-:material-arrow-right-circle-outline: Uses the opf (OpenPecha format), which uses standoff markdown in annotation layers to link to characters in a base text layer
+:material-arrow-right-circle-outline: Files are stored in the OpenPecha format(OPF), in which standoff markdown in annotation layers are linked to a base text layer.
 
-:material-arrow-right-circle-outline: Includes a base layer, a table of contents layer, a footnotes layer, and a hyperlinks layer by default
+:material-arrow-right-circle-outline: OPF includes a base layer, a table of contents layer, a footnotes layer, and a hyperlinks layer by default.
 
-:material-arrow-right-circle-outline: Supports virtually unlimited additional layers for witnesses, commentaries, layers of same-type tags, and more
+:material-arrow-right-circle-outline: Virtually unlimited additional layers can be added for witnesses, commentaries, layers of same-type tags, and more.
 
-:material-arrow-right-circle-outline: Supports changes to the base layer through OpenPecha's Character Coordinate Translation Vector (CCTV), which locks tags in annotation layers to characters in the base layer even as they move   
+:material-arrow-right-circle-outline: OpenPecha's Character Coordinate Translation Vector (CCTV) ties tags in annotation layers to characters in the base layer.  Whenever a character in the base layer changes position, annotations that link to it are automatically updated to point to its new coordinates.
