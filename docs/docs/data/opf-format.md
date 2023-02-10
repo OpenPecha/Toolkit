@@ -8,7 +8,7 @@ OpenPecha's Character Coordinate Translation Vector (CCTV) ties tags in annotati
 
 <div class="grid cards" markdown>
 
-- [:material-arrow-right-circle-outline: __file structure__](#opf-file-structure)
+- [:material-arrow-right-circle-outline: __File structure__](#opf-file-structure)
 - [:material-arrow-right-circle-outline: __Layers__](#layers)
 - [:material-arrow-right-circle-outline: __Repos and versioning__](#openpecha-data-repositories-and-versioning)
 
