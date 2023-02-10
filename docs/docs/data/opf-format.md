@@ -1,4 +1,8 @@
-# The OpenPecha format
+---
+icon: material/information-outline
+---
+
+# OpenPecha format
 
 The OpenPecha Format (OPF) is a standoff markdown file format in which annotation layers are linked to a base text layer. Virtually unlimited annotaton layers can be added for layers of same-type tags, witnesses, commentaries, translations, and more.
 
