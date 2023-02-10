@@ -40,16 +40,3 @@ The project’s primary aim is to facilitate the collection, proofreading, and e
     [:octicons-arrow-right-24: OpenPecha blog](https://openpecha.org/blog/)
 
 </div>
-
-
-## Key features
-
-:material-arrow-right-circle-outline: A dataset of more than 14,000 texts that is continuously increasing in quantity and quality through contributions from core members and apps that use our APIs.
-
-:material-arrow-right-circle-outline: Files are stored in the OpenPecha format(OPF), in which standoff markdown in annotation layers are linked to a base text layer.
-
-:material-arrow-right-circle-outline: OPF includes a base layer, a table of contents layer, a footnotes layer, and a hyperlinks layer by default.
-
-:material-arrow-right-circle-outline: Virtually unlimited additional layers can be added for witnesses, commentaries, layers of same-type tags, and more.
-
-:material-arrow-right-circle-outline: OpenPecha's Character Coordinate Translation Vector (CCTV) ties tags in annotation layers to characters in the base layer.  Whenever a character in the base layer changes position, annotations that link to it are automatically updated to point to its new coordinates.
