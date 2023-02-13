@@ -1,5 +1,5 @@
 ---
-icon: material/email-newsletter
+icon: material/ear-hearing
 ---
 
 # Stay informed
