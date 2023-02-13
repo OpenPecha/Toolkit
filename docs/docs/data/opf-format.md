@@ -1,5 +1,5 @@
 ---
-icon: material/information-outline
+icon: material/folder-information-outline
 ---
 
 # OpenPecha format
