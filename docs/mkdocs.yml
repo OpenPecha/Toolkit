@@ -29,13 +29,13 @@ theme:
 nav:
   - Home: index.md
   - Pecha Data:
-    - Intro: data/intro.md
+    - Intro to Pecha Data: data/intro.md
     - Featured datasets: data/featured-datasets.md
     - The OPF format: data/opf-format.md
-    - GitHub: data/github.md
+    - Pecha Data on GitHub: data/github.md
   - Pecha Tools:
     - Pecha Tools overview: tools/overview.md
-    - OCR Pipeline: tools/ocr-pipeline-reference.md
+    - OCR Pipeline reference: tools/ocr-pipeline-reference.md
   - Pecha API:
     - Getting started: api/getting-started.md
     - Reference: api/reference.md
