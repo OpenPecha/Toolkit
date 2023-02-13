@@ -310,7 +310,8 @@ class OpenPechaFS(OpenPecha):
         if content:
             base_fn.write_text(content, encoding='utf-8')
         else:
-            base_fn.unlink()
+            if base_fn.exists():
+                base_fn.unlink()
 
     def save_base(self):
         for base_name, content in self.bases.items():
