@@ -1,5 +1,5 @@
 ---
-icon: material/message-text
+icon: material/ear-hearing
 ---
 
 # Connect
