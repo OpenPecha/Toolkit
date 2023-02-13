@@ -4,6 +4,8 @@ OpenPecha is an :material-note-text-outline: etext and :material-tag-outline: an
 
 The project’s primary aim is to facilitate the collection, proofreading, and enrichment of etexts by leveraging language technology and collaboration.
 
+New to OpenPecha? Here are a few places to get started using our data and tools:
+
 <div class="grid cards" markdown>
 
 -   :material-download:{ .lg .middle } __Download a featured dataset__
@@ -13,6 +15,14 @@ The project’s primary aim is to facilitate the collection, proofreading, and e
     Get the latest Pecha datasets to train Tibetan-language AI models.
 
     [:octicons-arrow-right-24: Featured datasets](https://openpecha.org/data/featured-datasets/)
+ 
+-   :material-ocr:{ .lg .middle } __OCR scanned BDRC books__
+
+    ---
+
+    Use the OCR Pipeline to OCR scans in the BDRC collection.
+
+    [:octicons-arrow-right-24: OCR books ](https://tools.openpecha.org/)   
     
 -   :material-hammer-wrench:{ .lg .middle } __Get Pecha Toolkit__
 
@@ -23,13 +33,7 @@ The project’s primary aim is to facilitate the collection, proofreading, and e
 
     [:octicons-arrow-right-24: Pecha toolkit](https://openpecha.org/toolkit/install/)
 
--   :material-api:{ .lg .middle } __Use Pecha API__
 
-    ---
-
-    Harness the power of OpenPecha with Pecha API. 
-
-    [:octicons-arrow-right-24: Pecha API](https://openpecha.org/api/getting-started/)
 
 -   :material-post-outline:{ .lg .middle } __Get the latest news__
 
