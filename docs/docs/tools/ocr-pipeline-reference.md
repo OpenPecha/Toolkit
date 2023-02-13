@@ -7,7 +7,7 @@ Given a BDRC Scan ID, the OCR Pipeline:
 
 1. Retrieves the scans that make up the text from the [BDRC library](https://library.bdrc.io).
 2. OCRs them with [Google Cloud Vision](https://cloud.google.com/vision).
-3. Converts the results into the [OPF format](#) using the OpenPecha toolkit.
+3. Converts the results into the [OPF format](/data/opf-format/) using the OpenPecha toolkit.
 4. Creates a new repo on [OpenPecha Data's GitHub](https://github.com/OpenPecha-Data).
 5. Puts the OPF files for the text into the new repo.
 
@@ -115,9 +115,12 @@ Here you can:
 
 ### Error messages
 
-- `FileNotFoundError:`: The supplied ID(s) weren't found. This could be because the supplied ID(s) were BDRC Work IDs or Version IDs.
+- `FileNotFoundError`: The supplied ID(s) weren't found. This could be because the supplied ID(s) were BDRC Work IDs or Version IDs.
   - **Solution**: Find the Scan ID for the text(s) you'd like to OCR and try again.
- 
+
+- `FileNotFoundError: [Errno 2] No such file or directory`: The supplied ID(s) were BDRC scan IDs, but the scan(s) are copyrighted and unavailable to OCR.
+  - **Solution**: Choose a copyright-free scan from the BDRC library and and try again.
+
 - `AttributeError: 'str' object has no attribute 'keys'`: The provided key wasn't in the correct format. This could be because you entered the name of key file instead of the contents of the file.
   - **Solution**: See the directions above for entering your Google Cloud Service JSON key file.  
  
@@ -131,5 +134,5 @@ Processing an OCR job may take several minutes or more, depending on the number 
 ## Need help?
 
 * File an [issue](https://github.com/OpenPecha/Data-Pipeline-Manager/issues/new?assignees=&labels=&template=bug_report.md&title=).
-* Join our [Discord](https://discord.com/invite/7GFpPFSTeA) and ask.
+* Join our [Discord](https://discord.com/invite/7GFpPFSTeA) and ask there.
 * Email us at openpecha[at]gmail.com.
