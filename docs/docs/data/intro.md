@@ -20,20 +20,20 @@ Developers use OpenPecha Data make corpuses, train large language models, and cr
 
     [:octicons-arrow-right-24: Featured datasets](/data/featured-datasets/)
     
--   :material-information-outline:{ .lg .middle } __Understand the OpenPecha Format__
+-   :material-information-outline:{ .lg .middle } __Get to know the OPF Format__
 
     ---
 
-    View the OPF reference material to learn about the format's structure and how it works.
+    Learn about how the OpenPecha Format is structured and how it works.
 
-    [:octicons-arrow-right-24: OPF Format](/data/opf-format/)
+    [:octicons-arrow-right-24: The OPF Format](/data/opf-format/)
 
 -   :material-github:{ .lg .middle } __Understand OpenPecha Data on GitHub__
 
     ---
 
-    Get more out of OpenPecha Data on GitHub by learning how the data is organized.
+    Get up to speed on how OpenPecha Data is organized on GitHub.
 
-    [:octicons-arrow-right-24: OpenPecha Data on GitHub](https://openpecha.org/api/getting-started/)
+    [:octicons-arrow-right-24: OpenPecha Data on GitHub](/data/github/)
 
 </div>
