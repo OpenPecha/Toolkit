@@ -20,7 +20,7 @@ Developers use OpenPecha Data make corpuses, train large language models, and cr
 
     [:octicons-arrow-right-24: Featured datasets](/data/featured-datasets/)
     
--   :material-information-outline:{ .lg .middle } __Get to know the OPF Format__
+-   :material-folder-information-outline:{ .lg .middle } __Get to know the OPF Format__
 
     ---
 
