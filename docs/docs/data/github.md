@@ -14,10 +14,10 @@ Individual repos are given OpenPecha IDs. To see what is indie the repos, visit 
 
 <div class="grid cards" markdown>
 
-- [:material-brands-html5: __Works__](https://github.com/OpenPecha-Data/works) lists all the _works_ on OP Data.
-- [:material-brands-js: __Catalog__](https://github.com/OpenPecha-Data/catalog) lists all the _instances_ on OP Data.
-- [:material-brands-css3: __Collections__](https://github.com/OpenPecha-Data/Collections) lists OP Data's collections and corpuses.
-- [:material-view-parallel-outline: __Alignments__](https://github.com/OpenPecha-Data/alignments) lists Tibetan texts aligned to translations.
+- [:material-format-list-bulleted-square: __Works__ lists all the distinct _works_ on OP Data.](https://github.com/OpenPecha-Data/works)
+- [:material-list-box-outline: __Catalog__ lists all the _instances_ of those works on OP Data.](https://github.com/OpenPecha-Data/catalog) 
+- [:material-folder-multiple-outline: __Collections__ lists OP Data's collections and corpuses.](https://github.com/OpenPecha-Data/Collections)
+- [:material-view-parallel-outline: __Alignments__ lists Tibetan texts aligned to translations.](https://github.com/OpenPecha-Data/alignments) 
 
 </div>
 
