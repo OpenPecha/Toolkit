@@ -121,9 +121,6 @@ Here you can:
 - `FileNotFoundError`: The supplied ID(s) weren't found. This could be because the supplied ID(s) were BDRC Work IDs or Version IDs.
   - **Solution**: Find the Scan ID for the text(s) you'd like to OCR and try again.
 
-- `FileNotFoundError: [Errno 2] No such file or directory`: The supplied ID(s) were BDRC scan IDs, but the scan(s) are copyrighted and unavailable to OCR.
-  - **Solution**: Choose a copyright-free scan from the BDRC library and and try again.
-
 - `AttributeError: 'str' object has no attribute 'keys'`: The provided key wasn't in the correct format. This could be because you entered the name of key file instead of the contents of the file.
   - **Solution**: See the directions above for entering your Google Cloud Service JSON key file.  
  
