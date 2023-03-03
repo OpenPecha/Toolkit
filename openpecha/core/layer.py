@@ -37,6 +37,7 @@ class LayerEnum(Enum):
     footnote = "Footnote"
     segment = "Segment"
     ocr_confidence = "OCRConfidence"
+    transcription = "Transcription"
 
 
 def _get_annotation_class(layer_name: LayerEnum):
@@ -85,6 +86,8 @@ def _get_annotation_class(layer_name: LayerEnum):
         return Segment
     elif layer_name == LayerEnum.ocr_confidence:
         return OCRConfidence
+    elif layer_name == LayerEnum.transcription:
+        return Transcription
     else:
         return BaseAnnotation
 
