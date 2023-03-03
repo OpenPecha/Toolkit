@@ -37,7 +37,7 @@ class LayerEnum(Enum):
     footnote = "Footnote"
     segment = "Segment"
     ocr_confidence = "OCRConfidence"
-    transcriptionTimeSpan = "TranscriptionTimeSpan"
+    transcription_time_span = "TranscriptionTimeSpan"
 
 
 def _get_annotation_class(layer_name: LayerEnum):
@@ -86,7 +86,7 @@ def _get_annotation_class(layer_name: LayerEnum):
         return Segment
     elif layer_name == LayerEnum.ocr_confidence:
         return OCRConfidence
-    elif layer_name == LayerEnum.transcriptionTimeSpan:
+    elif layer_name == LayerEnum.transcription_time_span:
         return TranscriptionTimeSpan
     else:
         return BaseAnnotation
@@ -151,3 +151,14 @@ class SpanINFO(BaseModel):
 class OCRConfidenceLayer(Layer):
     confidence_threshold: float
     annotation_type: LayerEnum = LayerEnum.ocr_confidence
+    
+class TranscriptionTimeSpanLayer(Layer):
+    media_url: str
+    time_unit: str
+    annotation_type: LayerEnum = LayerEnum.transcription_time_span
+    
+    @validator("time_unit")
+    def time_unit_must_be_millisecond_or_microsecond(cls, v):
+        if v not in ('millisecond', 'microsecond'):
+            raise ValueError("time_unit must be either millisecond or microsecond")
+        return v

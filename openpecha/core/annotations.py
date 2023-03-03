@@ -15,7 +15,6 @@ class Span(BaseModel):
 
     @validator("start", "end")
     def span_must_not_be_neg(cls, v):
-
         if v < 0:
             raise ValueError("span shouldn't be negative")
         return v
