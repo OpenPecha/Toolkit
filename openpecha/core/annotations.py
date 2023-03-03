@@ -56,7 +56,7 @@ class OCRConfidence(BaseAnnotation):
     nb_below_threshold: Optional[int]
 
 
-class Transcription(BaseAnnotation):
+class TranscriptionTimeSpan(BaseAnnotation):
     time_span: Span
 
 
