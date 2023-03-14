@@ -36,16 +36,6 @@ def get_text_between(start, end):
     return text
 
 
-def get_text_till_end(start):
-    text = ""
-    tag = start.next_element.next_element
-    while tag:
-        if tag.name is None:
-            text += tag.text
-        tag = tag.next_element
-    return text
-
-
 class OTranscribeFormatter(BaseFormatter):
     """
     oTranscribe formatter for .otr file.
@@ -94,9 +84,47 @@ class OTranscribeFormatter(BaseFormatter):
             LayerEnum.transcription_time_span: transcription_time_span_layer
         }, base_text
 
-    def create_opf(self, input_path):
-        pecha_id = get_initial_pecha_id()
+    def create_opf_from_dir(self, input_path):
         input_path = Path(input_path)
+        if not input_path.is_dir():
+            raise TypeError("Only directories are allowed")
+        if not len(list(input_path.glob("*.otr"))):
+            raise Exception("No .otr file found")
+
+        pecha_id = get_initial_pecha_id()
+        pecha_path = self.output_path / f"{pecha_id}/{pecha_id}.opf"
+        pecha_meta = InitialPechaMetadata(id=pecha_id)
+        pecha = OpenPechaFS(path=pecha_path, pecha_id=pecha_id)
+        pecha._meta = pecha_meta
+
+        for otr_file in input_path.glob("*.otr"):
+            m_text = self.get_input(otr_file)
+            layers, base_text = self.build_layers(m_text)
+
+            base_id = get_base_id()
+
+            pecha.set_base(
+                content=base_text,
+                base_name=base_id,
+                metadata={
+                    "source_metadata": {
+                        "title": "test",
+                        "author": "sonam",
+                        "id": pecha_id,
+                    },
+                    "base_file": f"{base_id}.txt",
+                },
+            )
+            pecha.set_layer(
+                base_name=base_id, layer=layers[LayerEnum.transcription_time_span]
+            )
+        return pecha
+
+    def create_opf(self, input_path):
+        input_path = Path(input_path)
+        if input_path.is_dir():
+            return self.create_opf_from_dir(input_path)
+        pecha_id = get_initial_pecha_id()
         m_text = self.get_input(input_path)
         layers, base_text = self.build_layers(m_text)
         pecha_path = self.output_path / f"{pecha_id}/{pecha_id}.opf"

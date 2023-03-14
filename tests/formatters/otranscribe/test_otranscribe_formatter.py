@@ -3,7 +3,7 @@ from openpecha.formatters import OTranscribeFormatter
 from openpecha.core.layer import LayerEnum, Layer
 from openpecha.utils import load_yaml_str
 
-input_path = Path(__file__).parent / "data" / "input_otr.otr"
+input_path = Path(__file__).parent / "data"
 expected_base = (Path(__file__).parent / "data" / "expected_base.txt").read_text(
     encoding="utf8"
 )
@@ -58,9 +58,10 @@ def compare_layers(layer_a, layer_b):
 
 
 def test_get_opf():
-    formatter = OTranscribeFormatter(media_url="file:///Users/spsither/Desktop/olala.wav")
+    formatter = OTranscribeFormatter(
+        media_url="file:///Users/spsither/Desktop/olala.wav"
+    )
     output_opf = formatter.create_opf(input_path)
-
     first_base_name = list(output_opf.meta.bases.keys())[0]
 
     assert output_opf.get_base(base_name=first_base_name) == expected_base
