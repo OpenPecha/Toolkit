@@ -168,7 +168,7 @@ class OpenPecha:
             if layer:
                 return layer
 
-        layer_dict = self.read_layers_file(base_name, layer_name.value)
+        layer_dict = self.read_layers_file(base_name, layer_name)
         if layer_dict:
             layer = Layer.parse_obj(layer_dict)
         else:
