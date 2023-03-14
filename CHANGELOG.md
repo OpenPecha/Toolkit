@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.9.25 (2023-03-14)
+### Fix
+* **po-exporter:** Test case has been updated ([`267b8b3`](https://github.com/OpenPecha/Toolkit/commit/267b8b396ffb64ddb5dee67f88cf4f937fde0f48))
+
 ## v0.9.24 (2023-02-13)
 ### Fix
 * **core:** Check existence before unlink ([`190147e`](https://github.com/OpenPecha/Toolkit/commit/190147e32d97f58b795f9e6e6442164765a32976))
