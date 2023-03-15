@@ -1,0 +1,156 @@
+id: 44c9b1388fef4515a7ecc18e57bb7c60
+annotation_type: TranscriptionTimeSpan
+revision: '00001'
+annotations:
+  1b7c36ba0341451eb016e1f5b5e848cd:
+    span:
+      start: 0
+      end: 44
+      errors: null
+    metadata: null
+    time_span:
+      start: 9483782
+      end: 17449519
+      errors: null
+  3632135f79154d67ba19d4de878e6b4f:
+    span:
+      start: 45
+      end: 126
+      errors: null
+    metadata: null
+    time_span:
+      start: 17449519
+      end: 26632803
+      errors: null
+  dc4cc07fbd9248f7bc9a15dd88d7acff:
+    span:
+      start: 127
+      end: 190
+      errors: null
+    metadata: null
+    time_span:
+      start: 26632803
+      end: 35100599
+      errors: null
+  a2ac60a148094185afedaa01f34c454b:
+    span:
+      start: 191
+      end: 285
+      errors: null
+    metadata: null
+    time_span:
+      start: 35100599
+      end: 44148338
+      errors: null
+  710a8707587c4e2aa67933b6308ee1a9:
+    span:
+      start: 286
+      end: 379
+      errors: null
+    metadata: null
+    time_span:
+      start: 44148338
+      end: 52986499
+      errors: null
+  8c3667dbb97b432bb3da9f408b68e5c3:
+    span:
+      start: 380
+      end: 520
+      errors: null
+    metadata: null
+    time_span:
+      start: 52986499
+      end: 61122624
+      errors: null
+  dd8ae183fc6a4b17a43f18edc9ffc969:
+    span:
+      start: 521
+      end: 638
+      errors: null
+    metadata: null
+    time_span:
+      start: 61122624
+      end: 71397616
+      errors: null
+  af4afd2ad0ac4ced9b5cc5b2c96aa136:
+    span:
+      start: 639
+      end: 693
+      errors: null
+    metadata: null
+    time_span:
+      start: 71397616
+      end: 78053466
+      errors: null
+  be4641ff5eac4804be35e6dbfaf76bbf:
+    span:
+      start: 694
+      end: 787
+      errors: null
+    metadata: null
+    time_span:
+      start: 78053466
+      end: 86883668
+      errors: null
+  cd9fdafb79e7442fb7cf203ea34b8e4f:
+    span:
+      start: 788
+      end: 894
+      errors: null
+    metadata: null
+    time_span:
+      start: 86883668
+      end: 95606826
+      errors: null
+  2508821931bc4de48beec5499d84c710:
+    span:
+      start: 895
+      end: 996
+      errors: null
+    metadata: null
+    time_span:
+      start: 95606826
+      end: 103634127
+      errors: null
+  4e57f2dd029b495fb59b8c731b2804b9:
+    span:
+      start: 997
+      end: 1072
+      errors: null
+    metadata: null
+    time_span:
+      start: 103634127
+      end: 111874609
+      errors: null
+  a39b64f0453d43e8a9c28162deb905b7:
+    span:
+      start: 1073
+      end: 1210
+      errors: null
+    metadata: null
+    time_span:
+      start: 111874609
+      end: 121609916
+      errors: null
+  e1c9c84349974c2ab5ce6d43a405481c:
+    span:
+      start: 1211
+      end: 1263
+      errors: null
+    metadata: null
+    time_span:
+      start: 121609916
+      end: 129411758
+      errors: null
+  562625d46ef94addb970a2c615966546:
+    span:
+      start: 1264
+      end: 1334
+      errors: null
+    metadata: null
+    time_span:
+      start: 129411758
+      end: 132713335
+      errors: null
+media_url: file:///Users/spsither/Desktop/olala.wav
+time_unit: microsecond

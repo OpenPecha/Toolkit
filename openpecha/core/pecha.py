@@ -63,6 +63,8 @@ class OpenPecha:
 
     @property
     def about(self):
+        if not self.meta.source_metadata:
+            return ""
         source_metadata = []
         descriptive_labels = ['title', 'author', 'id']
         for label, info in self.meta.source_metadata.items():
@@ -138,7 +140,7 @@ class OpenPecha:
         return self.bases[base_name]
 
     def get_base_metadata(self, base_name: str) -> str:
-        self.meta.bases.get(base_name)
+        return self.meta.bases.get(base_name)
 
     def set_base(self, content: str, base_name: str = None, metadata: Dict = {}, update_layer_coordinates = True) -> str:
         """Create new base with `content` if `base_name` is not
@@ -166,7 +168,7 @@ class OpenPecha:
             if layer:
                 return layer
 
-        layer_dict = self.read_layers_file(base_name, layer_name.value)
+        layer_dict = self.read_layers_file(base_name, layer_name)
         if layer_dict:
             layer = Layer.parse_obj(layer_dict)
         else:
@@ -271,7 +273,7 @@ class OpenPechaFS(OpenPecha):
     def read_layers_file(
         self, base_name: str, layer_name: LayerEnum
     ) -> Union[Dict, None]:
-        layer_fn = self.layers_path / base_name / f"{layer_name}.yml"
+        layer_fn = self.layers_path / base_name / f"{layer_name.value}.yml"
         if layer_fn.is_file():
             return load_yaml(layer_fn)
 

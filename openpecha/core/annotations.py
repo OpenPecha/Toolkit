@@ -15,7 +15,6 @@ class Span(BaseModel):
 
     @validator("start", "end")
     def span_must_not_be_neg(cls, v):
-
         if v < 0:
             raise ValueError("span shouldn't be negative")
         return v
@@ -50,9 +49,15 @@ class Pagination(BaseAnnotation):
 class Language(BaseAnnotation):
     language: str = Field(None, description="BCP-47 tag of the language")
 
+
 class OCRConfidence(BaseAnnotation):
     confidence: float
     nb_below_threshold: Optional[int]
+
+
+class TranscriptionTimeSpan(BaseAnnotation):
+    time_span: Span
+
 
 class Citation(BaseAnnotation):
     pass

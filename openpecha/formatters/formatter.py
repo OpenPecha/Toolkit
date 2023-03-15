@@ -265,7 +265,7 @@ class BaseFormatter:
             cross_vols_layers[cross_ann_name] = layers[cross_ann_name]
             del layers[cross_ann_name]
 
-        # Create Annotaion layers
+        # Create Annotation layers
         for (i, vol_layers) in enumerate(self._get_vol_layers(layers)):
             vol_id = f"v{i+1:03}"
             result = {}
@@ -316,10 +316,10 @@ class BaseFormatter:
         )
 
     def get_base_text(self, m_text):
-        "Retuns text with all annotation removed"
+        "Returns text with all annotation removed"
         raise NotImplementedError(
             "Every type of text have different format for annotation, \
-                                  should be implemented in sub_class."
+                                  should be implemented in sub-class."
         )
 
     def create_opf(self, input_path):
