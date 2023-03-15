@@ -2,6 +2,19 @@
 
 <!--next-version-placeholder-->
 
+## v0.10.0 (2023-03-15)
+### Feature
+* **otranscribe:** Initial implementation for oTranscribe formatter ([`13e2c83`](https://github.com/OpenPecha/Toolkit/commit/13e2c8307fd6f9df9011ba2023119515602fa97b))
+* Add TranscriptionTimeSpanLayer ([`096f8ff`](https://github.com/OpenPecha/Toolkit/commit/096f8ff2dcff8ffa21960dff69fc1057b82c78fa))
+* Add a Layer for transcription ([`454a304`](https://github.com/OpenPecha/Toolkit/commit/454a3043ff22065c615643baeb4a5dae48203185))
+* Add annotation for transcription ([`ee669a3`](https://github.com/OpenPecha/Toolkit/commit/ee669a3685c1bd6cb8ae0268d2d8784047ff4c96))
+
+### Fix
+* **otranscribe:** Take directory as an input path ([`9e1e9b5`](https://github.com/OpenPecha/Toolkit/commit/9e1e9b50202373ca958f3c0ee41a194c7400298c))
+* **core/pecha:** Pass layerEum obj instead of str ([`bba5d1f`](https://github.com/OpenPecha/Toolkit/commit/bba5d1f9a34d39436862a9b5a57b4ccad17a9762))
+* **otranscribe:** Add test data for oTranscribe formatter ([`acd9a22`](https://github.com/OpenPecha/Toolkit/commit/acd9a22a1dc5c8ef6e6dd03434cc74a6facdf225))
+* Read_layers_file file, get_base_metadata, about ([`14200c8`](https://github.com/OpenPecha/Toolkit/commit/14200c800a437f28bcb08cb8b7a06c077cc81bd3))
+
 ## v0.9.25 (2023-03-14)
 ### Fix
 * **po-exporter:** Test case has been updated ([`267b8b3`](https://github.com/OpenPecha/Toolkit/commit/267b8b396ffb64ddb5dee67f88cf4f937fde0f48))
