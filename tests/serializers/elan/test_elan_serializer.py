@@ -12,9 +12,8 @@ expected_elan = (Path(__file__).parent / "data" / "expected_elan.eaf").read_text
 
 def test_elan_serialize():
     elan_serializer = ElanSerializer(input_opf_path)
-    with tempfile.TemporaryDirectory() as tempDir:
-        elan_files = elan_serializer.serialize(output_path=tempDir)
-        assert elan_files[0].read_text(encoding="utf8") == expected_elan
+    for base_id, elan in elan_serializer.serialize():
+        assert elan == expected_elan
 
 
 if __name__ == "__main__":

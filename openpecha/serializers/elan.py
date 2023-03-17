@@ -85,11 +85,9 @@ class ElanSerializer(Serialize):
 </ANNOTATION_DOCUMENT>
 """
 
-    def serialize(self, output_path="./output"):
-        output_path = Path(output_path)
+    def serialize(self):
         self.apply_layers()
         results = self.get_result()
-        elan_files = []
         for base_id, result in results.items():
             transcription_time_span_layer_file = (
                 self.opf_path / "layers" / base_id / "TranscriptionTimeSpan.yml"
@@ -100,7 +98,5 @@ class ElanSerializer(Serialize):
             elan = self.get_elan(
                 base_id, result, transcription_time_span_layer["media_url"]
             )
-            output_path.mkdir(exist_ok=True, parents=True)
-            (output_path / f"{base_id}.eaf").write_text(elan, encoding="utf-8")
-            elan_files += [output_path / f"{base_id}.eaf"]
-        return elan_files
+
+            yield base_id, elan
