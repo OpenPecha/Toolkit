@@ -4,8 +4,8 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.mpi.nl/tools/elan/EAFv3.0.xsd">
     <HEADER MEDIA_FILE="" TIME_UNITS="milliseconds">
         <MEDIA_DESCRIPTOR
-            MEDIA_URL="file:///Users/spsither/Documents/OpenPecha/OTR002-Output/OTR002-01-གངས་རིན་པོ་ཆེ།/OTR001.wav"
-            MIME_TYPE="audio/x-wav" RELATIVE_MEDIA_URL="./OTR001.wav"/>
+            MEDIA_URL="file:///Users/spsither/Desktop/olala.wav"
+            MIME_TYPE="audio/x-wav" RELATIVE_MEDIA_URL="./olala.wav"/>
         <PROPERTY NAME="URN">urn:nl-mpi-tools-elan-eaf:ea97e0c9-0c39-48c0-be65-ae73b74d1be1</PROPERTY>
         <PROPERTY NAME="lastUsedAnnotationId">4</PROPERTY>
     </HEADER>

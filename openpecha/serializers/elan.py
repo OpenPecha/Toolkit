@@ -1,6 +1,9 @@
 from pathlib import Path
 from openpecha.core.layer import LayerEnum
 from openpecha.serializers.serialize import Serialize
+from openpecha.utils import load_yaml
+import mimetypes
+import os
 
 
 def micro_to_milliseconds(microseconds):
@@ -49,15 +52,19 @@ class ElanSerializer(Serialize):
         <TIME_SLOT TIME_SLOT_ID="ts{self.annotation_sequence[base_id] * 2}" TIME_VALUE="{micro_to_milliseconds(annotation["time_span"]["end"])}"/>"""
             self.annotation_sequence[base_id] += 1
 
-    def get_elan(self, base_id, result):
+    def get_elan(self, base_id, result, media_url):
+        media_url_path = Path(media_url)
+        mime_type = (
+            mimetypes.MimeTypes().guess_type(media_url_path.name)[0] or "audio/*"
+        )
         return f"""<?xml version="1.0" encoding="UTF-8"?>
 <ANNOTATION_DOCUMENT AUTHOR="" DATE="2023-03-15T20:50:48+05:30"
     FORMAT="3.0" VERSION="3.0"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.mpi.nl/tools/elan/EAFv3.0.xsd">
     <HEADER MEDIA_FILE="" TIME_UNITS="milliseconds">
         <MEDIA_DESCRIPTOR
-            MEDIA_URL="file:///Users/spsither/Documents/OpenPecha/OTR002-Output/OTR002-01-གངས་རིན་པོ་ཆེ།/OTR001.wav"
-            MIME_TYPE="audio/x-wav" RELATIVE_MEDIA_URL="./OTR001.wav"/>
+            MEDIA_URL="{media_url}"
+            MIME_TYPE="{mime_type}" RELATIVE_MEDIA_URL=".{os.sep}{media_url_path.name}"/>
         <PROPERTY NAME="URN">urn:nl-mpi-tools-elan-eaf:ea97e0c9-0c39-48c0-be65-ae73b74d1be1</PROPERTY>
         <PROPERTY NAME="lastUsedAnnotationId">4</PROPERTY>
     </HEADER>
@@ -84,9 +91,16 @@ class ElanSerializer(Serialize):
         results = self.get_result()
         elan_files = []
         for base_id, result in results.items():
-            output_path.mkdir(exist_ok=True, parents=True)
-            (output_path / f"{base_id}.eaf").write_text(
-                self.get_elan(base_id, result), encoding="utf-8"
+            transcription_time_span_layer_file = (
+                self.opf_path / "layers" / base_id / "TranscriptionTimeSpan.yml"
             )
+            transcription_time_span_layer = load_yaml(
+                transcription_time_span_layer_file
+            )
+            elan = self.get_elan(
+                base_id, result, transcription_time_span_layer["media_url"]
+            )
+            output_path.mkdir(exist_ok=True, parents=True)
+            (output_path / f"{base_id}.eaf").write_text(elan, encoding="utf-8")
             elan_files += [output_path / f"{base_id}.eaf"]
         return elan_files
