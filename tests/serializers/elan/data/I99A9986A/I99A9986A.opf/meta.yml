@@ -1,0 +1,19 @@
+id: I99A9986A
+imported: 2023-03-15 18:28:29.946915
+last_modified: 2023-03-15 18:28:29.946935
+bases:
+  A5BB:
+    source_metadata:
+      title: test
+      author: sonam
+      id: I99A9986A
+    base_file: A5BB.txt
+  A494:
+    source_metadata:
+      title: test
+      author: sonam
+      id: I99A9986A
+    base_file: A494.txt
+copyright:
+  status: Unknown
+  notice: ''

@@ -129,7 +129,7 @@ class OpenPecha:
 
     def _set_base_metadata(self, base_name: str, metadata: Dict) -> None:
         metadata.update({"base_file": f"{base_name}.txt"})
-        if "bases" not in self.meta:
+        if not hasattr(self.meta, "bases"):
             self.meta.bases = {}
         self.meta.bases[base_name] = metadata
 
