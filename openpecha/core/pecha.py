@@ -3,6 +3,7 @@ import warnings
 from collections import defaultdict
 from pathlib import Path
 from typing import Dict, List, Union
+
 from git import Repo
 
 from openpecha import blupdate, config
@@ -33,7 +34,7 @@ class OpenPecha:
         metadata: PechaMetadata = None,
         assets: Dict[str, List[Union[str, Path]]] = None,
         components: Dict[str, List[Layer]] = None,
-        pecha_id: str = None
+        pecha_id: str = None,
     ):
         self._pecha_id = pecha_id
         self.bases = bases if bases else {}
@@ -66,7 +67,7 @@ class OpenPecha:
         if not self.meta.source_metadata:
             return ""
         source_metadata = []
-        descriptive_labels = ['title', 'author', 'id']
+        descriptive_labels = ["title", "author", "id"]
         for label, info in self.meta.source_metadata.items():
             if label in descriptive_labels:
                 if isinstance(info, list):
@@ -114,13 +115,18 @@ class OpenPecha:
             return self._components
         self._components = self._read_components()
         return self._components
-    
+
     @property
     def is_private(self):
         if self.meta.source_metadata:
-            if self.meta.source_metadata.get("geo_restriction", []) or self.meta.source_metadata.get("restrictedInChina", False):
+            if self.meta.source_metadata.get(
+                "geo_restriction", []
+            ) or self.meta.source_metadata.get("restrictedInChina", False):
                 return True
-            if self.meta.source_metadata.get("access", "") != "http://purl.bdrc.io/admindata/AccessOpen":
+            if (
+                self.meta.source_metadata.get("access", "")
+                != "http://purl.bdrc.io/admindata/AccessOpen"
+            ):
                 return True
         return False
 
@@ -142,7 +148,13 @@ class OpenPecha:
     def get_base_metadata(self, base_name: str) -> str:
         return self.meta.bases.get(base_name)
 
-    def set_base(self, content: str, base_name: str = None, metadata: Dict = {}, update_layer_coordinates = True) -> str:
+    def set_base(
+        self,
+        content: str,
+        base_name: str = None,
+        metadata: Dict = {},
+        update_layer_coordinates=True,
+    ) -> str:
         """Create new base with `content` if `base_name` is not
         given otherwise overwrites it and return base_name.
         """
@@ -153,7 +165,7 @@ class OpenPecha:
                 blupdate.update_single_base(self, base_name, content)
             self.bases[base_name] = content
         else:
-            
+
             self.bases[base_name] = content
             self._set_base_metadata(base_name, metadata)
         return base_name
@@ -230,11 +242,9 @@ class OpenPechaFS(OpenPecha):
         path (str): path to .opf directory.
     """
 
-    def __init__(
-        self, path: str, pecha_id: str = None, **kwargs
-    ):
-        self._opf_path = Path(path)
-        super().__init__(pecha_id = pecha_id, **kwargs)
+    def __init__(self, path: str = None, pecha_id: str = None, **kwargs):
+        self._opf_path = Path(path) if path else None
+        super().__init__(pecha_id=pecha_id, **kwargs)
 
     @staticmethod
     def _mkdir(path: Path):
@@ -302,7 +312,7 @@ class OpenPechaFS(OpenPecha):
         return res
 
     def save_meta(self):
-        OpenPechaFS._mkdir(self.base_path)  
+        OpenPechaFS._mkdir(self.base_path)
         dump_yaml(self.meta.dict(exclude_none=True), self.meta_fn)
 
     def save_single_base(self, base_name: str, content: str = None):
@@ -310,7 +320,7 @@ class OpenPechaFS(OpenPecha):
             content = self.bases[base_name]
         base_fn = OpenPechaFS._mkdir(self.base_path) / f"{base_name}.txt"
         if content:
-            base_fn.write_text(content, encoding='utf-8')
+            base_fn.write_text(content, encoding="utf-8")
         else:
             if base_fn.exists():
                 base_fn.unlink()
@@ -320,7 +330,9 @@ class OpenPechaFS(OpenPecha):
             self.save_single_base(base_name, content)
 
     def save_layer(self, base_name: str, layer_name: LayerEnum, layer: Layer):
-        layer_fn = OpenPechaFS._mkdir(self.layers_path / base_name) / f"{layer_name.value}.yml"
+        layer_fn = (
+            OpenPechaFS._mkdir(self.layers_path / base_name) / f"{layer_name.value}.yml"
+        )
         dump_yaml(layer.dict(exclude_none=True), layer_fn)
         return layer_fn
 
@@ -399,13 +411,12 @@ class OpenPechaGitRepo(OpenPechaFS):
         storage (Storage): storage for distant interaction.
     """
 
-
     def __init__(
         self, pecha_id: str = None, path: str = None, storage: Storage = None, **kwargs
     ):
         self._opf_path = OpenPechaGitRepo.get_opf_path(pecha_id, path)
         self.storage = storage
-        super().__init__(pecha_id = pecha_id, path = self._opf_path, **kwargs)
+        super().__init__(pecha_id=pecha_id, path=self._opf_path, **kwargs)
 
     @staticmethod
     def get_opf_path(pecha_id, path: str) -> Path:
@@ -437,7 +448,7 @@ class OpenPechaGitRepo(OpenPechaFS):
         self._opf_path = self.pecha_path / f"{self.pecha_id}.opf"
         return self._opf_path
 
-    def publish(self, asset_path:Path=None, asset_name:str=None):
+    def publish(self, asset_path: Path = None, asset_name: str = None):
         asset_paths = []
         if not self.storage:
             self.storage = GithubStorage()
@@ -445,7 +456,9 @@ class OpenPechaGitRepo(OpenPechaFS):
             local_repo = Repo(self.pecha_path)
             commit_and_push(repo=local_repo, message="Pecha update")
         else:
-            self.storage.add_dir(path=self.pecha_path, description=self.about, is_private=self.is_private)
+            self.storage.add_dir(
+                path=self.pecha_path, description=self.about, is_private=self.is_private
+            )
 
         # Publishing assets in release
         if asset_path:
@@ -453,7 +466,11 @@ class OpenPechaGitRepo(OpenPechaFS):
             shutil.make_archive(asset_path.parent / asset_name, "zip", asset_path)
             asset_paths.append(f"{asset_path.parent / asset_name}.zip")
             create_release(
-                repo_name, prerelease=False, asset_paths=asset_paths, org=self.storage.org_name, token=self.storage.token
+                repo_name,
+                prerelease=False,
+                asset_paths=asset_paths,
+                org=self.storage.org_name,
+                token=self.storage.token,
             )
             (asset_path.parent / f"{asset_name}.zip").unlink()
 
@@ -478,9 +495,14 @@ class OpenPechaBareGitRepo(OpenPecha):
     """
 
     def __init__(
-        self, pecha_id: str = None, path: str = None, revision: str = "HEAD", repo=None, **kwargs
+        self,
+        pecha_id: str = None,
+        path: str = None,
+        revision: str = "HEAD",
+        repo=None,
+        **kwargs,
     ):
-        super().__init__(pecha_id = pecha_id, **kwargs)
+        super().__init__(pecha_id=pecha_id, **kwargs)
         self.rev = revision
         if repo is not None:
             self.repo = repo
@@ -536,11 +558,12 @@ class OpenPechaBareGitRepo(OpenPecha):
     def read_layers_file(
         self, base_name: str, layer_name: LayerEnum
     ) -> Union[Dict, None]:
-        return self.read_file_content_yml("layers/" + base_name + "/" + layer_name + ".yml")
+        return self.read_file_content_yml(
+            "layers/" + base_name + "/" + layer_name + ".yml"
+        )
 
     def read_meta_file(self) -> Dict:
         return self.read_file_content_yml("meta.yml")
 
     def read_index_file(self) -> Dict:
         return self.read_file_content_yml("index.yml")
-
