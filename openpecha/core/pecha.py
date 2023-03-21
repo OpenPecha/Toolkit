@@ -1,3 +1,4 @@
+import copy
 import shutil
 import warnings
 from collections import defaultdict
@@ -167,7 +168,7 @@ class OpenPecha:
         else:
 
             self.bases[base_name] = content
-            self._set_base_metadata(base_name, metadata)
+            self._set_base_metadata(base_name, copy.deepcopy(metadata))
         return base_name
 
     def get_layers(self, base_name: str) -> Layer:
