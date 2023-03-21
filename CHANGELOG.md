@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.11.1 (2023-03-21)
+### Fix
+* **core/pecha:** Make  arg optional ([`67fd90b`](https://github.com/OpenPecha/Toolkit/commit/67fd90bffeab0a44abb0ff488998867c560be08c))
+
 ## v0.11.0 (2023-03-17)
 ### Feature
 * **elan:** Initial implementation of elan serializer ([`3f8cd41`](https://github.com/OpenPecha/Toolkit/commit/3f8cd41a115e8b9cff667e0e94b2dc02a8b6032f))
