@@ -31,7 +31,7 @@ def test_create_pecha():
             }
         },
         metadata=InitialPechaMetadata(initial_creation_type=InitialCreationType.ebook),
-        path=""
+        path="",
     )
     assert openpecha.meta.id
     assert openpecha.get_base("v001")
@@ -87,13 +87,13 @@ def test_set_base_metadata():
     base_metadata = {"id": "id", "title": "title"}
 
     base_name = pecha.set_base("base content", metadata=base_metadata)
+    base_name_2 = pecha.set_base("base content", metadata=base_metadata)
 
     assert base_name in pecha.meta.bases
     assert pecha.meta.bases[base_name]["id"] == "id"
     assert pecha.meta.bases[base_name]["title"] == "title"
-    assert (
-        pecha.meta.bases[base_name]["base_file"] == f"{base_name}.txt"
-    )
+    assert pecha.meta.bases[base_name]["base_file"] == f"{base_name}.txt"
+    assert pecha.meta.bases[base_name_2]["base_file"] == f"{base_name_2}.txt"
 
 
 def test_set_layer():
