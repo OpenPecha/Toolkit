@@ -1,9 +1,9 @@
 import enum
-import git
 import os
 import shutil
 from pathlib import Path
 
+import git
 from git import Repo
 from github import Github
 
@@ -130,15 +130,15 @@ class GithubStorage(Storage):
             _ = git.Repo(path).git_dir
             return True
         except git.exc.InvalidGitRepositoryError:
-            return False       
+            return False
 
-    def add_dir(self, path: Path, description: str, is_private: bool=False):
+    def add_dir(self, path: Path, description: str, is_private: bool = False, branch: str = "master"):
         """dir local dir to github."""
         remote_repo_url = self._init_remote_repo(
             path=path, description=description, is_private=is_private
         )
         local_repo = self._init_local_repo(path=path, remote_url=remote_repo_url)
-        commit_and_push(repo=local_repo, message="Initial commit")
+        commit_and_push(repo=local_repo, message="Initial commit", branch=branch)
         return local_repo
 
     def remove_dir_with_name(self, name: str):

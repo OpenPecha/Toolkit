@@ -449,7 +449,7 @@ class OpenPechaGitRepo(OpenPechaFS):
         self._opf_path = self.pecha_path / f"{self.pecha_id}.opf"
         return self._opf_path
 
-    def publish(self, asset_path: Path = None, asset_name: str = None):
+    def publish(self, asset_path: Path = None, asset_name: str = None, branch: str = "main"):
         asset_paths = []
         if not self.storage:
             self.storage = GithubStorage()
@@ -458,7 +458,7 @@ class OpenPechaGitRepo(OpenPechaFS):
             commit_and_push(repo=local_repo, message="Pecha update")
         else:
             self.storage.add_dir(
-                path=self.pecha_path, description=self.about, is_private=self.is_private
+                path=self.pecha_path, description=self.about, is_private=self.is_private, branch=branch
             )
 
         # Publishing assets in release
