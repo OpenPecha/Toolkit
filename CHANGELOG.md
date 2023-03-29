@@ -2,6 +2,11 @@
 
 <!--next-version-placeholder-->
 
+## v0.11.3 (2023-03-29)
+### Fix
+* **core/pecha:** Add base_names_list prop to pecha ([`58e7135`](https://github.com/OpenPecha/Toolkit/commit/58e7135f08afab18faffdea8cce0d19964636abf))
+* **core/pecha:** Pecha publish method accepts branch ([`5c599ca`](https://github.com/OpenPecha/Toolkit/commit/5c599ca3b1ed6cba85b02595f96c0d2d35050cde))
+
 ## v0.11.2 (2023-03-21)
 ### Fix
 * **core/pecha:** Overwriting bases in metedata ([`f9033eb`](https://github.com/OpenPecha/Toolkit/commit/f9033eb066268047fe2e146d58f685d91ba00038))
