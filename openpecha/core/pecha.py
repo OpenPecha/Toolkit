@@ -43,6 +43,7 @@ class OpenPecha:
         self._meta = self.__handle_old_metadata_attr(meta, metadata)
         self._index = index
         self.assets = assets if assets else {}
+        self._base_names_list = []
         self._components = components if components else {}
         self.current_base_order = 1
 
@@ -109,6 +110,19 @@ class OpenPecha:
         if idxf is not None:
             self._index = Layer.parse_obj(idxf)
         return self._index
+
+    @property
+    def base_names_list(self) -> List[str]:
+        if self.bases:
+            self._base_names_list = list(self.bases.keys())
+
+        if "bases" in self.meta in self.meta.bases:
+            self._base_names_list = list(self.meta.bases.keys())
+
+        if not self._base_names_list:
+            self._base_names_list = self._read_base_names()
+
+        return self._base_names_list
 
     @property
     def components(self) -> Dict[str, List[LayerEnum]]:
@@ -296,6 +310,9 @@ class OpenPechaFS(OpenPecha):
         if self.index_fn.is_file():
             return load_yaml(self.index_fn)
 
+    def _read_base_names(self):
+        return [base.stem for base in self.base_path.iterdir()]
+
     def _read_components(self):
         res = {}
         for vol_dir in self.layers_path.iterdir():
@@ -449,7 +466,9 @@ class OpenPechaGitRepo(OpenPechaFS):
         self._opf_path = self.pecha_path / f"{self.pecha_id}.opf"
         return self._opf_path
 
-    def publish(self, asset_path: Path = None, asset_name: str = None, branch: str = "main"):
+    def publish(
+        self, asset_path: Path = None, asset_name: str = None, branch: str = "main"
+    ):
         asset_paths = []
         if not self.storage:
             self.storage = GithubStorage()
@@ -458,7 +477,10 @@ class OpenPechaGitRepo(OpenPechaFS):
             commit_and_push(repo=local_repo, message="Pecha update")
         else:
             self.storage.add_dir(
-                path=self.pecha_path, description=self.about, is_private=self.is_private, branch=branch
+                path=self.pecha_path,
+                description=self.about,
+                is_private=self.is_private,
+                branch=branch,
             )
 
         # Publishing assets in release

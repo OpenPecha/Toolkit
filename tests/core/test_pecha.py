@@ -193,3 +193,8 @@ def test_multi_create_pecha():
 
     assert len(pecha_02.bases) == 1
     assert pecha_02.bases[pecha_02_base_name] == "pecha_02 base content"
+
+
+def test_pecha_base_names_list(opf_path):
+    pecha = OpenPechaFS(path=opf_path)
+    assert pecha.base_names_list == ["v001"]
