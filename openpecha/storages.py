@@ -9,6 +9,7 @@ from github import Github
 
 from openpecha.github_utils import create_github_repo
 
+URL: str
 
 class Storages(enum.Enum):
     GITHUB = enum.auto()
@@ -97,7 +98,13 @@ class GithubStorage(Storage):
         self.token = _get_value(token, "GITHUB_TOKEN")
         self._username = _get_value(username, "GITHUB_USERNAME", optional=True)
         self._email = _get_value(email, "GITHUB_EMAIL", optional=True)
-        self.org = Github(self.token).get_organization(self.org_name)
+        self._org = None
+
+    @property
+    def org(self):
+        if not self._org:
+            self._org = Github(self.token).get_organization(self.org_name)
+        return self._org
 
     @property
     def username(self):
@@ -131,6 +138,9 @@ class GithubStorage(Storage):
             return True
         except git.exc.InvalidGitRepositoryError:
             return False
+
+    def get_authenticated_repo_remote_url(self, repo_name: str):
+        return f"https://{self.username}:{self.token}@github.com/{self.org_name}/{repo_name}.git"
 
     def add_dir(self, path: Path, description: str, is_private: bool = False, branch: str = "master"):
         """dir local dir to github."""
