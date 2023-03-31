@@ -133,13 +133,27 @@ def _eval_branch(repo, branch):
         return "master"
 
 
-def download_pecha(pecha_id, out_path=None, needs_update=True, branch="main"):
+def download_pecha(pecha_id, out_path=None, needs_update=True, branch="main") -> Path:
+    """Download pecha from github
+
+    Note: If pecha is already downloaded before and needs_update,
+          it will update the pecha by pulling the remote `branch`.
+
+    Args:
+        pecha_id (str): pecha id
+        out_path (str, optional): path to download pecha. Defaults to None.
+        needs_update (bool, optional): if True, update pecha. Defaults to True.
+        branch (str, optional): branch name. Defaults to "main".
+
+    Returns:
+        Path: pecha path
+    """
     # resolve defaults kwargs
     needs_update = needs_update if needs_update is not None else True
     branch = branch if branch is not None else "main"
+    storage = GithubStorage()
 
-    # clone the repo
-    pecha_url = f"{config.GITHUB_ORG_URL}/{pecha_id}.git"
+    # create pecha path
     if out_path:
         out_path = Path(out_path)
         out_path.mkdir(exist_ok=True, parents=True)
@@ -147,7 +161,7 @@ def download_pecha(pecha_id, out_path=None, needs_update=True, branch="main"):
     else:
         pecha_path = config.PECHAS_PATH / pecha_id
 
-    if pecha_path.is_dir():  # if repo is already exits at local then try to pull
+    if pecha_path.is_dir():
         repo = Repo(str(pecha_path))
         branch = _eval_branch(repo, branch)
         repo.git.checkout(branch)
@@ -155,6 +169,7 @@ def download_pecha(pecha_id, out_path=None, needs_update=True, branch="main"):
             repo.git.config("pull.rebase", "false")
             repo.git.pull("origin", branch)
     else:
+        pecha_url = storage.get_authenticated_repo_remote_url(pecha_id)
         try:
             Repo.clone_from(pecha_url, str(pecha_path))
         except GitCommandError:
@@ -164,7 +179,6 @@ def download_pecha(pecha_id, out_path=None, needs_update=True, branch="main"):
         repo.git.checkout(branch)
 
     # setup auth
-    storage = GithubStorage()
     setup_auth_for_old_repo(repo, org=storage.org_name, token=storage.token)
 
     return pecha_path
