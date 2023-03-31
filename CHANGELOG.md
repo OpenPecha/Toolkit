@@ -2,6 +2,11 @@
 
 <!--next-version-placeholder-->
 
+## v0.11.4 (2023-03-31)
+### Fix
+* **utils:** Download private pecha ([`5ce7113`](https://github.com/OpenPecha/Toolkit/commit/5ce71136969d328be01e92f56ce793d1c5e2f992))
+* **storage:** Generate auth remote url ([`5172865`](https://github.com/OpenPecha/Toolkit/commit/5172865c010cda2759fd302c76c83a3bb247b5b4))
+
 ## v0.11.3 (2023-03-29)
 ### Fix
 * **core/pecha:** Add base_names_list prop to pecha ([`58e7135`](https://github.com/OpenPecha/Toolkit/commit/58e7135f08afab18faffdea8cce0d19964636abf))
