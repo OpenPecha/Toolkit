@@ -1,3 +1,4 @@
+import os
 import tempfile
 from pathlib import Path
 
@@ -59,3 +60,18 @@ def test_add_file():
             )
         finally:
             storage.remove_dir_with_path(tmpdir)
+
+
+def test_github_storage_authenticated_remote_url():
+    # arrange
+    os.environ["GITHUB_USERNAME"] = "test"
+    os.environ["GITHUB_EMAIL"] = "test@test.com"
+    os.environ["GITHUB_TOKEN"] = "fake-token"
+    os.environ["OPENPECHA_DATA_GITHUB_ORG"] = "fake-org"
+
+    # act
+    storage = GithubStorage()
+
+    assert storage.get_authenticated_repo_remote_url("test-repo") == (
+        f"https://test:fake-token@github.com/fake-org/test-repo.git"
+    )
