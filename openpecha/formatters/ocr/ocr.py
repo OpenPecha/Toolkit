@@ -646,7 +646,7 @@ class OCRFormatter(BaseFormatter):
               "ocr_word_mean_confidence_index": statistics.mean(word_confidence_list)
             }
     
-    def create_opf(self, data_provider, opf_options = {}, ocr_import_info = {}, pehca_id = None):
+    def create_opf(self, data_provider, pecha_id = None, opf_options = {}, ocr_import_info = {}):
         """Create opf
 
         Args:
