@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.11.5 (2023-05-03)
+### Fix
+* **ocr:** Handle case where pecha_id is None ([`8740f22`](https://github.com/OpenPecha/Toolkit/commit/8740f22447a2f9e101eddb7b798833c83f5dffae))
+
 ## v0.11.4 (2023-03-31)
 ### Fix
 * **utils:** Download private pecha ([`5ce7113`](https://github.com/OpenPecha/Toolkit/commit/5ce71136969d328be01e92f56ce793d1c5e2f992))
