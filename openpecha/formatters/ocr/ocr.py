@@ -646,7 +646,7 @@ class OCRFormatter(BaseFormatter):
               "ocr_word_mean_confidence_index": statistics.mean(word_confidence_list)
             }
     
-    def create_opf(self, data_provider, opf_options = {}, ocr_import_info = {}):
+    def create_opf(self, data_provider, opf_options = {}, ocr_import_info = {}, pehca_id = None):
         """Create opf
 
         Args:
@@ -696,7 +696,7 @@ class OCRFormatter(BaseFormatter):
             self.default_language = ocr_import_info["expected_default_language"]
         elif "languages" in self.source_info and self.source_info["languages"]:
             self.default_language = self.source_info["languages"][0]
-        pecha_id = ids.get_initial_pecha_id()
+        pecha_id = ids.get_initial_pecha_id() if pecha_id is None else pecha_id
         self.metadata = self.get_metadata(pecha_id, ocr_import_info)
         pecha = OpenPechaFS(metadata=self.metadata,
                             path=self.output_path / pecha_id / f"{pecha_id}.opf",
