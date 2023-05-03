@@ -44,7 +44,6 @@ Daily development version:
 
 #### `pip install git+https://github.com/OpenPecha/Openpecha-Toolkit`
 
-
 <!-- This section must list as bulleted list how this repo depends or is integrated with other repos -->
 
 ## Docs
