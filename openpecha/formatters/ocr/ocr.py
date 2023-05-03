@@ -13,6 +13,7 @@ from openpecha.core.layer import Layer, LayerEnum, OCRConfidenceLayer
 from openpecha.core.metadata import InitialPechaMetadata, InitialCreationType, LicenseType, Copyright_copyrighted, Copyright_unknown, Copyright_public_domain
 from openpecha.core.pecha import OpenPechaFS
 from openpecha.formatters import BaseFormatter
+from openpecha.core import ids
 from openpecha import __version__
 
 ANNOTATION_MINIMAL_LEN = 20
@@ -645,7 +646,7 @@ class OCRFormatter(BaseFormatter):
               "ocr_word_mean_confidence_index": statistics.mean(word_confidence_list)
             }
     
-    def create_opf(self, data_provider, pecha_id=None, opf_options = {}, ocr_import_info = {}):
+    def create_opf(self, data_provider, pecha_id = None, opf_options = {}, ocr_import_info = {}):
         """Create opf
 
         Args:
@@ -695,12 +696,14 @@ class OCRFormatter(BaseFormatter):
             self.default_language = ocr_import_info["expected_default_language"]
         elif "languages" in self.source_info and self.source_info["languages"]:
             self.default_language = self.source_info["languages"][0]
-
+        pecha_id = ids.get_initial_pecha_id() if pecha_id is None else pecha_id
         self.metadata = self.get_metadata(pecha_id, ocr_import_info)
-        pecha = OpenPechaFS(metadata=self.metadata, path=self.output_path)
+        pecha = OpenPechaFS(metadata=self.metadata,
+                            path=self.output_path / pecha_id / f"{pecha_id}.opf",
+                            pecha_id=pecha_id)
         total_word_confidence_list = []
-
-        for image_group_id, image_group_info in self.source_info["image_groups"].items():
+    
+        for image_group_id, _ in self.source_info["image_groups"].items():
             base_id = image_group_id
             base_text, layers, word_confidence_list = self.build_base(image_group_id)
             pecha.bases[base_id] = base_text
