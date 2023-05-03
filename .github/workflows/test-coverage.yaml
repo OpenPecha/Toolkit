@@ -37,5 +37,5 @@ jobs:
         GITHUB_ORG: ${{ secrets.GH_ORG }}
         GITHUB_TOKEN: ${{ secrets.ADMIN_GITHUB_TOKEN }}
       run: |
-        coverage run -m pytest tests/
+        PYTHONPATH=./docs_src coverage run -m pytest
         coverage report
