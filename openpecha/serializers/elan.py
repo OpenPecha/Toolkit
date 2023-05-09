@@ -26,7 +26,8 @@ class ElanSerializer(Serialize):
         if ann_type == LayerEnum.transcription_time_span:
             if base_id not in self.annotation_sequence:
                 self.annotation_sequence[base_id] = 1
-            start_payload = """        <ANNOTATION>
+            start_payload = """
+        <ANNOTATION>
             <ALIGNABLE_ANNOTATION ANNOTATION_ID="a{seq}"
                 TIME_SLOT_REF1="ts{slot1}" TIME_SLOT_REF2="ts{slot2}">
                 <ANNOTATION_VALUE>""".format(
