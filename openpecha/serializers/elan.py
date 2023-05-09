@@ -34,11 +34,11 @@ class ElanSerializer(Serialize):
                 slot1=self.annotation_sequence[base_id] * 2 - 1,
                 slot2=self.annotation_sequence[base_id] * 2,
             )
-            end_payload = """</ANNOTATION_VALUE>
+            end_payload = """                </ANNOTATION_VALUE>
             </ALIGNABLE_ANNOTATION>
         </ANNOTATION>"""
             self.add_chars(base_id, annotation["span"]["start"], True, start_payload)
-            self.add_chars(base_id, annotation["span"]["end"], True, end_payload)
+            self.add_chars(base_id, annotation["span"]["end"], False, end_payload)
             if base_id not in self.time_order:
                 self.time_order[
                     base_id
