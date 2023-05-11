@@ -5,9 +5,11 @@ categories:
   - bdrc
 ---
 
-# Tibetan OCR Challenges
+# Challenges with Tibetan OCR
 
-## Marginalia mixed with body text
+
+## Google OCR issues
+### Marginalia mixed with body text
 ([🔗OCR output](https://github.com/OpenPecha-Data/I0A0DA3E3/blob/17c1ef7253cd1c5be5ef159b40774ee76c1fd512/I0A0DA3E3.opf/base/I1KG12989.txt#LL99-L118), [🔗image source](https://library.bdrc.io/show/bdr:W1KG12986?s=%2Fshow%2Fbdr%3AMW1KG12986%3Fprerender%3Dtrue%26prerender%3Dtrue%26part%3Dbdr%3AMW1KG12986_D20A36%26backToOutline%3Dtrue#open-viewer))
 
 ![](https://iiif.bdrc.io/bdr:I1KG12989::I1KG129890015.tif/full/3500,/0/default.png)
