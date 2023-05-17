@@ -2,6 +2,11 @@
 
 <!--next-version-placeholder-->
 
+## v0.11.6 (2023-05-17)
+### Fix
+* **elan:** Indent ANNOTATION_VALUE tag ([`946d45d`](https://github.com/OpenPecha/Toolkit/commit/946d45db0e327cfe892489996e1de092a2d1776e))
+* **elan:** Put end_payload in the end ([`adb9848`](https://github.com/OpenPecha/Toolkit/commit/adb98482112f8cc5eb1898eb4e0dd7557286d63c))
+
 ## v0.11.5 (2023-05-03)
 ### Fix
 * **ocr:** Handle case where pecha_id is None ([`8740f22`](https://github.com/OpenPecha/Toolkit/commit/8740f22447a2f9e101eddb7b798833c83f5dffae))
