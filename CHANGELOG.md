@@ -2,6 +2,11 @@
 
 <!--next-version-placeholder-->
 
+## v0.11.7 (2023-05-29)
+### Fix
+
+* **github-storage:** Set current checkout branch as default ([`e2d6318`](https://github.com/OpenPecha/Toolkit/commit/e2d631876b21601f1afdf9b84a6daa0adbbf0246))
+
 ## v0.11.6 (2023-05-17)
 ### Fix
 * **elan:** Indent ANNOTATION_VALUE tag ([`946d45d`](https://github.com/OpenPecha/Toolkit/commit/946d45db0e327cfe892489996e1de092a2d1776e))
