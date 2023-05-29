@@ -57,10 +57,12 @@ def setup_auth_for_old_repo(repo, org, token):
     return repo
 
 
-def commit_and_push(repo, message, branch="master"):
+def commit_and_push(repo, message, branch=None):
+    if not branch:
+        branch = repo.active_branch.name
     repo.git.add("-A")
     repo.git.commit("-m", message)
-    repo.git.push("origin", branch)
+    repo.git.push("-u", "origin", branch)
 
 
 class Storage:
@@ -142,7 +144,7 @@ class GithubStorage(Storage):
     def get_authenticated_repo_remote_url(self, repo_name: str):
         return f"https://{self.username}:{self.token}@github.com/{self.org_name}/{repo_name}.git"
 
-    def add_dir(self, path: Path, description: str, is_private: bool = False, branch: str = "master"):
+    def add_dir(self, path: Path, description: str, is_private: bool = False, branch: str = None):
         """dir local dir to github."""
         remote_repo_url = self._init_remote_repo(
             path=path, description=description, is_private=is_private

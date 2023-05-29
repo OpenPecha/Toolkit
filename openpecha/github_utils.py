@@ -43,11 +43,15 @@ def update_github_repo_visibility(repo_name, org_name, token, private=False):
     repo.edit(private=private)
 
 
-def commit(repo_path, message, not_includes, branch="master"):
+def commit(repo_path, message, not_includes, branch=None):
     if isinstance(repo_path, Repo):
         repo = repo_path
     else:
         repo = Repo(repo_path)
+
+    if not branch:
+        branch = repo.active_branch.name
+
     has_changed = False
 
     # add untrack fns
@@ -95,11 +99,15 @@ def create_local_repo(path, remote_url, org, token):
         return repo
 
 
-def create_orphan_branch(repo_path, branch_name, parent_branch="master", type_="opf"):
+def create_orphan_branch(repo_path, branch_name, parent_branch=None, type_="opf"):
     if isinstance(repo_path, Repo):
         repo = repo_path
     else:
         repo = Repo(repo_path)
+
+    if not parent_branch:
+        parent_branch = repo.active_branch.name
+
     repo.git.checkout(parent_branch)
     repo.git.checkout("--orphan", branch_name)
 

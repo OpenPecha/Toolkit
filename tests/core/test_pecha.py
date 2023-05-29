@@ -198,3 +198,18 @@ def test_multi_create_pecha():
 def test_pecha_base_names_list(opf_path):
     pecha = OpenPechaFS(path=opf_path)
     assert pecha.base_names_list == ["v001"]
+
+@pytest.mark.skip(reason="Requires Github connection")
+def test_pecha_github_publish(tmp_path):
+    from openpecha.core.pecha import OpenPechaGitRepo
+    metadata = InitialPechaMetadata(initial_creation_type=InitialCreationType.input)
+    output_path = tmp_path / "pechas"
+    pecha = OpenPechaGitRepo(metadata=metadata)
+    pecha.set_base("base content")
+    pecha.save(output_path=output_path)
+
+    assert pecha.pecha_path.is_dir()
+
+    pecha.publish()
+
+    print(pecha.pecha_path)

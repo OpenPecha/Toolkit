@@ -467,14 +467,14 @@ class OpenPechaGitRepo(OpenPechaFS):
         return self._opf_path
 
     def publish(
-        self, asset_path: Path = None, asset_name: str = None, branch: str = "main"
+        self, asset_path: Path = None, asset_name: str = None, branch: str = None
     ):
         asset_paths = []
         if not self.storage:
             self.storage = GithubStorage()
         if self.storage.is_git_repo(self.pecha_path):
             local_repo = Repo(self.pecha_path)
-            commit_and_push(repo=local_repo, message="Pecha update")
+            commit_and_push(repo=local_repo, message="Pecha update", branch=branch)
         else:
             self.storage.add_dir(
                 path=self.pecha_path,
