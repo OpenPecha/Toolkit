@@ -43,7 +43,7 @@ setup(
         "GitPython>=3.1.0, <4.0",
         "bs4>=0.0.1, <1.0",
         "pyewts>=0.1.3, <1.0",
-        "rdflib>=5.0.0, <6.0",
+        "rdflib>=5.0.0",
         "pydantic>=1.7.3, <2.0",
         "python-docx>=0.8.11, <1.0",
         "fonttools[unicode] >= 4.37.3"
