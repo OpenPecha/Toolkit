@@ -2,6 +2,13 @@
 
 <!--next-version-placeholder-->
 
+## v0.11.8 (2023-10-05)
+
+### Fix
+
+* **ci:** Pin python-semantic-release version ([`a10c298`](https://github.com/OpenPecha/Toolkit/commit/a10c298e7c7a8d09cda0d7a2addae39b033a4d6b))
+* **dependency:** Make commit parser happy ([`6c6eae1`](https://github.com/OpenPecha/Toolkit/commit/6c6eae177ebedcfe19cf5ebbf3332d679b1173c6))
+
 ## v0.11.7 (2023-05-29)
 ### Fix
 
