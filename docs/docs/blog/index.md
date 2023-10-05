@@ -1,2 +1,0 @@
-
-# OpenPecha blog

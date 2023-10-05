@@ -1,9 +1,0 @@
-## Why OpenPecha?
-
-Digital text is quickly becoming essential to modern daily life. The article you’re reading right now is born digital; unlike texts of the not-so-distant past, it may never be printed at all. Worldwide, the trend is clear: Digital text is on the way in, and print is on its way out. Year-by-year, more and more readers are turning to ebooks, internet news, and other forms of ereading, while generation-by-generation, print is becoming less and less relevant.
-
-These trends aren’t unique to English—to meet the demands and expectations of today’s readers, Tibetan texts, too, are being digitized by many organizations and institutions with a shared appreciation for the Tibetan literary heritage. They include a variety of secular publishers, monastic institutions, and Buddhist foundations, among others. But while these organizations share common goals for common texts, their work is all too frequently completely disconnected from the community at large.
-
-This situation negatively impacts what is already a minoritized and under-resourced language. While competition—from other languages, as well as other publishers in the Tibetan etext world—has been a driver of innovation in the adoption of ereading technology, we believe that a rich, shared data source is not only in everyone’s best interest, but the only practical way forward when we consider the time, effort, expertise, and money that quality digitization takes.
-
-That’s why we’ve designed OpenPecha to be a public, open platform for collaborative etext curation and annotation sharing. Its aim is providing a wide range of users with the latest version of the exact “view” of any text they need, while maintaining the integrity of the text and its annotations, and simultaneously allowing for community improvements and additions. In this paper, we explore the details of how the project came to be; what it is and how it works; while also presenting a few common use cases.
