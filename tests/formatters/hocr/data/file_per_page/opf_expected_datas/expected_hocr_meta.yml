@@ -11,13 +11,13 @@ ocr_import_info:
     txt: txt.zip
     images: images.zip
   op_import_options:
-    remove_duplicate_symbols: True
-  op_import_version: 0.9.8
+    remove_duplicate_symbols: true
+  op_import_version: 0.11.8
 default_language: bo
 source: https://library.bdrc.io
 initial_creation_type: ocr
-imported: 2022-11-14 10:26:24.372012+00:00
-last_modified: 2022-11-14 10:26:24.372033+00:00
+imported: 2023-12-09 11:38:10.178039+00:00
+last_modified: 2023-12-09 11:38:10.178046+00:00
 source_metadata:
   id: http://purl.bdrc.io/resource/W1KG10193
   status: http://purl.bdrc.io/admindata/StatusReleased
@@ -31,9 +31,20 @@ source_metadata:
   - bo
   author: ཀུན་མཁྱེན་འཇིགས་མེད་གླིང་པ།
 statistics:
-  ocr_word_mean_confidence_index: 0.968030701754386
+  ocr_word_mean_confidence_index: 0.9681050328227571
   ocr_word_median_confidence_index: 1.0
 bases:
+  I1KG10195:
+    source_metadata:
+      id: http://purl.bdrc.io/resource/I1KG10195
+      total_pages: 935
+      volume_number: 1
+      volume_pages_bdrc_intro: 2
+    order: 1
+    base_file: I1KG10195.txt
+    statistics:
+      ocr_word_median_confidence_index: 1.0
+      ocr_word_mean_confidence_index: 0.9614963503649635
   I1KG10196:
     source_metadata:
       id: http://purl.bdrc.io/resource/I1KG10196
@@ -45,17 +56,6 @@ bases:
     statistics:
       ocr_word_median_confidence_index: 1.0
       ocr_word_mean_confidence_index: 0.9718181818181818
-  I1KG10195:
-    source_metadata:
-      id: http://purl.bdrc.io/resource/I1KG10195
-      total_pages: 935
-      volume_number: 1
-      volume_pages_bdrc_intro: 2
-    order: 1
-    base_file: I1KG10195.txt
-    statistics:
-      ocr_word_median_confidence_index: 1.0
-      ocr_word_mean_confidence_index: 0.9612484700122399
 copyright:
   status: Public domain
   notice: Public domain

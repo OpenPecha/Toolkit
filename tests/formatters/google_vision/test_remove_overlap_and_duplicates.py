@@ -32,6 +32,7 @@ def test_remove_overlap_and_duplicates():
     ocr_formatter = OCRFormatter()
     ocr_formatter.remove_duplicate_symbols = True
     ocr_formatter.same_line_ratio_threshold = 0.2
+    ocr_formatter.check_postprocessing = False
 
     ocr_formatter.build_page(bboxes, 1, "I1PD958780125", state, avg_char_width)
     base = state['base_layer']

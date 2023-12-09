@@ -46,6 +46,7 @@ class GoogleVisionFormatter(OCRFormatter):
 
     def __init__(self, output_path=None, metadata=None):
         super().__init__(output_path, metadata)
+        self.check_postprocessing = False
 
     def has_space_attached(self, symbol):
         """Checks if symbol has space followed by it or not
@@ -175,6 +176,7 @@ class GoogleVisionFormatter(OCRFormatter):
         widths = []
         for page in response['fullTextAnnotation']['pages']:
             for block in page['blocks']:
+                cur_line_boxes = []
                 for paragraph in block['paragraphs']:
                     for word in paragraph['words']:
                         bbox = self.dict_to_bbox(word)
@@ -199,7 +201,8 @@ class GoogleVisionFormatter(OCRFormatter):
                             # language = self.get_language_code_from_gv_poly(word)
                             # instead we use our custom detection system
                             bbox.language = self.get_main_language_code(cur_word)
-                            bboxes.append(bbox)
+                            cur_line_boxes.append(bbox)
+                bboxes.append(cur_line_boxes)
         avg_width = statistics.mean(widths) if widths else None
         logging.debug("average char width: %f", avg_width)
         return bboxes, avg_width
