@@ -31,7 +31,7 @@ source_metadata:
   - bo
   author: ཀུན་མཁྱེན་འཇིགས་མེད་གླིང་པ།
 statistics:
-  ocr_word_mean_confidence_index: 0.9681050328227571
+  ocr_word_mean_confidence_index: 0.9698547955674436
   ocr_word_median_confidence_index: 1.0
 bases:
   I1KG10195:
@@ -44,7 +44,7 @@ bases:
     base_file: I1KG10195.txt
     statistics:
       ocr_word_median_confidence_index: 1.0
-      ocr_word_mean_confidence_index: 0.9614963503649635
+      ocr_word_mean_confidence_index: 0.96736568457539
   I1KG10196:
     source_metadata:
       id: http://purl.bdrc.io/resource/I1KG10196

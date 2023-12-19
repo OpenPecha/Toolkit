@@ -56,3 +56,9 @@ annotations:
       end: 3185
     imgnum: 12
     reference: I1KG101950012.jpg
+  be5fb56cdba94ab79eaf0084b9022b81:
+    span:
+      start: 3186
+      end: 4455
+    imgnum: 13
+    reference: I1KG101950013.jpg
