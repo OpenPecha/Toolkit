@@ -2,6 +2,16 @@
 
 <!--next-version-placeholder-->
 
+## v0.11.9 (2023-12-21)
+
+### Fix
+
+* **ocr:** Checking the abnormal post correction feature added ([#264](https://github.com/OpenPecha/Toolkit/issues/264)) ([`e94d65d`](https://github.com/OpenPecha/Toolkit/commit/e94d65dae8dce63eaf415eb62300e46eab9d9796))
+
+### Documentation
+
+* Remove openpecha.org docs ([`3b2e2f1`](https://github.com/OpenPecha/Toolkit/commit/3b2e2f124cc769725e39bcd96ad70eff94c7baac))
+
 ## v0.11.8 (2023-10-05)
 
 ### Fix
