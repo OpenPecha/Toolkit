@@ -128,6 +128,7 @@ class OCRFormatter(BaseFormatter):
         self.language_annotation_min_len = ANNOTATION_MINIMAL_LEN
         self.remove_rotated_boxes = True
         self.remove_duplicate_symbols = True
+        self.check_postprocessing = True
         self.script_to_lang_map = DEFAULT_SCRIPT_TO_LANG_MAPPING
         self.max_low_conf_per_page = ANNOTATION_MAX_LOW_CONF_PER_PAGE
 
@@ -471,10 +472,22 @@ class OCRFormatter(BaseFormatter):
                 line += bbox.text
             logging.debug("ignoring line '%s', detected as noise", line)
         return False
+    
+    def has_abnormal_postprocessing(self, original_bboxes, postprocessed_bboxes):
+        number_line_difference = len(original_bboxes) - len(postprocessed_bboxes)
+        if number_line_difference < 0 or number_line_difference > len(postprocessed_bboxes):
+            return True
+        return False
 
     def build_page(self, bboxes, image_number, image_filename, state, avg_char_width=None):
-        sorted_bboxes = self.sort_bboxes(bboxes)
+        flatten_bboxes = []
+        for line_bboxes in bboxes:
+            for bbox in line_bboxes:
+                flatten_bboxes.append(bbox) 
+        sorted_bboxes = self.sort_bboxes(flatten_bboxes)
         bbox_lines = self.get_bbox_lines(sorted_bboxes)
+        if self.check_postprocessing and self.has_abnormal_postprocessing(bboxes, bbox_lines):
+            bbox_lines = bboxes
         page_start_cc = state["base_layer_len"]
         page_word_confidences = []
         for bbox_line in bbox_lines:

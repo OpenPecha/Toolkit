@@ -1,5 +1,4 @@
 id: I9876543
-legacy_id: null
 ocr_import_info:
   source: bdrc
   software: google_books
@@ -9,15 +8,13 @@ ocr_import_info:
   ocr_info:
     timestamp: None
   op_import_options:
-    remove_duplicate_symbols: True
-  op_import_version: 1.0.0
+    remove_duplicate_symbols: true
+  op_import_version: 0.11.8
 default_language: bo
 source: https://library.bdrc.io
-source_file: null
 initial_creation_type: ocr
-imported: '2022-09-21T06:56:45.945843+00:00'
-last_modified: '2022-09-21T06:56:45.945855+00:00'
-parser: null
+imported: 2023-12-09 11:46:15.699337+00:00
+last_modified: 2023-12-09 11:46:15.699341+00:00
 source_metadata:
   id: http://purl.bdrc.io/resource/W22084
   status: http://purl.bdrc.io/admindata/StatusReleased
@@ -28,9 +25,8 @@ source_metadata:
   languages:
   - bo
 statistics:
-  ocr_word_mean_confidence_index: 0.3492919649960223
+  ocr_word_mean_confidence_index: 0.3408977361436378
   ocr_word_median_confidence_index: 0.29
-quality: null
 bases:
   I0886:
     source_metadata:
@@ -41,8 +37,8 @@ bases:
     order: 1
     base_file: I0886.txt
     statistics:
-      ocr_word_median_confidence_index: 0.31
-      ocr_word_mean_confidence_index: 0.36663701067615656
+      ocr_word_median_confidence_index: 0.3
+      ocr_word_mean_confidence_index: 0.35191304347826086
   I0887:
     source_metadata:
       id: http://purl.bdrc.io/resource/I0887
@@ -53,7 +49,7 @@ bases:
     base_file: I0887.txt
     statistics:
       ocr_word_median_confidence_index: 0.27
-      ocr_word_mean_confidence_index: 0.3352661870503597
+      ocr_word_mean_confidence_index: 0.33192634560906514
 copyright:
   status: Public domain
   notice: Public domain

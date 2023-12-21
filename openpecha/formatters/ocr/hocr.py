@@ -269,12 +269,14 @@ class HOCRFormatter(OCRFormatter):
         hocr_html = BeautifulSoup(hocr_page_html, 'html.parser')
         line_boxes = hocr_html.find_all("span", {"class": "ocr_line"})
         for line_box in line_boxes:
+            cur_line_boxes = []
             self.word_span = 0
             word_boxes = line_box.find_all("span", {"class": "ocrx_word"})
             for word_box in word_boxes:
                 bbox = self.parse_box(line_box,word_box)
                 if bbox is not None:
-                    bboxes.append(bbox)
+                    cur_line_boxes.append(bbox)
+            bboxes.append(cur_line_boxes)
         return bboxes
     
     def get_boxes_for_IA(self, page_html):
@@ -291,12 +293,14 @@ class HOCRFormatter(OCRFormatter):
         for paragraph_html in paragraphs_html:
             line_boxes = paragraph_html.find_all("span", {"class": "ocr_line"})
             for line_box in line_boxes:
+                cur_line_boxes = []
                 self.word_span = 0
                 word_boxes = line_box.find_all("span", {"class": "ocrx_word"})
                 for word_box in word_boxes:
                     bbox = self.parse_box(line_box,word_box)
                     if bbox is not None:
-                        bboxes.append(bbox)
+                        cur_line_boxes.append(bbox)
+                bboxes.append(cur_line_boxes)
         return bboxes
 
 
