@@ -213,3 +213,12 @@ def test_pecha_github_publish(tmp_path):
     pecha.publish()
 
     print(pecha.pecha_path)
+
+
+def test_opf_path_OpenPechaGitRepo():
+    from openpecha.core.pecha import OpenPechaGitRepo
+    from openpecha import config
+    pecha_id = "P000108"
+    opf = OpenPechaGitRepo(pecha_id=pecha_id)
+    expected_opf_path = config.PECHAS_PATH / pecha_id/ f"{pecha_id}.opf"
+    assert opf.opf_path == expected_opf_path
