@@ -131,6 +131,7 @@ class OCRFormatter(BaseFormatter):
         self.check_postprocessing = True
         self.script_to_lang_map = DEFAULT_SCRIPT_TO_LANG_MAPPING
         self.max_low_conf_per_page = ANNOTATION_MAX_LOW_CONF_PER_PAGE
+        self.same_line_ratio_threshold = SAME_LINE_RATIO_THRESHOLD
 
     def text_preprocess(self, text):
         return text
