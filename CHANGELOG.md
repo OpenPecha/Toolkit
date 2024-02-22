@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.11.10 (2024-02-22)
+
+### Fix
+
+* **OCRFormatter:** Add same_line_ratio_threshold class variable ([#272](https://github.com/OpenPecha/Toolkit/issues/272)) ([`5b47b77`](https://github.com/OpenPecha/Toolkit/commit/5b47b778dc53fbfc3710825638e54a7f3338ccaa))
+
 ## v0.11.9 (2023-12-21)
 
 ### Fix
