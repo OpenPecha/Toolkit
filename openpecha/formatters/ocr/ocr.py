@@ -153,6 +153,9 @@ class OCRFormatter(BaseFormatter):
             bboxwidth = bbox.get_width()
             bboxeswidth += bboxwidth
             height_sum += bbox.get_height()*bboxwidth
+        if bboxeswidth == 0:
+            logging.error("found a line of bboxes with width=0")
+            return 0
         avg_height = height_sum / bboxeswidth
         logging.debug("average bbox height: %f (%d, %d)", avg_height, height_sum, bboxeswidth)
         return avg_height
@@ -481,6 +484,8 @@ class OCRFormatter(BaseFormatter):
         return False
 
     def build_page(self, bboxes, image_number, image_filename, state, avg_char_width=None):
+        if len(bboxes) == 0:
+            return
         flatten_bboxes = []
         for line_bboxes in bboxes:
             for bbox in line_bboxes:
