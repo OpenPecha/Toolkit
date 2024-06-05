@@ -66,4 +66,3 @@ pre-commit install
 PYTHONPATH=.:$PYTHONPATH pytest tests
 ```
 <!-- This section must link to the docs which are in the root of the repository in /docs -->
-
