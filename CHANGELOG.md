@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.11.11 (2024-06-05)
+
+### Fix
+
+* Tigger release ([`d0573a5`](https://github.com/OpenPecha/Toolkit/commit/d0573a59f22a3faf63aa688d2f99510873ec4043))
+
 ## v0.11.10 (2024-02-22)
 
 ### Fix
