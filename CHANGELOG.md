@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.11.12 (2024-06-05)
+
+### Fix
+
+* PYPI email verification error for new release ([`545d8ea`](https://github.com/OpenPecha/Toolkit/commit/545d8eacb9aa1fd3b267304b902f40daf07fd738))
+
 ## v0.11.11 (2024-06-05)
 
 ### Fix
