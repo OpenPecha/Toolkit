@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.11.13 (2024-06-05)
+
+### Fix
+
+* **ocr:** Another fix for #274 ([`2a7b401`](https://github.com/OpenPecha/Toolkit/commit/2a7b4016edd7a94cb026bc81e5ebd2fef043d06c))
+
 ## v0.11.12 (2024-06-05)
 
 ### Fix
