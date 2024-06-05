@@ -305,8 +305,12 @@ class OCRFormatter(BaseFormatter):
             centroid = bbox.get_centriod()
             bboxes[f"{centroid[0]},{centroid[1]}"] = bbox
             bbox_centriods.append(centroid)
+        if len(bbox_centriods) == 0:
+            return []
         sorted_bboxes = []
         sort_on_y_bboxs = self.get_bbox_sorted_on_y(bbox_centriods)
+        if len(sort_on_y_bboxs) == 0:
+            return []
         sorted_bbox_centriods = self.get_bbox_sorted_on_x(sort_on_y_bboxs, avg_box_height, bboxes)
         for bbox_centriod in sorted_bbox_centriods:
             sorted_bboxes.append(bboxes[f"{bbox_centriod[0]},{bbox_centriod[1]}"])
@@ -484,13 +488,15 @@ class OCRFormatter(BaseFormatter):
         return False
 
     def build_page(self, bboxes, image_number, image_filename, state, avg_char_width=None):
-        if len(bboxes) == 0:
-            return
         flatten_bboxes = []
         for line_bboxes in bboxes:
             for bbox in line_bboxes:
-                flatten_bboxes.append(bbox) 
+                flatten_bboxes.append(bbox)
+        if len(flatten_bboxes) == 0:
+            return
         sorted_bboxes = self.sort_bboxes(flatten_bboxes)
+        if len(sorted_bboxes) == 0:
+            return
         bbox_lines = self.get_bbox_lines(sorted_bboxes)
         if self.check_postprocessing and self.has_abnormal_postprocessing(bboxes, bbox_lines):
             bbox_lines = bboxes
@@ -596,7 +602,10 @@ class OCRFormatter(BaseFormatter):
             # enumerate starts at 0 but image numbers start at 1
             bboxes, avg_char_width = self.get_bboxes_for_page(image_group_id, image_filename)
             if bboxes:
-                self.build_page(bboxes, image_number+1, image_filename, state, avg_char_width)
+                try:
+                    self.build_page(bboxes, image_number+1, image_filename, state, avg_char_width)
+                except:
+                    logger.error("error while building page")
         layers = {}
         if state["pagination_annotations"]:
             layer = Layer(annotation_type=LayerEnum.pagination, annotations=state["pagination_annotations"])
