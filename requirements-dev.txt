@@ -6,6 +6,7 @@ pre-commit
 pytest
 coverage
 covdefaults
+jsondiff
 
 # Docs
 mkdocs-material>=8.0.5, <9.0
