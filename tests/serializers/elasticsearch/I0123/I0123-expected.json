@@ -1,32 +1,9 @@
 [
   {
     "type": "Etext",
-    "etext_for_root_instance_id": "MW1KG16793",
+    "etext_for_root_instance_id": "IE0OPI0123",
     "etext_pagination_in": "W1KG16793",
     "etext_quality": 2,
-    "etext_for_instance_id": "MW1KG16793",
-    "etext_instance_pop_score": 0.40212286,
-    "firstScanSyncDate": "2016-03-30T16:20:30.571Z",
-    "db_score": 0.50086975,
-    "ric": true,
-    "scans_access": 3,
-    "scans_freshness": -0.008762322,
-    "workIsAbout": [
-      "T1863",
-      "T248"
-    ],
-    "seriesName_res": [
-      "WAS1KG16786"
-    ],
-    "authorshipStatement_bo_x_ewts": [
-      "krung go spyi tshogs tshan rig khang grangs nyung mi rigs rtsom rig so'o dang bod rang skyong ljongs spyi tshogs tshan rig khang gis bsgrigs/"
-    ],
-    "publisherLocation_bo_x_ewts": [
-      "lha sa/"
-    ],
-    "prefLabel_bo_x_ewts": [
-      "a grags gzi rdzong /"
-    ],
     "_id": "UTIE0OPI0123_9C26",
     "volumeNumber": 1,
     "etextNumber": 0,

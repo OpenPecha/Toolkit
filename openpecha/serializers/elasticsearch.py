@@ -9,13 +9,15 @@ class BUDAElasticSearchSerializer:
     """
     """
 
-    def __init__(self, openpecha):
+    def __init__(self, openpecha, offline=False):
         self.openpecha = openpecha
         self._pecha_id = openpecha.pecha_id
         self.etext_root_instance_id = f"IE0OP{self._pecha_id}"
         self.docs = []
         self.bl_volinfo = None
         self.common = None
+        self.offline = offline
+
 
     def add_triple(self, rdf_subject, rdf_predicate, rdf_object):
         self.lod_g.add((rdf_subject, rdf_predicate, rdf_object))
@@ -56,6 +58,8 @@ class BUDAElasticSearchSerializer:
         """
         Get the MW (instance) document in the database that corresponds to a W (scans)
         """
+        if self.offline:
+            return None, None
         query = {
             "query": {
                 "term": {
@@ -69,13 +73,13 @@ class BUDAElasticSearchSerializer:
             hits = results.get('hits', {}).get('hits', [])
             if not hits:
                 logger.error("No documents found for "+w_id)
-                return None
+                return None, None
             if len(hits) > 1:
                 logger.error("More than one document found for "+w_id)
             return hits[0]['_id'], hits[0]['_source']
         else:
             logger.error(f"Error querying Elasticsearch: {response.status_code} {response.text}")
-            return None
+            return None, None
 
     def get_common(self):
         if self.common is not None:
@@ -83,36 +87,48 @@ class BUDAElasticSearchSerializer:
         common = self.meta_to_common()
         if "etext_pagination_in" in common:
             mw_id, mw_doc = self.get_doc_for_w(common["etext_pagination_in"])
-            common["etext_for_root_instance_id"] = mw_id
-            common["etext_for_instance_id"] = mw_id # temporary, can be changed later with the outline
-            common["etext_instance_pop_score"] = mw_doc["pop_score"]
-            for field in [
-                    "firstScanSyncDate",
-                    "db_score",
-                    "inCollection",
-                    "associatedTradition",
-                    "associatedCentury",
-                    "ric",
-                    "scans_access",
-                    "scans_quality",
-                    "scans_freshness",
-                    #"etext_access",
-                    "workGenre",
-                    "workIsAbout",
-                    "author",
-                    "translator",
-                    "complete",
-                    "seriesName_res",
-                    "authorshipStatement_bo_x_ewts",
-                    "authorshipStatement_en",
-                    "publisherLocation_bo_x_ewts",
-                    "publisherName_en",
-                    "publisherLocation_en",
-                    "prefLabel_bo_x_ewts",
-                    "prefLabel_en"
-                    ]:
-                if field in mw_doc:
-                    common[field] = mw_doc[field]
+            if mw_id is not None:
+                common["etext_for_root_instance_id"] = mw_id
+                common["etext_for_instance_id"] = mw_id # temporary, can be changed later with the outline
+                common["etext_instance_pop_score"] = mw_doc["pop_score"]
+                for field in [
+                        "db_score",
+                        "firstScanSyncDate",
+                        "inCollection",
+                        "associatedTradition",
+                        "associatedCentury",
+                        "ric",
+                        "scans_access",
+                        "scans_quality",
+                        "scans_freshness",
+                        #"etext_access",
+                        "workGenre",
+                        "workIsAbout",
+                        "author",
+                        "translator",
+                        "complete",
+                        "seriesName_res",
+                        "authorshipStatement_bo_x_ewts",
+                        "authorshipStatement_en",
+                        "publisherLocation_bo_x_ewts",
+                        "publisherName_en",
+                        "publisherLocation_en",
+                        "prefLabel_bo_x_ewts",
+                        "prefLabel_en"
+                        ]:
+                    if field in mw_doc:
+                        common[field] = mw_doc[field]
+                for field in [
+                        "authorshipStatement_bo_x_ewts",
+                        "authorshipStatement_en",
+                        "publisherLocation_bo_x_ewts",
+                        "publisherName_en",
+                        "publisherLocation_en",
+                        "prefLabel_bo_x_ewts",
+                        "prefLabel_en"
+                        ]:
+                    if field in mw_doc:
+                        common["etext_"+field] = mw_doc[field]
         self.common = common
         return self.common
 

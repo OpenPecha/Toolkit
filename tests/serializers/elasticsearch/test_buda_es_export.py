@@ -11,12 +11,12 @@ def remove_dateTimes(g):
     for s, p, o in g.triples((None, rdflib.URIRef("http://purl.bdrc.io/ontology/core/OPFOCRTimeStamp"), None)):
         g.remove((s, p, o))
 
-def test_buda_es_serializer():
+def test_buda_es_serializer(offline=True):
     opf_path = Path(__file__).parent / "I0123" / "I0123.opf"
     expected_path = Path(__file__).parent / "I0123" / "I0123-expected.json"
 
     op = OpenPechaFS(opf_path, "I0123")
-    serializer = BUDAElasticSearchSerializer(op)
+    serializer = BUDAElasticSearchSerializer(op, offline=offline)
     serializer.apply_layers()
     docs = serializer.get_result()
     print(json.dumps(docs, ensure_ascii=False))
@@ -31,4 +31,4 @@ def test_buda_es_serializer():
     assert True
 
 if __name__ == "__main__":
-    test_buda_es_serializer()
+    test_buda_es_serializer(False)
