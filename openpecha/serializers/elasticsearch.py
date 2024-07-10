@@ -90,7 +90,8 @@ class BUDAElasticSearchSerializer:
             if mw_id is not None:
                 common["etext_for_root_instance_id"] = mw_id
                 common["etext_for_instance_id"] = mw_id # temporary, can be changed later with the outline
-                common["etext_instance_pop_score"] = mw_doc["pop_score"]
+                if "pop_score" in mw_doc:
+                    common["etext_instance_pop_score"] = mw_doc["pop_score"]
                 for field in [
                         "db_score",
                         "firstScanSyncDate",

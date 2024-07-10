@@ -582,7 +582,7 @@ class OpenPechaBareGitRepo(OpenPecha):
         self, base_name: str, layer_name: LayerEnum
     ) -> Union[Dict, None]:
         return self.read_file_content_yml(
-            "layers/" + base_name + "/" + layer_name + ".yml"
+            "layers/" + base_name + "/" + layer_name.value + ".yml"
         )
 
     def read_meta_file(self) -> Dict:
