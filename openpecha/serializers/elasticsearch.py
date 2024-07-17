@@ -72,13 +72,13 @@ class BUDAElasticSearchSerializer:
             results = response.json()
             hits = results.get('hits', {}).get('hits', [])
             if not hits:
-                logger.error("No documents found for "+w_id)
+                logging.error("No documents found for "+w_id)
                 return None, None
             if len(hits) > 1:
-                logger.error("More than one document found for "+w_id)
+                logging.error("More than one document found for "+w_id)
             return hits[0]['_id'], hits[0]['_source']
         else:
-            logger.error(f"Error querying Elasticsearch: {response.status_code} {response.text}")
+            logging.error(f"Error querying Elasticsearch: {response.status_code} {response.text}")
             return None, None
 
     def get_common(self):
