@@ -36,7 +36,7 @@ class BUDAElasticSearchSerializer:
 
     def meta_to_common(self):
         common = {}
-        common["type"] = "Etext"
+        common["type"] = ["Etext"]
         common["etext_for_root_instance_id"] = self.etext_root_instance_id
         meta = self.openpecha.meta
         sm = meta.source_metadata
