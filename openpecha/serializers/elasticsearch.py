@@ -95,6 +95,10 @@ class BUDAElasticSearchSerializer:
             volume_number = baseinfo["order"]
         else:
             volume_number = int(re.search(r"\d+", baselname).group())
+        if volume_number == 0:
+            # volume numbers are necessary
+            logging.error("cannot find volume number")
+            return
         iglname = None
         if "source_metadata" in baseinfo and "image_group_id" in baseinfo["source_metadata"]:
             iglname = baseinfo["source_metadata"]["image_group_id"]
@@ -102,19 +106,51 @@ class BUDAElasticSearchSerializer:
                 iglname = iglname[4:]
             elif iglname.startswith("http://purl.bdrc.io/resource/"):
                 iglname = iglname[29:]
+        if iglname is None:
+            for iglname_candidate, iginfo in self.w_info["image_groups"]:
+                if iginfo["volume_number"] == volume_number:
+                    iglname = iglname_candidate
+                    break
+        if iglname is None:
+            logging.error("cannot find image group id")
+            return
+        if iglname not in self.w_info["image_groups"]:
+            logging.error("cannot find image group %s" % iglname)
+            return
+        iginfo = self.w_info["image_groups"][iglname]
         player = self.openpecha.get_layer(baselname, LayerEnum.pagination)
         if player is None or self.outline_pl is None or len(self.outline_pl.get_mw_list(volume_number)) == 0:
-            # no outline or no outline in this volume
+            # no pagination or no outline in this volume
             doc = self.get_common()
             volume_basename = f"{self.etext_root_instance_id}_{baselname}"
             doc["_id"] = f"UT{volume_basename}"
             doc["volumeNumber"] = volume_number
             doc["etextNumber"] = 0
-            if iglname:
-                doc["etext_imagegroup_id"] = iglname
+            doc["etext_imagegroup_id"] = iglname
             doc["etext_vol_id"] = f"VL{volume_basename}"
-            self.set_etext_pages(doc, baselname)
-            self.set_etext_chunks(doc, baselname, baseinfo)
+            # skip first two pages
+            rng = None
+            if iginfo["volume_pages_bdrc_intro"] > 0 and player:
+                start_cc = 0
+                for annotation_id, annotation in player.annotations.items():
+                    sequence = 0
+                    if "imgnum" in annotation:
+                        sequence = annotation["imgnum"]
+                    elif "page_index" in annotation:
+                        sequence = self.get_sequence(annotation["page_index"])
+                    else:
+                        # image numbers are necessary for this exercise
+                        continue
+                    # assuming that annotations are in order:
+                    if sequence > iginfo["volume_pages_bdrc_intro"]:
+                        start_cc = annotation["span"]["start"]
+                        break
+                if start_cc == 0:
+                    logging.warning("character 0 found for first non-intro page, this shouldn't happen")
+                else:
+                    rng = (iginfo["volume_pages_bdrc_intro"], -1, start_cc, -1)
+            self.set_etext_pages(doc, baselname, iginfo, rng)
+            self.set_etext_chunks(doc, baselname, baseinfo, iginfo, rng)
             self.docs.append(doc)
             return
         has_chunks_outside_outline = False
@@ -131,6 +167,9 @@ class BUDAElasticSearchSerializer:
                 sequence = self.get_sequence(annotation["page_index"])
             else:
                 # image numbers are necessary for this exercise
+                continue
+            if sequence <= iginfo["volume_pages_bdrc_intro"]:
+                # skip intro pages
                 continue
             mws = self.outline_pl.get_mw_list(volume_number, sequence)
             # in case we have a page with OCR that has no corresponding location in the outline
@@ -169,8 +208,7 @@ class BUDAElasticSearchSerializer:
         doc = self.get_common()
         doc["_id"] = f"UT{mw}_{baselname}"
         doc["volumeNumber"] = volume_number
-        if iglname:
-            doc["etext_imagegroup_id"] = iglname
+        doc["etext_imagegroup_id"] = iglname
         doc["etextNumber"] = etext_in_volume
         doc["etext_vol_id"] = f"VL{self.etext_root_instance_id}_{baselname}"
         for rng in ranges:
@@ -190,7 +228,7 @@ class BUDAElasticSearchSerializer:
                 sequence = self.get_sequence(annotation["page_index"])
             if not sequence and rng:
                 continue
-            if rng and (sequence < rng[0] or sequence > rng[1]):
+            if rng and (sequence < rng[0] or (rng[1] > 0 and sequence > rng[1])):
                 continue
             if "etext_pages" not in doc:
                 doc["etext_pages"] = []
@@ -206,9 +244,12 @@ class BUDAElasticSearchSerializer:
         return number * 2 if page_index[-1] == "b" else (number * 2) - 1
 
     def add_chunks(self, doc, baselname, volume_string, language, previous_i = 0, start_cc=0, end_cc=-1, rng=None):
-        if rng:
+        if rng and (end_cc != -1 or rng[3] != -1): 
             start_cc = max(start_cc, rng[2])
-            end_cc = rng[3] if end_cc == -1 else min(rng[3], end_cc)
+            if end_cc != -1 and rng[3] != -1:
+                end_cc = min(rng[3], end_cc)
+            else:
+                end_cc = max(rng[3], end_cc)
             if end_cc <= start_cc:
                 return
         chunk_indexes = self.get_chunk_indexes(volume_string, language, start_cc, end_cc)

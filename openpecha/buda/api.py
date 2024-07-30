@@ -161,7 +161,7 @@ def _res_from_model(g, wlname):
             iginfo["id"] = str(ig)
             iginfo["total_pages"] = int(g.value(ig, BDO.volumePagesTotal))
             iginfo["volume_number"] = int(g.value(ig, BDO.volumeNumber))
-            iginfo["volume_pages_bdrc_intro"] = int(g.value(ig, BDO.volumePagesTbrcIntro))
+            iginfo["volume_pages_bdrc_intro"] = int(g.value(ig, BDO.volumePagesTbrcIntro, default=Literal(0)))
             for _, _, l in g.triples((ig, SKOS.prefLabel, None)):
                 if l.language == "bo-x-ewts":
                     iginfo["title"] = CONVERTER.toUnicode(l.value)
