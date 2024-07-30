@@ -189,6 +189,86 @@ def get_buda_scan_info(wlname):
     finally:
         return res
 
+class OutlinePageLookup:
+    """
+    Defines an efficient lookup structure that get built with the outline content location information
+    and then returns a list of texts (mw) present on an image (defined by volume number + image number)
+    """
+
+    def __init__(self):
+        # Initialize a dictionary to store content locations
+        self.lookup = {}
+        # Additional structure to keep track of open-ended ranges
+        self.open_ranges = {}
+        self.vnum_to_mws = {}
+
+    def add_from_graph(self, og, w_lname):
+        for s, _, cl in og.triples((None, BDO.contentLocation, None)):
+            if (cl, BDO.contentLocationInstance, BDR.w_lname) not in og:
+                continue
+            partType = s.get(BDO.partType)
+            if not partType or partType in [BDR.PartTypeVolume, BDR.PartTypeCodicologicalVolume, BDR.PartTypeSection, BDR.PartTypeChapter]:
+                continue
+            mw = to_BDR_lname(s)
+            vnum_start = cl.get(BDO.contentLocationVolume)
+            vnum_end = cl.get(BDO.contentLocationEndVolume)
+            imgnum_end = cl.get(BDO.contentLocationEndPage)
+            imgnum_start = cl.get(BDO.contentLocationPage)
+            self.add_content_location(mw, vnum_start, vnum_end, imgnum_start, imgnum_end)
+
+    def add_content_location(self, mw, vnum_start, vnum_end, imgnum_start, imgnum_end):
+        """
+        add content location information (start volume number, end volume number, start image number, end image number)
+        We don't always know in advance the total number of images per volume, or the number of volumes
+        imgnum_start can be None, in which case we consider it is 1 (there is no image number 0)
+        imgnum_end can be None, in which case all the images after imgnum_start get associated with the mw
+        there can be multiple mw associated with the same image
+        """
+        if imgnum_start is None:
+            imgnum_start = 1
+
+        for vnum in range(vnum_start, vnum_end + 1):
+            if vnum not in self.vnum_to_mws:
+                self.vnum_to_mws[vum] = set()
+            self.vnum_to_mws[vnum].add(mw)
+            vol_imgnum_end = imgnum_end if vnum == vnum_end else None
+            if vnum not in self.lookup:
+                self.lookup[vnum] = {}
+
+            if vol_imgnum_end is None:
+                if vnum not in self.open_ranges:
+                    self.open_ranges[vnum] = []
+                self.open_ranges[vnum].append((imgnum_start, mw))
+            else:
+                for imgnum in range(imgnum_start, vol_imgnum_end + 1):
+                    if imgnum not in self.lookup[vnum]:
+                        self.lookup[vnum][imgnum] = set()
+                    self.lookup[vnum][imgnum].add(mw)
+
+    def get_mw_list(self, volnum, imgnum=None):
+        """
+        returns a list of mws associated with a specific image
+        """
+        if imgnum is None:
+            if volnum not in self.vnum_to_mws:
+                return []
+            else:
+                return self.vnum_to_mws[volnum]
+
+        mw_list = set()
+        
+        # Check specific image assignments
+        if volnum in self.lookup and imgnum in self.lookup[volnum]:
+            mw_list.update(self.lookup[volnum][imgnum])
+        
+        # Check open-ended ranges
+        if volnum in self.open_ranges:
+            for start_imgnum, mw in self.open_ranges[volnum]:
+                if imgnum >= start_imgnum:
+                    mw_list.add(mw)
+
+        return mw_list
+
 def image_group_to_folder_name(scan_id, image_group_id):
     image_group_folder_part = image_group_id
     pre, rest = image_group_id[0], image_group_id[1:]
