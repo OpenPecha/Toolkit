@@ -121,6 +121,9 @@ def _res_from_model(g, wlname):
         res["source_metadata"]["access"] = str(g.value(adm, ADM.access))
         if (adm, ADM.restrictedInChina, Literal(True)) in g:
             res["source_metadata"]["geo_restriction"] = ["CN"]
+        o = g.value(predicate=BDO.outlineOf, object=wres)
+        if o:
+            res["source_metadata"]["outline"] = str(o)
         mwres = g.value(wres, BDO.instanceReproductionOf)
         res["source_metadata"]["reproduction_of"] = str(mwres)
         for _, _, cs in g.triples((mwres, BDO.copyright, None)):
