@@ -2,6 +2,7 @@ import re
 from pathlib import Path
 from openpecha.buda.chunker import TibetanEasyChunker, EnglishEasyChunker
 from openpecha.core.layer import Layer, LayerEnum, PechaMetadata, SpanINFO
+from openpecha.buda.api import get_buda_scan_info, OutlinePageLookup
 import logging
 import requests
 
@@ -9,7 +10,7 @@ class BUDAElasticSearchSerializer:
     """
     """
 
-    def __init__(self, openpecha, offline=False):
+    def __init__(self, openpecha, get_o_graph=None, get_w_info=get_buda_scan_info):
         self.openpecha = openpecha
         self._pecha_id = openpecha.pecha_id
         self.etext_root_instance_id = f"IE0OP{self._pecha_id}"
@@ -17,7 +18,10 @@ class BUDAElasticSearchSerializer:
         self.bl_volinfo = None
         self.common = None
         self.offline = offline
-
+        self.get_w_info = get_w_info
+        self.get_o_graph = get_o_graph
+        self.w_info = None
+        self.outline_pl = None
 
     def add_triple(self, rdf_subject, rdf_predicate, rdf_object):
         self.lod_g.add((rdf_subject, rdf_predicate, rdf_object))
@@ -54,88 +58,31 @@ class BUDAElasticSearchSerializer:
                 # for regular ocr, we set the quality by volume
         return common
 
-    def get_doc_for_w(self, w_id):
-        """
-        Get the MW (instance) document in the database that corresponds to a W (scans)
-        """
-        if self.offline:
-            return None, None
-        query = {
-            "query": {
-                "term": {
-                    "merged.keyword": w_id
-                }
-            }
-        }
-        response = requests.post(f"https://autocomplete.bdrc.io/search", json=query)
-        if response.status_code == 200:
-            results = response.json()
-            hits = results.get('hits', {}).get('hits', [])
-            if not hits:
-                logging.error("No documents found for "+w_id)
-                return None, None
-            if len(hits) > 1:
-                logging.error("More than one document found for "+w_id)
-            return hits[0]['_id'], hits[0]['_source']
-        else:
-            logging.error(f"Error querying Elasticsearch: {response.status_code} {response.text}")
-            return None, None
-
     def get_common(self):
         if self.common is not None:
             return self.common
         common = self.meta_to_common()
-        if "etext_pagination_in" in common:
-            mw_id, mw_doc = self.get_doc_for_w(common["etext_pagination_in"])
+        if "etext_pagination_in" in common and self.get_w_info:
+            self.w_info = self.get_w_info(common["etext_pagination_in"])
+            mw_id = self.w_info["source_metadata"]["reproduction_of"]
+            if outline in self.w_info["source_metadata"] and self.get_o_graph:
+                self.outline_pl = self.get_o_graph(["source_metadata"]["outline"])
             if mw_id is not None:
                 common["etext_for_root_instance_id"] = mw_id
                 common["etext_for_instance_id"] = mw_id # temporary, can be changed later with the outline
-                if "pop_score" in mw_doc:
-                    common["etext_instance_pop_score"] = mw_doc["pop_score"]
-                for field in [
-                        "db_score",
-                        "firstScanSyncDate",
-                        "inCollection",
-                        "associatedTradition",
-                        "associatedCentury",
-                        "ric",
-                        "scans_access",
-                        "scans_quality",
-                        "scans_freshness",
-                        #"etext_access",
-                        "workGenre",
-                        "workIsAbout",
-                        "author",
-                        "translator",
-                        "complete",
-                        "seriesName_res",
-                        "authorshipStatement_bo_x_ewts",
-                        "authorshipStatement_en",
-                        "publisherLocation_bo_x_ewts",
-                        "publisherName_en",
-                        "publisherLocation_en",
-                        "prefLabel_bo_x_ewts",
-                        "prefLabel_en"
-                        ]:
-                    if field in mw_doc:
-                        common[field] = mw_doc[field]
-                for field in [
-                        "authorshipStatement_bo_x_ewts",
-                        "authorshipStatement_en",
-                        "publisherLocation_bo_x_ewts",
-                        "publisherName_en",
-                        "publisherLocation_en",
-                        "prefLabel_bo_x_ewts",
-                        "prefLabel_en"
-                        ]:
-                    if field in mw_doc:
-                        common["etext_"+field] = mw_doc[field]
+                common["join_field"] = { "name": "etext", "parent": mw_id }
         self.common = common
         return self.common
 
     def set_instance(self):
         for baselname, baseinfo in self.openpecha.meta.bases.items():
             self.get_base_volume(baselname, baseinfo)
+
+    def get_ut_id(volume_basename, mw):
+        if mw is None:
+            return f"UT{volume_basename}"
+        else:
+            return f"UT{volume_basename}_{mw}"
 
     def get_base_volume(self, baselname, baseinfo):
         volume_string = self.openpecha.get_base(baselname)
@@ -148,55 +95,122 @@ class BUDAElasticSearchSerializer:
             volume_number = baseinfo["order"]
         else:
             volume_number = int(re.search(r"\d+", baselname).group())
-        doc = self.get_common()
-        volume_basename = f"{self.etext_root_instance_id}_{baselname}"
-        doc["_id"] = f"UT{volume_basename}"
-        doc["volumeNumber"] = volume_number
-        doc["etextNumber"] = 0
-        doc["etext_vol_id"] = f"VL{volume_basename}"
-        self.set_etext(doc, baselname, baseinfo, volume_number)
-        self.docs.append(doc)
-
-    def set_etext(self, doc, baselname, baseinfo, volume_number):
-        volume_basename = f"{self.etext_root_instance_id}_{baselname}"
+        iglname = None
         if "source_metadata" in baseinfo and "image_group_id" in baseinfo["source_metadata"]:
             iglname = baseinfo["source_metadata"]["image_group_id"]
             if iglname.startswith("bdr:"):
                 iglname = iglname[4:]
             elif iglname.startswith("http://purl.bdrc.io/resource/"):
                 iglname = iglname[29:]
-            doc["etext_imagegroup_id"] = iglname
-        self.set_etext_pages(doc, baselname)
-        self.set_etext_chunks(doc, baselname, baseinfo)
+        player = self.openpecha.get_layer(baselname, LayerEnum.pagination)
+        if player is None or self.outline_pl is None or len(self.outline_pl.get_mw_list(volume_number)) == 0:
+            # no outline or no outline in this volume
+            doc = self.get_common()
+            volume_basename = f"{self.etext_root_instance_id}_{baselname}"
+            doc["_id"] = f"UT{volume_basename}"
+            doc["volumeNumber"] = volume_number
+            doc["etextNumber"] = 0
+            if iglname:
+                doc["etext_imagegroup_id"] = iglname
+            doc["etext_vol_id"] = f"VL{volume_basename}"
+            self.set_etext_pages(doc, baselname)
+            self.set_etext_chunks(doc, baselname, baseinfo)
+            self.docs.append(doc)
+            return
+        has_chunks_outside_outline = False
+        ranges = {}
+        cur_ranges = {}
+        prev_mws = set()
+        ordered_mws = []
+        # a range is a tuple (page_start, page_end, char_start, char_end)
+        for annotation_id, annotation in player.annotations.items():
+            sequence = 0
+            if "imgnum" in annotation:
+                sequence = annotation["imgnum"]
+            elif "page_index" in annotation:
+                sequence = self.get_sequence(annotation["page_index"])
+            else:
+                # image numbers are necessary for this exercise
+                continue
+            mws = self.outline_pl.get_mw_list(volume_number, sequence)
+            # in case we have a page with OCR that has no corresponding location in the outline
+            if len(mws) == 0:
+                # we just add the root mw
+                mws = {self.w_info["source_metadata"]["reproduction_of"]}
+            # for mws that were on previous page but not this one:
+            for mw in prev_mws.difference(mws):
+                # we close their range
+                if mw not in ranges:
+                    ranges[mw] = []
+                ranges[mw].append(cur_ranges[mw])
+                delete(cur_ranges[mw])
+            # for mws that were not on previous page but are on this one:
+            for mw in mws.difference(prev_mws):
+                if mw not in ordered_mws:
+                    ordered_mws.append(mw)
+                # we create a new range
+                cur_ranges[mw] = (sequence, sequence, annotation["span"]["start"], annotation["span"]["end"])
+            # for mws that were also on the previous page:
+            for mw in mws.intersection(prev_mws):
+                # we extend the range
+                page_start, page_end, char_start, char_end = cur_ranges[mw]
+                cur_ranges[mw] = (page_start, sequence, char_start, annotation["span"]["end"])
+            prev_mws = mws
+        # finish ranges
+        for mw, r in cur_ranges.items():
+            if mw not in ranges:
+                ranges[mw] = []
+            ranges[mw].append(r)
+        # then go through the ranges and add to the documents:
+        for mw_i, mw in enumerate(ordered_mws):
+            self.add_partial_etext_doc(self, mw, baselname, iglname, baseinfo, volume_number, ranges[mw])
 
-    def set_etext_pages(self, doc, baselname):
+    def add_partial_etext_doc(self, mw, etext_in_volume, baselname, iglname, baseinfo, volume_number, ranges):
+        doc = self.get_common()
+        doc["_id"] = f"UT{mw}_{baselname}"
+        doc["volumeNumber"] = volume_number
+        if iglname:
+            doc["etext_imagegroup_id"] = iglname
+        doc["etextNumber"] = etext_in_volume
+        doc["etext_vol_id"] = f"VL{self.etext_root_instance_id}_{baselname}"
+        for rng in ranges:
+            self.set_etext_pages(doc, baselname, rng)
+            self.set_etext_chunks(doc, baselname, baseinfo, rng)
+        self.docs.append(doc)
+
+    def set_etext_pages(self, doc, baselname, rng=None):
         player = self.openpecha.get_layer(baselname, LayerEnum.pagination)
         if player is None:
             return
         for annotation_id, annotation in player.annotations.items():
-            self.set_etext_page(doc, annotation_id, annotation, baselname)
-
-    def set_etext_page(self, doc, annotation_id, annotation, volume_name):
-        sequence = 0
-        if "imgnum" in annotation:
-            sequence = annotation["imgnum"]
-        elif "page_index" in annotation:
-            sequence = self.get_sequence(annotation["page_index"])
-        if "etext_pages" not in doc:
-            doc["etext_pages"] = []
-        doc["etext_pages"].append({
-            "cstart": annotation["span"]["start"],
-            "cend": annotation["span"]["end"],
-            "pnum": sequence
-            })
+            sequence = 0
+            if "imgnum" in annotation:
+                sequence = annotation["imgnum"]
+            elif "page_index" in annotation:
+                sequence = self.get_sequence(annotation["page_index"])
+            if not sequence and rng:
+                continue
+            if rng and (sequence < rng[0] or sequence > rng[1]):
+                continue
+            if "etext_pages" not in doc:
+                doc["etext_pages"] = []
+            doc["etext_pages"].append({
+                "cstart": annotation["span"]["start"],
+                "cend": annotation["span"]["end"],
+                "pnum": sequence
+                })
 
     @staticmethod
     def get_sequence(page_index):
         number = int(re.search(r"\d+", page_index).group())
         return number * 2 if page_index[-1] == "b" else (number * 2) - 1
 
-
-    def add_chunks(self, doc, baselname, volume_string, language, previous_i = 0, start_cc=0, end_cc=-1):
+    def add_chunks(self, doc, baselname, volume_string, language, previous_i = 0, start_cc=0, end_cc=-1, rng=None):
+        if rng:
+            start_cc = max(start_cc, rng[2])
+            end_cc = rng[3] if end_cc == -1 else min(rng[3], end_cc)
+            if end_cc <= start_cc:
+                return
         chunk_indexes = self.get_chunk_indexes(volume_string, language, start_cc, end_cc)
         for i in range(0, len(chunk_indexes) - 1):
             self.set_etext_chunk(
@@ -204,8 +218,7 @@ class BUDAElasticSearchSerializer:
             )
         return previous_i + len(chunk_indexes)
 
-
-    def set_etext_chunks(self, doc, baselname, baseinfo):
+    def set_etext_chunks(self, doc, baselname, baseinfo, rng=None):
         volume_string = self.openpecha.get_base(baselname)
         default_language = "bo"
         if "default_language" in baseinfo:
@@ -214,7 +227,7 @@ class BUDAElasticSearchSerializer:
             default_language = self.openpecha.meta.default_language
         llayer = self.openpecha.get_layer(baselname, LayerEnum.language)
         if llayer is None:
-            self.add_chunks(doc, baselname, volume_string, default_language)
+            self.add_chunks(doc, baselname, volume_string, default_language, rng)
         else:
             last_index = 0
             ci = 0
@@ -222,12 +235,12 @@ class BUDAElasticSearchSerializer:
             sorted_annotations = sorted(llayer.annotations.values(), key=lambda x: x["span"]["start"])
             for annotation in sorted_annotations:
                 if annotation["span"]["start"] > last_index:
-                    ci = self.add_chunks(doc, baselname, volume_string, default_language, ci, last_index, annotation["span"]["start"])
-                ci = self.add_chunks(doc, baselname, volume_string, annotation["language"], ci, annotation["span"]["start"], annotation["span"]["end"])
+                    ci = self.add_chunks(doc, baselname, volume_string, default_language, ci, last_index, annotation["span"]["start"], rng)
+                ci = self.add_chunks(doc, baselname, volume_string, annotation["language"], ci, annotation["span"]["start"], annotation["span"]["end"], rng)
                 last_index = annotation["span"]["end"]
             len_vol_str = len(volume_string)
             if last_index < len_vol_str:
-                self.add_chunks(doc, baselname, volume_string, default_language, ci, last_index, len_vol_str)
+                self.add_chunks(doc, baselname, volume_string, default_language, ci, last_index, len_vol_str, rng)
 
     def set_etext_chunk(self, doc, i, start_char, end_char, baselname, volume_string, language):
         if "chunks" not in doc:
