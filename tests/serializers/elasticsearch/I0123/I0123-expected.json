@@ -1,20 +1,23 @@
 [
   {
-    "type": "Etext",
-    "etext_for_root_instance_id": "IE0OPI0123",
+    "type": [
+      "Etext"
+    ],
+    "etext_instance": "IE0OPI0123",
     "etext_pagination_in": "W1KG16793",
     "etext_quality": 2,
+    "etext_for_root_instance": "MW123",
+    "etext_for_instance": "MW123",
+    "join_field": {
+      "name": "etext",
+      "parent": "MW123"
+    },
     "_id": "UTIE0OPI0123_9C26",
     "volumeNumber": 1,
     "etextNumber": 0,
-    "etext_vol_id": "VLIE0OPI0123_9C26",
-    "etext_imagegroup_id": "I1KG16930",
+    "etext_imagegroup": "I1KG16930",
+    "etext_vol": "VLIE0OPI0123_9C26",
     "etext_pages": [
-      {
-        "cstart": 0,
-        "cend": 629,
-        "pnum": 1
-      },
       {
         "cstart": 634,
         "cend": 1171,
@@ -118,14 +121,9 @@
     ],
     "chunks": [
       {
-        "cstart": 0,
-        "cend": 200,
-        "text_en": "༄༅།།བོད་ཀྱི་ནང་བསྟན་དཔེ་ཚོགས་ལྟེ་གནས།།\nTibetan Buddhist Resource Center\nText Scan Input Form - Title Page\nWork:\nImageGroup:\nW4CZ1042\nn/a\n11PD108817\nn/a\nLCCN:\nISBN:\nTitle:\nགཏེར་ཆོས། ་རྩ་གསུམ་གླིང་པ།\ngt"
-      },
-      {
-        "cstart": 200,
+        "cstart": 634,
         "cend": 1450,
-        "text_bo": "er chos/_rtsa gsum gling pa/\nརྩ་གསུམ་གཏེར་བདག་གླིང་པ་\nAuthor:\nrtsa gsum gter bdag gling pa\nn/a\nDescriptor:\nOriginal Publication:\nn/a;n/a\nPlace:\npharphing; kathmandu, nepal\nPublisher:\nbka' gter sri zhu e waM dpe skrun khang\n2002-2010\nDate:\nVolume:\n33\nILI\nTotal Volumes:\nTBRC Pages:\nIntroductory Pages:\nText Pages:\nScanning Information:\nn/a\nScanned at Tibetan Buddhist Resource Center, 150 West 17th St, New York City, NY\n10011, US.\n\n\n\n...\n-----\n---\n--\n-.-..-....\n.\n.\n.\n.....\n...\n..\n.\n-------\n...\n.\n.\n.\n.\n.\n.\n.\n.\n. .\n.\n.\n-\n.\n-\n. .\n-\n- -\n.\n-\n-\n.--.- ..\n... ... ...-.-\n-\n... -\n.. ...\n- --------\n-\n... ......-.\n-\n.. .. .\n-\n.\n-\n.\n--..\n.\n-\n....\n-\n.\n.\n. ..\n. .-\n...\n---.-\n-. ..-\n--\n-\n---.-.--.-\n.-\n.\n.-\n-.\n..\n. ..\n.\n...\n...\n.\n....\n---\n---\n--------\n-.\n-\n.\n.-\n...\n. .\n.\n.\n.\n. .\n.\n.\n.\n....\n.\n.\n.\n. .\ndeasure to\nthe Pre\n-\n-\ni\n7:)\n:)\n\"\n'\")\nPublishin\n.\noral and\n--\nof the or\nsurupes\nOmenas\n2:}\n}\n17.1\n.)\n...\nThe Treasure Teachings of Narnchag\nTsasum Lingpa\nVol29\n---\nA\n.\nvyR\n- -.\n.\nwere\n\n\n\n--\n---\n-\n-\n---\n-\n-\n--\n-\nఅ\nనుమతులు అతను నన్ను న\nఅను నేను\nన\nన\nన న\nన న న న న న న న\n\n\n\nམ\nསཾམཐd མས་མས་བས\n，\n༄༅། །པོད་ཉེར་དགུ་པ་སྤྲུལ་པའི་གཏེར་ཆེན་རྩ་གསུམ་གླིང་པའི་གསུང་ཐོར་བུའི་རིགས་དང་། ཕྱིས་\nབྱོན་རྣམས་ཀྱི་མཛད་པའི་གསུང་གི་ཆ་ཤས་ཟེགས་ཕྲན་ཇི་སྙེད་ཕྱོགས་གཅིག་ཏུ་བསྡུས་པ་བཞུགས་སོ།།\n. "
+        "text_bo": "...\n-----\n---\n--\n-.-..-....\n.\n.\n.\n.....\n...\n..\n.\n-------\n...\n.\n.\n.\n.\n.\n.\n.\n.\n. .\n.\n.\n-\n.\n-\n. .\n-\n- -\n.\n-\n-\n.--.- ..\n... ... ...-.-\n-\n... -\n.. ...\n- --------\n-\n... ......-.\n-\n.. .. .\n-\n.\n-\n.\n--..\n.\n-\n....\n-\n.\n.\n. ..\n. .-\n...\n---.-\n-. ..-\n--\n-\n---.-.--.-\n.-\n.\n.-\n-.\n..\n. ..\n.\n...\n...\n.\n....\n---\n---\n--------\n-.\n-\n.\n.-\n...\n. .\n.\n.\n.\n. .\n.\n.\n.\n....\n.\n.\n.\n. .\ndeasure to\nthe Pre\n-\n-\ni\n7:)\n:)\n\"\n'\")\nPublishin\n.\noral and\n--\nof the or\nsurupes\nOmenas\n2:}\n}\n17.1\n.)\n...\nThe Treasure Teachings of Narnchag\nTsasum Lingpa\nVol29\n---\nA\n.\nvyR\n- -.\n.\nwere\n\n\n\n--\n---\n-\n-\n---\n-\n-\n--\n-\nఅ\nనుమతులు అతను నన్ను న\nఅను నేను\nన\nన\nన న\nన న న న న న న న\n\n\n\nམ\nསཾམཐd མས་མས་བས\n，\n༄༅། །པོད་ཉེར་དགུ་པ་སྤྲུལ་པའི་གཏེར་ཆེན་རྩ་གསུམ་གླིང་པའི་གསུང་ཐོར་བུའི་རིགས་དང་། ཕྱིས་\nབྱོན་རྣམས་ཀྱི་མཛད་པའི་གསུང་གི་ཆ་ཤས་ཟེགས་ཕྲན་ཇི་སྙེད་ཕྱོགས་གཅིག་ཏུ་བསྡུས་པ་བཞུགས་སོ།།\n. "
       },
       {
         "cstart": 1450,

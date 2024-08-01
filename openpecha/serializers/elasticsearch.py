@@ -17,11 +17,11 @@ class BUDAElasticSearchSerializer:
         self.docs = []
         self.bl_volinfo = None
         self.common = None
-        self.offline = offline
         self.get_w_info = get_w_info
         self.get_o_graph = get_o_graph
         self.w_info = None
         self.outline_pl = None
+        self.set_common()
 
     def add_triple(self, rdf_subject, rdf_predicate, rdf_object):
         self.lod_g.add((rdf_subject, rdf_predicate, rdf_object))
@@ -41,7 +41,7 @@ class BUDAElasticSearchSerializer:
     def meta_to_common(self):
         common = {}
         common["type"] = ["Etext"]
-        common["etext_for_root_instance_id"] = self.etext_root_instance_id
+        common["etext_instance"] = self.etext_root_instance_id
         meta = self.openpecha.meta
         sm = meta.source_metadata
         if sm is not None:
@@ -58,21 +58,19 @@ class BUDAElasticSearchSerializer:
                 # for regular ocr, we set the quality by volume
         return common
 
-    def get_common(self):
-        if self.common is not None:
-            return self.common
+    def set_common(self):
         common = self.meta_to_common()
         if "etext_pagination_in" in common and self.get_w_info:
             self.w_info = self.get_w_info(common["etext_pagination_in"])
             mw_id = self.w_info["source_metadata"]["reproduction_of"]
-            if outline in self.w_info["source_metadata"] and self.get_o_graph:
-                self.outline_pl = self.get_o_graph(["source_metadata"]["outline"])
+            if "outline" in self.w_info["source_metadata"] and self.get_o_graph:
+                outline_graph = self.get_o_graph(self.w_info["source_metadata"]["outline"])
+                self.outline_pl = OutlinePageLookup(outline_graph, common["etext_pagination_in"])
             if mw_id is not None:
-                common["etext_for_root_instance_id"] = mw_id
-                common["etext_for_instance_id"] = mw_id # temporary, can be changed later with the outline
+                common["etext_for_root_instance"] = mw_id
+                common["etext_for_instance"] = mw_id # temporary, can be changed later with the outline
                 common["join_field"] = { "name": "etext", "parent": mw_id }
         self.common = common
-        return self.common
 
     def set_instance(self):
         for baselname, baseinfo in self.openpecha.meta.bases.items():
@@ -121,13 +119,13 @@ class BUDAElasticSearchSerializer:
         player = self.openpecha.get_layer(baselname, LayerEnum.pagination)
         if player is None or self.outline_pl is None or len(self.outline_pl.get_mw_list(volume_number)) == 0:
             # no pagination or no outline in this volume
-            doc = self.get_common()
+            doc = self.common.copy()
             volume_basename = f"{self.etext_root_instance_id}_{baselname}"
             doc["_id"] = f"UT{volume_basename}"
             doc["volumeNumber"] = volume_number
             doc["etextNumber"] = 0
-            doc["etext_imagegroup_id"] = iglname
-            doc["etext_vol_id"] = f"VL{volume_basename}"
+            doc["etext_imagegroup"] = iglname
+            doc["etext_vol"] = f"VL{volume_basename}"
             # skip first two pages
             rng = None
             if iginfo["volume_pages_bdrc_intro"] > 0 and player:
@@ -149,8 +147,8 @@ class BUDAElasticSearchSerializer:
                     logging.warning("character 0 found for first non-intro page, this shouldn't happen")
                 else:
                     rng = (iginfo["volume_pages_bdrc_intro"], -1, start_cc, -1)
-            self.set_etext_pages(doc, baselname, iginfo, rng)
-            self.set_etext_chunks(doc, baselname, baseinfo, iginfo, rng)
+            self.set_etext_pages(doc, baselname, rng)
+            self.set_etext_chunks(doc, baselname, baseinfo, rng)
             self.docs.append(doc)
             return
         has_chunks_outside_outline = False
@@ -182,7 +180,7 @@ class BUDAElasticSearchSerializer:
                 if mw not in ranges:
                     ranges[mw] = []
                 ranges[mw].append(cur_ranges[mw])
-                delete(cur_ranges[mw])
+                del cur_ranges[mw]
             # for mws that were not on previous page but are on this one:
             for mw in mws.difference(prev_mws):
                 if mw not in ordered_mws:
@@ -200,17 +198,19 @@ class BUDAElasticSearchSerializer:
             if mw not in ranges:
                 ranges[mw] = []
             ranges[mw].append(r)
+        #print(ranges)
         # then go through the ranges and add to the documents:
         for mw_i, mw in enumerate(ordered_mws):
-            self.add_partial_etext_doc(self, mw, baselname, iglname, baseinfo, volume_number, ranges[mw])
+            self.add_partial_etext_doc(mw, mw_i, baselname, iglname, baseinfo, volume_number, ranges[mw])
 
     def add_partial_etext_doc(self, mw, etext_in_volume, baselname, iglname, baseinfo, volume_number, ranges):
-        doc = self.get_common()
+        doc = self.common.copy()
         doc["_id"] = f"UT{mw}_{baselname}"
         doc["volumeNumber"] = volume_number
-        doc["etext_imagegroup_id"] = iglname
+        doc["etext_imagegroup"] = iglname
+        doc["etext_for_instance"] = mw
         doc["etextNumber"] = etext_in_volume
-        doc["etext_vol_id"] = f"VL{self.etext_root_instance_id}_{baselname}"
+        doc["etext_vol"] = f"VL{self.etext_root_instance_id}_{baselname}"
         for rng in ranges:
             self.set_etext_pages(doc, baselname, rng)
             self.set_etext_chunks(doc, baselname, baseinfo, rng)
@@ -251,7 +251,7 @@ class BUDAElasticSearchSerializer:
             else:
                 end_cc = max(rng[3], end_cc)
             if end_cc <= start_cc:
-                return
+                return previous_i
         chunk_indexes = self.get_chunk_indexes(volume_string, language, start_cc, end_cc)
         for i in range(0, len(chunk_indexes) - 1):
             self.set_etext_chunk(
@@ -268,7 +268,7 @@ class BUDAElasticSearchSerializer:
             default_language = self.openpecha.meta.default_language
         llayer = self.openpecha.get_layer(baselname, LayerEnum.language)
         if llayer is None:
-            self.add_chunks(doc, baselname, volume_string, default_language, rng)
+            self.add_chunks(doc, baselname, volume_string, default_language, rng=rng)
         else:
             last_index = 0
             ci = 0
@@ -276,12 +276,12 @@ class BUDAElasticSearchSerializer:
             sorted_annotations = sorted(llayer.annotations.values(), key=lambda x: x["span"]["start"])
             for annotation in sorted_annotations:
                 if annotation["span"]["start"] > last_index:
-                    ci = self.add_chunks(doc, baselname, volume_string, default_language, ci, last_index, annotation["span"]["start"], rng)
-                ci = self.add_chunks(doc, baselname, volume_string, annotation["language"], ci, annotation["span"]["start"], annotation["span"]["end"], rng)
+                    ci = self.add_chunks(doc, baselname, volume_string, default_language, ci, last_index, annotation["span"]["start"], rng=rng)
+                ci = self.add_chunks(doc, baselname, volume_string, annotation["language"], ci, annotation["span"]["start"], annotation["span"]["end"], rng=rng)
                 last_index = annotation["span"]["end"]
             len_vol_str = len(volume_string)
             if last_index < len_vol_str:
-                self.add_chunks(doc, baselname, volume_string, default_language, ci, last_index, len_vol_str, rng)
+                self.add_chunks(doc, baselname, volume_string, default_language, ci, last_index, len_vol_str, rng=rng)
 
     def set_etext_chunk(self, doc, i, start_char, end_char, baselname, volume_string, language):
         if "chunks" not in doc:

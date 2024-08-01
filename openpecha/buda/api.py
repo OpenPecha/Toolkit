@@ -19,6 +19,7 @@ SESSION = boto3.Session()
 S3 = SESSION.client('s3')
 
 BDR = Namespace("http://purl.bdrc.io/resource/")
+BDR_uri = "http://purl.bdrc.io/resource/"
 BDO = Namespace("http://purl.bdrc.io/ontology/core/")
 BDA = Namespace("http://purl.bdrc.io/admindata/")
 ADM = Namespace("http://purl.bdrc.io/ontology/admin/")
@@ -195,25 +196,28 @@ class OutlinePageLookup:
     and then returns a list of texts (mw) present on an image (defined by volume number + image number)
     """
 
-    def __init__(self):
+    def __init__(self, outline_graph, w_lname):
         # Initialize a dictionary to store content locations
         self.lookup = {}
         # Additional structure to keep track of open-ended ranges
         self.open_ranges = {}
         self.vnum_to_mws = {}
+        self.outline_graph = outline_graph
+        self.w_lname = w_lname
+        self.process()
 
-    def add_from_graph(self, og, w_lname):
-        for s, _, cl in og.triples((None, BDO.contentLocation, None)):
-            if (cl, BDO.contentLocationInstance, BDR.w_lname) not in og:
+    def process(self):
+        for s, _, cl in self.outline_graph.triples((None, BDO.contentLocation, None)):
+            if (cl, BDO.contentLocationInstance, BDR[self.w_lname]) not in self.outline_graph:
                 continue
-            partType = s.get(BDO.partType)
+            partType = self.outline_graph.value(s, BDO.partType, None)
             if not partType or partType in [BDR.PartTypeVolume, BDR.PartTypeCodicologicalVolume, BDR.PartTypeSection, BDR.PartTypeChapter]:
                 continue
-            mw = to_BDR_lname(s)
-            vnum_start = cl.get(BDO.contentLocationVolume)
-            vnum_end = cl.get(BDO.contentLocationEndVolume)
-            imgnum_end = cl.get(BDO.contentLocationEndPage)
-            imgnum_start = cl.get(BDO.contentLocationPage)
+            mw = str(s)[len(BDR_uri):]
+            vnum_start = self.outline_graph.value(cl, BDO.contentLocationVolume, None)
+            vnum_end = self.outline_graph.value(cl, BDO.contentLocationEndVolume, None)
+            imgnum_end = self.outline_graph.value(cl, BDO.contentLocationEndPage, None)
+            imgnum_start = self.outline_graph.value(cl, BDO.contentLocationPage, None)
             self.add_content_location(mw, vnum_start, vnum_end, imgnum_start, imgnum_end)
 
     def add_content_location(self, mw, vnum_start, vnum_end, imgnum_start, imgnum_end):
@@ -227,20 +231,29 @@ class OutlinePageLookup:
         if imgnum_start is None:
             imgnum_start = 1
 
-        for vnum in range(vnum_start, vnum_end + 1):
+        if vnum_start is None:
+            vnum_start = 1
+        if vnum_end is None:
+            vnum_end = vnum_start
+
+        if imgnum_start is None:
+            imgnum_start = 1
+
+        for vnum in range(int(vnum_start), int(vnum_end) + 1):
             if vnum not in self.vnum_to_mws:
-                self.vnum_to_mws[vum] = set()
+                self.vnum_to_mws[vnum] = set()
             self.vnum_to_mws[vnum].add(mw)
-            vol_imgnum_end = imgnum_end if vnum == vnum_end else None
+            vol_imgnum_end = int(imgnum_end) if vnum == int(vnum_end) and imgnum_end is not None else None
+            vol_imgnum_start = int(imgnum_start) if vnum == int(vnum_start) else 1
             if vnum not in self.lookup:
                 self.lookup[vnum] = {}
 
             if vol_imgnum_end is None:
                 if vnum not in self.open_ranges:
                     self.open_ranges[vnum] = []
-                self.open_ranges[vnum].append((imgnum_start, mw))
+                self.open_ranges[vnum].append((vol_imgnum_start, mw))
             else:
-                for imgnum in range(imgnum_start, vol_imgnum_end + 1):
+                for imgnum in range(vol_imgnum_start, vol_imgnum_end + 1):
                     if imgnum not in self.lookup[vnum]:
                         self.lookup[vnum][imgnum] = set()
                     self.lookup[vnum][imgnum].add(mw)

@@ -1,0 +1,118 @@
+[
+  {
+    "type": [
+      "Etext"
+    ],
+    "etext_instance": "IE0OPI0123",
+    "etext_pagination_in": "W1KG16793",
+    "etext_quality": 2,
+    "etext_for_root_instance": "MW123",
+    "etext_for_instance": "MW1",
+    "join_field": {
+      "name": "etext",
+      "parent": "MW123"
+    },
+    "_id": "UTMW1_9C26",
+    "volumeNumber": 1,
+    "etext_imagegroup": "I1KG16930",
+    "etextNumber": 0,
+    "etext_vol": "VLIE0OPI0123_9C26",
+    "etext_pages": [
+      {
+        "cstart": 10,
+        "cend": 19,
+        "pnum": 3
+      },
+      {
+        "cstart": 20,
+        "cend": 29,
+        "pnum": 4
+      },
+      {
+        "cstart": 30,
+        "cend": 39,
+        "pnum": 5
+      },
+      {
+        "cstart": 40,
+        "cend": 49,
+        "pnum": 6
+      },
+      {
+        "cstart": 50,
+        "cend": 59,
+        "pnum": 7
+      },
+      {
+        "cstart": 60,
+        "cend": 69,
+        "pnum": 8
+      },
+      {
+        "cstart": 70,
+        "cend": 79,
+        "pnum": 9
+      }
+    ],
+    "chunks": [
+      {
+        "cstart": 10,
+        "cend": 35,
+        "text_bo": "| p 3  |\n\n| p 4  |\n\n| p 5"
+      },
+      {
+        "cstart": 35,
+        "cend": 45,
+        "text_en": "  |\n\n| p 6"
+      },
+      {
+        "cstart": 45,
+        "cend": 78,
+        "text_bo": "  |\n\n| p 7  |\n\n| p 8  |\n\n| p 9  |"
+      }
+    ]
+  },
+  {
+    "type": [
+      "Etext"
+    ],
+    "etext_instance": "IE0OPI0123",
+    "etext_pagination_in": "W1KG16793",
+    "etext_quality": 2,
+    "etext_for_root_instance": "MW123",
+    "etext_for_instance": "MW3",
+    "join_field": {
+      "name": "etext",
+      "parent": "MW123"
+    },
+    "_id": "UTMW3_9C26",
+    "volumeNumber": 1,
+    "etext_imagegroup": "I1KG16930",
+    "etextNumber": 1,
+    "etext_vol": "VLIE0OPI0123_9C26",
+    "etext_pages": [
+      {
+        "cstart": 20,
+        "cend": 29,
+        "pnum": 4
+      },
+      {
+        "cstart": 30,
+        "cend": 39,
+        "pnum": 5
+      }
+    ],
+    "chunks": [
+      {
+        "cstart": 20,
+        "cend": 35,
+        "text_bo": "| p 4  |\n\n| p 5"
+      },
+      {
+        "cstart": 35,
+        "cend": 39,
+        "text_en": "  |\n"
+      }
+    ]
+  }
+]
