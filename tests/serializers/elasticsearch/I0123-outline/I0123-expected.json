@@ -10,7 +10,7 @@
     "etext_for_instance": "MW1",
     "join_field": {
       "name": "etext",
-      "parent": "MW123"
+      "parent": "MW1"
     },
     "_id": "UTMW1_9C26",
     "volumeNumber": 1,
@@ -83,7 +83,7 @@
     "etext_for_instance": "MW3",
     "join_field": {
       "name": "etext",
-      "parent": "MW123"
+      "parent": "MW3"
     },
     "_id": "UTMW3_9C26",
     "volumeNumber": 1,

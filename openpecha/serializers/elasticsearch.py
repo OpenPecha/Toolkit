@@ -6,6 +6,13 @@ from openpecha.buda.api import get_buda_scan_info, OutlinePageLookup
 import logging
 import requests
 
+def to_lname(uri):
+    if uri.startswith("bdr:"):
+        return uri[4:]
+    elif uri.startswith("http://purl.bdrc.io/resource/"):
+        return uri[29:]
+    return uri
+
 class BUDAElasticSearchSerializer:
     """
     """
@@ -45,12 +52,7 @@ class BUDAElasticSearchSerializer:
         meta = self.openpecha.meta
         sm = meta.source_metadata
         if sm is not None:
-            scanlname = sm["id"]
-            if scanlname.startswith("bdr:"):
-                scanlname = scanlname[4:]
-            elif scanlname.startswith("http://purl.bdrc.io/resource/"):
-                scanlname = scanlname[29:]
-            common["etext_pagination_in"] = scanlname
+            common["etext_pagination_in"] = to_lname(sm["id"])
         if meta.ocr_import_info is not None:
             oii = meta.ocr_import_info
             if "software_id" in oii and oii["software_id"] == "norbuketaka":
@@ -62,7 +64,7 @@ class BUDAElasticSearchSerializer:
         common = self.meta_to_common()
         if "etext_pagination_in" in common and self.get_w_info:
             self.w_info = self.get_w_info(common["etext_pagination_in"])
-            mw_id = self.w_info["source_metadata"]["reproduction_of"]
+            mw_id = to_lname(self.w_info["source_metadata"]["reproduction_of"])
             if "outline" in self.w_info["source_metadata"] and self.get_o_graph:
                 outline_graph = self.get_o_graph(self.w_info["source_metadata"]["outline"])
                 self.outline_pl = OutlinePageLookup(outline_graph, common["etext_pagination_in"])
@@ -105,7 +107,7 @@ class BUDAElasticSearchSerializer:
             elif iglname.startswith("http://purl.bdrc.io/resource/"):
                 iglname = iglname[29:]
         if iglname is None:
-            for iglname_candidate, iginfo in self.w_info["image_groups"]:
+            for iglname_candidate, iginfo in self.w_info["image_groups"].items():
                 if iginfo["volume_number"] == volume_number:
                     iglname = iglname_candidate
                     break
@@ -173,7 +175,7 @@ class BUDAElasticSearchSerializer:
             # in case we have a page with OCR that has no corresponding location in the outline
             if len(mws) == 0:
                 # we just add the root mw
-                mws = {self.w_info["source_metadata"]["reproduction_of"]}
+                mws = { to_lname(self.w_info["source_metadata"]["reproduction_of"]) }
             # for mws that were on previous page but not this one:
             for mw in prev_mws.difference(mws):
                 # we close their range
@@ -206,6 +208,7 @@ class BUDAElasticSearchSerializer:
     def add_partial_etext_doc(self, mw, etext_in_volume, baselname, iglname, baseinfo, volume_number, ranges):
         doc = self.common.copy()
         doc["_id"] = f"UT{mw}_{baselname}"
+        doc["join_field"] = {"name": "etext", "parent": mw}
         doc["volumeNumber"] = volume_number
         doc["etext_imagegroup"] = iglname
         doc["etext_for_instance"] = mw
