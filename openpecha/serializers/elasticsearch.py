@@ -5,6 +5,12 @@ from openpecha.core.layer import Layer, LayerEnum, PechaMetadata, SpanINFO
 from openpecha.buda.api import get_buda_scan_info, OutlinePageLookup
 import logging
 import requests
+from datetime import datetime, timedelta
+from dateutil.relativedelta import relativedelta
+
+START_DATE = datetime(2016, 1, 1)
+END_DATE = datetime(2026, 5, 1)
+TOTAL_DAYS = (END_DATE - START_DATE).days
 
 def to_lname(uri):
     if uri.startswith("bdr:"):
@@ -53,6 +59,14 @@ class BUDAElasticSearchSerializer:
         sm = meta.source_metadata
         if sm is not None:
             common["etext_pagination_in"] = to_lname(sm["id"])
+        if "imported" in meta:
+            common["firstEtextSyncDate"] = meta["imported"]
+            try:
+                sync_date = datetime.fromisoformat(meta["imported"])
+                days_from_start = (sync_date - START_DATE).days
+                common["etext_freshness"] = float(days_from_start) / TOTAL_DAYS
+            except ValueError as e:
+                logging.warning("cannot parse "+meta["imported"])
         if meta.ocr_import_info is not None:
             oii = meta.ocr_import_info
             if "software_id" in oii and oii["software_id"] == "norbuketaka":

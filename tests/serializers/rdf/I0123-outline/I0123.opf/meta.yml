@@ -1,0 +1,36 @@
+id: I0123
+legacy_id: P1234
+source: https://library.bdrc.io
+source_file: null
+initial_creation_type: ocr
+imported: '2020-03-28T15:55:51+00:00'
+last_modified: '2022-06-07T12:32:16.743803+00:00'
+default_language: bo
+source_metadata:
+  id: http://purl.bdrc.io/resource/W1KG16793
+  title: ཨ་གྲགས་གཟི་རྫོང་།
+  author: ''
+  access: http://purl.bdrc.io/admindata/AccessOpen
+  restrictedInChina: true
+bases:
+  9C26:
+    base_file: 9C26.txt
+    legacy_id: v001
+    order: 1
+    source_metadata:
+      image_group_id: http://purl.bdrc.io/resource/I1KG16930
+      title: ''
+      total_pages: 422
+      volume_number: 1
+statistics:
+  ocr_word_median_confidence_index: 0.9
+  ocr_word_mean_confidence_index: 0.91
+ocr_import_info:
+  source: bdrc
+  software_id: norbuketaka
+  batch_id: batch_2022
+  ocr_info:
+    timestamp: 1977-04-22T06:00:00Z
+    prop1: value 1
+    prop2: value 2
+  parser: https://github.com/OpenPecha-dev/openpecha-toolkit/blob/231bba39dd1ba393320de82d4d08a604aabe80fc/openpecha/formatters/google_orc.py

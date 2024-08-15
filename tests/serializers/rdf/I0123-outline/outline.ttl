@@ -1,0 +1,19 @@
+@prefix :      <http://purl.bdrc.io/ontology/core/> .
+@prefix bdr:   <http://purl.bdrc.io/resource/> .
+
+bdr:MW1 :contentLocation bdr:CL1 , bdr:CL2 ;
+        :partType :PartTypeText .
+
+bdr:MW3 :contentLocation bdr:CL3 ;
+        :partType :PartTypeText .
+
+bdr:CL1 :contentLocationInstance bdr:W1KG16793 ;
+         :contentLocationPage 1 .
+
+bdr:CL2  :contentLocationInstance bdr:W1KG16793 ;
+         :contentLocationPage 3 ;
+         :contentLocationEndPage 6 .
+
+bdr:CL3 :contentLocationInstance bdr:W1KG16793 ;
+         :contentLocationPage 4 ;
+         :contentLocationEndPage 5 .

@@ -17,11 +17,19 @@ bda:IE0OPP1234 a adm:AdminData ;
     adm:replaceWith bdr:IE0OPI0123 ;
     adm:status bda:StatusWithdrawn .
 
-bdr:UTIE0OPI0123_9C26 a :Etext ;
+bdr:UTMW1_9C26 a :Etext ;
+    :eTextInInstance bdr:IE0OPI0123 ;
+    :etextInVolume bdr:VLIE0OPI0123_9C26 ;
+    :seqNum 0 ;
+    :sliceEndChar 79 ;
+    :sliceStartChar 10 .
+
+bdr:UTMW3_9C26 a :Etext ;
     :eTextInInstance bdr:IE0OPI0123 ;
     :etextInVolume bdr:VLIE0OPI0123_9C26 ;
     :seqNum 1 ;
-    :sliceStartChar 1 .
+    :sliceEndChar 39 ;
+    :sliceStartChar 20 .
 
 bdr:IE0OPP1234 a :EtextInstance .
 

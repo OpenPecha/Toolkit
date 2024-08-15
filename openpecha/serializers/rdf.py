@@ -5,6 +5,7 @@ from rdflib import BNode, Literal, URIRef
 from rdflib.namespace import OWL, RDF, RDFS, SKOS, XSD, Namespace, NamespaceManager
 from openpecha.buda.chunker import TibetanEasyChunker, EnglishEasyChunker
 from openpecha.core.layer import Layer, LayerEnum, PechaMetadata, SpanINFO
+from openpecha.buda.api import get_buda_scan_info, OutlinePageLookup
 
 rdf = RDF
 rdfs = RDFS
@@ -22,6 +23,13 @@ nsm.bind("bda", bda)
 nsm.bind("adm", adm)
 nsm.bind("rdf", rdf)
 nsm.bind("rdfs", rdfs)
+
+def to_lname(uri):
+    if uri.startswith("bdr:"):
+        return uri[4:]
+    elif uri.startswith("http://purl.bdrc.io/resource/"):
+        return uri[29:]
+    return uri
 
 class BUDARDFSerializer:
     """
@@ -61,11 +69,7 @@ class BUDARDFSerializer:
         meta = self.openpecha.meta
         sm = meta.source_metadata
         if sm is not None:
-            scanlname = sm["id"]
-            if scanlname.startswith("bdr:"):
-                scanlname = scanlname[4:]
-            elif scanlname.startswith("http://purl.bdrc.io/resource/"):
-                scanlname = scanlname[29:]
+            scanlname = to_lname(sm["id"])
             self.add_triple(
                 bdr[self.lname], bdo["instanceReproductionOf"], bdr[scanlname]
             )
@@ -111,6 +115,8 @@ class BUDARDFSerializer:
                 self.add_triple(bdr[self.lname], bdo["OPFOCRBatch"], Literal(oii["batch_id"]))
             if "ocr_info" in oii and "timestamp" in oii["ocr_info"]:
                 self.add_triple(bdr[self.lname], bdo["OPFOCRTimeStamp"], Literal(oii["ocr_info"]["timestamp"], datatype=XSD.dateTime))
+            if "timestamp" in oii:
+                self.add_triple(bdr[self.lname], bdo["OPFOCRTimeStamp"], Literal(oii["timestamp"], datatype=XSD.dateTime))
         self.add_triple(
             bdr[self.lname],
             rdfs.seeAlso,
@@ -136,10 +142,7 @@ class BUDARDFSerializer:
             iglname = None
             if "source_metadata" in baseinfo and "image_group_id" in baseinfo["source_metadata"] or "id" in baseinfo["source_metadata"]:
                 iglname = baseinfo["source_metadata"]["image_group_id"] if "image_group_id" in baseinfo["source_metadata"] else baseinfo["source_metadata"]["id"]
-                if iglname.startswith("bdr:"):
-                    iglname = iglname[4:]
-                elif iglname.startswith("http://purl.bdrc.io/resource/"):
-                    iglname = iglname[29:]
+                iglname = to_lname(iglname)
             volume_basename = f"{self.lname}_{baselname}"
             evol = bdr[f"VL{volume_basename}"]
             self.add_triple(evol, rdf.type, bdo["EtextVolume"])
@@ -206,8 +209,8 @@ class BUDARDFSerializer:
             for mw_i, mw in enumerate(ordered_mws):
                 self.add_partial_etext(mw, mw_i, evol, baselname, baseinfo, ranges[mw])
 
-    def add_partial_etext(mw, mw_i, evol, baselname, baseinfo, rgs):
-        ut = bdr[f"UT{mw}_{baselname}"]
+    def add_partial_etext(self, mw, mw_i, evol, baselname, baseinfo, rgs):
+        subject = bdr[f"UT{mw}_{baselname}"]
         self.add_triple(subject, rdf.type, bdo["Etext"])
         self.add_triple(subject, bdo["eTextInInstance"], bdr[self.lname])
         self.add_triple(subject, bdo["etextInVolume"], evol)
@@ -252,7 +255,7 @@ class BUDARDFSerializer:
         self.add_triple(
             subject, bdo["sliceStartChar"], Literal(1, datatype=XSD.integer)
         )
-        if include_contents:
+        if self.include_contents:
             self.set_etext_pages(baselname)
             self.set_etext_chunks(baselname, baseinfo)
 
