@@ -39,7 +39,8 @@ class BUDARDFSerializer:
         self.bl_volinfo = None
         self.include_contents = include_contents
         self.get_o_graph = get_o_graph
-        self.get_buda_scan_info = get_buda_scan_info
+        self.get_w_info = get_w_info
+        self.outline_pl = None
 
     def add_triple(self, rdf_subject, rdf_predicate, rdf_object):
         self.lod_g.add((rdf_subject, rdf_predicate, rdf_object))
@@ -50,7 +51,6 @@ class BUDARDFSerializer:
 
     def get_result(self):
         return self.lod_g
-
 
     """
     Entry point to build the RDF graph
@@ -72,6 +72,12 @@ class BUDARDFSerializer:
             self.add_triple(
                 bdr[scanlname], bdo["instanceHasReproduction"], bdr[self.lname]
             )
+            if self.get_w_info:
+                self.w_info = self.get_w_info(scanlname)
+                self.mw_lname = to_lname(self.w_info["source_metadata"]["reproduction_of"])
+                if "outline" in self.w_info["source_metadata"] and self.get_o_graph:
+                    outline_graph = self.get_o_graph(self.w_info["source_metadata"]["outline"])
+                    self.outline_pl = OutlinePageLookup(outline_graph, scanlname)
         if meta.initial_creation_type == "ocr":
             self.add_triple(
                 bdr[self.lname], bdo["contentMethod"], bdr['ContentMethod_OCR']
@@ -142,7 +148,95 @@ class BUDARDFSerializer:
             self.add_triple(bdr[self.lname], bdo["instanceHasVolume"], evol)
             if iglname:
                 self.add_triple(evol, bdo["etextVolumeForImageGroup"], bdr[iglname])
-            self.set_etext_full_volume(baselname, baseinfo, evol)
+            player = self.openpecha.get_layer(baselname, LayerEnum.pagination)
+            if iglname is None or self.w_info is None or player is None or self.outline_pl is None or len(self.outline_pl.get_mw_list(volume_number)) == 0:
+                self.set_etext_full_volume(baselname, baseinfo, evol)
+                return
+            # in outlines
+            iginfo = self.w_info["image_groups"][iglname]
+            has_chunks_outside_outline = False
+            ranges = {}
+            cur_ranges = {}
+            prev_mws = set()
+            ordered_mws = []
+            # a range is a tuple (page_start, page_end, char_start, char_end)
+            for annotation_id, annotation in player.annotations.items():
+                sequence = 0
+                if "imgnum" in annotation:
+                    sequence = annotation["imgnum"]
+                elif "page_index" in annotation:
+                    sequence = self.get_sequence(annotation["page_index"])
+                else:
+                    # image numbers are necessary for this exercise
+                    continue
+                if sequence <= iginfo["volume_pages_bdrc_intro"]:
+                    # skip intro pages
+                    continue
+                mws = self.outline_pl.get_mw_list(volume_number, sequence)
+                # in case we have a page with OCR that has no corresponding location in the outline
+                if len(mws) == 0:
+                    # we just add the root mw
+                    mws = { to_lname(self.w_info["source_metadata"]["reproduction_of"]) }
+                # for mws that were on previous page but not this one:
+                for mw in prev_mws.difference(mws):
+                    # we close their range
+                    if mw not in ranges:
+                        ranges[mw] = []
+                    ranges[mw].append(cur_ranges[mw])
+                    del cur_ranges[mw]
+                # for mws that were not on previous page but are on this one:
+                for mw in mws.difference(prev_mws):
+                    if mw not in ordered_mws:
+                        ordered_mws.append(mw)
+                    # we create a new range
+                    cur_ranges[mw] = (sequence, sequence, annotation["span"]["start"], annotation["span"]["end"])
+                # for mws that were also on the previous page:
+                for mw in mws.intersection(prev_mws):
+                    # we extend the range
+                    page_start, page_end, char_start, char_end = cur_ranges[mw]
+                    cur_ranges[mw] = (page_start, sequence, char_start, annotation["span"]["end"])
+                prev_mws = mws
+            # finish ranges
+            for mw, r in cur_ranges.items():
+                if mw not in ranges:
+                    ranges[mw] = []
+                ranges[mw].append(r)
+            #print(ranges)
+            # then go through the ranges and add to the documents:
+            for mw_i, mw in enumerate(ordered_mws):
+                self.add_partial_etext(mw, mw_i, evol, baselname, baseinfo, ranges[mw])
+
+    def add_partial_etext(mw, mw_i, evol, baselname, baseinfo, rgs):
+        ut = bdr[f"UT{mw}_{baselname}"]
+        self.add_triple(subject, rdf.type, bdo["Etext"])
+        self.add_triple(subject, bdo["eTextInInstance"], bdr[self.lname])
+        self.add_triple(subject, bdo["etextInVolume"], evol)
+        self.add_triple(subject, bdo["seqNum"], Literal(mw_i, datatype=XSD.integer))
+        if not rgs:
+            self.add_triple(
+                subject, bdo["sliceStartChar"], Literal(1, datatype=XSD.integer)
+            )
+        else:
+            min_page_start = float('inf')
+            max_page_end = 0
+            min_char_start = float('inf')
+            max_char_end = 0
+            for rg in rgs:
+                page_start, page_end, char_start, char_end = rg
+                if page_start < min_page_start:
+                    min_page_start = page_start
+                if page_end > max_page_end:
+                    max_page_end = page_end
+                if char_start < min_char_start:
+                    min_char_start = char_start
+                if char_end > max_char_end:
+                    max_char_end = char_end
+            self.add_triple(
+                subject, bdo["sliceStartChar"], Literal(min_char_start, datatype=XSD.integer)
+            )
+            self.add_triple(
+                subject, bdo["sliceEndChar"], Literal(max_char_end, datatype=XSD.integer)
+            )
 
     def set_etext_full_volume(self, baselname, baseinfo, evol):
         volume_basename = f"{self.lname}_{baselname}"
@@ -151,6 +245,13 @@ class BUDARDFSerializer:
         self.add_triple(subject, bdo["eTextInInstance"], bdr[self.lname])
         self.add_triple(subject, bdo["etextInVolume"], evol)
         self.add_triple(subject, bdo["seqNum"], Literal(1, datatype=XSD.integer))
+        # TODO?
+        #self.add_triple(
+        #    subject, bdo["sliceEndChar"], Literal(end, datatype=XSD.integer)
+        #)
+        self.add_triple(
+            subject, bdo["sliceStartChar"], Literal(1, datatype=XSD.integer)
+        )
         if include_contents:
             self.set_etext_pages(baselname)
             self.set_etext_chunks(baselname, baseinfo)
@@ -231,11 +332,10 @@ class BUDARDFSerializer:
             bdo["chunkContents"],
             Literal(volume_string[start_char:end_char], lang=language),
         )
+        # TODO?
+        #self.add_triple(subject, bdo["sliceEndChar"], Literal(end_char, datatype=XSD.integer))
         self.add_triple(
-            subject, bdo["sliceEndChar"], Literal(end_char, datatype=XSD.integer)
-        )
-        self.add_triple(
-            subject, bdo["sliceStartChar"], Literal(start_char, datatype=XSD.integer)
+            subject, bdo["sliceStartChar"], Literal(1, datatype=XSD.integer)
         )
 
         self.add_triple(bdr[etext], bdo["eTextHasChunk"], subject)
