@@ -27,7 +27,8 @@ class BUDARDFSerializer:
     """
     """
 
-    def __init__(self, openpecha):
+    def __init__(self, openpecha, include_contents=False, get_o_graph=None, get_w_info=get_buda_scan_info):
+
         self.openpecha = openpecha
         self._pecha_id = openpecha.pecha_id
         self.lname = f"IE0OP{self._pecha_id}"
@@ -36,6 +37,9 @@ class BUDARDFSerializer:
         self.lod_g = self.lod_ds.graph(self.graph_r)
         self.lod_g.namespace_manager = nsm
         self.bl_volinfo = None
+        self.include_contents = include_contents
+        self.get_o_graph = get_o_graph
+        self.get_buda_scan_info = get_buda_scan_info
 
     def add_triple(self, rdf_subject, rdf_predicate, rdf_object):
         self.lod_g.add((rdf_subject, rdf_predicate, rdf_object))
@@ -101,6 +105,13 @@ class BUDARDFSerializer:
                 self.add_triple(bdr[self.lname], bdo["OPFOCRBatch"], Literal(oii["batch_id"]))
             if "ocr_info" in oii and "timestamp" in oii["ocr_info"]:
                 self.add_triple(bdr[self.lname], bdo["OPFOCRTimeStamp"], Literal(oii["ocr_info"]["timestamp"], datatype=XSD.dateTime))
+        self.add_triple(
+            bdr[self.lname],
+            rdfs.seeAlso,
+            Literal(
+                f"https://github.com/Openpecha-Data/{self._pecha_id}/", datatype=XSD.anyURI
+            ),
+        )
         self.get_base_volumes()
         self.set_adm()
 
@@ -116,56 +127,33 @@ class BUDARDFSerializer:
                 volume_number = baseinfo["order"]
             else:
                 volume_number = int(re.search(r"\d+", baselname).group())
-            self.set_etext_asset(baselname, baseinfo, volume_number)
-            self.add_triple(
-                bdr[self.lname],
-                bdo["instanceHasVolume"],
-                bdr[f"VL{self.lname}_{baselname}"],
-            )
-            self.set_etext_ref(baselname)
-            self.set_etext(baselname, baseinfo, volume_number)
+            iglname = None
+            if "source_metadata" in baseinfo and "image_group_id" in baseinfo["source_metadata"] or "id" in baseinfo["source_metadata"]:
+                iglname = baseinfo["source_metadata"]["image_group_id"] if "image_group_id" in baseinfo["source_metadata"] else baseinfo["source_metadata"]["id"]
+                if iglname.startswith("bdr:"):
+                    iglname = iglname[4:]
+                elif iglname.startswith("http://purl.bdrc.io/resource/"):
+                    iglname = iglname[29:]
+            volume_basename = f"{self.lname}_{baselname}"
+            evol = bdr[f"VL{volume_basename}"]
+            self.add_triple(evol, rdf.type, bdo["EtextVolume"])
+            self.add_triple(evol, bdo["volumeNumber"], Literal(volume_number, datatype=XSD.integer))
+            self.add_triple(evol, bdo["volumeOf"], bdr[f"{self.lname}"])
+            self.add_triple(bdr[self.lname], bdo["instanceHasVolume"], evol)
+            if iglname:
+                self.add_triple(evol, bdo["etextVolumeForImageGroup"], bdr[iglname])
+            self.set_etext_full_volume(baselname, baseinfo, evol)
 
-    def set_etext_asset(self, baselname, baseinfo, volume_number):
-        volume_basename = f"{self.lname}_{baselname}"
-        subject = bdr[f"VL{volume_basename}"]
-        self.add_triple(subject, rdf.type, bdo["VolumeEtextAsset"])
-        self.add_triple(subject, bdo["volumeHasEtext"], bdr[f"ER{volume_basename}"])
-        self.add_triple(
-            subject, bdo["volumeNumber"], Literal(volume_number, datatype=XSD.integer)
-        )
-        self.add_triple(subject, bdo["volumeOf"], bdr[f"{self.lname}"])
-
-    def set_etext_ref(self, baselname):
-        volume_basename = f"{self.lname}_{baselname}"
-        subject = bdr[f"ER{volume_basename}"]
-        self.add_triple(subject, rdf.type, bdo["EtextRef"])
-        self.add_triple(subject, bdo["eTextResource"], bdr[f"UT{volume_basename}"])
-        self.add_triple(subject, bdo["seqNum"], Literal(1, datatype=XSD.integer))
-
-    def set_etext(self, baselname, baseinfo, volume_number):
+    def set_etext_full_volume(self, baselname, baseinfo, evol):
         volume_basename = f"{self.lname}_{baselname}"
         subject = bdr[f"UT{volume_basename}"]
-        if "source_metadata" in baseinfo and "image_group_id" in baseinfo["source_metadata"]:
-            iglname = baseinfo["source_metadata"]["image_group_id"]
-            if iglname.startswith("bdr:"):
-                iglname = iglname[4:]
-            elif iglname.startswith("http://purl.bdrc.io/resource/"):
-                iglname = iglname[29:]
-            self.add_triple(subject, bdo["eTextForImageGroup"], bdr[iglname])
         self.add_triple(subject, rdf.type, bdo["Etext"])
         self.add_triple(subject, bdo["eTextInInstance"], bdr[self.lname])
-        self.add_triple(
-            subject, bdo["eTextIsVolume"], Literal(volume_number, datatype=XSD.integer)
-        )
-        self.add_triple(
-            subject,
-            rdfs.seeAlso,
-            Literal(
-                f"https://github.com/Openpecha-Data/{self._pecha_id}/", datatype=XSD.anyURI
-            ),
-        )
-        self.set_etext_pages(baselname)
-        self.set_etext_chunks(baselname, baseinfo)
+        self.add_triple(subject, bdo["etextInVolume"], evol)
+        self.add_triple(subject, bdo["seqNum"], Literal(1, datatype=XSD.integer))
+        if include_contents:
+            self.set_etext_pages(baselname)
+            self.set_etext_chunks(baselname, baseinfo)
 
     def set_etext_pages(self, baselname):
         player = self.openpecha.get_layer(baselname, LayerEnum.pagination)
