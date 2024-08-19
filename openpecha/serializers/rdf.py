@@ -81,7 +81,7 @@ class BUDARDFSerializer:
                 self.mw_lname = to_lname(self.w_info["source_metadata"]["reproduction_of"])
                 if "outline" in self.w_info["source_metadata"] and self.get_o_graph:
                     outline_graph = self.get_o_graph(self.w_info["source_metadata"]["outline"])
-                    self.outline_pl = OutlinePageLookup(outline_graph, scanlname)
+                    self.outline_pl = OutlinePageLookup(outline_graph, scanlname, self.w_info)
         if meta.initial_creation_type == "ocr":
             self.add_triple(
                 bdr[self.lname], bdo["contentMethod"], bdr['ContentMethod_OCR']

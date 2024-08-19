@@ -196,7 +196,7 @@ class OutlinePageLookup:
     and then returns a list of texts (mw) present on an image (defined by volume number + image number)
     """
 
-    def __init__(self, outline_graph, w_lname):
+    def __init__(self, outline_graph, w_lname, w_info):
         # Initialize a dictionary to store content locations
         self.lookup = {}
         # Additional structure to keep track of open-ended ranges
@@ -204,7 +204,16 @@ class OutlinePageLookup:
         self.vnum_to_mws = {}
         self.outline_graph = outline_graph
         self.w_lname = w_lname
+        self.w_info = w_info # same format as returned by get_buda_scan_info()
         self.process()
+
+    def get_nb_img_intro(self, vnum):
+        if self.w_info is None:
+            return 1
+        for _, ig_info in self.w_info["image_groups"].items():
+            if ig_info["volume_number"] == vnum:
+                return ig_info["volume_pages_bdrc_intro"]
+        return 1
 
     def process(self):
         for s, _, cl in self.outline_graph.triples((None, BDO.contentLocation, None)):
@@ -228,9 +237,6 @@ class OutlinePageLookup:
         imgnum_end can be None, in which case all the images after imgnum_start get associated with the mw
         there can be multiple mw associated with the same image
         """
-        if imgnum_start is None:
-            imgnum_start = 1
-
         if vnum_start is None:
             vnum_start = 1
         if vnum_end is None:
@@ -238,13 +244,16 @@ class OutlinePageLookup:
 
         if imgnum_start is None:
             imgnum_start = 1
+        nb_intro_imgs = self.get_nb_img_intro(int(vnum_start))
+        if int(imgnum_start) < nb_intro_imgs:
+            imgnum_start = nb_intro_imgs
 
         for vnum in range(int(vnum_start), int(vnum_end) + 1):
             if vnum not in self.vnum_to_mws:
                 self.vnum_to_mws[vnum] = set()
             self.vnum_to_mws[vnum].add(mw)
             vol_imgnum_end = int(imgnum_end) if vnum == int(vnum_end) and imgnum_end is not None else None
-            vol_imgnum_start = int(imgnum_start) if vnum == int(vnum_start) else 1
+            vol_imgnum_start = int(imgnum_start) if vnum == int(vnum_start) else self.get_nb_img_intro(vnum)
             if vnum not in self.lookup:
                 self.lookup[vnum] = {}
 

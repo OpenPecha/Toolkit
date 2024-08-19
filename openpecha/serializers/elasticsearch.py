@@ -81,7 +81,7 @@ class BUDAElasticSearchSerializer:
             mw_id = to_lname(self.w_info["source_metadata"]["reproduction_of"])
             if "outline" in self.w_info["source_metadata"] and self.get_o_graph:
                 outline_graph = self.get_o_graph(self.w_info["source_metadata"]["outline"])
-                self.outline_pl = OutlinePageLookup(outline_graph, common["etext_pagination_in"])
+                self.outline_pl = OutlinePageLookup(outline_graph, common["etext_pagination_in"], self.w_info)
             if mw_id is not None:
                 common["etext_for_root_instance"] = mw_id
                 common["etext_for_instance"] = mw_id # temporary, can be changed later with the outline
