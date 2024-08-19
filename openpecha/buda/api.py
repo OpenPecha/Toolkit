@@ -209,11 +209,11 @@ class OutlinePageLookup:
 
     def get_nb_img_intro(self, vnum):
         if self.w_info is None:
-            return 1
+            return 0
         for _, ig_info in self.w_info["image_groups"].items():
             if ig_info["volume_number"] == vnum:
                 return ig_info["volume_pages_bdrc_intro"]
-        return 1
+        return 0
 
     def process(self):
         for s, _, cl in self.outline_graph.triples((None, BDO.contentLocation, None)):
@@ -245,15 +245,15 @@ class OutlinePageLookup:
         if imgnum_start is None:
             imgnum_start = 1
         nb_intro_imgs = self.get_nb_img_intro(int(vnum_start))
-        if int(imgnum_start) < nb_intro_imgs:
-            imgnum_start = nb_intro_imgs
+        if int(imgnum_start) < nb_intro_imgs + 1:
+            imgnum_start = nb_intro_imgs + 1
 
         for vnum in range(int(vnum_start), int(vnum_end) + 1):
             if vnum not in self.vnum_to_mws:
                 self.vnum_to_mws[vnum] = set()
             self.vnum_to_mws[vnum].add(mw)
             vol_imgnum_end = int(imgnum_end) if vnum == int(vnum_end) and imgnum_end is not None else None
-            vol_imgnum_start = int(imgnum_start) if vnum == int(vnum_start) else self.get_nb_img_intro(vnum)
+            vol_imgnum_start = int(imgnum_start) if vnum == int(vnum_start) else self.get_nb_img_intro(vnum) + 1
             if vnum not in self.lookup:
                 self.lookup[vnum] = {}
 
