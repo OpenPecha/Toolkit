@@ -154,7 +154,7 @@ class BUDARDFSerializer:
             player = self.openpecha.get_layer(baselname, LayerEnum.pagination)
             if iglname is None or self.w_info is None or player is None or self.outline_pl is None or len(self.outline_pl.get_mw_list(volume_number)) == 0:
                 self.set_etext_full_volume(baselname, baseinfo, evol)
-                return
+                continue
             # in outlines
             iginfo = self.w_info["image_groups"][iglname]
             has_chunks_outside_outline = False
