@@ -130,7 +130,8 @@ class BUDARDFSerializer:
     def get_base_volumes(self):
         for baselname, baseinfo in self.openpecha.meta.bases.items():
             volume_string = self.openpecha.get_base(baselname)
-            if len(volume_string) < 2:
+            vol_clen = len(volume_string)
+            if vol_clen < 2:
                 continue
             volume_number = 0
             if "source_metadata" in baseinfo and "volume_number" in baseinfo["source_metadata"]:
@@ -150,10 +151,10 @@ class BUDARDFSerializer:
             self.add_triple(evol, bdo["volumeOf"], bdr[f"{self.lname}"])
             self.add_triple(bdr[self.lname], bdo["instanceHasVolume"], evol)
             if iglname:
-                self.add_triple(evol, bdo["etextVolumeForImageGroup"], bdr[iglname])
+                self.add_triple(evol, bdo["eTextVolumeForImageGroup"], bdr[iglname])
             player = self.openpecha.get_layer(baselname, LayerEnum.pagination)
             if iglname is None or self.w_info is None or player is None or self.outline_pl is None or len(self.outline_pl.get_mw_list(volume_number)) == 0:
-                self.set_etext_full_volume(baselname, baseinfo, evol)
+                self.set_etext_full_volume(baselname, baseinfo, evol, vol_clen)
                 continue
             # in outlines
             iginfo = self.w_info["image_groups"][iglname]
@@ -207,17 +208,21 @@ class BUDARDFSerializer:
             #print(ranges)
             # then go through the ranges and add to the documents:
             for mw_i, mw in enumerate(ordered_mws):
-                self.add_partial_etext(mw, mw_i, evol, baselname, baseinfo, ranges[mw])
+                self.add_partial_etext(mw, mw_i, evol, baselname, baseinfo, ranges[mw], vol_clen)
 
-    def add_partial_etext(self, mw, mw_i, evol, baselname, baseinfo, rgs):
+    def add_partial_etext(self, mw, mw_i, evol, baselname, baseinfo, rgs, vol_clen):
         subject = bdr[f"UT{mw}_{baselname}"]
         self.add_triple(subject, rdf.type, bdo["Etext"])
         self.add_triple(subject, bdo["eTextInInstance"], bdr[self.lname])
         self.add_triple(subject, bdo["eTextInVolume"], evol)
+        self.add_triple(subject, bdo["eTextForInstance"], bdr[mw])
         self.add_triple(subject, bdo["seqNum"], Literal(mw_i, datatype=XSD.integer))
         if not rgs:
             self.add_triple(
                 subject, bdo["sliceStartChar"], Literal(1, datatype=XSD.integer)
+            )
+            self.add_triple(
+                subject, bdo["sliceEndChar"], Literal(vol_clen, datatype=XSD.integer)
             )
         else:
             min_page_start = float('inf')
@@ -241,17 +246,16 @@ class BUDARDFSerializer:
                 subject, bdo["sliceEndChar"], Literal(max_char_end, datatype=XSD.integer)
             )
 
-    def set_etext_full_volume(self, baselname, baseinfo, evol):
+    def set_etext_full_volume(self, baselname, baseinfo, evol, vol_clen):
         volume_basename = f"{self.lname}_{baselname}"
         subject = bdr[f"UT{volume_basename}"]
         self.add_triple(subject, rdf.type, bdo["Etext"])
         self.add_triple(subject, bdo["eTextInInstance"], bdr[self.lname])
         self.add_triple(subject, bdo["eTextInVolume"], evol)
         self.add_triple(subject, bdo["seqNum"], Literal(1, datatype=XSD.integer))
-        # TODO?
-        #self.add_triple(
-        #    subject, bdo["sliceEndChar"], Literal(end, datatype=XSD.integer)
-        #)
+        self.add_triple(
+            subject, bdo["sliceEndChar"], Literal(vol_clen, datatype=XSD.integer)
+        )
         self.add_triple(
             subject, bdo["sliceStartChar"], Literal(1, datatype=XSD.integer)
         )
