@@ -215,6 +215,7 @@ class BUDARDFSerializer:
         self.add_triple(subject, rdf.type, bdo["Etext"])
         self.add_triple(subject, bdo["eTextInInstance"], bdr[self.lname])
         self.add_triple(subject, bdo["eTextInVolume"], evol)
+        self.add_triple(evol, bdo["volumeHasEtext"], subject)
         self.add_triple(subject, bdo["eTextForInstance"], bdr[mw])
         self.add_triple(subject, bdo["seqNum"], Literal(mw_i, datatype=XSD.integer))
         if not rgs:
@@ -252,6 +253,7 @@ class BUDARDFSerializer:
         self.add_triple(subject, rdf.type, bdo["Etext"])
         self.add_triple(subject, bdo["eTextInInstance"], bdr[self.lname])
         self.add_triple(subject, bdo["eTextInVolume"], evol)
+        self.add_triple(evol, bdo["volumeHasEtext"], subject)
         self.add_triple(subject, bdo["seqNum"], Literal(1, datatype=XSD.integer))
         self.add_triple(
             subject, bdo["sliceEndChar"], Literal(vol_clen, datatype=XSD.integer)
