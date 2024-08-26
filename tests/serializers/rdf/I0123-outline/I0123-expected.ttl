@@ -17,28 +17,33 @@ bda:IE0OPP1234 a adm:AdminData ;
     adm:replaceWith bdr:IE0OPI0123 ;
     adm:status bda:StatusWithdrawn .
 
-bdr:UTMW1_9C26 a :Etext ;
-    :eTextInInstance bdr:IE0OPI0123 ;
-    :etextInVolume bdr:VLIE0OPI0123_9C26 ;
-    :seqNum 0 ;
-    :sliceEndChar 79 ;
-    :sliceStartChar 10 .
-
-bdr:UTMW3_9C26 a :Etext ;
-    :eTextInInstance bdr:IE0OPI0123 ;
-    :etextInVolume bdr:VLIE0OPI0123_9C26 ;
-    :seqNum 1 ;
-    :sliceEndChar 39 ;
-    :sliceStartChar 20 .
-
 bdr:IE0OPP1234 a :EtextInstance .
 
 bdr:PR1ER1 :collectionMember bdr:IE0OPI0123 .
 
+bdr:UTMW1_9C26 a :Etext ;
+    :eTextForInstance bdr:MW1 ;
+    :eTextInInstance bdr:IE0OPI0123 ;
+    :eTextInVolume bdr:VLIE0OPI0123_9C26 ;
+    :seqNum 1 ;
+    :sliceEndChar 79 ;
+    :sliceStartChar 10 .
+
+bdr:UTMW3_9C26 a :Etext ;
+    :eTextForInstance bdr:MW3 ;
+    :eTextInInstance bdr:IE0OPI0123 ;
+    :eTextInVolume bdr:VLIE0OPI0123_9C26 ;
+    :seqNum 2 ;
+    :sliceEndChar 39 ;
+    :sliceStartChar 20 .
+
 bdr:W1KG16793 :instanceHasReproduction bdr:IE0OPI0123 .
 
 bdr:VLIE0OPI0123_9C26 a :EtextVolume ;
-    :etextVolumeForImageGroup bdr:I1KG16930 ;
+    :eTextForInstance bdr:MWV1 ;
+    :eTextVolumeForImageGroup bdr:I1KG16930 ;
+    :volumeHasEtext bdr:UTMW1_9C26,
+        bdr:UTMW3_9C26 ;
     :volumeNumber 1 ;
     :volumeOf bdr:IE0OPI0123 .
 

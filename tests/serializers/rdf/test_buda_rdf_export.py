@@ -16,6 +16,7 @@ def get_w_info(w_lname, with_outline = False):
             },
             "image_groups": {
                 "I1KG16930": {
+                    "volume_number": 1,
                     "volume_pages_bdrc_intro": 2
                 }
             }

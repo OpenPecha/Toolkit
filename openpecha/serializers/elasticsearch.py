@@ -142,6 +142,9 @@ class BUDAElasticSearchSerializer:
             doc["etextNumber"] = 0
             doc["etext_imagegroup"] = iglname
             doc["etext_vol"] = f"VL{volume_basename}"
+            if self.outline_pl and volume_number in self.outline_pl.volnum_to_volmw:
+                volmw = self.outline_pl.volnum_to_volmw[volume_number]
+                doc["join_field"] = {"name": "etext", "parent": volmw}
             # skip first two pages
             rng = None
             if iginfo["volume_pages_bdrc_intro"] > 0 and player:

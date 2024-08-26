@@ -150,6 +150,9 @@ class BUDARDFSerializer:
             self.add_triple(evol, bdo["volumeNumber"], Literal(volume_number, datatype=XSD.integer))
             self.add_triple(evol, bdo["volumeOf"], bdr[f"{self.lname}"])
             self.add_triple(bdr[self.lname], bdo["instanceHasVolume"], evol)
+            if self.outline_pl and volume_number in self.outline_pl.volnum_to_volmw:
+                volmw = self.outline_pl.volnum_to_volmw[volume_number]
+                self.add_triple(evol, bdo["eTextForInstance"], bdr[volmw])
             if iglname:
                 self.add_triple(evol, bdo["eTextVolumeForImageGroup"], bdr[iglname])
             player = self.openpecha.get_layer(baselname, LayerEnum.pagination)
@@ -217,7 +220,7 @@ class BUDARDFSerializer:
         self.add_triple(subject, bdo["eTextInVolume"], evol)
         self.add_triple(evol, bdo["volumeHasEtext"], subject)
         self.add_triple(subject, bdo["eTextForInstance"], bdr[mw])
-        self.add_triple(subject, bdo["seqNum"], Literal(mw_i, datatype=XSD.integer))
+        self.add_triple(subject, bdo["seqNum"], Literal(mw_i+1, datatype=XSD.integer))
         if not rgs:
             self.add_triple(
                 subject, bdo["sliceStartChar"], Literal(1, datatype=XSD.integer)

@@ -2,13 +2,19 @@
 @prefix bdr:   <http://purl.bdrc.io/resource/> .
 
 bdr:MW1 :contentLocation bdr:CL1 , bdr:CL2 ;
-        :partType :PartTypeText .
+        :partType bdr:PartTypeText .
 
 bdr:MW3 :contentLocation bdr:CL3 ;
-        :partType :PartTypeText .
+        :partType bdr:PartTypeText .
+
+bdr:MWV1 :contentLocation bdr:CLV1 ;
+        :partType bdr:PartTypeVolume .
 
 bdr:CL1 :contentLocationInstance bdr:W1KG16793 ;
          :contentLocationPage 1 .
+
+bdr:CLV1 :contentLocationInstance bdr:W1KG16793 ;
+         :contentLocationVolume 1 .
 
 bdr:CL2  :contentLocationInstance bdr:W1KG16793 ;
          :contentLocationPage 3 ;

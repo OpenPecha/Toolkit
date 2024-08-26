@@ -205,6 +205,7 @@ class OutlinePageLookup:
         self.outline_graph = outline_graph
         self.w_lname = w_lname
         self.w_info = w_info # same format as returned by get_buda_scan_info()
+        self.volnum_to_volmw = {} # volume number to mw
         self.process()
 
     def get_nb_img_intro(self, vnum):
@@ -220,9 +221,15 @@ class OutlinePageLookup:
             if (cl, BDO.contentLocationInstance, BDR[self.w_lname]) not in self.outline_graph:
                 continue
             partType = self.outline_graph.value(s, BDO.partType, None)
-            if not partType or partType in [BDR.PartTypeVolume, BDR.PartTypeCodicologicalVolume, BDR.PartTypeSection, BDR.PartTypeChapter]:
-                continue
             mw = str(s)[len(BDR_uri):]
+            if partType in [BDR.PartTypeCodicologicalVolume, BDR.PartTypeVolume]:
+                vnum = self.outline_graph.value(cl, BDO.contentLocationVolume, None)
+                if not vnum:
+                    continue
+                self.volnum_to_volmw[int(vnum)] = mw
+                continue
+            if not partType or partType in [BDR.PartTypeSection, BDR.PartTypeChapter]:
+                continue
             vnum_start = self.outline_graph.value(cl, BDO.contentLocationVolume, None)
             vnum_end = self.outline_graph.value(cl, BDO.contentLocationEndVolume, None)
             imgnum_end = self.outline_graph.value(cl, BDO.contentLocationEndPage, None)
