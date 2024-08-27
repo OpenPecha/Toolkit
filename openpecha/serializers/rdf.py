@@ -148,6 +148,7 @@ class BUDARDFSerializer:
             evol = bdr[f"VL{volume_basename}"]
             self.add_triple(evol, rdf.type, bdo["EtextVolume"])
             self.add_triple(evol, bdo["volumeNumber"], Literal(volume_number, datatype=XSD.integer))
+            self.add_triple(evol, bdo["sliceEndChar"], Literal(vol_clen, datatype=XSD.integer))
             self.add_triple(evol, bdo["volumeOf"], bdr[f"{self.lname}"])
             self.add_triple(bdr[self.lname], bdo["instanceHasVolume"], evol)
             if self.outline_pl and volume_number in self.outline_pl.volnum_to_volmw:
