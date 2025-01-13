@@ -141,7 +141,7 @@ class BUDAElasticSearchSerializer:
             doc["volumeNumber"] = volume_number
             doc["etextNumber"] = 0
             doc["etext_imagegroup"] = iglname
-            doc["etext_vol"] = f"VL{volume_basename}"
+            doc["etext_vol"] = f"VE{volume_basename}"
             if self.outline_pl and volume_number in self.outline_pl.volnum_to_volmw:
                 volmw = self.outline_pl.volnum_to_volmw[volume_number]
                 doc["join_field"] = {"name": "etext", "parent": volmw}
@@ -230,7 +230,7 @@ class BUDAElasticSearchSerializer:
         doc["etext_imagegroup"] = iglname
         doc["etext_for_instance"] = mw
         doc["etextNumber"] = etext_in_volume
-        doc["etext_vol"] = f"VL{self.etext_root_instance_id}_{baselname}"
+        doc["etext_vol"] = f"VE{self.etext_root_instance_id}_{baselname}"
         for rng in ranges:
             self.set_etext_pages(doc, baselname, rng)
             self.set_etext_chunks(doc, baselname, baseinfo, rng)

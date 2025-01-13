@@ -71,7 +71,7 @@ class PechaMetadata(BaseModel):
     initial_creation_type: InitialCreationType = None
     imported: datetime = None
     last_modified: datetime = None
-    parser: AnyHttpUrl = None
+    parser: str = None
     source_metadata: Optional[Dict] = None  # place to dump any metadata from the source
     statistics: Optional[Dict] = None
     quality: Optional[Dict] = None

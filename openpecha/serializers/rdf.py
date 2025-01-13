@@ -145,7 +145,7 @@ class BUDARDFSerializer:
                 iglname = baseinfo["source_metadata"]["image_group_id"] if "image_group_id" in baseinfo["source_metadata"] else baseinfo["source_metadata"]["id"]
                 iglname = to_lname(iglname)
             volume_basename = f"{self.lname}_{baselname}"
-            evol = bdr[f"VL{volume_basename}"]
+            evol = bdr[f"VE{volume_basename}"]
             self.add_triple(evol, rdf.type, bdo["EtextVolume"])
             self.add_triple(evol, bdo["volumeNumber"], Literal(volume_number, datatype=XSD.integer))
             self.add_triple(evol, bdo["sliceEndChar"], Literal(vol_clen, datatype=XSD.integer))
