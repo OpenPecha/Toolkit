@@ -98,6 +98,7 @@ class BDRCGBFileProvider():
         hocr_basename = self.get_hocr_filename(image_filename)
         if not hocr_basename:
             logging.error("cannot find hocr filename for "+image_filename)
+            return
         hocr_filename = hocr_basename + ".html"
         zf = self.get_image_group_data(image_group_id)
         try:
