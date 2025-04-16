@@ -64,11 +64,11 @@ class BDRCGBFileProvider():
     def get_hocr_filename(self, image_id):
         """ return the filename of the image_id from the images_info dict
         """
-        basename_img_id = os.path.basename(image_id)
+        basename_img_id = os.path.splitext(image_id)[0]
         for filename, img_ref in self.images_info.items():
             if img_ref == image_id:
                 return filename
-            if os.path.basename(img_ref) == basename_img_id:
+            if os.path.splitext(img_ref)[0] == basename_img_id:
                 logging.warning(f"mapped {image_id} to {img_ref}")
                 return filename
 
