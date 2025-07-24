@@ -35,7 +35,7 @@ jobs:
     - name: Run Test Coverage
       env:
         GITHUB_ORG: ${{ secrets.GH_ORG }}
-        GITHUB_TOKEN: ${{ secrets.ADMIN_GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         PYTHONPATH=./docs_src coverage run -m pytest
         coverage report
