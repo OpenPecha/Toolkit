@@ -166,6 +166,7 @@ class BUDAElasticSearchSerializer:
                     logging.warning("character 0 found for first non-intro page, this shouldn't happen")
                 else:
                     rng = (iginfo["volume_pages_bdrc_intro"], -1, start_cc, -1)
+            self.set_cstart_cend(doc, baselname, rng)
             self.set_etext_pages(doc, baselname, rng)
             self.set_etext_chunks(doc, baselname, baseinfo, rng)
             self.docs.append(doc)
@@ -234,7 +235,22 @@ class BUDAElasticSearchSerializer:
         for rng in ranges:
             self.set_etext_pages(doc, baselname, rng)
             self.set_etext_chunks(doc, baselname, baseinfo, rng)
+            self.set_cstart_cend(doc, baselname, rng)
         self.docs.append(doc)
+
+    def set_cstart_cend(self, doc, baselname, rng):
+        volume_string_len = len(self.openpecha.get_base(baselname))
+        if not rng:
+            doc["cstart"] = 0
+            doc["cend"] = volume_string_len
+            return
+        _, _, rng_cstart, rng_cend = rng
+        if rng_cstart is None:
+            rng_cstart = 0
+        if rng_cend is None or rng_cend < 1:
+            rng_cend = volume_string_len
+        doc["cstart"] = rng_cstart
+        doc["cend"] = rng_cend
 
     def set_etext_pages(self, doc, baselname, rng=None):
         player = self.openpecha.get_layer(baselname, LayerEnum.pagination)
