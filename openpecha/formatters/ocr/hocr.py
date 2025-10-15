@@ -64,9 +64,12 @@ class BDRCGBFileProvider():
     def get_hocr_filename(self, image_id):
         """ return the filename of the image_id from the images_info dict
         """
+        basename_img_id = os.path.splitext(image_id)[0]
         for filename, img_ref in self.images_info.items():
-            img_id = img_ref
-            if img_id == image_id:
+            if img_ref == image_id:
+                return filename
+            if os.path.splitext(img_ref)[0] == basename_img_id:
+                logging.warning(f"mapped {image_id} to {img_ref}")
                 return filename
 
     def get_image_group_data(self, image_group_id):
@@ -95,7 +98,11 @@ class BDRCGBFileProvider():
         Returns:
             hocr_html: html file of the image_filename
         """
-        hocr_filename = self.get_hocr_filename(image_filename)+".html"
+        hocr_basename = self.get_hocr_filename(image_filename)
+        if not hocr_basename:
+            logging.error("cannot find hocr filename for "+image_filename)
+            return
+        hocr_filename = hocr_basename + ".html"
         zf = self.get_image_group_data(image_group_id)
         try:
             for filename in zf.filelist:
