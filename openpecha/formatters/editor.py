@@ -2,7 +2,6 @@ from collections import defaultdict
 from typing import Dict
 
 from bs4 import BeautifulSoup
-from pydantic.tools import T
 
 from openpecha.core.annotation import AnnBase, Span
 from openpecha.core.layer import Layer, LayerEnum

@@ -70,10 +70,10 @@ def test_get_opf():
         base_name=first_base_name, layer_name=LayerEnum.transcription_time_span
     )
 
-    expected_layer = Layer.parse_obj(load_yaml_str(expected_layer_yml))
+    expected_layer = Layer.model_validate(load_yaml_str(expected_layer_yml))
     compare_layers(output_layer, expected_layer)
 
-    compare_meta(output_opf.meta.dict(), load_yaml_str(expected_meta_yml))
+    compare_meta(output_opf.meta.model_dump(), load_yaml_str(expected_meta_yml))
 
 
 if __name__ == "__main__":

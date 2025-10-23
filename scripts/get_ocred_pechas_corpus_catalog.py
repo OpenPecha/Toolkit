@@ -24,7 +24,7 @@ def get_pecha_metadata(pecha_id: str) -> PechaMetadata:
     raw_metadata = _fix_old_metadata_attrs_name(r.text)
     metadata_dict = yaml.safe_load(raw_metadata)
     try:
-        metadata = PechaMetadata.parse_obj(metadata_dict)
+        metadata = PechaMetadata.model_validate(metadata_dict)
     except Exception:
         metadata = PechaMetadata(initial_creation_type=InitialCreationType.input)
     return metadata

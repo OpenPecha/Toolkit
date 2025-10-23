@@ -2,7 +2,7 @@ from datetime import datetime
 from enum import Enum
 from typing import Dict, Optional, Union
 
-from pydantic import AnyHttpUrl, BaseModel, Extra, validator
+from pydantic import BaseModel, ConfigDict, field_validator
 
 from . import ids
 
@@ -21,12 +21,11 @@ class CopyrightStatus(Enum):
 
 
 class Copyright(BaseModel):
+    model_config = ConfigDict(extra='forbid')
+    
     status: CopyrightStatus = CopyrightStatus.UNKNOWN
     notice: Optional[str] = ""
     info_url: Optional[str] = None
-
-    class Config:
-        extra = Extra.forbid
 
 Copyright_copyrighted = Copyright(
     status=CopyrightStatus.COPYRIGHTED,
@@ -79,15 +78,18 @@ class PechaMetadata(BaseModel):
     copyright: Copyright = None
     license: LicenseType = None
 
-    @validator("imported", pre=True, always=True)
+    @field_validator("imported", mode='before')
+    @classmethod
     def set_imported_date(cls, v):
         return v or datetime.now()
 
-    @validator("last_modified", pre=True, always=True)
+    @field_validator("last_modified", mode='before')
+    @classmethod
     def set_last_modified_date(cls, v):
         return v or datetime.now()
 
-    @validator("copyright", pre=True, always=True)
+    @field_validator("copyright", mode='before')
+    @classmethod
     def set_copyright_info(cls, v):
         return v or Copyright()
 
@@ -101,18 +103,21 @@ class PechaMetadata(BaseModel):
 class InitialPechaMetadata(PechaMetadata):
     bases: Dict = {}
 
-    @validator("id", pre=True, always=True)
+    @field_validator("id", mode='before')
+    @classmethod
     def set_id(cls, v):
         return v or ids.get_initial_pecha_id()
 
 
 class OpenPechaMetadata(PechaMetadata):
-    @validator("id", pre=True, always=True)
+    @field_validator("id", mode='before')
+    @classmethod
     def set_id(cls, v):
         return v or ids.get_open_pecha_id()
 
 
 class DiplomaticPechaMetadata(PechaMetadata):
-    @validator("id", pre=True, always=True)
+    @field_validator("id", mode='before')
+    @classmethod
     def set_id(cls, v):
         return v or ids.get_diplomatic_id()
