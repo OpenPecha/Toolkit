@@ -7,7 +7,7 @@ from datetime import timezone
 from fontTools import unicodedata
 from abc import abstractmethod
 
-from openpecha.core.annotation import Page, Span
+from openpecha.core.annotation import Page
 from openpecha.core.annotations import Language, OCRConfidence
 from openpecha.core.layer import Layer, LayerEnum, OCRConfidenceLayer
 from openpecha.core.metadata import InitialPechaMetadata, InitialCreationType, LicenseType, Copyright_copyrighted, Copyright_unknown, Copyright_public_domain
@@ -528,14 +528,14 @@ class OCRFormatter(BaseFormatter):
         nb_below_threshold = len(state["page_low_confidence_annotations"])
         if mean_page_confidence < self.ocr_confidence_threshold or nb_below_threshold > self.max_low_conf_per_page:
             state["low_confidence_annotations"][self.get_unique_id()] = OCRConfidence(
-                span=Span(start=page_start_cc, end=state["base_layer_len"]), 
+                span={"start": page_start_cc, "end": state["base_layer_len"]}, 
                 confidence=mean_page_confidence, nb_below_threshold=nb_below_threshold if nb_below_threshold else None)
         else:
             self.merge_page_low_confidence_annotations(state["page_low_confidence_annotations"], state["low_confidence_annotations"])
             state["page_low_confidence_annotations"] = []
         # add pagination annotation:
         state["pagination_annotations"][self.get_unique_id()] = Page(
-            span=Span(start=page_start_cc, end=state["base_layer_len"]), 
+            span={"start": page_start_cc, "end": state["base_layer_len"]}, 
             imgnum=image_number, 
             reference=image_filename)
         # adding another line break at the end of a page
@@ -554,8 +554,8 @@ class OCRFormatter(BaseFormatter):
         for annotation in annotation_list_src:
             avg_confidence = self.confidence_index_from_weighted_list(annotation["weights"])
             annotation_obj = OCRConfidence(
-                span = Span(start=annotation["start"], end=annotation["end"]),
-                confidence = avg_confidence)
+                span = {"start": annotation["start"], "end": annotation["end"]},
+                confidence = avg_confidence, nb_below_threshold=None)
             annotations_dst[self.get_unique_id()] = annotation_obj
 
     def merge_short_language_annotations(self, annotation_list):
@@ -572,7 +572,7 @@ class OCRFormatter(BaseFormatter):
                     previous_annotation.span.end = annotation['end']
                     continue
             previous_annotation = Language(
-                span = Span(start=annotation["start"], end=annotation["end"]),
+                span = {"start": annotation["start"], "end": annotation["end"]},
                 language = annotation["lang"])
             annotations[self.get_unique_id()] = previous_annotation
         return annotations
@@ -605,7 +605,7 @@ class OCRFormatter(BaseFormatter):
                 try:
                     self.build_page(bboxes, image_number+1, image_filename, state, avg_char_width)
                 except:
-                    logger.error("error while building page")
+                    logging.exception("error while building page")
         layers = {}
         if state["pagination_annotations"]:
             layer = Layer(annotation_type=LayerEnum.pagination, annotations=state["pagination_annotations"])
@@ -644,8 +644,7 @@ class OCRFormatter(BaseFormatter):
             source_metadata = self.source_info["source_metadata"]
             copyright, license = self.get_copyright_and_license_info(self.source_info)
 
-        parser_link = ocr_import_info["parser_link"] if "parser_link" in ocr_import_info else None
-
+        parser_link = ocr_import_info["parser_link"] if "parser_link" in ocr_import_info else ""
         metadata = InitialPechaMetadata(
             id=pecha_id,
             source='https://library.bdrc.io',
