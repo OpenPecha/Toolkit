@@ -3,38 +3,37 @@
 
 from typing import Dict, Optional
 
-from pydantic import BaseModel, Extra, Field, validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from .ids import get_uuid
 
 
 class Span(BaseModel):
+    model_config = ConfigDict(extra='forbid')
+    
     start: int = Field(..., ge=0)
     end: int = Field(..., ge=0)
     errors: Optional[Dict] = None
 
-    @validator("start", "end")
+    @field_validator("start", "end")
+    @classmethod
     def span_must_not_be_neg(cls, v):
         if v < 0:
             raise ValueError("span shouldn't be negative")
         return v
 
-    @validator("end")
-    def end_must_not_be_less_than_start(cls, v, values, **kwargs):
-        if "start" in values and v < values["start"]:
+    @model_validator(mode='after')
+    def end_must_not_be_less_than_start(self):
+        if self.start is not None and self.end < self.start:
             raise ValueError("Span end must not be less than start")
-        return v
-
-    class Config:
-        extra = Extra.forbid
+        return self
 
 
 class BaseAnnotation(BaseModel):
+    model_config = ConfigDict(extra='forbid')
+    
     span: Span
     metadata: Optional[Dict] = None
-
-    class Config:
-        extra = Extra.forbid
 
 
 class Pagination(BaseAnnotation):

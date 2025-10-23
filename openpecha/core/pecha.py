@@ -97,9 +97,9 @@ class OpenPecha:
             return self._meta
         mf = self.read_meta_file()
         if mf is not None:
-            self._meta = PechaMetadata.parse_obj(mf)
+            self._meta = PechaMetadata.model_validate(mf)
             return self._meta
-        self._meta = PechaMetadata.parse_obj({})
+        self._meta = PechaMetadata.model_validate({})
         return self._meta
 
     @property
@@ -108,7 +108,7 @@ class OpenPecha:
             return self._index
         idxf = self.read_index_file()
         if idxf is not None:
-            self._index = Layer.parse_obj(idxf)
+            self._index = Layer.model_validate(idxf)
         return self._index
 
     @property
@@ -197,7 +197,7 @@ class OpenPecha:
 
         layer_dict = self.read_layers_file(base_name, layer_name)
         if layer_dict:
-            layer = Layer.parse_obj(layer_dict)
+            layer = Layer.model_validate(layer_dict)
         else:
             layer = Layer(annotation_type=layer_name)
         self.layers[base_name][layer_name] = layer
@@ -331,7 +331,7 @@ class OpenPechaFS(OpenPecha):
 
     def save_meta(self):
         OpenPechaFS._mkdir(self.base_path)
-        dump_yaml(self.meta.dict(exclude_none=True), self.meta_fn)
+        dump_yaml(self.meta.model_dump(exclude_none=True), self.meta_fn)
 
     def save_single_base(self, base_name: str, content: str = None):
         if not content:
@@ -351,7 +351,7 @@ class OpenPechaFS(OpenPecha):
         layer_fn = (
             OpenPechaFS._mkdir(self.layers_path / base_name) / f"{layer_name.value}.yml"
         )
-        dump_yaml(layer.dict(exclude_none=True), layer_fn)
+        dump_yaml(layer.model_dump(exclude_none=True), layer_fn)
         return layer_fn
 
     def save_layers(self):
@@ -363,7 +363,7 @@ class OpenPechaFS(OpenPecha):
         if self.index is None:
             return
         try:
-            dump_yaml(self.index.dict(exclude_none=True), self.index_fn)
+            dump_yaml(self.index.model_dump(exclude_none=True), self.index_fn)
         except FileNotFoundError:
             pass
 

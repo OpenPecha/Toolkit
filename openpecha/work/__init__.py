@@ -8,8 +8,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Union
 
-from pydantic import BaseModel, validator
-from pydantic.networks import AnyHttpUrl
+from pydantic import BaseModel, field_validator, HttpUrl
 
 from .. import config
 from ..core.ids import get_work_id
@@ -24,7 +23,7 @@ class InstanceMetadata(BaseModel):
     initial_creation_type: InitialCreationType
     title: str
     author: str = None
-    organization: AnyHttpUrl
+    organization: HttpUrl
     created_at: datetime
     last_modified_at: datetime
 
@@ -62,7 +61,8 @@ class Work(BaseModel):
     wikidata_id: str = None
     instances: Dict[str, Dict] = {}
 
-    @validator("id", pre=True, always=True)
+    @field_validator("id", mode='before')
+    @classmethod
     def set_id(cls, v):
         return v or get_work_id()
 
@@ -72,7 +72,7 @@ class Work(BaseModel):
         Args:
             instance (Dict): Instance to add to work.
         """
-        self.instances[instance.id] = instance.metadata.dict()
+        self.instances[instance.id] = instance.metadata.model_dump()
 
     def get_instance(self, instance_id: str) -> Instance:
         """Get instance from work.
@@ -108,9 +108,9 @@ class Work(BaseModel):
         """
         fn = Path(fn)
         data = load_yaml(fn)
-        work = cls.parse_obj(data)
+        work = cls.model_validate(data)
         for instance_id, metadata in work.instances.items():
-            work.instances[instance_id] = InstanceMetadata.parse_obj(metadata)
+            work.instances[instance_id] = InstanceMetadata.model_validate(metadata)
         return work
 
     def save_to_yaml(self, output_dir: Union[str, Path] = None) -> Path:
@@ -126,7 +126,7 @@ class Work(BaseModel):
             output_dir = download_pecha(config.WORKS_REPO_NAME)
         output_dir = Path(output_dir)
         work_fn = output_dir / f"{self.id}.yaml"
-        dump_yaml(data=json.loads(self.json()), output_fn=work_fn)
+        dump_yaml(data=json.loads(self.model_dump_json()), output_fn=work_fn)
         return work_fn
 
     @classmethod

@@ -1,4 +1,5 @@
 import inspect
+import json
 from pathlib import Path
 
 from pydantic import BaseModel
@@ -22,7 +23,8 @@ def build_schema_for_annotations():
     ann_schemas_path = Path("docs_src") / "annotations"
     for ann_name, ann_class in get_annotation_classes():
         ann_schema_fn = ann_schemas_path / f"{ann_name}_schema.json"
-        ann_schema_fn.write_text(ann_class.schema_json(indent=2))
+        schema = ann_class.model_json_schema()
+        ann_schema_fn.write_text(json.dumps(schema, indent=2))
         print(f"[INFO] Built {ann_name} annotation schema")
 
 

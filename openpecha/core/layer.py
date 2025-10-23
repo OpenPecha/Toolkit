@@ -2,7 +2,7 @@ import json
 from enum import Enum
 from typing import List, Optional
 
-from pydantic import BaseModel, validator
+from pydantic import BaseModel, field_validator
 
 from openpecha.core.annotations import *
 from openpecha.core.ids import get_uuid
@@ -98,11 +98,13 @@ class Layer(BaseModel):
     revision: str = "00001"
     annotations: Dict = {}
 
-    @validator("id", pre=True, always=True)
+    @field_validator("id", mode='before')
+    @classmethod
     def set_id(cls, v):
         return v or get_uuid()
 
-    @validator("revision")
+    @field_validator("revision")
+    @classmethod
     def revision_must_int_parsible(cls, v):
         assert v.isdigit(), "must integer parsible like `00002`"
         return v
@@ -118,7 +120,7 @@ class Layer(BaseModel):
         """Yield Annotation Objects"""
         for ann_id, ann_dict in self.annotations.items():
             ann_class = _get_annotation_class(self.annotation_type)
-            ann = ann_class.parse_obj(ann_dict)
+            ann = ann_class.model_validate(ann_dict)
             yield ann_id, ann
 
     def get_annotation(self, annotation_id: str) -> Optional[BaseAnnotation]:
@@ -127,13 +129,13 @@ class Layer(BaseModel):
         if not ann_dict:
             return
         ann_class = _get_annotation_class(self.annotation_type)
-        ann = ann_class.parse_obj(ann_dict)
+        ann = ann_class.model_validate(ann_dict)
         return ann
 
     def set_annotation(self, ann: BaseAnnotation, ann_id=None):
         """Add or Update annotation `ann` to the layer, returns the annotation id"""
         ann_id = ann_id if ann_id is not None else get_uuid()
-        self.annotations[ann_id] = json.loads(ann.json())
+        self.annotations[ann_id] = json.loads(ann.model_dump_json())
         return ann_id
 
     def remove_annotation(self, annotation_id: str):
@@ -157,7 +159,8 @@ class TranscriptionTimeSpanLayer(Layer):
     time_unit: str
     annotation_type: LayerEnum = LayerEnum.transcription_time_span
     
-    @validator("time_unit")
+    @field_validator("time_unit")
+    @classmethod
     def time_unit_must_be_millisecond_or_microsecond(cls, v):
         if v not in ('millisecond', 'microsecond'):
             raise ValueError("time_unit must be either millisecond or microsecond")
