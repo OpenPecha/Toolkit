@@ -629,7 +629,7 @@ class OCRFormatter(BaseFormatter):
         if cs == "http://purl.bdrc.io/resource/CopyrightPublicDomain":
             return Copyright_public_domain, LicenseType.CC0
         if cs == "http://purl.bdrc.io/resource/CopyrightUndetermined":
-            return Copyright_unknown, None
+            return Copyright_unknown, LicenseType.UNKNOWN
         return Copyright_copyrighted, LicenseType.UNDER_COPYRIGHT
             
     def get_metadata(self, pecha_id: str = None, ocr_import_info=None) -> InitialPechaMetadata:
@@ -639,7 +639,7 @@ class OCRFormatter(BaseFormatter):
             "author": "",
         }
         copyright = {}
-        license = None
+        license = LicenseType.UNKNOWN
         if self.source_info is not None:
             source_metadata = self.source_info["source_metadata"]
             copyright, license = self.get_copyright_and_license_info(self.source_info)

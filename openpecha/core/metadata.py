@@ -58,6 +58,7 @@ class LicenseType(Enum):
     CC_BY_NC_ND = "CC BY-NC-ND"
     
     UNDER_COPYRIGHT = "under copyright"
+    UNKNOWN = "unknown"
 
 
 class PechaMetadata(BaseModel):
