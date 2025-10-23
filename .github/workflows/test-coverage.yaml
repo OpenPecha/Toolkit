@@ -14,7 +14,7 @@ jobs:
     strategy:
       max-parallel: 4
       matrix:
-        python-version: [3.8]
+        python-version: [3.12.11]
 
     steps:
     - uses: actions/checkout@v1
@@ -35,7 +35,7 @@ jobs:
     - name: Run Test Coverage
       env:
         GITHUB_ORG: ${{ secrets.GH_ORG }}
-        GITHUB_TOKEN: ${{ secrets.ADMIN_GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         PYTHONPATH=./docs_src coverage run -m pytest
         coverage report

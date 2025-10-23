@@ -5,19 +5,23 @@ on:
     branches:
       - master
 
+permissions:
+  contents: write
+  id-token: write
+
 jobs:
   test:
     runs-on: ubuntu-latest
     strategy:
       max-parallel: 4
       matrix:
-        python-version: [3.8]
+        python-version: [3.12.11]
 
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v4
 
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v1
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
 
@@ -30,22 +34,28 @@ jobs:
       - name: Run Test
         env:
           GITHUB_ORG: ${{ secrets.GH_ORG }}
-          GITHUB_TOKEN: ${{ secrets.ADMIN_GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           PYTHONPATH=./docs_src pytest
 
   publish:
     needs: test
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          token: ${{ secrets.ADMIN_GITHUB_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Python Semantic Release
-        uses: python-semantic-release/python-semantic-release@v7.34.6
+        id: release
+        uses: python-semantic-release/python-semantic-release@v9.8.6
         with:
-          github_token: ${{ secrets.ADMIN_GITHUB_TOKEN }}
-          pypi_token: ${{ secrets.PYPI_PASSWORD }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+        env:
+          REPOSITORY_USERNAME: __token__
+          REPOSITORY_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
