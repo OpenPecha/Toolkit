@@ -65,13 +65,13 @@ class PechaMetadata(BaseModel):
     id: str = None
     legacy_id: Optional[str] = None
     ocr_import_info: Optional[Dict] = None
-    default_language: str = None
-    source: str = None
-    source_file: str = None
+    default_language: Optional[str] = None
+    source: Optional[str] = None
+    source_file: Optional[str] = None
     initial_creation_type: InitialCreationType = None
     imported: datetime = None
     last_modified: datetime = None
-    parser: str = None
+    parser: Optional[str] = None
     source_metadata: Optional[Dict] = None  # place to dump any metadata from the source
     statistics: Optional[Dict] = None
     quality: Optional[Dict] = None
