@@ -224,6 +224,35 @@ class BUDAElasticSearchSerializer:
             self.add_partial_etext_doc(mw, mw_i, baselname, iglname, baseinfo, volume_number, ranges[mw])
 
     def add_partial_etext_doc(self, mw, etext_in_volume, baselname, iglname, baseinfo, volume_number, ranges):
+        """
+        If 'mw' is the root reproduction_of (i.e. pages outside the outline), emit one document per range
+        so cstart/cend are exact. Otherwise, keep one document per MW as before.
+        """
+        root_mw = to_lname(self.w_info["source_metadata"]["reproduction_of"])
+        volume_string = self.openpecha.get_base(baselname)
+
+        if mw == root_mw:
+            # One doc per contiguous "gap" range
+            for idx, rng in enumerate(ranges, 1):
+                doc = self.common.copy()
+                base_id = f"UT{mw}_{baselname}"
+                doc["_id"] = f"{base_id}_{idx:04d}"   # e.g. UTMW1KG4884_I1KG4886_0001
+                doc["join_field"] = {"name": "etext", "parent": mw}
+                doc["volumeNumber"] = volume_number
+                doc["etext_imagegroup"] = iglname
+                doc["etext_for_instance"] = mw
+                # keep etextNumber monotonic within volume; gaps can just use a large offset or idx
+                doc["etextNumber"] = etext_in_volume * 10000 + idx
+                doc["etext_vol"] = f"VE{self.etext_root_instance_id}_{baselname}"
+
+                # exact per-range pages/chunks/cstart/cend
+                self.set_etext_pages(doc, baselname, rng)
+                self.set_etext_chunks(doc, baselname, baseinfo, rng)
+                self.set_cstart_cend(doc, baselname, rng)
+                self.docs.append(doc)
+            return
+
+        # Regular outlined text: single doc
         doc = self.common.copy()
         doc["_id"] = f"UT{mw}_{baselname}"
         doc["join_field"] = {"name": "etext", "parent": mw}
@@ -232,6 +261,8 @@ class BUDAElasticSearchSerializer:
         doc["etext_for_instance"] = mw
         doc["etextNumber"] = etext_in_volume
         doc["etext_vol"] = f"VE{self.etext_root_instance_id}_{baselname}"
+
+        # for outlined texts; write all ranges into one doc
         for rng in ranges:
             self.set_etext_pages(doc, baselname, rng)
             self.set_etext_chunks(doc, baselname, baseinfo, rng)
