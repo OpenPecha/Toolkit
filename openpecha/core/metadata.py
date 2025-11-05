@@ -76,8 +76,8 @@ class PechaMetadata(BaseModel):
     statistics: Optional[Dict] = None
     quality: Optional[Dict] = None
     bases: Optional[Dict[str, Dict]] = {}
-    copyright: Copyright = None
-    license: LicenseType = None
+    copyright: Optional[Copyright] = None
+    license: Optional[LicenseType] = None
 
     @field_validator("imported", mode='before')
     @classmethod
