@@ -214,22 +214,58 @@ class OutlinePageLookup:
                 return ig_info["volume_pages_bdrc_intro"]
         return 0
 
+    def _get_parent(self, node):
+        """Return outline parent via partOf or inverse hasPart."""
+        parent = self.outline_graph.value(node, BDO.partOf, None)
+        if parent:
+            return parent
+        for p in self.outline_graph.subjects(BDO.hasPart, node):
+            return p
+        return None
+
+    def _has_ancestor_with_parttype(self, node, targets):
+        """True if any ancestor has partType in targets."""
+        seen = set()
+        cur = node
+        while True:
+            cur = self._get_parent(cur)
+            if not cur or cur in seen:
+                return False
+            seen.add(cur)
+            pt = self.outline_graph.value(cur, BDO.partType, None)
+            if pt in targets:
+                return True
+
     def process(self):
         for s, _, cl in self.outline_graph.triples((None, BDO.contentLocation, None)):
             if (cl, BDO.contentLocationInstance, BDR[self.w_lname]) not in self.outline_graph:
                 continue
+
             partType = self.outline_graph.value(s, BDO.partType, None)
             mw = str(s)[len(BDR_uri):]
+
+            # volume markers -> record volume MW and continue
             if partType in [BDR.PartTypeCodicologicalVolume, BDR.PartTypeVolume]:
                 vnum = self.outline_graph.value(cl, BDO.contentLocationVolume, None)
                 if not vnum:
                     continue
                 self.volnum_to_volmw[int(vnum)] = mw
                 continue
-            if not partType or partType in [BDR.PartTypeSection, BDR.PartTypeChapter]:
+
+            # Treat a Chapter as Text if there is no ancestor Text
+            if partType == BDR.PartTypeChapter and not self._has_ancestor_with_parttype(s, {BDR.PartTypeText, BDR.PartTypeChapter, BDR.PartTypeEditorial}):
+                partType = BDR.PartTypeText
+
+            # If we're inside a Text or Editorial subtree, ignore this node
+            if self._has_ancestor_with_parttype(s, {BDR.PartTypeText, BDR.PartTypeEditorial}):
                 continue
+
+            # Ignore nodes that are clearly structural-only
+            if not partType or partType in [BDR.PartTypeSection, BDR.PartTypeTableOfContent, BDR.PartTypeChapter]:
+                continue
+
             vnum_start = self.outline_graph.value(cl, BDO.contentLocationVolume, None)
-            vnum_end = self.outline_graph.value(cl, BDO.contentLocationEndVolume, None)
+            vnum_end   = self.outline_graph.value(cl, BDO.contentLocationEndVolume, None)
             imgnum_end = self.outline_graph.value(cl, BDO.contentLocationEndPage, None)
             imgnum_start = self.outline_graph.value(cl, BDO.contentLocationPage, None)
             self.add_content_location(mw, vnum_start, vnum_end, imgnum_start, imgnum_end)
