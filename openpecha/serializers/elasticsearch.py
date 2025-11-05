@@ -47,6 +47,33 @@ class BUDAElasticSearchSerializer:
         return self.docs
 
 
+    def _first_cstart_for_doc(self, doc):
+        """
+        Compute a stable 'start' for ordering:
+        - Prefer the earliest cstart from etext_pages if present.
+        - Fallback to doc['cstart'].
+        """
+        if "etext_pages" in doc and doc["etext_pages"]:
+            return min(p.get("cstart", 0) for p in doc["etext_pages"] if "cstart" in p)
+        return doc.get("cstart", 0)
+
+    def _renumber_volume_docs(self, baselname):
+        """
+        After building every document for a volume,
+        reorder by earliest cstart and reassign etextNumber = 1..N.
+        """
+        vol_tag = f"VE{self.etext_root_instance_id}_{baselname}"
+        # Select docs for this volume only
+        vol_docs = [d for d in self.docs if d.get("etext_vol") == vol_tag]
+
+        # Sort by real start; tie-break by _id to stay stable
+        vol_docs.sort(key=lambda d: (self._first_cstart_for_doc(d), d.get("_id", "")))
+
+        # Renumber strictly by order
+        for i, d in enumerate(vol_docs, 1):
+            d["etextNumber"] = i
+
+
     """
     Entry point to build the ES doc
     """
@@ -222,11 +249,13 @@ class BUDAElasticSearchSerializer:
         # then go through the ranges and add to the documents:
         for mw_i, mw in enumerate(ordered_mws):
             self.add_partial_etext_doc(mw, mw_i, baselname, iglname, baseinfo, volume_number, ranges[mw])
+        # etext numbers can be a bit tricky so we do a post processing here:
+        self._renumber_volume_docs(baselname)
 
     def add_partial_etext_doc(self, mw, etext_in_volume, baselname, iglname, baseinfo, volume_number, ranges):
         """
         If 'mw' is the root reproduction_of (i.e. pages outside the outline), emit one document per range
-        so cstart/cend are exact. Otherwise, keep one document per MW as before.
+        so cstart/cend are exact. Set etextNumber from a per-volume counter so numbers are unique & sequential.
         """
         root_mw = to_lname(self.w_info["source_metadata"]["reproduction_of"])
         volume_string = self.openpecha.get_base(baselname)
@@ -236,33 +265,30 @@ class BUDAElasticSearchSerializer:
             for idx, rng in enumerate(ranges, 1):
                 doc = self.common.copy()
                 base_id = f"UT{mw}_{baselname}"
-                doc["_id"] = f"{base_id}_{idx:04d}"   # e.g. UTMW1KG4884_I1KG4886_0001
+                doc["_id"] = f"{base_id}_{idx:04d}"
                 doc["join_field"] = {"name": "etext", "parent": mw}
                 doc["volumeNumber"] = volume_number
                 doc["etext_imagegroup"] = iglname
                 doc["etext_for_instance"] = mw
-                # keep etextNumber monotonic within volume; gaps can just use a large offset or idx
-                doc["etextNumber"] = etext_in_volume * 10000 + idx
+                doc["etextNumber"] = 0 # set later
                 doc["etext_vol"] = f"VE{self.etext_root_instance_id}_{baselname}"
 
-                # exact per-range pages/chunks/cstart/cend
                 self.set_etext_pages(doc, baselname, rng)
                 self.set_etext_chunks(doc, baselname, baseinfo, rng)
                 self.set_cstart_cend(doc, baselname, rng)
                 self.docs.append(doc)
             return
 
-        # Regular outlined text: single doc
+        # Regular outlined text
         doc = self.common.copy()
         doc["_id"] = f"UT{mw}_{baselname}"
         doc["join_field"] = {"name": "etext", "parent": mw}
         doc["volumeNumber"] = volume_number
         doc["etext_imagegroup"] = iglname
         doc["etext_for_instance"] = mw
-        doc["etextNumber"] = etext_in_volume
+        doc["etextNumber"] = 0 # set later
         doc["etext_vol"] = f"VE{self.etext_root_instance_id}_{baselname}"
 
-        # for outlined texts; write all ranges into one doc
         for rng in ranges:
             self.set_etext_pages(doc, baselname, rng)
             self.set_etext_chunks(doc, baselname, baseinfo, rng)

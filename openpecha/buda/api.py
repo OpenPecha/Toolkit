@@ -281,6 +281,7 @@ class OutlinePageLookup:
                     imgnum_end = g.value(cl_for_this, BDO.contentLocationEndPage, None)
                     imgnum_start = g.value(cl_for_this, BDO.contentLocationPage, None)
                     self.add_content_location(mw, vnum_start, vnum_end, imgnum_start, imgnum_end)
+                else:
                     logging.warning("missing content location for text")
                 continue  # PRUNE: don’t visit descendants
 
