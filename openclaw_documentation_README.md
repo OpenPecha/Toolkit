@@ -1,59 +1,55 @@
-<h1 align="center">
-  <br>
-  <a href="https://buddhistai.tools/"><img src="https://raw.githubusercontent.com/WeBuddhist/visual-assets/refs/heads/main/logo/WB-logo-purple.png" alt="OpenPecha" width="150"></a>
-  <br>
-</h1>
-
-<h1 align="center">Toolkit</h1>
-
-<p align="center">
-  |Python| |MIT|
-</p>
+# Toolkit
 
 🛠 Tools to create, edit and export texts and annotations
 
-## Table of Contents
+## Language
 
-- [Features](#features)
-- [Prerequisites](#prerequisites)
-- [Installation](#installation)
-- [Usage](#usage)
-- [Development](#contributing)
-- [How to get help](#how-to-get-help)
-- [Terms of use](#terms-of-use)
+Python
 
-## Features
+## Description
 
-- Create, edit, and export Tibetan texts
-- Annotation support
-- Multiple output formats
-- OpenPecha format integration
+OpenPecha Toolkit allows state of the art solution for distributed standoff annotations on moving texts, in which Base layer can be edited without affecting annotations. This is made possible by our OpenPecha Native Format called `opf` (OpenPecha Format) and our collection of importers which can parse existing text into opf and exporters which can export opf text into any format (.epub, .docx, .pdf, etc).
 
-## Prerequisites
+## Owner
 
-- Python 3.8+
+[@10zinten](https://github.com/10zinten)
 
 ## Installation
 
-```bash
-git clone https://github.com/OpenPecha/Toolkit.git
-cd Toolkit
+Stable version:
+\`\`\`bash
+pip install openpecha
+\`\`\`
+
+Daily development version:
+\`\`\`bash
+pip install git+https://github.com/OpenPecha/Toolkit
+\`\`\`
+
+## Developer Installation
+
+\`\`\`bash
+git clone https://github.com/OpenPecha-dev/openpecha-toolkit.git
+cd openpecha-toolkit
+pip install -r requirements-dev.txt
 pip install -e .
-```
+pre-commit install
+\`\`\`
 
-## Usage
+## Documentation
 
-```python
-from openpecha import toolkit
+- Documentation: [docs](https://openpecha.org)
+- If you have any problems with openpecha-toolkit, please open [issues](https://github.com/OpenPecha-dev/openpecha-toolkit/issues/new/choose)
 
-# Tool usage examples
-toolkit.create_text(...)
-toolkit.export_text(...)
-```
+## License
+
+See repository for license details.
 
 ## How to get help
-* File an issue.
-* Join our [discord](https://discord.com/invite/7GFpPFSTeA).
+
+- Open an issue at https://github.com/OpenPecha/Toolkit/issues
+- Check existing issues for solutions
 
 ## Terms of use
-Toolkit is licensed under the [MIT License](/LICENSE).
+
+This project is part of OpenPecha. See https://openpecha.org for terms of use.
