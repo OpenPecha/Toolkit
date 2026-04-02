@@ -1,6 +1,6 @@
 # Toolkit
 
-🛠 Tools to create, edit and export texts and annotations
+Tools to create, edit and export texts and annotations
 
 ## Language
 
@@ -17,24 +17,24 @@ OpenPecha Toolkit allows state of the art solution for distributed standoff anno
 ## Installation
 
 Stable version:
-\`\`\`bash
+```bash
 pip install openpecha
-\`\`\`
+```
 
 Daily development version:
-\`\`\`bash
+```bash
 pip install git+https://github.com/OpenPecha/Toolkit
-\`\`\`
+```
 
 ## Developer Installation
 
-\`\`\`bash
+```bash
 git clone https://github.com/OpenPecha-dev/openpecha-toolkit.git
 cd openpecha-toolkit
 pip install -r requirements-dev.txt
 pip install -e .
 pre-commit install
-\`\`\`
+```
 
 ## Documentation
 
